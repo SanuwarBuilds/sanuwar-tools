@@ -131,7 +131,31 @@ button {
   font-family: inherit;
   border: none;
   outline: none;
+  /* ── Mobile touch fixes ── */
+  -webkit-tap-highlight-color: transparent;
+  touch-action: manipulation;
 }
+
+/* Remove tap highlight from ALL interactive elements */
+a, button, input, select, textarea,
+[onclick], [role="button"], label {
+  -webkit-tap-highlight-color: transparent;
+}
+
+/* Fix 300ms tap delay on all clickable elements */
+a, button, .btn, .filter-btn, .hamburger,
+.nav-links a, .tool-card-actions a,
+.tool-card-actions button, .footer-social a,
+.sidebar-link, .admin-btn, .table-action-btn {
+  touch-action: manipulation;
+}
+
+/* Prevent iOS font size auto-adjust */
+input, select, textarea {
+  font-size: 16px; /* prevents iOS auto-zoom on focus */
+  font-family: inherit;
+}
+
 
 ::-webkit-scrollbar {
   width: 8px;
@@ -1132,17 +1156,25 @@ button {
   .tool-card-thumb {
     width: 120px;
     min-width: 120px;
-    padding-top: 0;
-    height: auto;
-    min-height: 100px;
+    padding-top: 0 !important;
+    height: 112px;          /* explicit height so child img fills it */
     flex-shrink: 0;
+    overflow: hidden;
   }
 
   .tool-card-thumb img {
-    position: static;
+    position: static !important;
     width: 100%;
     height: 100%;
     object-fit: cover;
+    inset: auto;
+  }
+
+  .tool-card-category {     /* keep category badge visible */
+    top: 8px;
+    left: 8px;
+    font-size: 0.65rem;
+    padding: 2px 8px;
   }
 
   .tool-card-body {

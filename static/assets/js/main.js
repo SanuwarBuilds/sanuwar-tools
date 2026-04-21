@@ -229,8 +229,8 @@
       if (t.visible === false) return false;
       const matchCat = activeCategory === 'All' || t.category === activeCategory;
       const matchSearch = !term ||
-        t.name.toLowerCase().includes(term.toLowerCase()) ||
-        t.description.toLowerCase().includes(term.toLowerCase()) ||
+        (t.name || '').toLowerCase().includes(term.toLowerCase()) ||
+        (t.description || '').toLowerCase().includes(term.toLowerCase()) ||
         (t.tags && t.tags.some(tag => tag.toLowerCase().includes(term.toLowerCase())));
       return matchCat && matchSearch;
     });

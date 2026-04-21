@@ -62,6 +62,27 @@ button {
   cursor: pointer;
   font-family: inherit;
   border: none;
+  -webkit-tap-highlight-color: transparent;
+  touch-action: manipulation;
+}
+
+/* Mobile touch fixes */
+a, button, input, select, textarea, label,
+[onclick], [role="button"] {
+  -webkit-tap-highlight-color: transparent;
+}
+
+a, button, .admin-btn, .sidebar-link,
+.table-action-btn, .admin-modal-close,
+.sidebar-toggle, .toast-close {
+  touch-action: manipulation;
+}
+
+/* Prevent iOS input zoom */
+.form-input, .form-textarea, .form-select,
+input, select, textarea {
+  font-size: 16px !important;
+  font-family: inherit;
 }
 
 /* ============================================
