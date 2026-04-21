@@ -1,0 +1,1578 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="robots" content="noindex, nofollow">
+  <title>Admin Panel — SanuwarTools</title>
+  <link rel="stylesheet" href="/assets/css/admin.css">
+<script src="https://cdn.tailwindcss.com"></script>
+<script>tailwind.config = { corePlugins: { preflight: false } }</script>
+</head>
+<body>
+
+  <!-- Toast Container -->
+  <div class="toast-container" id="toast-container"></div>
+
+  <!-- Sidebar Overlay (mobile) -->
+  <div class="sidebar-overlay" id="sidebar-overlay"></div>
+
+  <div class="admin-layout">
+    <!-- ═══════ SIDEBAR ═══════ -->
+    <aside class="admin-sidebar" id="admin-sidebar">
+      <div class="sidebar-header">
+        <div class="sidebar-logo">
+          <span class="sidebar-logo-icon">S</span>
+          <span class="sidebar-logo-text">SanuwarTools</span>
+          <span class="sidebar-logo-badge">Admin</span>
+        </div>
+      </div>
+
+      <nav class="sidebar-nav">
+        <div class="sidebar-section-label">Overview</div>
+        <a href="#" class="sidebar-link active" data-view="dashboard">
+          <span class="link-icon">📊</span> Dashboard
+        </a>
+
+        <div class="sidebar-section-label">Content</div>
+        <a href="#" class="sidebar-link" data-view="tools">
+          <span class="link-icon">🛠️</span> Manage Tools
+        </a>
+        <a href="#" class="sidebar-link" data-view="categories">
+          <span class="link-icon">📁</span> Categories
+        </a>
+
+        <div class="sidebar-section-label">Configuration</div>
+        <a href="#" class="sidebar-link" data-view="widgets">
+          <span class="link-icon">📌</span> Manage Widgets
+        </a>
+        <a href="#" class="sidebar-link" data-view="settings">
+          <span class="link-icon">⚙️</span> Site Settings
+        </a>
+        <a href="#" class="sidebar-link" data-view="download">
+          <span class="link-icon">⬇️</span> Manage Store/Downloads
+        </a>
+        <a href="#" class="sidebar-link" data-view="theme">
+          <span class="link-icon">🎨</span> Theme Settings
+        </a>
+
+        <div class="sidebar-section-label">Data</div>
+        <a href="#" class="sidebar-link" data-view="export">
+          <span class="link-icon">📤</span> Export Config
+        </a>
+        <a href="#" class="sidebar-link" data-view="import">
+          <span class="link-icon">📥</span> Import Config
+        </a>
+      </nav>
+
+      <div class="sidebar-footer">
+        <a href="/" target="_blank">
+          🌐 View Homepage
+        </a>
+      </div>
+    </aside>
+
+    <!-- ═══════ MAIN CONTENT ═══════ -->
+    <main class="admin-main">
+      <div class="admin-topbar">
+        <div style="display: flex; align-items: center; gap: 12px;">
+          <button class="sidebar-toggle" id="sidebar-toggle">☰</button>
+          <h1 id="topbar-title">📊 Dashboard</h1>
+        </div>
+        <div class="admin-topbar-actions">
+          <a href="/" target="_blank" class="admin-btn admin-btn-secondary admin-btn-sm">🌐 View Site</a>
+        </div>
+      </div>
+
+      <div class="admin-content">
+
+        <!-- ═══════ DASHBOARD VIEW ═══════ -->
+        <div class="admin-view active" id="view-dashboard">
+          <div class="stats-grid">
+            <div class="stat-card">
+              <div class="stat-icon purple">🛠️</div>
+              <div class="stat-info">
+                <h3 id="stat-total">0</h3>
+                <p>Total Tools</p>
+              </div>
+            </div>
+            <div class="stat-card">
+              <div class="stat-icon green">📁</div>
+              <div class="stat-info">
+                <h3 id="stat-categories">0</h3>
+                <p>Categories</p>
+              </div>
+            </div>
+            <div class="stat-card">
+              <div class="stat-icon yellow">⭐</div>
+              <div class="stat-info">
+                <h3 id="stat-featured">0</h3>
+                <p>Featured</p>
+              </div>
+            </div>
+            <div class="stat-card">
+              <div class="stat-icon purple">👁️</div>
+              <div class="stat-info">
+                <h3 id="stat-visible">0</h3>
+                <p>Visible</p>
+              </div>
+            </div>
+          </div>
+
+          <div class="admin-card">
+            <div class="admin-card-header">
+              <h3>Recently Added</h3>
+            </div>
+            <div class="admin-card-body admin-table-wrap" id="recent-tools-list">
+              <!-- Populated by JS -->
+            </div>
+          </div>
+        </div>
+
+        <!-- ═══════ TOOLS VIEW ═══════ -->
+        <div class="admin-view" id="view-tools">
+          <div class="admin-card">
+            <div class="admin-card-header">
+              <h3>All Tools</h3>
+              <button class="admin-btn admin-btn-primary admin-btn-sm" id="add-tool-btn">+ Add New Tool</button>
+            </div>
+            <div class="admin-card-body admin-table-wrap">
+              <table class="admin-table">
+                <thead>
+                  <tr>
+                    <th>Thumb</th>
+                    <th>Name</th>
+                    <th>Category</th>
+                    <th>Visible</th>
+                    <th>Featured</th>
+                    <th>Actions</th>
+                  </tr>
+                </thead>
+                <tbody id="tools-table-body">
+                  <!-- Populated by JS -->
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+
+        <!-- ═══════ CATEGORIES VIEW ═══════ -->
+        <div class="admin-view" id="view-categories">
+          <div class="admin-card">
+            <div class="admin-card-header">
+              <h3>Manage Categories</h3>
+            </div>
+            <div class="admin-card-body">
+              <p style="color: var(--admin-text-secondary); margin-bottom: 20px; font-size: 0.9rem;">
+                Categories are shown as filter buttons on the homepage. "All" is always included automatically.
+              </p>
+
+              <div class="category-list" id="categories-list">
+                <!-- Populated by JS -->
+              </div>
+
+              <div class="add-category-row">
+                <input type="text" class="form-input" id="new-category-input" placeholder="New category name...">
+                <button class="admin-btn admin-btn-primary" id="add-category-btn">+ Add</button>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- ═══════ WIDGETS VIEW ═══════ -->
+<div class="admin-view" id="view-widgets">
+
+  <!-- 🏠 Home Screen Builder -->
+  <div class="admin-card">
+    <div class="admin-card-header">
+      <h3>🧩 Home Screen Widget Builder</h3>
+      <button onclick="openAddWidgetModal()" class="admin-btn admin-btn-primary admin-btn-sm">+ Add Widget</button>
+    </div>
+    <div id="widgetsTableBody" class="admin-card-body" style="padding:0;">
+      <p style="padding:20px;text-align:center;color:var(--admin-text-muted);">Loading widgets...</p>
+    </div>
+  </div>
+
+  <!-- Add Widget Modal -->
+  <div id="addWidgetModal" class="admin-modal-overlay" style="display:none;">
+    <div class="admin-modal" style="max-width:620px;">
+      <div class="admin-modal-header">
+        <h3>Add Widget</h3>
+        <button class="admin-modal-close" onclick="closeAddWidgetModal()">✕</button>
+      </div>
+      <div class="admin-modal-body" style="max-height:80vh;overflow-y:auto;">
+        <form id="addWidgetForm" onsubmit="submitAddWidget(event)">
+          <div class="form-group">
+            <label class="form-label" style="font-size:0.85rem;font-weight:600;">Widget Type</label>
+            <select id="newWidgetType" onchange="updateWidgetFields('new')" class="form-select">
+              <option value="notice">📢 Notice / Alert</option>
+              <option value="poll">🗳️ Poll (with vote %)</option>
+              <option value="winner">🏆 Winner Celebration (Fireworks)</option>
+              <option value="person_card">👤 Person Card (Photo + Name)</option>
+              <option value="link_card">🔗 Link Card (Any Website)</option>
+              <option value="ticker">📰 Scrolling Ticker Text</option>
+              <option value="gallery">🖼️ Image Gallery / Slideshow</option>
+              <option value="event_card">📅 Event Card</option>
+              <option value="quote">💬 Quote / Message</option>
+              <option value="custom_html">⚙️ Custom HTML Block</option>
+            </select>
+          </div>
+          <div class="form-checkbox" style="margin-bottom:16px;">
+            <input type="checkbox" id="newWidgetEnabled" checked>
+            <label for="newWidgetEnabled">Show on home screen (enabled)</label>
+          </div>
+          <div id="widgetFields-new"></div>
+          <div class="form-actions" style="margin-top:20px;">
+            <button type="button" class="admin-btn admin-btn-secondary" onclick="closeAddWidgetModal()">Cancel</button>
+            <button type="submit" class="admin-btn admin-btn-primary">💾 Save Widget</button>
+          </div>
+        </form>
+      </div>
+    </div>
+  </div>
+
+  <!-- Edit Widget Modal -->
+  <div id="editWidgetModal" class="admin-modal-overlay" style="display:none;">
+    <div class="admin-modal" style="max-width:620px;">
+      <div class="admin-modal-header">
+        <h3>Edit Widget</h3>
+        <button class="admin-modal-close" onclick="closeEditWidgetModal()">✕</button>
+      </div>
+      <div class="admin-modal-body" style="max-height:80vh;overflow-y:auto;">
+        <input type="hidden" id="editWidgetId">
+        <input type="hidden" id="editWidgetType">
+        <form id="editWidgetForm" onsubmit="submitEditWidget(event)">
+          <div class="form-checkbox" style="margin-bottom:16px;">
+            <input type="checkbox" id="editWidgetEnabled">
+            <label for="editWidgetEnabled">Show on home screen (enabled)</label>
+          </div>
+          <div id="widgetFields-edit"></div>
+          <div class="form-actions" style="margin-top:20px;">
+            <button type="button" class="admin-btn admin-btn-secondary" onclick="closeEditWidgetModal()">Cancel</button>
+            <button type="submit" class="admin-btn admin-btn-primary">✏️ Update Widget</button>
+          </div>
+        </form>
+      </div>
+    </div>
+  </div>
+
+</div>
+
+<!-- ═══════ SITE SETTINGS VIEW ═══════ -->
+        <div class="admin-view" id="view-settings">
+          <div class="admin-card">
+            <div class="admin-card-header">
+              <h3>Site Settings</h3>
+            </div>
+            <div class="admin-card-body">
+              <div class="form-group">
+                <label>Site Name</label>
+                <input type="text" class="form-input" id="settings-name" placeholder="SanuwarTools">
+              </div>
+              <div class="form-group">
+                <label>Tagline</label>
+                <input type="text" class="form-input" id="settings-tagline" placeholder="All my tools, one place.">
+              </div>
+              <div class="form-group">
+                <label>Favicon URL</label>
+                <input type="text" class="form-input" id="settings-favicon" placeholder="/assets/favicon.ico">
+              </div>
+
+              <hr style="border: none; border-top: 1px solid var(--admin-card-border); margin: 24px 0;">
+
+              <h4 style="font-size: 0.95rem; font-weight: 700; margin-bottom: 16px;">Social Links</h4>
+              <div class="form-group">
+                <label>GitHub URL</label>
+                <input type="url" class="form-input" id="settings-github" placeholder="https://github.com/username">
+              </div>
+              <div class="form-group">
+                <label>YouTube URL</label>
+                <input type="url" class="form-input" id="settings-youtube" placeholder="https://youtube.com/@channel">
+              </div>
+              <div class="form-group">
+                <label>Twitter / X URL</label>
+                <input type="url" class="form-input" id="settings-twitter" placeholder="https://x.com/username">
+              </div>
+
+              <div class="form-actions">
+                <button class="admin-btn admin-btn-primary" id="save-settings-btn">💾 Save Settings</button>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        
+        <!-- ═══════ DOWNLOAD HUB VIEW ═══════ -->
+<div class="admin-view" id="view-download">
+
+  <!-- Summary stats -->
+  <div class="stats-grid" style="margin-bottom:20px;" id="dh-stats-grid">
+    <div class="stat-card">
+      <div class="stat-icon purple">📦</div>
+      <div class="stat-info"><h3 id="dh-stat-total">0</h3><p>Total Items</p></div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-icon green">📱</div>
+      <div class="stat-info"><h3 id="dh-stat-files">0</h3><p>Files & Apps</p></div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-icon yellow">🗂️</div>
+      <div class="stat-info"><h3 id="dh-stat-albums">0</h3><p>Albums</p></div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-icon purple">🏷️</div>
+      <div class="stat-info"><h3 id="dh-stat-cats">0</h3><p>Categories</p></div>
+    </div>
+  </div>
+
+  <!-- ── BULK UPLOAD / DRAG & DROP ZONE ── -->
+  <div class="admin-card" style="margin-bottom:20px;">
+    <div class="admin-card-header">
+      <h3>⚡ Bulk Upload Files</h3>
+      <span style="font-size:0.78rem;color:var(--admin-text-muted);">Each file becomes a separate download item</span>
+    </div>
+    <div class="admin-card-body">
+
+      <!-- Drop Zone -->
+      <div id="dh-drop-zone"
+           style="
+             border: 2px dashed var(--admin-card-border);
+             border-radius: 14px;
+             padding: 2.5rem 1.5rem;
+             text-align: center;
+             cursor: pointer;
+             transition: all 0.25s;
+             background: var(--admin-card-bg);
+             position: relative;
+           "
+           ondragover="dhDropZoneDragOver(event)"
+           ondragleave="dhDropZoneDragLeave(event)"
+           ondrop="dhDropZoneDrop(event)"
+           onclick="document.getElementById('dh-bulk-file-input').click()">
+        <div id="dh-drop-icon" style="font-size:2.5rem;margin-bottom:12px;transition:transform 0.2s;">📥</div>
+        <p style="font-weight:700;font-size:1rem;margin-bottom:6px;">Drag & Drop files here</p>
+        <p style="color:var(--admin-text-muted);font-size:0.83rem;">or click to browse — supports any file type</p>
+        <p style="color:var(--admin-text-muted);font-size:0.75rem;margin-top:8px;">
+          APK, PDF, ZIP, images, etc. &bull; Multiple files supported
+        </p>
+        <input type="file" id="dh-bulk-file-input" multiple style="display:none;" onchange="dhHandleBulkFiles(this.files)">
+      </div>
+
+      <!-- Bulk Category + Auto-title options -->
+      <div style="display:flex;gap:12px;align-items:flex-end;margin-top:16px;flex-wrap:wrap;">
+        <div class="form-group" style="flex:1;min-width:160px;margin-bottom:0;">
+          <label style="font-size:0.8rem;">Category for all uploads</label>
+          <input type="text" class="form-input" id="dh-bulk-category" placeholder="Apps, Photos, Files..." list="dh-cat-list" value="Files">
+        </div>
+        <div style="display:flex;align-items:center;gap:8px;padding-bottom:2px;">
+          <input type="checkbox" id="dh-bulk-as-album" style="width:16px;height:16px;cursor:pointer;">
+          <label for="dh-bulk-as-album" style="font-size:0.84rem;cursor:pointer;font-weight:500;">Upload as Single Album</label>
+        </div>
+        <div style="display:flex;gap:8px;padding-bottom:2px;">
+          <button class="admin-btn admin-btn-secondary admin-btn-sm" onclick="dhClearBulkQueue()">Clear Queue</button>
+        </div>
+      </div>
+
+      <!-- Upload Queue -->
+      <div id="dh-upload-queue" style="margin-top:16px;display:none;">
+        <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:10px;">
+          <h4 style="font-size:0.88rem;font-weight:700;">Upload Queue <span id="dh-queue-count" style="color:var(--admin-text-muted);"></span></h4>
+          <button class="admin-btn admin-btn-primary admin-btn-sm" id="dh-start-bulk-btn" onclick="dhStartBulkUpload()">
+            ⚡ Upload All
+          </button>
+        </div>
+        <div id="dh-queue-list" style="display:flex;flex-direction:column;gap:8px;max-height:280px;overflow-y:auto;"></div>
+
+        <!-- Overall Progress -->
+        <div id="dh-bulk-progress-wrap" style="margin-top:14px;display:none;">
+          <div style="display:flex;justify-content:space-between;margin-bottom:6px;">
+            <span style="font-size:0.8rem;font-weight:600;">Overall Progress</span>
+            <span id="dh-bulk-progress-txt" style="font-size:0.8rem;color:var(--admin-text-muted);">0%</span>
+          </div>
+          <div style="background:var(--admin-card-border);border-radius:999px;height:6px;overflow:hidden;">
+            <div id="dh-bulk-progress-bar" style="height:100%;width:0%;background:linear-gradient(90deg,#6366f1,#a855f7);border-radius:999px;transition:width 0.3s;"></div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Items Table -->
+  <div class="admin-card">
+    <div class="admin-card-header">
+      <h3>📥 Download Hub Items</h3>
+      <div style="display:flex;gap:8px;align-items:center;">
+        <a href="/downloads" target="_blank" class="admin-btn admin-btn-secondary admin-btn-sm">🌐 View Hub</a>
+        <button class="admin-btn admin-btn-primary admin-btn-sm" id="dh-add-btn">+ Add Item</button>
+      </div>
+    </div>
+    <div class="admin-card-body admin-table-wrap">
+      <table class="admin-table">
+        <thead>
+          <tr>
+            <th>Thumb</th>
+            <th>Title</th>
+            <th>Category</th>
+            <th>Type</th>
+            <th>Version</th>
+            <th>Actions</th>
+          </tr>
+        </thead>
+        <tbody id="dh-table-body">
+          <tr><td colspan="6" style="text-align:center;padding:30px;color:var(--admin-text-muted);">Loading...</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+</div>
+
+<!-- ═══════ DOWNLOAD HUB ITEM MODAL ═══════ -->
+<div class="admin-modal-overlay" id="dh-modal-overlay" style="display:none;">
+  <div class="admin-modal" style="max-width:680px;">
+    <div class="admin-modal-header">
+      <h3 id="dh-modal-title">Add Download Item</h3>
+      <button class="admin-modal-close" id="dh-modal-close">&times;</button>
+    </div>
+    <div class="admin-modal-body" style="max-height:78vh;overflow-y:auto;">
+      <input type="hidden" id="dh-item-id">
+
+      <!-- Album toggle -->
+      <div class="form-checkbox" style="margin-bottom:16px;padding:12px;background:var(--admin-card-bg);border-radius:8px;border:1px solid var(--admin-card-border);">
+        <input type="checkbox" id="dh-is-album" onchange="dhToggleAlbumMode()">
+        <label for="dh-is-album" style="font-weight:600;">📁 This is an Album (multiple files)</label>
+      </div>
+
+      <div class="form-row">
+        <div class="form-group">
+          <label>Title *</label>
+          <input type="text" class="form-input" id="dh-title" placeholder="My App / Album Name">
+        </div>
+        <div class="form-group">
+          <label>Category</label>
+          <input type="text" class="form-input" id="dh-category" placeholder="Apps, Albums, Photos..." list="dh-cat-list">
+          <datalist id="dh-cat-list"></datalist>
+        </div>
+      </div>
+
+      <div class="form-group">
+        <label>Description</label>
+        <textarea class="form-textarea" id="dh-desc" rows="2" placeholder="Short description of the item"></textarea>
+      </div>
+
+      <div class="form-row">
+        <div class="form-group">
+          <label>Version <span style="color:var(--admin-text-muted);font-weight:400;">(optional)</span></label>
+          <input type="text" class="form-input" id="dh-version" placeholder="1.0.0">
+        </div>
+      </div>
+
+      <!-- Thumbnail -->
+      <div class="form-group">
+        <label>Thumbnail Image</label>
+        <div style="display:flex;gap:8px;align-items:flex-start;">
+          <input type="text" class="form-input" id="dh-image" placeholder="https://... or upload below" style="flex:1;">
+          <label class="admin-btn admin-btn-secondary admin-btn-sm" style="cursor:pointer;flex-shrink:0;margin:0;">
+            📷 Upload
+            <input type="file" accept="image/*" id="dh-img-upload" style="display:none;" onchange="dhUploadFile(this,'dh-image','dh-img-status')">
+          </label>
+        </div>
+        <div id="dh-img-status" style="font-size:0.78rem;margin-top:4px;color:var(--admin-accent);"></div>
+        <div id="dh-img-preview" style="margin-top:8px;display:none;">
+          <img id="dh-img-preview-img" style="height:80px;border-radius:8px;object-fit:cover;border:1px solid var(--admin-card-border);">
+        </div>
+      </div>
+
+      <!-- Single file mode -->
+      <div id="dh-single-mode">
+        <div class="form-group">
+          <label>Download URL / File Link</label>
+          <div style="display:flex;gap:8px;align-items:flex-start;">
+            <input type="text" class="form-input" id="dh-link" placeholder="https://... or raw.githubusercontent.com/..." style="flex:1;">
+            <label class="admin-btn admin-btn-secondary admin-btn-sm" style="cursor:pointer;flex-shrink:0;margin:0;">
+              📎 Upload File
+              <input type="file" id="dh-file-upload" style="display:none;" onchange="dhUploadFile(this,'dh-link','dh-file-status')">
+            </label>
+          </div>
+          <div id="dh-file-status" style="font-size:0.78rem;margin-top:4px;color:var(--admin-accent);"></div>
+        </div>
+      </div>
+
+      <!-- Album mode -->
+      <div id="dh-album-mode" style="display:none;">
+        <div class="admin-card" style="margin-top:8px;">
+          <div class="admin-card-header" style="padding:12px 16px;">
+            <h4 style="font-size:0.9rem;">Album Files</h4>
+            <div style="display:flex;gap:6px;">
+              <label class="admin-btn admin-btn-secondary admin-btn-sm" style="cursor:pointer;margin:0;">
+                📥 Bulk Add
+                <input type="file" multiple style="display:none;" onchange="dhBulkAddAlbumFiles(this.files)">
+              </label>
+              <button type="button" class="admin-btn admin-btn-secondary admin-btn-sm" onclick="dhAddAlbumFile()">+ Add Row</button>
+            </div>
+          </div>
+          <!-- Album D&D drop zone -->
+          <div id="dh-album-drop-zone"
+               style="margin:10px 12px;border:2px dashed var(--admin-card-border);border-radius:10px;padding:1rem;text-align:center;cursor:pointer;transition:all 0.2s;font-size:0.82rem;color:var(--admin-text-muted);"
+               ondragover="dhAlbumDropZoneDragOver(event)"
+               ondragleave="dhAlbumDropZoneDragLeave(event)"
+               ondrop="dhAlbumDropZoneDrop(event)"
+               onclick="document.querySelector('#dh-album-mode input[type=file][multiple]').click()">
+            📎 Drop files here to add them to the album
+          </div>
+          <div class="admin-card-body" id="dh-album-files-list" style="padding:12px;"></div>
+        </div>
+      </div>
+
+      <div class="form-actions" style="margin-top:20px;">
+        <button type="button" class="admin-btn admin-btn-secondary" id="dh-modal-cancel">Cancel</button>
+        <button type="button" class="admin-btn admin-btn-primary" onclick="dhSaveItem()">💾 Save Item</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ═══════ THEME SETTINGS VIEW ═══════ -->
+        <div class="admin-view" id="view-theme">
+          <div class="admin-card">
+            <div class="admin-card-header">
+              <h3>Theme Settings</h3>
+            </div>
+            <div class="admin-card-body">
+              <p style="color: var(--admin-text-secondary); margin-bottom: 20px; font-size: 0.9rem;">
+                Set the default theme for first-time visitors. Users can still toggle the theme themselves using the menu.
+              </p>
+              <div class="form-group">
+                <label>Default Theme</label>
+                <select class="form-select" id="default-theme-select">
+                  <option value="light">☀️ Light</option>
+                  <option value="dark">🌙 Dark</option>
+                </select>
+              </div>
+
+              <div class="form-actions">
+                <button class="admin-btn admin-btn-primary" id="save-theme-btn">💾 Save Theme</button>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- ═══════ EXPORT VIEW ═══════ -->
+        <div class="admin-view" id="view-export">
+          <div class="admin-card">
+            <div class="admin-card-header">
+              <h3>Export Configuration</h3>
+              <div style="display: flex; gap: 8px;">
+                <button class="admin-btn admin-btn-secondary admin-btn-sm" id="export-copy-btn">📋 Copy</button>
+                <button class="admin-btn admin-btn-primary admin-btn-sm" id="export-download-btn">⬇ Download JSON</button>
+              </div>
+            </div>
+            <div class="admin-card-body">
+              <p style="color: var(--admin-text-secondary); margin-bottom: 16px; font-size: 0.9rem;">
+                Download your current config as <code>tools.config.json</code>. Replace the file in your project to update the homepage.
+              </p>
+              <pre class="config-preview" id="export-preview"></pre>
+            </div>
+          </div>
+        </div>
+
+        <!-- ═══════ IMPORT VIEW ═══════ -->
+        <div class="admin-view" id="view-import">
+          <div class="admin-card">
+            <div class="admin-card-header">
+              <h3>Import Configuration</h3>
+            </div>
+            <div class="admin-card-body">
+              <p style="color: var(--admin-text-secondary); margin-bottom: 20px; font-size: 0.9rem;">
+                Upload a <code>tools.config.json</code> file to restore or update your configuration. This will replace all current data.
+              </p>
+
+              <div class="file-upload-area" id="import-drop-zone">
+                <div class="upload-icon">📁</div>
+                <p>Drop your <strong>tools.config.json</strong> here</p>
+                <p class="upload-hint">or click to browse files</p>
+              </div>
+              <input type="file" id="import-file-input" accept=".json" style="display: none;">
+            </div>
+          </div>
+        </div>
+
+      </div>
+    </main>
+  </div>
+
+  <!-- ═══════ TOOL FORM MODAL ═══════ -->
+  <div class="admin-modal-overlay" id="tool-modal-overlay">
+    <div class="admin-modal">
+      <div class="admin-modal-header">
+        <h3 id="modal-title">Add New Tool</h3>
+        <button class="admin-modal-close" id="modal-close-btn">&times;</button>
+      </div>
+      <div class="admin-modal-body">
+        <form id="tool-form" onsubmit="return false;">
+          <div class="form-row">
+            <div class="form-group">
+              <label>Tool Name *</label>
+              <input type="text" class="form-input" id="tool-form-name" placeholder="My Awesome Tool" required>
+            </div>
+            <div class="form-group">
+              <label>Slug</label>
+              <input type="text" class="form-input" id="tool-form-slug" placeholder="my-awesome-tool">
+              <p class="form-hint">Auto-generated from name</p>
+            </div>
+          </div>
+
+          <div class="form-row">
+            <div class="form-group">
+              <label>Category</label>
+              <select class="form-select" id="tool-form-category">
+                <!-- Populated by JS -->
+              </select>
+            </div>
+            <div class="form-group">
+              <label>Date Added</label>
+              <input type="date" class="form-input" id="tool-form-date">
+            </div>
+          </div>
+
+          <div class="form-group">
+            <label>Short Description</label>
+            <textarea class="form-textarea" id="tool-form-description" placeholder="Brief description (1-2 lines)" rows="2"></textarea>
+          </div>
+
+          <div class="form-group">
+            <label>Long Description</label>
+            <textarea class="form-textarea" id="tool-form-long-desc" placeholder="Detailed description for modal view" rows="3"></textarea>
+          </div>
+
+          <div class="form-group">
+            <label>Site URL *</label>
+            <input type="url" class="form-input" id="tool-form-url" placeholder="https://mytool.example.com" required>
+          </div>
+
+          <div class="form-group">
+            <label>Thumbnail</label>
+            <div style="display: flex; gap: 8px; align-items: flex-start;">
+              <input type="text" class="form-input" id="tool-form-thumbnail" placeholder="/assets/thumbnails/tool.png or Base64" style="flex:1;">
+              <label class="admin-btn admin-btn-secondary admin-btn-sm" style="cursor: pointer; margin-top: 0; flex-shrink: 0;">
+                📷 Upload
+                <input type="file" id="tool-form-thumb-upload" accept="image/*" style="display: none;">
+              </label>
+            </div>
+            <p class="form-hint">Enter a URL path or upload an image (stored as Base64)</p>
+          </div>
+
+          <div class="form-group">
+            <label>Tags</label>
+            <div class="tags-input-container" id="tool-form-tags-container">
+              <input type="text" class="tags-input" id="tool-form-tags-input" placeholder="Type a tag and press Enter">
+            </div>
+            <p class="form-hint">Press Enter or comma to add a tag</p>
+          </div>
+
+          <div class="form-row">
+            <div class="form-checkbox">
+              <input type="checkbox" id="tool-form-download">
+              <label for="tool-form-download">Download Available</label>
+            </div>
+            <div class="form-checkbox">
+              <input type="checkbox" id="tool-form-featured">
+              <label for="tool-form-featured">Featured ⭐</label>
+            </div>
+          </div>
+
+          <div class="form-checkbox" style="margin-top: 8px;">
+            <input type="checkbox" id="tool-form-visible" checked>
+            <label for="tool-form-visible">Visible on Homepage</label>
+          </div>
+
+          <div class="form-actions">
+            <button type="button" class="admin-btn admin-btn-secondary" id="modal-cancel-btn">Cancel</button>
+            <button type="button" class="admin-btn admin-btn-primary" id="modal-save-btn">💾 Save Tool</button>
+          </div>
+        </form>
+      </div>
+    </div>
+  </div>
+
+  <script src="/assets/js/admin.js"></script>
+<script>
+
+
+
+document.addEventListener('DOMContentLoaded', () => {
+    setTimeout(() => { dhLoadItems(); dhLoadCats(); }, 500);
+});
+
+// ── DOWNLOAD HUB ADMIN JS ─────────────────────────────────
+let dhItems = [];
+let dhAlbumFiles = [];
+
+async function dhLoadItems() {
+    try {
+        const r = await fetch('/api/downloads_data');
+        dhItems = await r.json();
+        dhRenderStats();
+        dhRenderTable();
+    } catch(e) {
+        document.getElementById('dh-table-body').innerHTML =
+            `<tr><td colspan="6" style="text-align:center;color:var(--admin-danger,#ef4444);padding:20px;">Failed to load items</td></tr>`;
+    }
+}
+
+async function dhLoadCats() {
+    try {
+        const r = await fetch('/api/downloads/categories');
+        const cats = await r.json();
+        const dl = document.getElementById('dh-cat-list');
+        if (dl) dl.innerHTML = cats.map(c => `<option value="${c}">`).join('');
+    } catch(e) {}
+}
+
+function dhRenderStats() {
+    const total = dhItems.length;
+    const albums = dhItems.filter(i => i.is_album).length;
+    const files = total - albums;
+    const cats = new Set(dhItems.map(i => i.category)).size;
+    document.getElementById('dh-stat-total').textContent = total;
+    document.getElementById('dh-stat-files').textContent = files;
+    document.getElementById('dh-stat-albums').textContent = albums;
+    document.getElementById('dh-stat-cats').textContent = cats;
+}
+
+function dhRenderTable() {
+    const tbody = document.getElementById('dh-table-body');
+    if (!dhItems.length) {
+        tbody.innerHTML = `<tr><td colspan="6" style="text-align:center;padding:40px;">
+            <div class="empty-state"><div class="empty-icon">📦</div><h4>No items yet</h4><p>Click "+ Add Item" to get started.</p></div>
+        </td></tr>`;
+        return;
+    }
+    tbody.innerHTML = dhItems.map(item => `
+        <tr>
+            <td><img src="${item.image||''}" style="width:44px;height:44px;border-radius:8px;object-fit:cover;background:#1a2035;" onerror="this.style.display='none'"></td>
+            <td class="table-name">${item.title}</td>
+            <td><span class="table-category">${item.category||'—'}</span></td>
+            <td>${item.is_album ? '<span style="color:#c4b5fd;font-size:0.8rem;">📁 Album</span>' : '<span style="color:#86efac;font-size:0.8rem;">📄 File</span>'}</td>
+            <td style="color:var(--admin-text-muted);font-size:0.82rem;">${item.version||'—'}</td>
+            <td>
+                <div class="table-actions">
+                    <button class="table-action-btn edit" onclick="dhEditItem('${item.id}')">✏️ Edit</button>
+                    <button class="table-action-btn delete" onclick="dhDeleteItem('${item.id}')">🗑️ Delete</button>
+                </div>
+            </td>
+        </tr>`).join('');
+}
+
+function dhOpenModal(item = null) {
+    const overlay = document.getElementById('dh-modal-overlay');
+    overlay.style.display = 'flex';
+    setTimeout(() => overlay.classList.add('open'), 10);
+    document.body.style.overflow = 'hidden';
+
+    document.getElementById('dh-modal-title').textContent = item ? 'Edit Download Item' : 'Add Download Item';
+    document.getElementById('dh-item-id').value = item ? item.id : '';
+    document.getElementById('dh-title').value = item ? item.title : '';
+    document.getElementById('dh-category').value = item ? (item.category || '') : '';
+    document.getElementById('dh-desc').value = item ? (item.description || '') : '';
+    document.getElementById('dh-version').value = item ? (item.version || '') : '';
+    document.getElementById('dh-image').value = item ? (item.image || '') : '';
+    document.getElementById('dh-link').value = item ? (item.link || '') : '';
+    document.getElementById('dh-is-album').checked = item ? !!item.is_album : false;
+
+    dhAlbumFiles = item && item.album_files ? JSON.parse(JSON.stringify(item.album_files)) : [];
+    dhToggleAlbumMode();
+    dhRenderAlbumFiles();
+
+    // Image preview
+    const img = item && item.image ? item.image : '';
+    dhUpdateImgPreview(img);
+}
+
+function dhCloseModal() {
+    const overlay = document.getElementById('dh-modal-overlay');
+    overlay.classList.remove('open');
+    setTimeout(() => { overlay.style.display = 'none'; }, 300);
+    document.body.style.overflow = '';
+}
+
+function dhToggleAlbumMode() {
+    const isAlbum = document.getElementById('dh-is-album').checked;
+    document.getElementById('dh-single-mode').style.display = isAlbum ? 'none' : 'block';
+    document.getElementById('dh-album-mode').style.display = isAlbum ? 'block' : 'none';
+}
+
+function dhRenderAlbumFiles() {
+    const list = document.getElementById('dh-album-files-list');
+    if (!dhAlbumFiles.length) {
+        list.innerHTML = '<p style="color:var(--admin-text-muted);font-size:0.85rem;">No files added yet. Click "+ Add File".</p>';
+        return;
+    }
+    list.innerHTML = dhAlbumFiles.map((f, i) => `
+        <div style="display:flex;gap:8px;align-items:center;padding:8px;background:var(--admin-card-bg);border:1px solid var(--admin-card-border);border-radius:8px;margin-bottom:8px;">
+            <input type="text" class="form-input" value="${f.name||''}" placeholder="File name" onchange="dhAlbumFiles[${i}].name=this.value" style="flex:1;font-size:0.82rem;">
+            <input type="text" class="form-input" value="${f.link||''}" placeholder="URL" onchange="dhAlbumFiles[${i}].link=this.value" style="flex:2;font-size:0.82rem;">
+            <label class="admin-btn admin-btn-secondary admin-btn-sm" style="cursor:pointer;flex-shrink:0;font-size:0.75rem;">
+                Upload
+                <input type="file" style="display:none;" onchange="dhUploadAlbumFile(this,${i})">
+            </label>
+            <button type="button" class="admin-btn admin-btn-sm" style="background:rgba(239,68,68,0.15);color:#f87171;border:1px solid rgba(239,68,68,0.3);" onclick="dhRemoveAlbumFile(${i})">×</button>
+        </div>`).join('');
+}
+
+function dhAddAlbumFile() {
+    dhAlbumFiles.push({ name: '', link: '' });
+    dhRenderAlbumFiles();
+}
+
+function dhRemoveAlbumFile(idx) {
+    dhAlbumFiles.splice(idx, 1);
+    dhRenderAlbumFiles();
+}
+
+async function dhUploadAlbumFile(input, idx) {
+    const file = input.files[0];
+    if (!file) return;
+    const fd = new FormData();
+    fd.append('file', file);
+    try {
+        const r = await fetch('/api/admin/upload-download-file', { method: 'POST', body: fd });
+        const data = await r.json();
+        if (data.url) {
+            // Update live
+            dhAlbumFiles[idx].link = data.url;
+            if (!dhAlbumFiles[idx].name) dhAlbumFiles[idx].name = data.filename || file.name;
+            dhRenderAlbumFiles();
+            if (typeof showToast === 'function') showToast('File uploaded', 'success');
+        }
+    } catch(e) { alert('Upload failed'); }
+}
+
+async function dhUploadFile(input, targetId, statusId) {
+    const file = input.files[0];
+    if (!file) return;
+    const status = document.getElementById(statusId);
+    if (status) status.textContent = 'Uploading...';
+    const fd = new FormData();
+    fd.append(targetId.includes('img') ? 'image' : 'file', file);
+    try {
+        const r = await fetch('/api/admin/upload-download-file', { method: 'POST', body: fd });
+        const data = await r.json();
+        if (data.url) {
+            document.getElementById(targetId).value = data.url;
+            if (status) status.textContent = '✓ Uploaded';
+            if (targetId === 'dh-image') dhUpdateImgPreview(data.url);
+            if (typeof showToast === 'function') showToast('Uploaded successfully', 'success');
+        } else {
+            if (status) status.textContent = '❌ ' + (data.error || 'Failed');
+        }
+    } catch(e) {
+        if (status) status.textContent = '❌ Error';
+    }
+    input.value = '';
+}
+
+function dhUpdateImgPreview(url) {
+    const wrap = document.getElementById('dh-img-preview');
+    const img = document.getElementById('dh-img-preview-img');
+    if (url) { img.src = url; wrap.style.display = 'block'; }
+    else { wrap.style.display = 'none'; }
+}
+
+async function dhSaveItem() {
+    const id = document.getElementById('dh-item-id').value;
+    const isAlbum = document.getElementById('dh-is-album').checked;
+
+    // Sync album files from inputs
+    document.querySelectorAll('#dh-album-files-list input[type=text]').forEach((inp, i) => {
+        const fileIdx = Math.floor(i / 2);
+        if (dhAlbumFiles[fileIdx]) {
+            if (i % 2 === 0) dhAlbumFiles[fileIdx].name = inp.value;
+            else dhAlbumFiles[fileIdx].link = inp.value;
+        }
+    });
+
+    const payload = {
+        title: document.getElementById('dh-title').value.trim(),
+        description: document.getElementById('dh-desc').value.trim(),
+        category: document.getElementById('dh-category').value.trim() || 'General',
+        image: document.getElementById('dh-image').value.trim(),
+        link: isAlbum ? '' : document.getElementById('dh-link').value.trim(),
+        version: document.getElementById('dh-version').value.trim(),
+        is_album: isAlbum,
+        album_files: isAlbum ? dhAlbumFiles.filter(f => f.link || f.name) : [],
+    };
+
+    if (!payload.title) {
+        if (typeof showToast === 'function') showToast('Title is required', 'error');
+        else alert('Title is required');
+        return;
+    }
+
+    try {
+        let r;
+        if (id) {
+            payload.id = id;
+            r = await fetch('/api/update_item', { method: 'PUT', headers: {'Content-Type':'application/json'}, body: JSON.stringify(payload) });
+        } else {
+            r = await fetch('/api/add_item', { method: 'POST', headers: {'Content-Type':'application/json'}, body: JSON.stringify(payload) });
+        }
+        const data = await r.json();
+        if (data.success) {
+            dhCloseModal();
+            dhLoadItems();
+            dhLoadCats();
+            if (typeof showToast === 'function') showToast(id ? 'Item updated' : 'Item added', 'success');
+        } else {
+            if (typeof showToast === 'function') showToast(data.error || 'Save failed', 'error');
+        }
+    } catch(e) {
+        if (typeof showToast === 'function') showToast('Network error', 'error');
+    }
+}
+
+function dhEditItem(id) {
+    const item = dhItems.find(i => i.id === id);
+    if (item) dhOpenModal(item);
+}
+
+async function dhDeleteItem(id) {
+    const item = dhItems.find(i => i.id === id);
+    if (!item) return;
+    if (!confirm(`Delete "${item.title}"? This cannot be undone.`)) return;
+    try {
+        const r = await fetch('/api/delete_item/' + id, { method: 'DELETE' });
+        const data = await r.json();
+        if (data.success) {
+            dhLoadItems();
+            if (typeof showToast === 'function') showToast('Item deleted', 'success');
+        } else {
+            if (typeof showToast === 'function') showToast(data.error || 'Delete failed', 'error');
+        }
+    } catch(e) {
+        if (typeof showToast === 'function') showToast('Network error', 'error');
+    }
+}
+
+// Bind modal buttons
+document.addEventListener('DOMContentLoaded', () => {
+    document.getElementById('dh-add-btn')?.addEventListener('click', () => dhOpenModal());
+    document.getElementById('dh-modal-close')?.addEventListener('click', dhCloseModal);
+    document.getElementById('dh-modal-cancel')?.addEventListener('click', dhCloseModal);
+    document.getElementById('dh-image')?.addEventListener('input', e => dhUpdateImgPreview(e.target.value));
+    document.getElementById('dh-modal-overlay')?.addEventListener('click', e => {
+        if (e.target.id === 'dh-modal-overlay') dhCloseModal();
+    });
+});
+
+// ─────────────────────────────────────────────────────────────
+// BULK UPLOAD + DRAG & DROP SYSTEM
+// ─────────────────────────────────────────────────────────────
+
+let dhBulkQueue = []; // [{ file, status:'pending'|'uploading'|'done'|'error', url, progress }]
+let dhBulkUploading = false;
+
+// ── Main Drop Zone Events ──────────────────────────────────
+function dhDropZoneDragOver(e) {
+    e.preventDefault();
+    e.stopPropagation();
+    const zone = document.getElementById('dh-drop-zone');
+    zone.style.borderColor = '#6366f1';
+    zone.style.background = 'rgba(99,102,241,0.07)';
+    zone.style.transform = 'scale(1.01)';
+    document.getElementById('dh-drop-icon').style.transform = 'scale(1.2) translateY(-4px)';
+}
+
+function dhDropZoneDragLeave(e) {
+    e.preventDefault();
+    const zone = document.getElementById('dh-drop-zone');
+    zone.style.borderColor = '';
+    zone.style.background = '';
+    zone.style.transform = '';
+    document.getElementById('dh-drop-icon').style.transform = '';
+}
+
+function dhDropZoneDrop(e) {
+    e.preventDefault();
+    dhDropZoneDragLeave(e);
+    const files = e.dataTransfer.files;
+    if (files && files.length) dhHandleBulkFiles(files);
+}
+
+// ── Process Files into Queue ──────────────────────────────
+function dhHandleBulkFiles(files) {
+    const arr = Array.from(files);
+    arr.forEach(file => {
+        // Avoid duplicates
+        if (!dhBulkQueue.find(q => q.file.name === file.name && q.file.size === file.size)) {
+            dhBulkQueue.push({ file, status: 'pending', url: null, progress: 0 });
+        }
+    });
+    dhRenderBulkQueue();
+}
+
+function dhRenderBulkQueue() {
+    const wrap = document.getElementById('dh-upload-queue');
+    const listEl = document.getElementById('dh-queue-list');
+    const countEl = document.getElementById('dh-queue-count');
+
+    if (!dhBulkQueue.length) {
+        wrap.style.display = 'none';
+        return;
+    }
+    wrap.style.display = 'block';
+    countEl.textContent = `(${dhBulkQueue.length} file${dhBulkQueue.length > 1 ? 's' : ''})`;
+
+    listEl.innerHTML = dhBulkQueue.map((item, i) => {
+        const ext = item.file.name.split('.').pop().toUpperCase();
+        const size = dhFormatSize(item.file.size);
+        const icon = dhFileIcon(item.file.name);
+
+        const statusColor = {
+            pending: 'var(--admin-text-muted)',
+            uploading: '#6366f1',
+            done: '#22c55e',
+            error: '#ef4444',
+        }[item.status] || 'var(--admin-text-muted)';
+
+        const statusLabel = {
+            pending: 'Queued',
+            uploading: `Uploading... ${item.progress}%`,
+            done: '✓ Done',
+            error: '✗ Error',
+        }[item.status] || '';
+
+        const bar = item.status === 'uploading'
+            ? `<div style="margin-top:5px;background:rgba(255,255,255,0.06);border-radius:4px;height:4px;overflow:hidden;">
+                 <div style="height:100%;width:${item.progress}%;background:linear-gradient(90deg,#6366f1,#a855f7);border-radius:4px;transition:width 0.2s;"></div>
+               </div>`
+            : '';
+
+        const removable = item.status !== 'uploading';
+
+        return `
+        <div id="dh-queue-item-${i}" style="display:flex;align-items:center;gap:10px;padding:10px 12px;background:var(--admin-card-bg);border:1px solid var(--admin-card-border);border-radius:10px;">
+            <div style="font-size:1.4rem;flex-shrink:0;">${icon}</div>
+            <div style="flex:1;min-width:0;">
+                <div style="font-size:0.83rem;font-weight:600;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;" title="${item.file.name}">${item.file.name}</div>
+                <div style="font-size:0.73rem;color:var(--admin-text-muted);">${ext} · ${size}</div>
+                ${bar}
+            </div>
+            <div style="font-size:0.75rem;font-weight:600;color:${statusColor};white-space:nowrap;flex-shrink:0;">${statusLabel}</div>
+            ${removable ? `<button onclick="dhRemoveBulkItem(${i})" style="background:rgba(239,68,68,0.12);border:1px solid rgba(239,68,68,0.25);color:#f87171;border-radius:6px;padding:3px 8px;cursor:pointer;font-size:0.75rem;">✕</button>` : ''}
+        </div>`;
+    }).join('');
+}
+
+function dhRemoveBulkItem(idx) {
+    if (dhBulkQueue[idx]?.status === 'uploading') return;
+    dhBulkQueue.splice(idx, 1);
+    dhRenderBulkQueue();
+}
+
+function dhClearBulkQueue() {
+    if (dhBulkUploading) return;
+    dhBulkQueue = [];
+    dhRenderBulkQueue();
+    document.getElementById('dh-bulk-file-input').value = '';
+    document.getElementById('dh-bulk-progress-wrap').style.display = 'none';
+}
+
+// ── Start Bulk Upload ────────────────────────────────────
+async function dhStartBulkUpload() {
+    if (dhBulkUploading) return;
+    const pending = dhBulkQueue.filter(q => q.status === 'pending');
+    if (!pending.length) {
+        if (typeof showToast === 'function') showToast('No files queued', 'error');
+        return;
+    }
+
+    const asAlbum = document.getElementById('dh-bulk-as-album').checked;
+    const category = document.getElementById('dh-bulk-category').value.trim() || 'Files';
+
+    dhBulkUploading = true;
+    document.getElementById('dh-start-bulk-btn').disabled = true;
+    document.getElementById('dh-start-bulk-btn').textContent = 'Uploading...';
+    document.getElementById('dh-bulk-progress-wrap').style.display = 'block';
+
+    const albumFiles = [];
+    let done = 0;
+
+    for (let i = 0; i < dhBulkQueue.length; i++) {
+        const item = dhBulkQueue[i];
+        if (item.status !== 'pending') continue;
+
+        item.status = 'uploading';
+        item.progress = 0;
+        dhRenderBulkQueue();
+
+        try {
+            const url = await dhXHRUpload(item.file, (pct) => {
+                item.progress = pct;
+                dhRenderBulkQueue();
+            });
+
+            item.url = url;
+            item.status = 'done';
+            item.progress = 100;
+
+            if (asAlbum) {
+                albumFiles.push({ name: item.file.name, link: url });
+            } else {
+                // Create individual item
+                await fetch('/api/add_item', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        title: item.file.name.replace(/\.[^.]+$/, ''), // strip extension
+                        description: '',
+                        category,
+                        image: '',
+                        link: url,
+                        version: '',
+                        is_album: false,
+                        album_files: [],
+                    })
+                });
+            }
+        } catch (err) {
+            item.status = 'error';
+        }
+
+        done++;
+        const pct = Math.round((done / pending.length) * 100);
+        document.getElementById('dh-bulk-progress-bar').style.width = pct + '%';
+        document.getElementById('dh-bulk-progress-txt').textContent = pct + '%';
+        dhRenderBulkQueue();
+    }
+
+    // If album mode → create one album item with all uploaded files
+    if (asAlbum && albumFiles.length) {
+        const albumTitle = category + ' Album ' + new Date().toLocaleDateString();
+        await fetch('/api/add_item', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+                title: albumTitle,
+                description: `${albumFiles.length} files`,
+                category,
+                image: albumFiles[0]?.link || '',
+                link: '',
+                version: '',
+                is_album: true,
+                album_files: albumFiles,
+            })
+        });
+    }
+
+    dhBulkUploading = false;
+    document.getElementById('dh-start-bulk-btn').disabled = false;
+    document.getElementById('dh-start-bulk-btn').textContent = '⚡ Upload All';
+    if (typeof showToast === 'function') showToast(`${done} file${done > 1 ? 's' : ''} uploaded!`, 'success');
+    dhLoadItems();
+}
+
+// ── XHR Upload with progress ────────────────────────────
+function dhXHRUpload(file, onProgress) {
+    return new Promise((resolve, reject) => {
+        const xhr = new XMLHttpRequest();
+        const fd = new FormData();
+        fd.append('file', file);
+
+        xhr.upload.addEventListener('progress', e => {
+            if (e.lengthComputable) onProgress(Math.round((e.loaded / e.total) * 100));
+        });
+
+        xhr.addEventListener('load', () => {
+            if (xhr.status >= 200 && xhr.status < 300) {
+                try {
+                    const resp = JSON.parse(xhr.responseText);
+                    if (resp.url) resolve(resp.url);
+                    else reject(new Error(resp.error || 'No URL'));
+                } catch { reject(new Error('Parse error')); }
+            } else {
+                reject(new Error('HTTP ' + xhr.status));
+            }
+        });
+
+        xhr.addEventListener('error', () => reject(new Error('Network error')));
+        xhr.open('POST', '/api/admin/upload-download-file');
+        xhr.send(fd);
+    });
+}
+
+// ── Album Drop Zone ──────────────────────────────────────
+function dhAlbumDropZoneDragOver(e) {
+    e.preventDefault();
+    e.stopPropagation();
+    const z = document.getElementById('dh-album-drop-zone');
+    z.style.borderColor = '#6366f1';
+    z.style.background = 'rgba(99,102,241,0.07)';
+    z.style.color = '#a5b4fc';
+}
+
+function dhAlbumDropZoneDragLeave(e) {
+    e.preventDefault();
+    const z = document.getElementById('dh-album-drop-zone');
+    z.style.borderColor = '';
+    z.style.background = '';
+    z.style.color = '';
+}
+
+async function dhAlbumDropZoneDrop(e) {
+    e.preventDefault();
+    dhAlbumDropZoneDragLeave(e);
+    const files = Array.from(e.dataTransfer.files);
+    if (!files.length) return;
+    await dhBulkAddAlbumFiles(files);
+}
+
+async function dhBulkAddAlbumFiles(filesInput) {
+    const files = Array.from(filesInput);
+    const z = document.getElementById('dh-album-drop-zone');
+    z.textContent = `Uploading ${files.length} file${files.length > 1 ? 's' : ''}...`;
+    z.style.borderColor = '#6366f1';
+
+    let uploaded = 0;
+    for (const file of files) {
+        try {
+            const url = await dhXHRUpload(file, () => {});
+            dhAlbumFiles.push({ name: file.name, link: url });
+            uploaded++;
+            z.textContent = `Uploaded ${uploaded}/${files.length}...`;
+        } catch {
+            dhAlbumFiles.push({ name: file.name, link: '' });
+        }
+    }
+
+    dhRenderAlbumFiles();
+    z.textContent = `✓ Added ${uploaded} file${uploaded > 1 ? 's' : ''} — drop more or add rows manually`;
+    z.style.borderColor = '#22c55e';
+    z.style.color = '#86efac';
+    setTimeout(() => {
+        z.textContent = '📎 Drop files here to add them to the album';
+        z.style.borderColor = '';
+        z.style.color = '';
+    }, 3000);
+    if (typeof showToast === 'function') showToast(`${uploaded} file${uploaded > 1 ? 's' : ''} added to album`, 'success');
+}
+
+// ── Helpers ──────────────────────────────────────────────
+function dhFormatSize(bytes) {
+    if (bytes < 1024) return bytes + ' B';
+    if (bytes < 1024 * 1024) return (bytes / 1024).toFixed(1) + ' KB';
+    return (bytes / (1024 * 1024)).toFixed(1) + ' MB';
+}
+
+function dhFileIcon(name) {
+    const ext = (name.split('.').pop() || '').toLowerCase();
+    const map = {
+        apk: '🤖', pdf: '📄', zip: '🗜️', rar: '🗜️', '7z': '🗜️',
+        mp4: '🎬', mov: '🎬', avi: '🎬', mkv: '🎬',
+        mp3: '🎵', wav: '🎵', ogg: '🎵',
+        jpg: '🖼️', jpeg: '🖼️', png: '🖼️', gif: '🖼️', webp: '🖼️',
+        exe: '⚙️', dmg: '🍎', deb: '🐧',
+        docx: '📝', xlsx: '📊', pptx: '📊',
+    };
+    return map[ext] || '📦';
+}
+
+// ===================== WIDGET ADMIN FUNCTIONS =====================
+
+const WIDGET_LABELS = {
+  notice:'📢 Notice', poll:'🗳️ Poll', winner:'🏆 Winner',
+  person_card:'👤 Person Card', link_card:'🔗 Link Card',
+  ticker:'📰 Ticker', gallery:'🖼️ Gallery',
+  event_card:'📅 Event', quote:'💬 Quote', custom_html:'⚙️ Custom HTML'
+};
+
+// Dynamic form fields generator
+function getWidgetFieldsHTML(type, d={}) {
+  const inp = (id,ph,val='',type2='text') => `<input type="${type2}" id="${id}" placeholder="${ph}" value="${val.toString().replace(/"/g,'&quot;')}" class="form-input" style="width:100%;">`;
+  const ta  = (id,ph,val='') => `<textarea id="${id}" placeholder="${ph}" rows="3" class="form-textarea" style="width:100%;">${val}</textarea>`;
+  const lbl = (text) => `<label class="form-label" style="font-size:0.82rem;font-weight:600;margin-bottom:4px;display:block;">${text}</label>`;
+  const sel = (id,opts,val='') => `<select id="${id}" class="form-select" style="width:100%;">${opts.map(o=>`<option value="${o.v}" ${o.v===val?'selected':''}>${o.l}</option>`).join('')}</select>`;
+
+  switch(type) {
+    case 'notice': return `
+      <div class="form-group">${lbl('Title')}${inp('wf_title','Alert heading',d.title||'')}</div>
+      <div class="form-group">${lbl('Message')}${ta('wf_message','Your notice message...',d.message||'')}</div>
+      <div class="form-group">${lbl('Style')}${sel('wf_style',[{v:'info',l:'ℹ️ Info'},{v:'warning',l:'⚠️ Warning'},{v:'success',l:'✅ Success'},{v:'danger',l:'🚨 Danger'}],d.style||'info')}</div>`;
+    case 'poll': return `
+      <div class="form-group">${lbl('Question')}${inp('wf_question','e.g. Who should win?',d.question||'')}</div>
+      <div class="form-group">
+        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:6px;">${lbl('Options')}<button type="button" class="admin-btn admin-btn-secondary admin-btn-sm" onclick="addPollOption()">+ Add Option</button></div>
+        <div id="pollOptions">${(d.options||[{id:'opt1',text:'',votes:0},{id:'opt2',text:'',votes:0}]).map((o,i)=>`<div style="display:flex;gap:8px;margin-bottom:8px;align-items:center;"><input type="text" class="poll-opt-input form-input" placeholder="Option ${i+1}" value="${o.text.replace(/"/g,'&quot;')}" data-id="${o.id}" data-votes="${o.votes}" style="flex:1;"><span style="font-size:0.75rem;color:var(--admin-text-muted);white-space:nowrap;">${o.votes} votes</span><button type="button" onclick="this.parentElement.remove()" style="background:rgba(239,68,68,0.15);border:1px solid rgba(239,68,68,0.3);color:#f87171;border-radius:6px;padding:2px 8px;cursor:pointer;">×</button></div>`).join('')}</div>
+      </div>`;
+    case 'winner': return `
+      <div class="form-group">${lbl('Winner Name')}${inp('wf_winner_name','e.g. Rahul Das',d.winner_name||'')}</div>
+      <div class="form-group">${lbl('Event / Award Name')}${inp('wf_event_name','e.g. Best Player 2026',d.event_name||'')}</div>
+      <div class="form-group">${lbl('Photo URL')}${inp('wf_photo_url','https://...',d.photo_url||'')}</div>
+      <div class="form-group">${lbl('Message')}${ta('wf_message','Congratulations message...',d.message||'')}</div>
+      <div class="form-checkbox" style="margin-bottom:12px;"><input type="checkbox" id="wf_fireworks" ${d.fireworks!==false?'checked':''}><label for="wf_fireworks"> 🎆 Enable Fireworks Animation</label></div>
+      <div class="form-group">${lbl('Fireworks Text')}${inp('wf_fireworks_text','e.g. 🎉 WINNER!',d.fireworks_text||'')}</div>`;
+    case 'person_card': return `
+      <div class="form-group">${lbl('Full Name')}${inp('wf_name','e.g. Dr. Aminul Islam',d.name||'')}</div>
+      <div class="form-group">${lbl('Role / Designation')}${inp('wf_role','e.g. Chief Minister',d.role||'')}</div>
+      <div class="form-group">${lbl('Photo URL')}${inp('wf_photo_url','https://...',d.photo_url||'')}</div>
+      <div class="form-group">${lbl('Short Bio')}${ta('wf_bio','A brief description...',d.bio||'')}</div>`;
+    case 'link_card': return `
+      <div class="form-group">${lbl('Card Title')}${inp('wf_title','e.g. Official Website',d.title||'')}</div>
+      <div class="form-group">${lbl('URL')}${inp('wf_url','https://example.com',d.url||'')}</div>
+      <div class="form-group">${lbl('Description')}${inp('wf_description','Short description',d.description||'')}</div>
+      <div class="form-group">${lbl('Button Text')}${inp('wf_button_text','Visit Site',d.button_text||'Visit Site')}</div>
+      <div class="form-group">${lbl('Color')}${sel('wf_color',[{v:'blue',l:'🔵 Blue'},{v:'green',l:'🟢 Green'},{v:'purple',l:'🟣 Purple'},{v:'orange',l:'🟠 Orange'},{v:'red',l:'🔴 Red'}],d.color||'blue')}</div>`;
+    case 'ticker': return `
+      <div class="form-group">${lbl('Messages (one per line)')}${ta('wf_messages','Breaking News: ...\nImportant: ...',(d.messages||[]).join('\n'))}</div>
+      <div class="form-group">${lbl('Speed')}${sel('wf_speed',[{v:'slow',l:'🐢 Slow'},{v:'medium',l:'🚶 Medium'},{v:'fast',l:'🏃 Fast'}],d.speed||'medium')}</div>`;
+    case 'gallery': return `
+      <div class="form-group">${lbl('Gallery Title')}${inp('wf_title','Photo Gallery',d.title||'Photo Gallery')}</div>
+      <div class="form-group">${lbl('Image URLs (one per line — add | caption after URL)')}${ta('wf_images','https://img1.jpg|Caption\nhttps://img2.jpg',(d.images||[]).map(i=>i.caption?`${i.url}|${i.caption}`:i.url).join('\n'))}</div>`;
+    case 'event_card': return `
+      <div class="form-group">${lbl('Event Title')}${inp('wf_title','Event name',d.title||'')}</div>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;">
+        <div class="form-group">${lbl('Date')}${inp('wf_date','',d.date||'','date')}</div>
+        <div class="form-group">${lbl('Time')}${inp('wf_time','',d.time||'','time')}</div>
+      </div>
+      <div class="form-group">${lbl('Venue')}${inp('wf_venue','Location / City',d.venue||'')}</div>
+      <div class="form-group">${lbl('Description')}${ta('wf_description','Event details...',d.description||'')}</div>`;
+    case 'quote': return `
+      <div class="form-group">${lbl('Quote Text')}${ta('wf_text','Your quote here...',d.text||'')}</div>
+      <div class="form-group">${lbl('Author')}${inp('wf_author','— Author Name',d.author||'')}</div>
+      <div class="form-group">${lbl('Background')}${sel('wf_bg',[{v:'dark',l:'🌑 Dark'},{v:'gradient',l:'🌈 Gradient'},{v:'light',l:'⬜ Light'}],d.bg||'gradient')}</div>`;
+    case 'custom_html': return `
+      <div class="form-group">${lbl('Custom HTML')}<textarea id="wf_html" rows="7" class="form-textarea" style="width:100%;font-family:monospace;font-size:0.82rem;">${(d.html||'').replace(/</g,'&lt;').replace(/>/g,'&gt;')}</textarea></div>`;
+    default: return '';
+  }
+}
+
+function updateWidgetFields(prefix) {
+  const type = document.getElementById(prefix==='new'?'newWidgetType':'editWidgetType').value;
+  document.getElementById(`widgetFields-${prefix}`).innerHTML = getWidgetFieldsHTML(type);
+}
+
+function addPollOption() {
+  const container = document.getElementById('pollOptions');
+  const count = container.querySelectorAll('.poll-opt-input').length + 1;
+  const id = 'opt' + Date.now();
+  const div = document.createElement('div');
+  div.style.cssText = 'display:flex;gap:8px;margin-bottom:8px;align-items:center;';
+  div.innerHTML = `<input type="text" class="poll-opt-input form-input" placeholder="Option ${count}" data-id="${id}" data-votes="0" style="flex:1;"><button type="button" onclick="this.parentElement.remove()" style="background:rgba(239,68,68,0.15);border:1px solid rgba(239,68,68,0.3);color:#f87171;border-radius:6px;padding:2px 8px;cursor:pointer;">×</button>`;
+  container.appendChild(div);
+}
+
+function collectWidgetData(prefix) {
+  const type = document.getElementById(prefix==='new'?'newWidgetType':'editWidgetType').value;
+  const g = (id) => { const el = document.getElementById(id); return el ? el.value.trim() : ''; };
+  const gc = (id) => { const el = document.getElementById(id); return el ? el.checked : false; };
+  switch(type) {
+    case 'notice':   return { title:g('wf_title'), message:g('wf_message'), style:g('wf_style') };
+    case 'poll': {
+      const opts = [...document.querySelectorAll('.poll-opt-input')].map(el=>({id:el.dataset.id,text:el.value.trim(),votes:parseInt(el.dataset.votes||0)})).filter(o=>o.text);
+      return { question:g('wf_question'), options:opts };
+    }
+    case 'winner':      return { winner_name:g('wf_winner_name'), event_name:g('wf_event_name'), photo_url:g('wf_photo_url'), message:g('wf_message'), fireworks:gc('wf_fireworks'), fireworks_text:g('wf_fireworks_text') };
+    case 'person_card': return { name:g('wf_name'), role:g('wf_role'), photo_url:g('wf_photo_url'), bio:g('wf_bio') };
+    case 'link_card':   return { title:g('wf_title'), url:g('wf_url'), description:g('wf_description'), button_text:g('wf_button_text'), color:g('wf_color') };
+    case 'ticker':      return { messages:g('wf_messages').split('\n').map(s=>s.trim()).filter(Boolean), speed:g('wf_speed') };
+    case 'gallery': {
+      const imgs = g('wf_images').split('\n').filter(Boolean).map(line=>{const[url,...rest]=line.split('|');return{url:url.trim(),caption:(rest.join('|')||'').trim()};});
+      return { title:g('wf_title'), images:imgs };
+    }
+    case 'event_card':  return { title:g('wf_title'), date:g('wf_date'), time:g('wf_time'), venue:g('wf_venue'), description:g('wf_description') };
+    case 'quote':       return { text:g('wf_text'), author:g('wf_author'), bg:g('wf_bg') };
+    case 'custom_html': { const el=document.getElementById('wf_html'); return { html: el ? el.value : '' }; }
+    default: return {};
+  }
+}
+
+async function loadWidgets() {
+  const tb = document.getElementById('widgetsTableBody');
+  try {
+    const res = await fetch('/api/admin/widgets?t=' + new Date().getTime());
+    if (res.status === 401) { window.location.href='/admin/login'; return; }
+    renderWidgetsTable(await res.json());
+  } catch (e) {
+    if (tb) tb.innerHTML = `<p style="color:red;padding:20px;text-align:center;">Failed to load widgets</p>`;
+  }
+}
+
+const _widgetCache = {};
+function renderWidgetsTable(widgets) {
+  const tb = document.getElementById('widgetsTableBody');
+  if (!widgets.length) {
+    tb.innerHTML = '<p style="text-align:center;padding:30px;color:var(--admin-text-muted);">No widgets yet. Click "+  Add Widget" to create one.</p>';
+    return;
+  }
+  widgets.forEach(w => { _widgetCache[w.id] = w; });
+  tb.innerHTML = widgets.map((w, idx) => `
+    <div style="display:flex;align-items:center;justify-content:space-between;padding:12px 20px;border-bottom:1px solid var(--admin-card-border);">
+      <div style="display:flex;align-items:center;gap:10px;">
+        <div style="display:flex;flex-direction:column;gap:2px;">
+          <button onclick="moveWidget('${w.id}',${idx},-1)" ${idx===0?'disabled':''} style="font-size:11px;cursor:pointer;background:none;border:none;color:var(--admin-text-muted);line-height:1;">▲</button>
+          <button onclick="moveWidget('${w.id}',${idx},+1)" ${idx===widgets.length-1?'disabled':''} style="font-size:11px;cursor:pointer;background:none;border:none;color:var(--admin-text-muted);line-height:1;">▼</button>
+        </div>
+        <div>
+          <div style="font-weight:600;font-size:0.9rem;">${WIDGET_LABELS[w.type]||w.type}</div>
+          <div style="font-size:0.75rem;color:var(--admin-text-muted);margin-top:2px;">${getWidgetPreview(w)}</div>
+        </div>
+      </div>
+      <div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap;">
+        <span style="font-size:11px;padding:2px 10px;border-radius:99px;background:${w.enabled?'rgba(34,197,94,0.15)':'rgba(148,163,184,0.1)'};color:${w.enabled?'#86efac':'#94a3b8'};border:1px solid ${w.enabled?'rgba(34,197,94,0.3)':'rgba(148,163,184,0.2)'}">${w.enabled?'ON':'OFF'}</span>
+        <button onclick="toggleWidget('${w.id}',${w.enabled})" class="admin-btn admin-btn-secondary admin-btn-sm">${w.enabled?'Hide':'Show'}</button>
+        <button onclick="openEditWidgetModal('${w.id}')" class="admin-btn admin-btn-secondary admin-btn-sm" style="color:var(--admin-accent);">✏️ Edit</button>
+        <button onclick="deleteWidget('${w.id}',this)" class="admin-btn admin-btn-sm" style="background:rgba(239,68,68,0.12);color:#f87171;border:1px solid rgba(239,68,68,0.25);">🗑️ Del</button>
+      </div>
+    </div>
+  `).join('');
+}
+
+function getWidgetPreview(w) {
+  const d = w.data || {};
+  switch(w.type) {
+    case 'notice': return d.title || d.message || '';
+    case 'poll':   return d.question || '';
+    case 'winner': return d.winner_name || '';
+    case 'person_card': return `${d.name||''} — ${d.role||''}`;
+    case 'link_card': return d.url || d.title || '';
+    case 'ticker': return (d.messages||[]).join(' • ').substring(0,60);
+    case 'gallery': return `${(d.images||[]).length} images`;
+    case 'event_card': return `${d.title||''} ${d.date||''}`;
+    case 'quote': return `"${(d.text||'').substring(0,40)}"`;
+    case 'custom_html': return 'Custom HTML block';
+    default: return '';
+  }
+}
+
+function openAddWidgetModal() {
+  const modal = document.getElementById('addWidgetModal');
+  modal.style.display = 'flex';
+  setTimeout(()=>modal.classList.add('open'),10);
+  document.body.style.overflow = 'hidden';
+  updateWidgetFields('new');
+}
+function closeAddWidgetModal() {
+  const modal = document.getElementById('addWidgetModal');
+  modal.classList.remove('open');
+  setTimeout(()=>{ modal.style.display='none'; }, 300);
+  document.body.style.overflow = '';
+  document.getElementById('addWidgetForm').reset();
+}
+function openEditWidgetModal(widgetId) {
+  const w = _widgetCache[widgetId];
+  if (!w) { if(typeof showToast==='function') showToast('Widget not found — reload', 'error'); return; }
+  document.getElementById('editWidgetId').value   = w.id;
+  document.getElementById('editWidgetType').value  = w.type;
+  document.getElementById('editWidgetEnabled').checked = w.enabled;
+  document.getElementById('widgetFields-edit').innerHTML = getWidgetFieldsHTML(w.type, w.data||{});
+  const modal = document.getElementById('editWidgetModal');
+  modal.style.display = 'flex';
+  setTimeout(()=>modal.classList.add('open'),10);
+  document.body.style.overflow = 'hidden';
+}
+function closeEditWidgetModal() {
+  const modal = document.getElementById('editWidgetModal');
+  modal.classList.remove('open');
+  setTimeout(()=>{ modal.style.display='none'; }, 300);
+  document.body.style.overflow = '';
+}
+
+async function submitAddWidget(e) {
+  e.preventDefault();
+  const btn = e.target.querySelector('button[type=submit]');
+  btn.disabled = true; btn.textContent = 'Saving...';
+  try {
+    const res = await fetch('/api/admin/widgets', {
+      method:'POST', headers:{'Content-Type':'application/json'},
+      body: JSON.stringify({
+        type: document.getElementById('newWidgetType').value,
+        enabled: document.getElementById('newWidgetEnabled').checked,
+        data: collectWidgetData('new')
+      })
+    });
+    if (!res.ok) throw new Error((await res.json()).error || 'Server error');
+    closeAddWidgetModal();
+    await loadWidgets();
+    if(typeof showToast==='function') showToast('Widget added!', 'success');
+  } catch(err) {
+    if(typeof showToast==='function') showToast('Failed: '+err.message,'error'); else alert(err.message);
+  } finally { btn.disabled=false; btn.textContent='💾 Save Widget'; }
+}
+
+async function submitEditWidget(e) {
+  e.preventDefault();
+  const id = document.getElementById('editWidgetId').value;
+  const btn = e.target.querySelector('button[type=submit]');
+  btn.disabled = true; btn.textContent = 'Updating...';
+  try {
+    const res = await fetch(`/api/admin/widgets/${id}`, {
+      method:'PUT', headers:{'Content-Type':'application/json'},
+      body: JSON.stringify({
+        enabled: document.getElementById('editWidgetEnabled').checked,
+        data: collectWidgetData('edit')
+      })
+    });
+    if (!res.ok) throw new Error((await res.json()).error || 'Server error');
+    closeEditWidgetModal();
+    await loadWidgets();
+    if(typeof showToast==='function') showToast('Widget updated!', 'success');
+  } catch(err) {
+    if(typeof showToast==='function') showToast('Failed: '+err.message,'error'); else alert(err.message);
+  } finally { btn.disabled=false; btn.textContent='✏️ Update Widget'; }
+}
+
+async function toggleWidget(id, currentlyEnabled) {
+  try {
+    await fetch(`/api/admin/widgets/${id}`, {method:'PUT',headers:{'Content-Type':'application/json'},body:JSON.stringify({enabled:!currentlyEnabled})});
+    await loadWidgets();
+    if(typeof showToast==='function') showToast(currentlyEnabled?'Widget hidden':'Widget shown','success');
+  } catch(e) { if(typeof showToast==='function') showToast('Failed to toggle','error'); }
+}
+
+async function deleteWidget(id, btn) {
+  if (!confirm('Delete this widget? This cannot be undone.')) return;
+  btn.disabled=true; btn.textContent='...';
+  try {
+    await fetch(`/api/admin/widgets/${id}`, {method:'DELETE'});
+    await loadWidgets();
+    if(typeof showToast==='function') showToast('Widget deleted','success');
+  } catch(e) {
+    if(typeof showToast==='function') showToast('Delete failed','error');
+    btn.disabled=false; btn.textContent='🗑️ Del';
+  }
+}
+
+async function moveWidget(widgetId, currentIdx, direction) {
+  const rows = document.querySelectorAll('#widgetsTableBody > div');
+  const ids = [...rows].map(r => {
+    const btn = r.querySelector('[onclick*="openEditWidgetModal"]');
+    if (!btn) return null;
+    const m = btn.getAttribute('onclick').match(/'([^']+)'/);
+    return m ? m[1] : null;
+  }).filter(Boolean);
+  const newIdx = currentIdx + direction;
+  if (newIdx < 0 || newIdx >= ids.length) return;
+  [ids[currentIdx], ids[newIdx]] = [ids[newIdx], ids[currentIdx]];
+  try {
+    await fetch('/api/admin/widgets/reorder', {method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({order:ids})});
+    await loadWidgets();
+  } catch(e) { if(typeof showToast==='function') showToast('Reorder failed','error'); }
+}
+
+// Close modals on backdrop click
+document.addEventListener('DOMContentLoaded', () => {
+  document.getElementById('addWidgetModal')?.addEventListener('click', e => {
+    if (e.target.id === 'addWidgetModal') closeAddWidgetModal();
+  });
+  document.getElementById('editWidgetModal')?.addEventListener('click', e => {
+    if (e.target.id === 'editWidgetModal') closeEditWidgetModal();
+  });
+});
+
+// Load widgets when Widgets tab is opened
+document.querySelectorAll('[data-view="widgets"]').forEach(link => {
+  link.addEventListener('click', () => { setTimeout(loadWidgets, 100); });
+});
+
+</script>
+</body>
+</html>

@@ -1,0 +1,179 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="description" content="Download SanuwarTools for offline use. Get all tools in one package.">
+  <title>Download — SanuwarTools</title>
+  <link rel="stylesheet" href="/assets/css/style.css">
+  <script>
+    (function() {
+      const t = localStorage.getItem('sanuwartools-theme');
+      if (t) document.documentElement.setAttribute('data-theme', t);
+    })();
+  </script>
+  <style>
+    .download-page {
+      min-height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      text-align: center;
+      padding: 100px 24px 60px;
+      background: var(--hero-gradient);
+      position: relative;
+    }
+
+    .download-page::before {
+      content: '';
+      position: absolute;
+      top: -50%;
+      left: -50%;
+      width: 200%;
+      height: 200%;
+      background: radial-gradient(ellipse at 50% 50%, var(--accent-glow) 0%, transparent 60%);
+      animation: heroFloat 20s ease-in-out infinite;
+      pointer-events: none;
+    }
+
+    .download-content {
+      max-width: 600px;
+      position: relative;
+      z-index: 1;
+    }
+
+    .download-icon {
+      font-size: 4rem;
+      margin-bottom: 24px;
+      display: block;
+    }
+
+    .download-content h1 {
+      font-size: 2.4rem;
+      font-weight: 900;
+      margin-bottom: 16px;
+      letter-spacing: -1px;
+    }
+
+    .download-content p {
+      font-size: 1.1rem;
+      color: var(--text-secondary);
+      line-height: 1.7;
+      margin-bottom: 32px;
+    }
+
+    .download-actions {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 16px;
+    }
+
+    .download-actions .btn {
+      min-width: 280px;
+    }
+
+    .download-info {
+      margin-top: 40px;
+      padding: 24px;
+      background: var(--card-bg);
+      border: 1px solid var(--card-border);
+      border-radius: var(--radius-lg);
+      text-align: left;
+    }
+
+    .download-info h3 {
+      font-size: 1rem;
+      font-weight: 700;
+      margin-bottom: 12px;
+    }
+
+    .download-info ul {
+      list-style: none;
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+    }
+
+    .download-info li {
+      font-size: 0.9rem;
+      color: var(--text-secondary);
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .download-info li::before {
+      content: '✅';
+      font-size: 0.85rem;
+    }
+
+    .back-link {
+      position: fixed;
+      top: 24px;
+      left: 24px;
+      z-index: 100;
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      padding: 10px 18px;
+      background: var(--card-bg);
+      border: 1px solid var(--card-border);
+      border-radius: 100px;
+      color: var(--text-primary);
+      font-weight: 600;
+      font-size: 0.9rem;
+      box-shadow: var(--shadow);
+      transition: all var(--transition);
+    }
+
+    .back-link:hover {
+      border-color: var(--accent);
+      color: var(--accent);
+      transform: translateY(-2px);
+    }
+
+    @media (max-width: 480px) {
+      .download-content h1 {
+        font-size: 1.8rem;
+      }
+
+      .download-actions .btn {
+        min-width: unset;
+        width: 100%;
+      }
+    }
+  </style>
+</head>
+<body>
+
+  <a href="/" class="back-link">← Back to Home</a>
+
+  <section class="download-page">
+    <div class="download-content">
+      <span class="download-icon">📦</span>
+      <h1>Download Tools</h1>
+      <p>Get all SanuwarTools for offline use. Download the complete package and run tools directly from your device — no internet required.</p>
+
+      <div class="download-actions">
+        <a href="#" class="btn btn-primary" id="main-download-btn" onclick="alert('Download package will be available soon!'); return false;">
+          ⬇ Download All Tools (ZIP)
+        </a>
+        <a href="/" class="btn btn-secondary">← Browse Tools Online</a>
+      </div>
+
+      <div class="download-info">
+        <h3>What's included:</h3>
+        <ul>
+          <li>All web tools in a single package</li>
+          <li>Works completely offline</li>
+          <li>No installation required — just extract and open</li>
+          <li>Regular updates with new tools</li>
+          <li>Lightweight and portable</li>
+        </ul>
+      </div>
+    </div>
+  </section>
+
+</body>
+</html>

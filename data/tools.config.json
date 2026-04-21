@@ -1,0 +1,83 @@
+{
+  "site": {
+    "name": "SanuwarTools",
+    "tagline": "All my tools, one place.",
+    "favicon": "/assets/favicon.ico",
+    "defaultTheme": "light"
+  },
+  "downloadPage": {
+    "enabled": true,
+    "url": "/download.html",
+    "buttonLabel": "⬇ Download Tools",
+    "buttonSubtext": "Get all tools offline"
+  },
+  "tools": [
+    {
+      "id": "tool-001",
+      "name": "Instant Photo",
+      "slug": "instant-photo",
+      "category": "Utility",
+      "description": "Generate passport-size photo sheets instantly from any image. Supports multiple formats and layouts.",
+      "longDescription": "A powerful online tool that converts regular photos into perfectly sized passport photos. Upload any image, auto-crop to standard passport dimensions, and generate printable sheets with multiple copies. Supports various international passport photo standards.",
+      "thumbnail": "/assets/thumbnails/tool-001.png",
+      "siteUrl": "https://instant-photo.vercel.app",
+      "downloadAvailable": true,
+      "tags": ["free", "web", "photo", "utility"],
+      "featured": true,
+      "visible": true,
+      "addedDate": "2025-01-15"
+    },
+    {
+      "id": "tool-002",
+      "name": "Cricket Speed Tracker",
+      "slug": "cricket-speed-tracker",
+      "category": "Utility",
+      "description": "Real-time AI-powered cricket bowling speed tracker using your phone's camera.",
+      "longDescription": "Track cricket bowling speeds in real-time using advanced computer vision and motion detection. Uses your device camera to detect ball trajectory and calculate speed in km/h and m/s. Features a professional dark-themed HUD with live metrics.",
+      "thumbnail": "/assets/thumbnails/tool-002.png",
+      "siteUrl": "https://cricket-speed-tracker.vercel.app",
+      "downloadAvailable": false,
+      "tags": ["free", "web", "sports", "AI"],
+      "featured": true,
+      "visible": true,
+      "addedDate": "2025-03-10"
+    },
+    {
+      "id": "tool-003",
+      "name": "Neon Hand Tracker",
+      "slug": "neon-hand-tracker",
+      "category": "Generator",
+      "description": "AI-powered dual hand tracking with neon visual effects and real-time analytics.",
+      "longDescription": "A high-performance dual-hand tracking web application featuring predictive motion smoothing, intelligent nearest-neighbor finger mapping, and a real-time analytical HUD. Creates stunning neon visual effects that follow your hand movements.",
+      "thumbnail": "/assets/thumbnails/tool-003.png",
+      "siteUrl": "https://neon-hand-tracker.vercel.app",
+      "downloadAvailable": false,
+      "tags": ["free", "web", "AI", "creative"],
+      "featured": false,
+      "visible": true,
+      "addedDate": "2025-04-01"
+    },
+    {
+      "id": "tool-004",
+      "name": "App Download Hub",
+      "slug": "app-download-hub",
+      "category": "Downloader",
+      "description": "Secure one-click file download system with admin controls and analytics.",
+      "longDescription": "A modern, secure download platform featuring time-limited signed URLs, efficient file streaming with range header support, and robust admin controls for file management. Provides a seamless one-click download experience for APKs, PDFs, and other files.",
+      "thumbnail": "/assets/thumbnails/tool-004.png",
+      "siteUrl": "https://app-download-hub.vercel.app",
+      "downloadAvailable": true,
+      "tags": ["free", "web", "downloader", "utility"],
+      "featured": true,
+      "visible": true,
+      "addedDate": "2025-02-20"
+    }
+  ],
+  "categories": ["All", "Utility", "Downloader", "Converter", "Generator"],
+  "socialLinks": {
+    "github": "https://github.com/SanuwarBuilds",
+    "instagram": "https://www.instagram.com/iam.sanuwar?igsh=Z2kyODk1YmppY3pj&utm_source=qr",
+    "youtube": "",
+    "twitter": ""
+  }
+}

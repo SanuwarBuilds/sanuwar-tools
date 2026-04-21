@@ -1,0 +1,24 @@
+# Python
+__pycache__/
+*.py[cod]
+*.pyo
+.venv/
+venv/
+env/
+
+# Environment secrets — NEVER commit this
+.env
+
+# Mac
+.DS_Store
+
+# Vercel
+.vercel
+
+# Local uploads (don't commit uploaded files)
+static/assets/uploads/
+static/assets/thumbnails/
+
+# Temp
+*.tmp
+syntax_check.html

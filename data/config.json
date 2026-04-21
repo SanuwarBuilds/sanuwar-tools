@@ -1,0 +1,18 @@
+{
+  "widgets": [],
+  "admin": {
+    "username": "admin",
+    "password_hash": "$2b$12$cEeI9lFioQkZH1s.HXL/7.Po0JfpDNOhj7uUn5Zb668Bs7OL3c48e"
+  },
+  "store_apps": [
+    {
+      "title": "photo",
+      "description": "e",
+      "version": "",
+      "link": "",
+      "image": "/assets/thumbnails/6553235a-2b65-40a4-92ab-89f366d5369f_93b4b221-9bdd-4483-b207-281c080c9a90.JPG",
+      "category": "Apps",
+      "id": "6e675207-9473-473b-838e-6b9821574d59"
+    }
+  ]
+}
