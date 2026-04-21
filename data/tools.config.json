@@ -27,7 +27,7 @@
   "tools": [
     {
       "addedDate": "2025-01-15",
-      "category": "Utility",
+      "category": "Generator",
       "description": "Generate passport-size photo sheets instantly from any image. Supports multiple formats and layouts.",
       "downloadAvailable": false,
       "featured": true,
