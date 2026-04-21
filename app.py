@@ -2,12 +2,33 @@ import os
 import json
 import uuid
 import datetime
+import cloudinary
+import cloudinary.uploader
 from flask import Flask, request, render_template, session, redirect, jsonify, url_for, send_file, send_from_directory
 from dotenv import load_dotenv
 import utils
 
 load_dotenv()
 app = Flask(__name__, static_folder='static/assets', static_url_path='/assets')
+
+# ── Cloudinary setup ───────────────────────────────────────────
+cloudinary.config(
+    cloud_name=os.getenv("CLOUDINARY_CLOUD_NAME", ""),
+    api_key=os.getenv("CLOUDINARY_API_KEY", ""),
+    api_secret=os.getenv("CLOUDINARY_API_SECRET", ""),
+    secure=True
+)
+
+def upload_to_cloudinary(file_storage, resource_type="auto", folder="sanuwar-tools"):
+    """Upload a FileStorage object to Cloudinary and return the secure URL."""
+    result = cloudinary.uploader.upload(
+        file_storage,
+        folder=folder,
+        resource_type=resource_type,
+        use_filename=True,
+        unique_filename=True
+    )
+    return result.get("secure_url", ""), result.get("original_filename", file_storage.filename or "file")
 app.secret_key = "SANUWAR_TOOLS_SECRET"
 
 def login_required(f):
@@ -137,11 +158,8 @@ def upload_file():
         if 'image' not in request.files:
             return jsonify({"error": "No file"}), 400
         file = request.files['image']
-        os.makedirs('static/assets/thumbnails', exist_ok=True)
-        filename = f"{uuid.uuid4()}_{file.filename}"
-        filepath = os.path.join('static/assets/thumbnails', filename)
-        file.save(filepath)
-        return jsonify({"url": f"/assets/thumbnails/{filename}"})
+        url, _ = upload_to_cloudinary(file, resource_type="image", folder="sanuwar-tools/thumbnails")
+        return jsonify({"url": url})
     except Exception as e:
         return jsonify({"error": str(e)}), 500
 
@@ -149,7 +167,7 @@ def upload_file():
 # DOWNLOAD HUB API
 # ════════════════════════════════════════════
 
-DOWNLOADS_FILE = "data/downloads.json"
+DOWNLOADS_FILE = os.path.join(BASE_DIR, "data", "downloads.json")
 
 def load_downloads():
     """Load all download items from JSON file."""
@@ -261,18 +279,19 @@ def api_download_categories():
 @app.route("/api/admin/upload-download-file", methods=["POST"])
 @login_required
 def upload_download_file():
-    """Upload a file for the download hub (image or file attachment)."""
+    """Upload any file to Cloudinary for the download hub."""
     try:
         key = 'file' if 'file' in request.files else ('image' if 'image' in request.files else None)
         if not key:
             return jsonify({"error": "No file in request"}), 400
         file = request.files[key]
-        os.makedirs('static/assets/uploads', exist_ok=True)
-        ext = os.path.splitext(file.filename)[1] if file.filename else ''
-        filename = str(uuid.uuid4()) + ext
-        filepath = os.path.join('static', 'assets', 'uploads', filename)
-        file.save(filepath)
-        return jsonify({"url": f"/assets/uploads/{filename}", "filename": file.filename})
+        original_name = file.filename or "upload"
+        # Images go to image folder, everything else as raw
+        ext = os.path.splitext(original_name)[1].lower()
+        is_image = ext in ('.jpg', '.jpeg', '.png', '.gif', '.webp', '.svg')
+        rtype = "image" if is_image else "raw"
+        url, fname = upload_to_cloudinary(file, resource_type=rtype, folder="sanuwar-tools/downloads")
+        return jsonify({"url": url, "filename": original_name})
     except Exception as e:
         return jsonify({"error": str(e)}), 500
 

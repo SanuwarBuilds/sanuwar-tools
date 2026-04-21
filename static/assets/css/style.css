@@ -1005,11 +1005,12 @@ button {
 }
 
 /* ============================================
-   Responsive
+   Responsive — Tablet (≤1024px)
    ============================================ */
 @media (max-width: 1024px) {
   .tools-grid {
     grid-template-columns: repeat(2, 1fr);
+    gap: 20px;
   }
 
   .footer-container {
@@ -1022,71 +1023,92 @@ button {
   }
 }
 
+/* ============================================
+   Responsive — Mobile (≤768px)
+   ============================================ */
 @media (max-width: 768px) {
+
+  /* Navbar */
   .nav-links {
     display: none;
     position: fixed;
     top: 0;
     right: 0;
-    width: 280px;
+    width: min(300px, 85vw);
     height: 100vh;
     background: var(--card-bg);
     flex-direction: column;
-    padding: 80px 32px 32px;
-    gap: 24px;
+    padding: 80px 28px 32px;
+    gap: 20px;
     box-shadow: var(--shadow-lg);
     z-index: 1000;
     border-left: 1px solid var(--card-border);
+    overflow-y: auto;
   }
 
-  .nav-links.mobile-open {
-    display: flex;
-  }
+  .nav-links.mobile-open { display: flex; }
+  .mobile-nav-overlay { display: block; }
+  .hamburger { display: flex; }
 
-  .mobile-nav-overlay {
-    display: block;
-  }
-
-  .hamburger {
-    display: flex;
+  /* Hero */
+  .hero {
+    min-height: 90vh;
+    padding: 90px 20px 48px;
   }
 
   .hero h1 {
-    font-size: 2.2rem;
+    font-size: clamp(1.8rem, 8vw, 2.6rem);
+    letter-spacing: -1px;
   }
 
   .hero p {
-    font-size: 1rem;
+    font-size: 0.97rem;
+    margin-bottom: 28px;
   }
 
   .hero-buttons {
     flex-direction: column;
+    align-items: stretch;
+    gap: 12px;
   }
 
   .hero-buttons .btn {
     width: 100%;
-    max-width: 300px;
+    justify-content: center;
+    padding: 14px 20px;
   }
 
-  .tools-grid {
-    grid-template-columns: 1fr;
-    gap: 16px;
+  /* Sections */
+  .section { padding: 52px 16px; }
+
+  .section-header {
+    margin-bottom: 32px;
   }
 
+  .section-header h2 { font-size: 1.7rem; }
+
+  /* Tools Controls */
   .tools-controls {
     flex-direction: column;
     align-items: stretch;
+    gap: 12px;
   }
 
   .filter-bar {
     overflow-x: auto;
     flex-wrap: nowrap;
-    padding-bottom: 8px;
+    padding-bottom: 6px;
+    gap: 6px;
     -webkit-overflow-scrolling: touch;
+    scrollbar-width: none;
   }
+  .filter-bar::-webkit-scrollbar { display: none; }
 
   .filter-btn {
     flex-shrink: 0;
+    padding: 8px 14px;
+    font-size: 0.82rem;
+    white-space: nowrap;
   }
 
   .search-box {
@@ -1094,53 +1116,162 @@ button {
     width: 100%;
   }
 
-  .section {
-    padding: 60px 16px;
+  /* Tools Grid — single column on mobile */
+  .tools-grid {
+    grid-template-columns: 1fr;
+    gap: 14px;
   }
 
+  /* Tool card — horizontal layout on mobile */
+  .tool-card {
+    display: flex;
+    flex-direction: row;
+    align-items: stretch;
+  }
+
+  .tool-card-thumb {
+    width: 120px;
+    min-width: 120px;
+    padding-top: 0;
+    height: auto;
+    min-height: 100px;
+    flex-shrink: 0;
+  }
+
+  .tool-card-thumb img {
+    position: static;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+  }
+
+  .tool-card-body {
+    padding: 14px 16px;
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+  }
+
+  .tool-card-name { font-size: 0.97rem; margin-bottom: 4px; }
+
+  .tool-card-desc {
+    font-size: 0.82rem;
+    -webkit-line-clamp: 2;
+    margin-bottom: 10px;
+  }
+
+  .tool-card-tags { gap: 4px; margin-bottom: 10px; }
+  .tool-tag { font-size: 0.7rem; padding: 2px 8px; }
+
+  .tool-card-actions {
+    flex-direction: row;
+    gap: 6px;
+  }
+
+  .tool-card-actions .btn {
+    flex: 1;
+    padding: 8px 8px;
+    font-size: 0.78rem;
+    min-height: 36px;
+  }
+
+  /* Download section */
   .download-section {
-    padding: 60px 16px;
+    padding: 52px 16px;
   }
 
   .download-section h2 {
-    font-size: 1.6rem;
+    font-size: 1.5rem;
   }
+
+  .download-section p {
+    font-size: 0.95rem;
+  }
+
+  .download-section .btn {
+    padding: 14px 28px;
+    font-size: 0.95rem;
+    width: 100%;
+    max-width: 300px;
+  }
+
+  /* Footer */
+  .footer { padding: 36px 16px 20px; }
 
   .footer-container {
     grid-template-columns: 1fr;
     gap: 24px;
   }
 
-  .tool-card-actions {
-    flex-direction: column;
+  .footer-social a {
+    width: 36px;
+    height: 36px;
   }
 
-  .tool-card-actions .btn {
-    width: 100%;
+  /* Widgets zone */
+  #widgets-zone > div {
+    margin: 0 -1px; /* edge to edge on mobile */
+  }
+
+  /* Modals */
+  .modal {
+    width: 96vw;
+    padding: 20px 16px;
+    max-height: 90vh;
+    border-radius: var(--radius);
   }
 }
 
+/* ============================================
+   Responsive — Small Mobile (≤480px)
+   ============================================ */
 @media (max-width: 480px) {
-  .navbar {
-    height: 60px;
-  }
+  .navbar { height: 60px; }
 
-  .nav-logo {
-    font-size: 1.2rem;
-  }
+  .nav-logo { font-size: 1.1rem; }
 
   .nav-logo .logo-icon {
-    width: 32px;
-    height: 32px;
-    font-size: 0.95rem;
+    width: 30px;
+    height: 30px;
+    font-size: 0.9rem;
   }
 
   .hero {
     min-height: 85vh;
-    padding: 80px 16px 40px;
+    padding: 80px 14px 36px;
   }
 
-  .section-header h2 {
-    font-size: 1.6rem;
+  .hero h1 {
+    font-size: clamp(1.6rem, 9vw, 2.2rem);
+  }
+
+  .hero p { font-size: 0.92rem; }
+
+  .hero-badge { font-size: 0.78rem; padding: 5px 12px; }
+
+  .section-header h2 { font-size: 1.45rem; }
+
+  /* Even smaller tool thumbnail on small phones */
+  .tool-card-thumb {
+    width: 100px;
+    min-width: 100px;
+  }
+
+  .tool-card-body { padding: 12px 12px; }
+
+  /* Buttons */
+  .btn { min-height: 44px; }
+
+  /* Footer bottom */
+  .footer-bottom { font-size: 0.78rem; }
+
+  /* Admin modals full screen on small devices */
+  .admin-modal-overlay .admin-modal {
+    width: 100vw !important;
+    max-width: 100vw !important;
+    height: 100vh;
+    border-radius: 0;
+    margin: 0;
   }
 }

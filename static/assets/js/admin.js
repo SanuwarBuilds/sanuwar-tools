@@ -45,35 +45,50 @@
   // ── Config Management ───────────────────
   async function loadConfig() {
     try {
+      // Always fetch fresh from server so deletes/edits are reflected everywhere
+      const res = await fetch(CONFIG_URL + '?t=' + Date.now());
+      if (!res.ok) throw new Error(`HTTP ${res.status}`);
+      config = await res.json();
+      localStorage.setItem(LS_CONFIG_KEY, JSON.stringify(config));
+    } catch (err) {
+      console.warn('Server fetch failed, trying localStorage:', err);
       const cached = localStorage.getItem(LS_CONFIG_KEY);
       if (cached) {
         config = JSON.parse(cached);
       } else {
-        const res = await fetch(CONFIG_URL);
-        if (!res.ok) throw new Error(`HTTP ${res.status}`);
-        config = await res.json();
+        config = {
+          site: { name: 'SanuwarTools', tagline: 'All my tools, one place.', favicon: '', defaultTheme: 'light' },
+          downloadPage: { enabled: true, url: '/downloads', buttonLabel: '⬇ Download Tools', buttonSubtext: 'Get all tools offline' },
+          tools: [],
+          categories: ['All', 'Utility', 'Downloader', 'Converter', 'Generator'],
+          socialLinks: { github: '', instagram: '', youtube: '', twitter: '' }
+        };
         saveConfig();
+        showToast('Created new config — add your tools!', 'info');
       }
-    } catch (err) {
-      console.error('Failed to load config:', err);
-      // Initialize with defaults
-      config = {
-        site: { name: 'SanuwarTools', tagline: 'All my tools, one place.', favicon: '', defaultTheme: 'light' },
-        downloadPage: { enabled: true, url: '/download.html', buttonLabel: '⬇ Download Tools', buttonSubtext: 'Get all tools offline' },
-        tools: [],
-        categories: ['All', 'Utility', 'Downloader', 'Converter', 'Generator'],
-        socialLinks: { github: '', youtube: '', twitter: '' }
-      };
-      saveConfig();
-      showToast('Created new config — add your tools!', 'info');
     }
 
     renderCurrentView();
     updateDashboardStats();
   }
 
+  // Push config to localStorage AND server
   function saveConfig() {
     localStorage.setItem(LS_CONFIG_KEY, JSON.stringify(config));
+    syncToServer();
+  }
+
+  async function syncToServer() {
+    try {
+      const res = await fetch('/api/tools.config', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(config)
+      });
+      if (!res.ok) console.warn('Server sync failed:', await res.text());
+    } catch (e) {
+      console.warn('Server sync error:', e);
+    }
   }
 
   // ── Sidebar Navigation ──────────────────
@@ -595,6 +610,7 @@
     setValue('settings-tagline', site.tagline);
     setValue('settings-favicon', site.favicon);
     setValue('settings-github', social.github);
+    setValue('settings-instagram', social.instagram);
     setValue('settings-youtube', social.youtube);
     setValue('settings-twitter', social.twitter);
   }
@@ -603,14 +619,17 @@
     const saveBtn = document.getElementById('save-settings-btn');
     if (saveBtn) {
       saveBtn.addEventListener('click', () => {
+        if (!config.site) config.site = {};
+        if (!config.socialLinks) config.socialLinks = {};
         config.site.name = getValue('settings-name');
         config.site.tagline = getValue('settings-tagline');
         config.site.favicon = getValue('settings-favicon');
         config.socialLinks.github = getValue('settings-github');
+        config.socialLinks.instagram = getValue('settings-instagram');
         config.socialLinks.youtube = getValue('settings-youtube');
         config.socialLinks.twitter = getValue('settings-twitter');
         saveConfig();
-        showToast('Site settings saved', 'success');
+        showToast('Site settings saved & synced to server ✅', 'success');
       });
     }
   }
