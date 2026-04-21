@@ -389,7 +389,8 @@ input, select, textarea {
   padding: 100px 24px 60px;
   background: var(--hero-gradient);
   position: relative;
-  overflow: hidden;
+  /* Use clip instead of hidden — avoids iOS Safari touch-event blocking */
+  overflow: clip;
 }
 
 .hero::before {
@@ -403,6 +404,7 @@ input, select, textarea {
               radial-gradient(ellipse at 70% 50%, rgba(108, 99, 255, 0.08) 0%, transparent 50%);
   animation: heroFloat 20s ease-in-out infinite;
   pointer-events: none;
+  z-index: 0;
 }
 
 @keyframes heroFloat {
@@ -1305,5 +1307,58 @@ input, select, textarea {
     height: 100vh;
     border-radius: 0;
     margin: 0;
+  }
+}
+
+/* ============================================
+   Widget — Poll button hover (CSS replaces inline JS mouse handlers)
+   ============================================ */
+.poll-opt-btn:hover,
+.poll-opt-btn:focus {
+  background: rgba(99, 102, 241, 0.2) !important;
+  border-color: rgba(99, 102, 241, 0.5) !important;
+}
+
+/* ============================================
+   Mobile Touch Fixes — iOS Safari
+   ============================================ */
+
+/* Ensure hero content is fully interactive on touch devices */
+.hero-content,
+.hero-buttons,
+.hero-buttons .btn,
+.hero-badge {
+  position: relative;
+  z-index: 1;
+  touch-action: manipulation;
+  -webkit-tap-highlight-color: transparent;
+}
+
+/* Fix touch on widget zone elements */
+#widgets-zone *,
+#widgets-zone button,
+#widgets-zone a {
+  touch-action: manipulation;
+  -webkit-tap-highlight-color: transparent;
+}
+
+/* Ensure all buttons and links respond to touch immediately */
+.btn,
+button,
+a,
+[onclick] {
+  touch-action: manipulation;
+  cursor: pointer;
+}
+
+/* Prevent tool cards from blocking touch due to transform hover */
+@media (hover: none) {
+  .tool-card:hover {
+    transform: none;
+  }
+  .btn-primary:hover,
+  .btn-secondary:hover,
+  .btn-outline:hover {
+    transform: none;
   }
 }

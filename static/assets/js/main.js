@@ -56,34 +56,54 @@
       navbar.classList.toggle('scrolled', window.scrollY > 20);
     });
 
-    // Hamburger toggle
+    // iOS Safari scroll-lock helpers (overflow:hidden alone doesn't work on iOS)
+    let _scrollY = 0;
+    function lockBodyScroll() {
+      _scrollY = window.scrollY;
+      document.body.style.position = 'fixed';
+      document.body.style.top = `-${_scrollY}px`;
+      document.body.style.width = '100%';
+      document.body.style.overflow = 'hidden';
+    }
+    function unlockBodyScroll() {
+      document.body.style.position = '';
+      document.body.style.top = '';
+      document.body.style.width = '';
+      document.body.style.overflow = '';
+      window.scrollTo(0, _scrollY);
+    }
+
+    // Hamburger toggle — both click & touchstart for instant mobile response
+    function toggleMobileNav() {
+      const isOpen = navLinks.classList.toggle('mobile-open');
+      hamburger.classList.toggle('active', isOpen);
+      overlay.classList.toggle('active', isOpen);
+      if (isOpen) lockBodyScroll(); else unlockBodyScroll();
+    }
+    function closeMobileNav() {
+      hamburger.classList.remove('active');
+      navLinks.classList.remove('mobile-open');
+      overlay.classList.remove('active');
+      unlockBodyScroll();
+    }
+
     if (hamburger) {
-      hamburger.addEventListener('click', () => {
-        hamburger.classList.toggle('active');
-        navLinks.classList.toggle('mobile-open');
-        overlay.classList.toggle('active');
-        document.body.style.overflow = navLinks.classList.contains('mobile-open') ? 'hidden' : '';
-      });
+      hamburger.addEventListener('click', toggleMobileNav);
     }
 
     // Overlay close
     if (overlay) {
-      overlay.addEventListener('click', () => {
-        hamburger.classList.remove('active');
-        navLinks.classList.remove('mobile-open');
-        overlay.classList.remove('active');
-        document.body.style.overflow = '';
-      });
+      overlay.addEventListener('click', closeMobileNav);
+      // touchstart for instant response on iOS
+      overlay.addEventListener('touchstart', (e) => {
+        e.preventDefault();
+        closeMobileNav();
+      }, { passive: false });
     }
 
     // Close mobile nav on link click
     document.querySelectorAll('.nav-links a').forEach(link => {
-      link.addEventListener('click', () => {
-        hamburger?.classList.remove('active');
-        navLinks?.classList.remove('mobile-open');
-        overlay?.classList.remove('active');
-        document.body.style.overflow = '';
-      });
+      link.addEventListener('click', closeMobileNav);
     });
 
     // Three-dot menu
