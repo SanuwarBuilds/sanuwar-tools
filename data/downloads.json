@@ -1,17 +1,5 @@
 [
   {
-    "id": "item_1079aba8",
-    "title": "netflix",
-    "description": "",
-    "category": "apps",
-    "image": "/assets/uploads/e0f63718-5dc4-4f72-9ac0-3d66f2fa44c5.JPG",
-    "link": "/assets/uploads/31aed325-90b7-4bc9-b489-93ef67e64c57.apk",
-    "version": "",
-    "is_album": false,
-    "album_files": [],
-    "is_new": true
-  },
-  {
     "id": "app_611fea08",
     "title": "Marriage event (Dulena)",
     "description": "4 items in this album.",
