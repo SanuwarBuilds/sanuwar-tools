@@ -3,6 +3,7 @@ import os
 import uuid
 import bcrypt
 import tempfile
+import base64
 
 try:
     import fcntl
@@ -15,6 +16,33 @@ if os.environ.get("VERCEL"):
 else:
     CONFIG_FILE = os.path.join("data", "config.json")
     DEFAULT_CONFIG_FILE = None
+
+def github_push_config(content_str):
+    """Push config.json to GitHub so changes survive Vercel cold restarts."""
+    try:
+        import requests as req
+        token = os.getenv("GITHUB_PAT", "")
+        user  = os.getenv("GITHUB_USER", "")
+        repo  = os.getenv("GITHUB_REPO", "sanuwar-tools")
+        if not token or not user:
+            return
+        file_rel_path = "data/config.json"
+        api = f"https://api.github.com/repos/{user}/{repo}/contents/{file_rel_path}"
+        headers = {"Authorization": f"token {token}", "Accept": "application/vnd.github.v3+json"}
+        # Get current SHA (required for update)
+        r = req.get(api, headers=headers, timeout=8)
+        sha = r.json().get("sha", "") if r.ok else ""
+        payload = {
+            "message": "auto: update config.json",
+            "content": base64.b64encode(content_str.encode()).decode()
+        }
+        if sha:
+            payload["sha"] = sha
+        resp = req.put(api, json=payload, headers=headers, timeout=10)
+        if not resp.ok:
+            print(f"GitHub push failed: {resp.status_code} {resp.text[:200]}")
+    except Exception as e:
+        print(f"GitHub push warning: {e}")
 
 def lock_file(f, exclusive=True):
     if fcntl:
@@ -63,11 +91,13 @@ def save_config(config_data):
     if dir_name:
         os.makedirs(dir_name, exist_ok=True)
     
+    content_str = json.dumps(config_data, indent=2)
+    
     fd, temp_path = tempfile.mkstemp(dir=dir_name)
     try:
         with os.fdopen(fd, "w") as f:
             lock_file(f, exclusive=True)
-            json.dump(config_data, f, indent=2)
+            f.write(content_str)
             f.flush()
             os.fsync(f.fileno())
             unlock_file(f)
@@ -76,6 +106,9 @@ def save_config(config_data):
         print(f"Error saving config: {e}")
         if os.path.exists(temp_path):
             os.remove(temp_path)
+
+    # Push to GitHub so changes persist across Vercel cold restarts
+    github_push_config(content_str)
 
 def check_password(password, hashed):
     return bcrypt.checkpw(password.encode('utf-8'), hashed.encode('utf-8'))
