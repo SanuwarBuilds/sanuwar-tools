@@ -370,11 +370,13 @@ input, select, textarea {
   background: var(--overlay);
   z-index: 999;
   opacity: 0;
+  pointer-events: none;
   transition: opacity var(--transition);
 }
 
 .mobile-nav-overlay.active {
   opacity: 1;
+  pointer-events: auto;
 }
 
 /* ============================================
