@@ -20,15 +20,18 @@ cloudinary.config(
 )
 
 def upload_to_cloudinary(file_storage, resource_type="auto", folder="sanuwar-tools"):
-    """Upload a FileStorage object to Cloudinary and return the secure URL."""
+    """Upload a Flask FileStorage to Cloudinary. Returns (url, filename)."""
+    # Use .stream so Flask FileStorage is read correctly by Cloudinary SDK
     result = cloudinary.uploader.upload(
-        file_storage,
+        file_storage.stream,
         folder=folder,
         resource_type=resource_type,
         use_filename=True,
-        unique_filename=True
+        unique_filename=True,
+        overwrite=False
     )
-    return result.get("secure_url", ""), result.get("original_filename", file_storage.filename or "file")
+    return result.get("secure_url", ""), (file_storage.filename or "file")
+
 app.secret_key = "SANUWAR_TOOLS_SECRET"
 
 def login_required(f):
@@ -77,28 +80,83 @@ def admin_logout():
     return redirect(url_for("admin_login"))
 
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))
-TOOLS_CONFIG_PATH = os.path.join(BASE_DIR, "data", "tools.config.json")
+IS_VERCEL = bool(os.environ.get("VERCEL"))
+
+# On Vercel filesystem is read-only EXCEPT /tmp — copy files there on first use
+def get_writable_path(relative_data_path):
+    """Returns a writable path. On Vercel uses /tmp, locally uses data/."""
+    src = os.path.join(BASE_DIR, relative_data_path)
+    if IS_VERCEL:
+        dst = os.path.join("/tmp", os.path.basename(relative_data_path))
+        if not os.path.exists(dst) and os.path.exists(src):
+            import shutil
+            shutil.copy2(src, dst)
+        return dst
+    return src
+
+def github_push(file_rel_path, content_str):
+    """Push a file update to GitHub so changes persist across Vercel deployments."""
+    try:
+        import base64, requests as req
+        token = os.getenv("GITHUB_PAT", "")
+        user  = os.getenv("GITHUB_USER", "")
+        repo  = os.getenv("GITHUB_REPO", "sanuwar-tools")
+        if not token or not user:
+            return
+        api = f"https://api.github.com/repos/{user}/{repo}/contents/{file_rel_path}"
+        headers = {"Authorization": f"token {token}", "Accept": "application/vnd.github.v3+json"}
+        # Get current SHA
+        r = req.get(api, headers=headers, timeout=8)
+        sha = r.json().get("sha", "") if r.ok else ""
+        payload = {"message": f"auto: update {file_rel_path}",
+                   "content": base64.b64encode(content_str.encode()).decode()}
+        if sha:
+            payload["sha"] = sha
+        req.put(api, json=payload, headers=headers, timeout=10)
+    except Exception as e:
+        print(f"GitHub push warning: {e}")
+
+def safe_read(rel_path):
+    path = get_writable_path(rel_path)
+    try:
+        with open(path, "r") as f:
+            return json.load(f)
+    except FileNotFoundError:
+        return None
+    except Exception as e:
+        print(f"Read error {path}: {e}")
+        return None
+
+def safe_write(rel_path, data):
+    path = get_writable_path(rel_path)
+    content_str = json.dumps(data, indent=2)
+    try:
+        os.makedirs(os.path.dirname(path), exist_ok=True)
+        with open(path, "w") as f:
+            f.write(content_str)
+    except Exception as e:
+        print(f"Write error {path}: {e}")
+    # Always push to GitHub so it persists on Vercel across cold starts
+    github_push(rel_path, content_str)
+
+TOOLS_CONFIG_REL = "data/tools.config.json"
+DOWNLOADS_REL    = "data/downloads.json"
 
 @app.route("/tools.config.json")
 def serve_config():
-    try:
-        with open(TOOLS_CONFIG_PATH, "r") as f:
-            data = json.load(f)
-        return jsonify(data)
-    except FileNotFoundError:
-        # Return empty valid config so frontend doesn't break
-        return jsonify({"tools": [], "categories": ["All"], "site": {}, "socialLinks": {}, "widgets": []})
-    except Exception as e:
-        return jsonify({"error": str(e)}), 500
+    data = safe_read(TOOLS_CONFIG_REL)
+    if data is None:
+        data = {"tools": [], "categories": ["All"], "site": {}, "socialLinks": {}, "widgets": []}
+    return jsonify(data)
 
 @app.route("/api/tools.config", methods=["POST"])
 @login_required
 def update_config():
     try:
         data = request.json
-        os.makedirs(os.path.dirname(TOOLS_CONFIG_PATH), exist_ok=True)
-        with open(TOOLS_CONFIG_PATH, "w") as f:
-            json.dump(data, f, indent=2)
+        if not data:
+            return jsonify({"error": "no data"}), 400
+        safe_write(TOOLS_CONFIG_REL, data)
         return jsonify({"success": True})
     except Exception as e:
         return jsonify({"error": str(e)}), 500
@@ -167,24 +225,14 @@ def upload_file():
 # DOWNLOAD HUB API
 # ════════════════════════════════════════════
 
-DOWNLOADS_FILE = os.path.join(BASE_DIR, "data", "downloads.json")
+DOWNLOADS_FILE = get_writable_path(DOWNLOADS_REL)
 
 def load_downloads():
-    """Load all download items from JSON file."""
-    if not os.path.exists(DOWNLOADS_FILE):
-        return []
-    try:
-        with open(DOWNLOADS_FILE, "r") as f:
-            data = json.load(f)
-        return data if isinstance(data, list) else []
-    except Exception:
-        return []
+    data = safe_read(DOWNLOADS_REL)
+    return data if isinstance(data, list) else []
 
 def save_downloads(items):
-    """Persist download items list to JSON file."""
-    os.makedirs("data", exist_ok=True)
-    with open(DOWNLOADS_FILE, "w") as f:
-        json.dump(items, f, indent=2)
+    safe_write(DOWNLOADS_REL, items)
 
 @app.route("/api/downloads_data")
 def api_downloads_data():
