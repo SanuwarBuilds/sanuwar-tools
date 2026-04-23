@@ -43,9 +43,9 @@
 
   // ── Navbar ──────────────────────────────
   function initNavbar() {
-    const navbar = document.querySelector('.navbar');
+    const navbar = document.querySelector('.topbar') || document.querySelector('.navbar');
     const hamburger = document.querySelector('.hamburger');
-    const navLinks = document.querySelector('.nav-links');
+    const navLinks = document.querySelector('.topbar-nav') || document.querySelector('.nav-links');
     const overlay = document.querySelector('.mobile-nav-overlay');
     const menuBtn = document.getElementById('nav-menu-btn');
     const dropdown = document.getElementById('nav-dropdown');
@@ -102,7 +102,7 @@
     }
 
     // Close mobile nav on link click
-    document.querySelectorAll('.nav-links a').forEach(link => {
+    document.querySelectorAll('.topbar-nav a, .nav-links a').forEach(link => {
       link.addEventListener('click', closeMobileNav);
     });
 

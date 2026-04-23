@@ -9,35 +9,35 @@
   <meta name="theme-color" content="#6C63FF">
   <title>SanuwarTools — All My Tools, One Place</title>
   <link rel="stylesheet" href="/assets/css/style.css">
-  <!-- Prevent theme flash -->
   <script>
     (function() {
-      const t = localStorage.getItem('sanuwartools-theme');
-      if (t) document.documentElement.setAttribute('data-theme', t);
+      document.documentElement.removeAttribute('data-theme');
+      localStorage.setItem('sanuwartools-theme', 'light');
     })();
   </script>
-
 </head>
 <body>
 
-  <!-- ═══════ NAVBAR ═══════ -->
-  <nav class="navbar" id="navbar">
-    <div class="nav-container">
-      <a href="/" class="nav-logo">
-        <span class="logo-icon">S</span>
-        SanuwarTools
+  <!-- ═══════ TOP BAR ═══════ -->
+  <nav class="topbar" id="navbar">
+    <div class="topbar-inner">
+      <a href="/" class="topbar-logo" id="nav-logo">
+        <div class="logo-mark">S</div>
+        <span>SanuwarTools</span>
       </a>
 
-      <ul class="nav-links" id="nav-links">
+      <ul class="topbar-nav" id="nav-links">
         <li><a href="#hero" class="active">Home</a></li>
         <li><a href="#tools-section">Tools</a></li>
         <li><a href="/downloads">Downloads</a></li>
         <li><a href="#footer">About</a></li>
       </ul>
 
-      <div style="display: flex; align-items: center; gap: 8px;">
-        <div style="position: relative;">
-          <button class="nav-menu-btn" id="nav-menu-btn" aria-label="Menu">⋮</button>
+      <div class="topbar-actions">
+        <div class="topbar-menu-wrap">
+          <button class="topbar-dots" id="nav-menu-btn" aria-label="Menu">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="5" r="1.5"/><circle cx="12" cy="12" r="1.5"/><circle cx="12" cy="19" r="1.5"/></svg>
+          </button>
           <div class="nav-dropdown" id="nav-dropdown">
             <button class="nav-dropdown-item" id="theme-toggle-btn">
               🌙 <span>Switch to Dark Theme</span>
@@ -45,9 +45,7 @@
           </div>
         </div>
         <button class="hamburger" id="hamburger" aria-label="Toggle menu">
-          <span></span>
-          <span></span>
-          <span></span>
+          <span></span><span></span><span></span>
         </button>
       </div>
     </div>
@@ -55,42 +53,94 @@
 
   <div class="mobile-nav-overlay" id="mobile-nav-overlay"></div>
 
-  <!-- ═══════ HERO SECTION ═══════ -->
-  <section class="hero" id="hero">
-    <div class="hero-content">
-      <div class="hero-badge">🚀 Open Source & Free</div>
-      <h1>All My Tools.<br><span class="gradient-text">One Place.</span></h1>
-      <p>Discover a curated collection of free web tools, utilities, and apps — built by Sanuwar. Browse, use online, or download for offline access.</p>
-      <div class="hero-buttons">
-        <a href="/downloads" class="btn btn-primary" id="hero-download-btn">⬇ Download Hub</a>
-        <a href="#tools-section" class="btn btn-secondary" id="hero-browse-btn">Browse Tools ↓</a>
+  <!-- ═══════ HERO — FULL IMPACT ═══════ -->
+  <section class="hero-section" id="hero">
+    <!-- Animated mesh background -->
+    <div class="mesh-bg">
+      <div class="mesh-blob blob-a"></div>
+      <div class="mesh-blob blob-b"></div>
+      <div class="mesh-blob blob-c"></div>
+    </div>
+    <!-- Grid pattern overlay -->
+    <div class="grid-overlay"></div>
+
+    <div class="hero-inner">
+      <div class="hero-chip">
+        <span class="chip-pulse"></span>
+        Free & Powerful Tools
+      </div>
+
+      <h1 class="hero-title">
+        All Your Tools
+        <br>
+        <span class="hero-highlight">In One Place</span>
+      </h1>
+
+      <p class="hero-desc">
+        A handcrafted suite of web tools, utilities & apps — designed to simplify your workflow. Built with care by Sanuwar.
+      </p>
+
+      <div class="hero-cta">
+        <a href="#tools-section" class="cta-primary" id="hero-browse-btn">
+          <span>Explore Tools</span>
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/></svg>
+        </a>
+        <a href="/downloads" class="cta-ghost" id="hero-download-btn">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+          <span>Downloads</span>
+        </a>
+      </div>
+    </div>
+
+    <!-- Floating bento preview cards -->
+    <div class="hero-showcase">
+      <div class="bento-grid">
+        <div class="bento-card bento-lg" id="bento-stat-tools">
+          <div class="bento-icon">🛠️</div>
+          <div class="bento-number" id="stat-tools">—</div>
+          <div class="bento-label">Tools Available</div>
+        </div>
+        <div class="bento-card bento-sm">
+          <div class="bento-icon">⚡</div>
+          <div class="bento-number">Fast</div>
+          <div class="bento-label">&amp; Reliable</div>
+        </div>
+        <div class="bento-card bento-sm bento-accent">
+          <div class="bento-icon">💎</div>
+          <div class="bento-number">Free</div>
+          <div class="bento-label">Forever</div>
+        </div>
       </div>
     </div>
   </section>
+
   <!-- ===== HOME SCREEN WIDGET ZONE ===== -->
   <div id="widgets-zone"></div>
   <canvas id="fireworks-canvas" style="display:none;position:fixed;inset:0;pointer-events:none;z-index:999;width:100%;height:100%;"></canvas>
 
   <!-- ═══════ TOOLS SECTION ═══════ -->
-  <section class="section" id="tools-section" style="background: var(--bg-secondary);">
-    <div class="section-container">
-      <div class="section-header reveal">
-        <h2>My Tools & Sites</h2>
-        <p>Browse all available tools — filter by category or search by name.</p>
+  <section class="tools-section" id="tools-section">
+    <div class="container">
+      <div class="section-head reveal">
+        <div class="section-label">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>
+          Explore
+        </div>
+        <h2>My Tools &amp; Sites</h2>
+        <p>Browse all available tools — filter by category or search.</p>
       </div>
 
       <div class="tools-controls reveal">
         <div class="filter-bar" id="filter-bar">
           <!-- Populated by JS -->
         </div>
-        <div class="search-box">
-          <span class="search-icon">🔍</span>
+        <div class="search-wrap">
+          <svg class="search-ico" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
           <input type="text" id="search-input" placeholder="Search tools..." autocomplete="off">
         </div>
       </div>
 
       <div class="tools-grid stagger-children" id="tools-grid">
-        <!-- Populated by JS -->
         <div class="tool-card skeleton" style="height: 380px;"></div>
         <div class="tool-card skeleton" style="height: 380px;"></div>
         <div class="tool-card skeleton" style="height: 380px;"></div>
@@ -98,43 +148,58 @@
     </div>
   </section>
 
-  <!-- ═══════ DOWNLOAD SECTION ═══════ -->
-  <section class="download-section" id="download-section">
-    <div class="section-container">
-      <h2>Download Hub</h2>
-      <p>Get apps, albums, photos and files — all in one place. One click download.</p>
-      <a href="/downloads" class="btn" id="download-page-btn">Go to Download Hub →</a>
+  <!-- ═══════ DOWNLOAD CTA ═══════ -->
+  <section class="download-cta" id="download-section">
+    <div class="container">
+      <div class="dl-card reveal">
+        <div class="dl-content">
+          <div class="dl-icon-row">
+            <span class="dl-float-icon">📱</span>
+            <span class="dl-float-icon">🖼️</span>
+            <span class="dl-float-icon">📁</span>
+          </div>
+          <h2>Download Hub</h2>
+          <p>Apps, albums, photos, files — everything available for one-click download.</p>
+          <a href="/downloads" class="cta-primary cta-white" id="download-page-btn">
+            <span>Open Download Hub</span>
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/></svg>
+          </a>
+        </div>
+      </div>
     </div>
   </section>
 
   <!-- ═══════ FOOTER ═══════ -->
-  <footer class="footer" id="footer">
-    <div class="footer-container">
-      <div class="footer-brand">
-        <h3>SanuwarTools</h3>
-        <p>All my tools, one place. Free, open-source web tools and utilities built for everyone.</p>
-        <div class="footer-social" id="footer-social">
-          <!-- Populated by JS from config -->
+  <footer class="site-footer" id="footer">
+    <div class="container">
+      <div class="footer-grid">
+        <div class="footer-about">
+          <div class="footer-logo-row">
+            <div class="logo-mark">S</div>
+            <h3>SanuwarTools</h3>
+          </div>
+          <p>Free web tools and utilities built for everyone. All in one place.</p>
+          <div class="footer-social" id="footer-social"></div>
+        </div>
+        <div class="footer-col">
+          <h4>Quick Links</h4>
+          <ul>
+            <li><a href="#hero">Home</a></li>
+            <li><a href="#tools-section">Tools</a></li>
+            <li><a href="/downloads">Downloads</a></li>
+          </ul>
+        </div>
+        <div class="footer-col">
+          <h4>More</h4>
+          <ul>
+            <li><a href="/admin/">Admin Panel</a></li>
+            <li><a href="#footer">About</a></li>
+          </ul>
         </div>
       </div>
-      <div class="footer-links">
-        <h4>Quick Links</h4>
-        <ul>
-          <li><a href="#hero">Home</a></li>
-          <li><a href="#tools-section">Tools</a></li>
-          <li><a href="/downloads">Downloads</a></li>
-        </ul>
+      <div class="footer-bottom-bar">
+        <p>Built with ❤️ by <strong>Sanuwar</strong> &middot; &copy; 2025</p>
       </div>
-      <div class="footer-links">
-        <h4>More</h4>
-        <ul>
-          <li><a href="/admin/">Admin Panel</a></li>
-          <li><a href="#footer">About</a></li>
-        </ul>
-      </div>
-    </div>
-    <div class="footer-bottom">
-      <p>Built with ❤️ by <strong>Sanuwar</strong> &middot; &copy; 2025</p>
     </div>
   </footer>
 
@@ -144,7 +209,7 @@
       <button class="modal-close" id="tool-modal-close">&times;</button>
       <h3 id="modal-tool-name"></h3>
       <p id="modal-tool-desc"></p>
-      <a href="#" id="modal-tool-link" target="_blank" rel="noopener noreferrer" class="btn btn-primary">🌐 Visit Site</a>
+      <a href="#" id="modal-tool-link" target="_blank" rel="noopener noreferrer" class="cta-primary">🌐 Visit Site</a>
     </div>
   </div>
 
@@ -152,7 +217,7 @@
 
   <script>
 // ============================================================
-//  HOME SCREEN WIDGET RENDERER
+//  HOME SCREEN WIDGET RENDERER (preserved)
 // ============================================================
 (async function initWidgets() {
   try {
@@ -161,12 +226,9 @@
     const widgets = await res.json();
     const zone = document.getElementById('widgets-zone');
     if (!widgets.length) { zone.innerHTML = ''; return; }
-
     let html = '';
     for (const w of widgets) { html += renderWidget(w); }
     zone.innerHTML = html;
-
-    // Post-render setup
     widgets.forEach(w => {
       if (w.type === 'winner' && w.data.fireworks) {
         startFireworks(w.data.fireworks_text, {
@@ -182,7 +244,6 @@
   } catch(e) { console.warn('Widget load failed', e); }
 })();
 
-// ---- Render dispatcher ----
 function renderWidget(w) {
   switch(w.type) {
     case 'notice':      return renderNotice(w);
@@ -199,269 +260,63 @@ function renderWidget(w) {
   }
 }
 
-// ---- 1. NOTICE ----
 function renderNotice(w) {
   const d = w.data;
   const styles = {
-    info:    { bg:'rgba(59,130,246,0.15)', border:'#3b82f6', icon:'\u2139\ufe0f', text:'#93c5fd' },
-    warning: { bg:'rgba(234,179,8,0.15)',  border:'#eab308', icon:'\u26a0\ufe0f', text:'#fde047' },
-    success: { bg:'rgba(34,197,94,0.15)',  border:'#22c55e', icon:'\u2705', text:'#86efac' },
-    danger:  { bg:'rgba(239,68,68,0.15)',  border:'#ef4444', icon:'\ud83d\udea8', text:'#fca5a5' },
+    info:    { bg:'#eff6ff', border:'#3b82f6', icon:'\u2139\ufe0f', text:'#1d4ed8' },
+    warning: { bg:'#fffbeb', border:'#f59e0b', icon:'\u26a0\ufe0f', text:'#b45309' },
+    success: { bg:'#f0fdf4', border:'#22c55e', icon:'\u2705', text:'#16a34a' },
+    danger:  { bg:'#fef2f2', border:'#ef4444', icon:'\ud83d\udea8', text:'#dc2626' },
   };
   const s = styles[d.style] || styles.info;
-  return `<div style="background:${s.bg};border-left:4px solid ${s.border};padding:14px 20px;margin:0;position:relative;">
-    <div style="max-width:900px;margin:0 auto;display:flex;gap:12px;align-items:flex-start;">
-      <span style="font-size:20px;flex-shrink:0;">${s.icon}</span>
-      <div>
-        ${d.title ? `<div style="font-weight:700;color:${s.text};font-size:15px;margin-bottom:2px;">${d.title}</div>` : ''}
-        <div style="color:#d1d5db;font-size:13px;line-height:1.5;">${d.message}</div>
-      </div>
-    </div>
-  </div>`;
+  return `<div style="background:${s.bg};border-left:4px solid ${s.border};padding:14px 20px;"><div style="max-width:900px;margin:0 auto;display:flex;gap:12px;align-items:flex-start;"><span style="font-size:20px;">${s.icon}</span><div>${d.title?`<div style="font-weight:700;color:${s.text};font-size:15px;margin-bottom:2px;">${d.title}</div>`:''}<div style="color:#4b5563;font-size:13px;line-height:1.5;">${d.message}</div></div></div></div>`;
 }
 
-// ---- 2. POLL ----
 function renderPoll(w) {
-  const d = w.data;
-  const voted = localStorage.getItem('voted_' + w.id);
-  const total = (d.options||[]).reduce((s,o)=>s+(o.votes||0),0);
-
+  const d = w.data, voted = localStorage.getItem('voted_'+w.id), total = (d.options||[]).reduce((s,o)=>s+(o.votes||0),0);
   if (voted) {
-    const bars = (d.options||[]).map(o => {
-      const pct = total ? Math.round((o.votes/total)*100) : 0;
-      const isWinner = o.votes === Math.max(...d.options.map(x=>x.votes)) && total > 0;
-      return `<div style="margin-bottom:10px;">
-        <div style="display:flex;justify-content:space-between;font-size:13px;margin-bottom:4px;">
-          <span style="color:${isWinner?'#fbbf24':'#d1d5db'};font-weight:${isWinner?700:400};">${isWinner?'\ud83e\udd47 ':''}${o.text}</span>
-          <span style="color:#9ca3af;">${o.votes} votes (${pct}%)</span>
-        </div>
-        <div style="background:rgba(255,255,255,0.08);border-radius:99px;height:8px;overflow:hidden;">
-          <div style="height:100%;border-radius:99px;background:${isWinner?'linear-gradient(90deg,#f59e0b,#fbbf24)':'linear-gradient(90deg,#6366f1,#818cf8)'};width:${pct}%;transition:width 0.8s ease;"></div>
-        </div>
-      </div>`;
-    }).join('');
-    return `<div style="background:rgba(99,102,241,0.09);border-top:3px solid #6366f1;border-bottom:1px solid rgba(99,102,241,0.3);padding:20px 24px;">
-      <div style="max-width:700px;margin:0 auto;">
-        <div style="font-size:11px;color:#818cf8;font-weight:600;text-transform:uppercase;letter-spacing:.06em;margin-bottom:6px;">\ud83d\uddfd Poll Results \u2022 ${total} votes</div>
-        <div style="font-size:16px;font-weight:700;color:#e2e8f0;margin-bottom:14px;">${d.question}</div>
-        ${bars}
-        <div style="font-size:11px;color:#6b7280;margin-top:8px;">\u2713 You have already voted</div>
-      </div>
-    </div>`;
+    const bars = (d.options||[]).map(o => { const pct = total?Math.round((o.votes/total)*100):0; const win = o.votes===Math.max(...d.options.map(x=>x.votes))&&total>0; return `<div style="margin-bottom:10px;"><div style="display:flex;justify-content:space-between;font-size:13px;margin-bottom:4px;"><span style="color:${win?'#b45309':'#374151'};font-weight:${win?700:400};">${win?'🥇 ':''}${o.text}</span><span style="color:#6b7280;">${o.votes} (${pct}%)</span></div><div style="background:#e5e7eb;border-radius:99px;height:8px;overflow:hidden;"><div style="height:100%;border-radius:99px;background:${win?'linear-gradient(90deg,#f59e0b,#fbbf24)':'linear-gradient(90deg,#6366f1,#818cf8)'};width:${pct}%;transition:width .8s;"></div></div></div>`; }).join('');
+    return `<div style="background:#f5f3ff;border-top:3px solid #6366f1;padding:20px 24px;"><div style="max-width:700px;margin:0 auto;"><div style="font-size:11px;color:#6366f1;font-weight:600;text-transform:uppercase;letter-spacing:.06em;margin-bottom:6px;">🗽 Poll Results • ${total} votes</div><div style="font-size:16px;font-weight:700;color:#1e293b;margin-bottom:14px;">${d.question}</div>${bars}<div style="font-size:11px;color:#9ca3af;margin-top:8px;">✓ You have already voted</div></div></div>`;
   }
-
-  const opts = (d.options||[]).map(o =>
-    `<button onclick="castVote('${w.id}','${o.id}',this)" class="poll-opt-btn" style="display:block;width:100%;text-align:left;background:rgba(255,255,255,0.05);border:1px solid rgba(255,255,255,0.1);border-radius:10px;padding:11px 16px;color:#e2e8f0;cursor:pointer;font-size:14px;margin-bottom:8px;transition:all 0.2s;">${o.text}</button>`
-  ).join('');
-  return `<div style="background:rgba(99,102,241,0.09);border-top:3px solid #6366f1;border-bottom:1px solid rgba(99,102,241,0.3);padding:20px 24px;">
-    <div style="max-width:700px;margin:0 auto;">
-      <div style="font-size:11px;color:#818cf8;font-weight:600;text-transform:uppercase;letter-spacing:.06em;margin-bottom:6px;">\ud83d\uddfd Vote Now</div>
-      <div style="font-size:16px;font-weight:700;color:#e2e8f0;margin-bottom:14px;">${d.question}</div>
-      <div id="poll-opts-${w.id}">${opts}</div>
-    </div>
-  </div>`;
+  const opts = (d.options||[]).map(o=>`<button onclick="castVote('${w.id}','${o.id}',this)" class="poll-opt-btn" style="display:block;width:100%;text-align:left;background:#fff;border:1px solid #e5e7eb;border-radius:10px;padding:11px 16px;color:#1e293b;cursor:pointer;font-size:14px;margin-bottom:8px;transition:all .2s;">${o.text}</button>`).join('');
+  return `<div style="background:#f5f3ff;border-top:3px solid #6366f1;padding:20px 24px;"><div style="max-width:700px;margin:0 auto;"><div style="font-size:11px;color:#6366f1;font-weight:600;text-transform:uppercase;letter-spacing:.06em;margin-bottom:6px;">🗽 Vote Now</div><div style="font-size:16px;font-weight:700;color:#1e293b;margin-bottom:14px;">${d.question}</div><div id="poll-opts-${w.id}">${opts}</div></div></div>`;
 }
+async function castVote(wid, oid, btn) { btn.disabled=true; btn.textContent='Voting...'; try { const r=await fetch(`/api/widgets/${wid}/vote`,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({option_id:oid})}); if(r.status===403){localStorage.setItem('voted_'+wid,'1');location.reload();return;} const d=await r.json(); if(d.success){localStorage.setItem('voted_'+wid,'1');location.reload();}else{btn.disabled=false;btn.textContent='Vote';} }catch(e){btn.disabled=false;btn.textContent='Vote';} }
 
-async function castVote(widgetId, optionId, btn) {
-  btn.disabled = true; btn.textContent = 'Voting...';
-  try {
-    const res = await fetch(`/api/widgets/${widgetId}/vote`, {
-      method:'POST', headers:{'Content-Type':'application/json'},
-      body: JSON.stringify({option_id: optionId})
-    });
-    if (res.status === 403) { localStorage.setItem('voted_'+widgetId,'1'); location.reload(); return; }
-    const data = await res.json();
-    if (data.success) { localStorage.setItem('voted_'+widgetId,'1'); location.reload(); }
-    else { btn.disabled=false; btn.textContent='Vote'; }
-  } catch(e) { btn.disabled=false; btn.textContent='Vote'; }
-}
+function renderWinner(w) { const d=w.data,ph=(d.photo_url||'').trim(),wp=ph?`<img src="${ph}" alt="" style="width:80px;height:80px;border-radius:50%;object-fit:cover;border:3px solid #f59e0b;margin:0 auto 10px;display:block;" onerror="this.style.display='none'">`:''; return `<div style="background:linear-gradient(135deg,#fffbeb,#fef3c7);border-top:3px solid #f59e0b;padding:24px 20px;text-align:center;" id="winner-banner-${w.id}"><div style="font-size:40px;margin-bottom:8px;animation:bounce-winner 1s infinite alternate;">🏆</div>${wp}<div style="font-size:11px;color:#b45309;font-weight:600;text-transform:uppercase;letter-spacing:.1em;margin-bottom:4px;">Congratulations!</div><div style="font-size:clamp(20px,5vw,30px);font-weight:900;background:linear-gradient(90deg,#f59e0b,#d97706);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;margin-bottom:4px;">${d.winner_name}</div>${d.event_name?`<div style="color:#92400e;font-size:14px;font-weight:600;margin-bottom:8px;">${d.event_name}</div>`:''}${d.message?`<div style="color:#4b5563;font-size:13px;max-width:500px;margin:0 auto;">${d.message}</div>`:''}</div><style>@keyframes bounce-winner{from{transform:scale(1)}to{transform:scale(1.2) rotate(5deg)}}</style>`; }
 
-// ---- 3. WINNER CELEBRATION ----
-function renderWinner(w) {
-  const d = w.data;
-  const photoUrl = (d.photo_url || '').trim();
-  const winnerPhoto = photoUrl
-    ? `<img src="${photoUrl}" alt="" style="width:80px;height:80px;border-radius:50%;object-fit:cover;border:3px solid #f59e0b;margin:0 auto 10px;display:block;" onerror="this.style.display='none'">`
-    : '';
-  return `<div style="background:linear-gradient(135deg,#1e1010,#3b1a0a,#1e1010);border-top:3px solid #f59e0b;border-bottom:1px solid rgba(245,158,11,0.3);padding:24px 20px;text-align:center;" id="winner-banner-${w.id}">
-    <div style="font-size:40px;margin-bottom:8px;animation:bounce-winner 1s infinite alternate;">${'\ud83c\udfc6'}</div>
-    ${winnerPhoto}
-    <div style="font-size:11px;color:#fbbf24;font-weight:600;text-transform:uppercase;letter-spacing:.1em;margin-bottom:4px;">Congratulations!</div>
-    <div style="font-size:clamp(20px,5vw,30px);font-weight:900;background:linear-gradient(90deg,#fde68a,#f59e0b,#fde68a);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;margin-bottom:4px;">${d.winner_name}</div>
-    ${d.event_name ? `<div style="color:#d97706;font-size:14px;font-weight:600;margin-bottom:8px;">${d.event_name}</div>` : ''}
-    ${d.message ? `<div style="color:#d1d5db;font-size:13px;max-width:500px;margin:0 auto;">${d.message}</div>` : ''}
-  </div>
-  <style>@keyframes bounce-winner{from{transform:scale(1)}to{transform:scale(1.2) rotate(5deg)}}</style>`;
-}
+function renderPersonCard(w) { const d=w.data,ph=(d.photo_url||'').trim(),pi=ph?`<img src="${ph}" alt="" style="width:72px;height:72px;border-radius:50%;object-fit:cover;border:2px solid #6366f1;" onerror="this.style.display='none'">`:`<div style="width:72px;height:72px;border-radius:50%;background:linear-gradient(135deg,#6366f1,#a78bfa);display:flex;align-items:center;justify-content:center;font-size:28px;">👤</div>`; return `<div style="background:#f8fafc;border-bottom:1px solid #e5e7eb;padding:16px 20px;"><div style="max-width:700px;margin:0 auto;display:flex;gap:16px;align-items:center;">${pi}<div><div style="font-size:17px;font-weight:700;color:#0f172a;">${d.name}</div>${d.role?`<div style="font-size:13px;color:#6366f1;font-weight:500;">${d.role}</div>`:''}${d.bio?`<div style="font-size:12px;color:#64748b;line-height:1.5;margin-top:4px;">${d.bio}</div>`:''}</div></div></div>`; }
 
-// ---- 4. PERSON CARD ----
-function renderPersonCard(w) {
-  const d = w.data;
-  const photoUrl = (d.photo_url || '').trim();
-  const photoHtml = photoUrl
-    ? `<img src="${photoUrl}" alt="" style="width:72px;height:72px;border-radius:50%;object-fit:cover;border:2px solid #6366f1;flex-shrink:0;" onerror="this.style.display='none'">`
-    : `<div style="width:72px;height:72px;border-radius:50%;background:linear-gradient(135deg,#6366f1,#a78bfa);display:flex;align-items:center;justify-content:center;font-size:28px;flex-shrink:0;">\ud83d\udc64</div>`;
-  return `<div style="background:rgba(30,41,59,0.7);border-bottom:1px solid rgba(255,255,255,0.07);padding:16px 20px;">
-    <div style="max-width:700px;margin:0 auto;display:flex;gap:16px;align-items:center;">
-      ${photoHtml}
-      <div>
-        <div style="font-size:17px;font-weight:700;color:#f1f5f9;">${d.name}</div>
-        ${d.role ? `<div style="font-size:13px;color:#818cf8;font-weight:500;margin-bottom:4px;">${d.role}</div>` : ''}
-        ${d.bio ? `<div style="font-size:12px;color:#94a3b8;line-height:1.5;">${d.bio}</div>` : ''}
-      </div>
-    </div>
-  </div>`;
-}
+function renderLinkCard(w) { const d=w.data,cols={blue:'#3b82f6',green:'#22c55e',purple:'#a855f7',orange:'#f97316',red:'#ef4444'},c=cols[d.color]||cols.blue; return `<div style="background:#f8fafc;border-bottom:1px solid #e5e7eb;padding:14px 20px;"><div style="max-width:700px;margin:0 auto;display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap;"><div><div style="font-size:15px;font-weight:700;color:#0f172a;">${d.title||'Link'}</div>${d.description?`<div style="font-size:12px;color:#64748b;margin-top:2px;">${d.description}</div>`:''}</div><a href="${d.url}" target="_blank" rel="noopener" style="background:${c};color:#fff;padding:9px 18px;border-radius:8px;font-size:13px;font-weight:600;text-decoration:none;">🔗 ${d.button_text||'Visit'}</a></div></div>`; }
 
-// ---- 5. LINK CARD ----
-function renderLinkCard(w) {
-  const d = w.data;
-  const colors = { blue:'#3b82f6', green:'#22c55e', purple:'#a855f7', orange:'#f97316', red:'#ef4444' };
-  const c = colors[d.color] || colors.blue;
-  return `<div style="background:rgba(30,41,59,0.6);border-bottom:1px solid rgba(255,255,255,0.07);padding:14px 20px;">
-    <div style="max-width:700px;margin:0 auto;display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap;">
-      <div>
-        <div style="font-size:15px;font-weight:700;color:#f1f5f9;">${d.title||'External Link'}</div>
-        ${d.description ? `<div style="font-size:12px;color:#94a3b8;margin-top:2px;">${d.description}</div>` : ''}
-      </div>
-      <a href="${d.url}" target="_blank" rel="noopener" style="background:${c};color:#fff;padding:9px 18px;border-radius:8px;font-size:13px;font-weight:600;text-decoration:none;white-space:nowrap;">\ud83d\udd17 ${d.button_text||'Visit Site'}</a>
-    </div>
-  </div>`;
-}
+function renderTicker2(w) { const d=w.data,sp={slow:'40s',medium:'25s',fast:'14s'}[d.speed]||'25s',ms=(d.messages||[]).join('  •  '); return `<div style="background:#f1f5f9;border-bottom:1px solid #e5e7eb;overflow:hidden;white-space:nowrap;" id="ticker-wrap-${w.id}"><div style="display:inline-block;padding:8px 0;padding-left:100%;animation:ticker-scroll-${w.id} ${sp} linear infinite;"><span style="font-size:13px;font-weight:500;color:#334155;">📰 ${ms}</span></div><style>@keyframes ticker-scroll-${w.id}{0%{transform:translateX(0)}100%{transform:translateX(-100%)}}</style></div>`; }
+function initTicker(id) {}
 
-// ---- 6. TICKER ----
-function renderTicker2(w) {
-  const d = w.data;
-  const speed = {slow:'40s', medium:'25s', fast:'14s'}[d.speed] || '25s';
-  const msgs = (d.messages||[]).join('  \u2022  ');
-  return `<div style="background:#1e293b;border-bottom:1px solid rgba(255,255,255,0.07);overflow:hidden;white-space:nowrap;" id="ticker-wrap-${w.id}">
-    <div style="display:inline-block;padding:8px 0;padding-left:100%;animation:ticker-scroll-${w.id} ${speed} linear infinite;" id="ticker-inner-${w.id}">
-      <span style="font-size:13px;font-weight:500;color:#e2e8f0;">\ud83d\udcf0 ${msgs}</span>
-    </div>
-    <style>@keyframes ticker-scroll-${w.id}{0%{transform:translateX(0)}100%{transform:translateX(-100%)}}</style>
-  </div>`;
-}
-function initTicker(id) { /* CSS animation handles it */ }
-
-// ---- 7. GALLERY ----
-function renderGallery(w) {
-  const d = w.data;
-  const imgs = (d.images || []).filter(img => img && img.url && img.url.trim());
-  if (!imgs.length) return '';
-  const slides = imgs.map((img, i) => {
-    const url = img.url.trim();
-    const caption = (img.caption || '').trim();
-    return `<div class="gallery-slide-${w.id}" style="display:${i===0?'block':'none'};position:relative;background:#000;">
-      <img src="${url}" alt="" style="width:100%;max-height:300px;object-fit:cover;display:block;" onerror="this.parentElement.style.display='none'">
-      ${caption ? `<div style="position:absolute;bottom:0;left:0;right:0;background:rgba(0,0,0,0.65);color:#fff;padding:8px 14px;font-size:13px;">${caption}</div>` : ''}
-    </div>`;
-  }).join('');
-  return `<div style="background:#0f172a;border-bottom:1px solid rgba(255,255,255,0.07);position:relative;" id="gallery-${w.id}">
-    ${d.title ? `<div style="padding:10px 16px 6px;font-size:13px;font-weight:600;color:#94a3b8;">\ud83d\uddbc\ufe0f ${d.title}</div>` : ''}
-    <div id="gallery-slides-${w.id}">${slides}</div>
-    ${imgs.length > 1 ? `<div style="position:absolute;top:50%;transform:translateY(-50%);left:8px;right:8px;display:flex;justify-content:space-between;pointer-events:none;">
-      <button onclick="galleryNav('${w.id}',-1)" style="background:rgba(0,0,0,0.6);border:none;color:#fff;width:32px;height:32px;border-radius:50%;cursor:pointer;pointer-events:all;font-size:16px;">\u2039</button>
-      <button onclick="galleryNav('${w.id}',+1)" style="background:rgba(0,0,0,0.6);border:none;color:#fff;width:32px;height:32px;border-radius:50%;cursor:pointer;pointer-events:all;font-size:16px;">\u203a</button>
-    </div>` : ''}
-    <div style="text-align:center;padding:6px;font-size:11px;color:#6b7280;" id="gallery-counter-${w.id}">${imgs.length > 1 ? `1 / ${imgs.length}` : ''}</div>
-  </div>`;
-}
+function renderGallery(w) { const d=w.data,imgs=(d.images||[]).filter(i=>i&&i.url&&i.url.trim()); if(!imgs.length) return ''; const slides=imgs.map((img,i)=>{const u=img.url.trim(),c=(img.caption||'').trim();return`<div class="gallery-slide-${w.id}" style="display:${i===0?'block':'none'};position:relative;background:#f1f5f9;"><img src="${u}" alt="" style="width:100%;max-height:300px;object-fit:cover;display:block;" onerror="this.parentElement.style.display='none'">${c?`<div style="position:absolute;bottom:0;left:0;right:0;background:rgba(0,0,0,.55);color:#fff;padding:8px 14px;font-size:13px;">${c}</div>`:''}</div>`;}).join(''); return `<div style="background:#f8fafc;border-bottom:1px solid #e5e7eb;" id="gallery-${w.id}">${d.title?`<div style="padding:10px 16px 6px;font-size:13px;font-weight:600;color:#64748b;">🖼️ ${d.title}</div>`:''}<div id="gallery-slides-${w.id}">${slides}</div>${imgs.length>1?`<div style="position:absolute;top:50%;transform:translateY(-50%);left:8px;right:8px;display:flex;justify-content:space-between;pointer-events:none;"><button onclick="galleryNav('${w.id}',-1)" style="background:rgba(0,0,0,.5);border:none;color:#fff;width:32px;height:32px;border-radius:50%;cursor:pointer;pointer-events:all;font-size:16px;">‹</button><button onclick="galleryNav('${w.id}',+1)" style="background:rgba(0,0,0,.5);border:none;color:#fff;width:32px;height:32px;border-radius:50%;cursor:pointer;pointer-events:all;font-size:16px;">›</button></div>`:''}<div style="text-align:center;padding:6px;font-size:11px;color:#9ca3af;" id="gallery-counter-${w.id}">${imgs.length>1?`1 / ${imgs.length}`:''}</div></div>`; }
 const _galleryIdx = {};
-function initGallery(id, imgs) { _galleryIdx[id] = 0; }
-function galleryNav(id, dir) {
-  const slides = document.querySelectorAll(`.gallery-slide-${id}`);
-  if (!slides.length) return;
-  slides[_galleryIdx[id]].style.display = 'none';
-  _galleryIdx[id] = (_galleryIdx[id] + dir + slides.length) % slides.length;
-  slides[_galleryIdx[id]].style.display = 'block';
-  const counter = document.getElementById(`gallery-counter-${id}`);
-  if (counter) counter.textContent = `${_galleryIdx[id]+1} / ${slides.length}`;
-}
+function initGallery(id) { _galleryIdx[id] = 0; }
+function galleryNav(id, dir) { const s=document.querySelectorAll(`.gallery-slide-${id}`); if(!s.length) return; s[_galleryIdx[id]].style.display='none'; _galleryIdx[id]=(_galleryIdx[id]+dir+s.length)%s.length; s[_galleryIdx[id]].style.display='block'; const c=document.getElementById(`gallery-counter-${id}`); if(c) c.textContent=`${_galleryIdx[id]+1} / ${s.length}`; }
 
-// ---- 8. EVENT CARD ----
-function renderEvent(w) {
-  const d = w.data;
-  const dateStr = d.date ? new Date(d.date).toLocaleDateString('en-IN',{weekday:'long',year:'numeric',month:'long',day:'numeric'}) : '';
-  return `<div style="background:rgba(30,41,59,0.6);border-bottom:1px solid rgba(255,255,255,0.07);padding:14px 20px;">
-    <div style="max-width:700px;margin:0 auto;">
-      <div style="font-size:11px;color:#f472b6;text-transform:uppercase;font-weight:600;letter-spacing:.06em;margin-bottom:4px;">\ud83d\udcc5 Upcoming Event</div>
-      <div style="font-size:16px;font-weight:700;color:#f1f5f9;margin-bottom:8px;">${d.title}</div>
-      <div style="display:flex;flex-wrap:wrap;gap:12px;">
-        ${dateStr?`<span style="font-size:12px;color:#94a3b8;">\ud83d\uddd3\ufe0f ${dateStr}</span>`:''}
-        ${d.time?`<span style="font-size:12px;color:#94a3b8;">\u23f0 ${d.time}</span>`:''}
-        ${d.venue?`<span style="font-size:12px;color:#94a3b8;">\ud83d\udccd ${d.venue}</span>`:''}
-      </div>
-      ${d.description?`<div style="font-size:12px;color:#94a3b8;margin-top:8px;">${d.description}</div>`:''}
-    </div>
-  </div>`;
-}
+function renderEvent(w) { const d=w.data,ds=d.date?new Date(d.date).toLocaleDateString('en-IN',{weekday:'long',year:'numeric',month:'long',day:'numeric'}):''; return `<div style="background:#f8fafc;border-bottom:1px solid #e5e7eb;padding:14px 20px;"><div style="max-width:700px;margin:0 auto;"><div style="font-size:11px;color:#ec4899;text-transform:uppercase;font-weight:600;letter-spacing:.06em;margin-bottom:4px;">📅 Upcoming Event</div><div style="font-size:16px;font-weight:700;color:#0f172a;margin-bottom:8px;">${d.title}</div><div style="display:flex;flex-wrap:wrap;gap:12px;">${ds?`<span style="font-size:12px;color:#64748b;">🗓️ ${ds}</span>`:''}${d.time?`<span style="font-size:12px;color:#64748b;">⏰ ${d.time}</span>`:''}${d.venue?`<span style="font-size:12px;color:#64748b;">📍 ${d.venue}</span>`:''}</div>${d.description?`<div style="font-size:12px;color:#64748b;margin-top:8px;">${d.description}</div>`:''}</div></div>`; }
 
-// ---- 9. QUOTE ----
-function renderQuote(w) {
-  const d = w.data;
-  const bgs = {
-    dark:'background:rgba(0,0,0,0.5)',
-    gradient:'background:linear-gradient(135deg,rgba(99,102,241,0.2),rgba(168,85,247,0.2))',
-    light:'background:rgba(255,255,255,0.06)'
-  };
-  return `<div style="${bgs[d.bg]||bgs.gradient};border-bottom:1px solid rgba(255,255,255,0.07);padding:18px 24px;text-align:center;">
-    <div style="max-width:700px;margin:0 auto;">
-      <div style="font-size:36px;color:rgba(255,255,255,0.2);line-height:1;margin-bottom:4px;">\u201c</div>
-      <div style="font-size:clamp(14px,3vw,18px);color:#e2e8f0;font-style:italic;line-height:1.6;margin-bottom:8px;">${d.text}</div>
-      ${d.author?`<div style="font-size:13px;color:#818cf8;font-weight:600;">${d.author}</div>`:''}
-    </div>
-  </div>`;
-}
+function renderQuote(w) { const d=w.data; return `<div style="background:linear-gradient(135deg,#f5f3ff,#fdf4ff);border-bottom:1px solid #e5e7eb;padding:24px;text-align:center;"><div style="max-width:700px;margin:0 auto;"><div style="font-size:40px;color:#c4b5fd;line-height:1;margin-bottom:4px;">"</div><div style="font-size:clamp(14px,3vw,18px);color:#334155;font-style:italic;line-height:1.6;margin-bottom:8px;">${d.text}</div>${d.author?`<div style="font-size:13px;color:#7c3aed;font-weight:600;">— ${d.author}</div>`:''}</div></div>`; }
 
-// ---- 10. CUSTOM HTML ----
-function renderCustom(w) {
-  return `<div style="border-bottom:1px solid rgba(255,255,255,0.05);">${w.data.html||''}</div>`;
-}
+function renderCustom(w) { return `<div style="border-bottom:1px solid #e5e7eb;">${w.data.html||''}</div>`; }
 
-// ============================================================
-//  FIREWORKS ANIMATION (for winner widget)
-// ============================================================
-function startFireworks(customText = '', options = {}) {
-  const canvas = document.getElementById('fireworks-canvas');
-  canvas.style.display = 'block';
-  canvas.width = window.innerWidth; canvas.height = window.innerHeight;
-  const ctx = canvas.getContext('2d');
-  const particles = [];
-  const colors = ['#f59e0b','#ef4444','#6366f1','#22c55e','#f472b6','#38bdf8','#fde68a'];
-  const fwText = customText ? customText.trim() : '';
-  const intensity = options.intensity || 60;
-  const durLimit = options.duration === 999 ? 99999 : ((options.duration || 5) * 60) / 40;
-  const tStyle = options.textStyle || 'sans-serif';
-  const tSizeBase = options.textSize || 40;
-  function spawnBurst() {
-    const x = Math.random()*canvas.width, y = Math.random()*canvas.height*0.5;
-    if (fwText && Math.random() > 0.3) {
-      particles.push({ x, y, vx:(Math.random()-0.5)*1, vy:-1-Math.random()*2, life:1, color:colors[Math.floor(Math.random()*colors.length)], text:fwText, scale:0 });
+// ── Fireworks ──
+function startFireworks(customText='',options={}) { const canvas=document.getElementById('fireworks-canvas'); canvas.style.display='block'; canvas.width=window.innerWidth; canvas.height=window.innerHeight; const ctx=canvas.getContext('2d'), particles=[], colors=['#f59e0b','#ef4444','#6366f1','#22c55e','#f472b6','#38bdf8','#fde68a'], fwText=customText?customText.trim():'', intensity=options.intensity||60, durLimit=options.duration===999?99999:((options.duration||5)*60)/40, tStyle=options.textStyle||'sans-serif', tSizeBase=options.textSize||40; function spawnBurst(){const x=Math.random()*canvas.width,y=Math.random()*canvas.height*0.5;if(fwText&&Math.random()>0.3){particles.push({x,y,vx:(Math.random()-0.5),vy:-1-Math.random()*2,life:1,color:colors[Math.floor(Math.random()*colors.length)],text:fwText,scale:0});}for(let i=0;i<intensity;i++){const ang=(Math.PI*2/intensity)*i,speed=2+Math.random()*4;particles.push({x,y,vx:Math.cos(ang)*speed,vy:Math.sin(ang)*speed,life:1,color:colors[Math.floor(Math.random()*colors.length)]});}} spawnBurst(); let t=0,burstsDone=0; function loop(){ctx.clearRect(0,0,canvas.width,canvas.height);t++;if(t%40===0&&burstsDone<durLimit){spawnBurst();burstsDone++;}for(let i=particles.length-1;i>=0;i--){const p=particles[i];if(p.text){p.x+=p.vx;p.y+=p.vy;p.life-=0.008;p.scale+=0.8;if(p.life<=0){particles.splice(i,1);continue;}ctx.globalAlpha=Math.max(0,p.life);ctx.fillStyle=p.color;ctx.font="bold "+Math.min(20+p.scale,tSizeBase*1.5)+"px "+tStyle;ctx.textAlign="center";ctx.fillText(p.text,p.x,p.y);}else{p.x+=p.vx;p.y+=p.vy;p.vy+=0.12;p.life-=0.015;if(p.life<=0){particles.splice(i,1);continue;}ctx.globalAlpha=p.life;ctx.fillStyle=p.color;ctx.beginPath();ctx.arc(p.x,p.y,3,0,Math.PI*2);ctx.fill();}}ctx.globalAlpha=1;if(particles.length>0||burstsDone<durLimit)requestAnimationFrame(loop);else{setTimeout(()=>canvas.style.display='none',500);}} loop(); window.addEventListener('resize',()=>{canvas.width=window.innerWidth;canvas.height=window.innerHeight;}); }
+
+// ── Update tool count ──
+document.addEventListener('DOMContentLoaded', () => {
+  setTimeout(() => {
+    const grid = document.getElementById('tools-grid');
+    const stat = document.getElementById('stat-tools');
+    if (grid && stat) {
+      const count = grid.querySelectorAll('.tool-card:not(.skeleton)').length;
+      if (count > 0) stat.textContent = count;
     }
-    for(let i=0;i<intensity;i++) {
-      const ang=(Math.PI*2/intensity)*i, speed=2+Math.random()*4;
-      particles.push({x,y,vx:Math.cos(ang)*speed,vy:Math.sin(ang)*speed,life:1,color:colors[Math.floor(Math.random()*colors.length)]});
-    }
-  }
-  spawnBurst();
-  let t=0, burstsDone=0;
-  function loop() {
-    ctx.clearRect(0,0,canvas.width,canvas.height); t++;
-    if(t%40===0&&burstsDone<durLimit){spawnBurst();burstsDone++;}
-    for(let i=particles.length-1;i>=0;i--) {
-      const p=particles[i];
-      if(p.text){p.x+=p.vx;p.y+=p.vy;p.life-=0.008;p.scale+=0.8;if(p.life<=0){particles.splice(i,1);continue;}ctx.globalAlpha=Math.max(0,p.life);ctx.fillStyle=p.color;ctx.font="bold "+Math.min(20+p.scale,tSizeBase*1.5)+"px "+tStyle;ctx.textAlign="center";ctx.fillText(p.text,p.x,p.y);}
-      else{p.x+=p.vx;p.y+=p.vy;p.vy+=0.12;p.life-=0.015;if(p.life<=0){particles.splice(i,1);continue;}ctx.globalAlpha=p.life;ctx.fillStyle=p.color;ctx.beginPath();ctx.arc(p.x,p.y,3,0,Math.PI*2);ctx.fill();}
-    }
-    ctx.globalAlpha=1;
-    if(particles.length>0||burstsDone<durLimit)requestAnimationFrame(loop);
-    else{setTimeout(()=>canvas.style.display='none',500);}
-  }
-  loop();
-  window.addEventListener('resize',()=>{canvas.width=window.innerWidth;canvas.height=window.innerHeight;});
-}
+  }, 2500);
+});
   </script>
-
-
 </body>
 </html>
