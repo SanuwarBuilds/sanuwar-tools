@@ -55,7 +55,7 @@
 
   <!-- ═══════ HERO — FULL IMPACT ═══════ -->
   <section class="hero-section" id="hero">
-    <!-- Animated mesh background -->
+    <!-- Layered editorial background -->
     <div class="mesh-bg">
       <div class="mesh-blob blob-a"></div>
       <div class="mesh-blob blob-b"></div>
@@ -64,51 +64,60 @@
     <!-- Grid pattern overlay -->
     <div class="grid-overlay"></div>
 
-    <div class="hero-inner">
-      <div class="hero-chip">
-        <span class="chip-pulse"></span>
-        Free & Powerful Tools
+    <div class="hero-shell">
+      <div class="hero-inner">
+        <div class="hero-chip">
+          <span class="chip-pulse"></span>
+          Free & Powerful Tools
+        </div>
+
+        <h1 class="hero-title">
+          Useful web tools,
+          <span class="hero-highlight">beautifully organized.</span>
+        </h1>
+
+        <p class="hero-desc">
+          Browse Sanuwar's growing collection of practical utilities, creative generators, download tools, and quick web apps from one clean homepage.
+        </p>
+
+        <div class="hero-cta">
+          <a href="#tools-section" class="cta-primary" id="hero-browse-btn">
+            <span>Explore Tools</span>
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/></svg>
+          </a>
+          <a href="/downloads" class="cta-ghost" id="hero-download-btn">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+            <span>Downloads</span>
+          </a>
+        </div>
+
+        <div class="hero-metrics" aria-label="Homepage highlights">
+          <div class="hero-metric">
+            <strong id="stat-tools">--</strong>
+            <span>Live tools</span>
+          </div>
+          <div class="hero-metric">
+            <strong id="stat-categories">--</strong>
+            <span>Categories</span>
+          </div>
+          <div class="hero-metric">
+            <strong>Free</strong>
+            <span>Access</span>
+          </div>
+        </div>
       </div>
 
-      <h1 class="hero-title">
-        All Your Tools
-        <br>
-        <span class="hero-highlight">In One Place</span>
-      </h1>
-
-      <p class="hero-desc">
-        A handcrafted suite of web tools, utilities & apps — designed to simplify your workflow. Built with care by Sanuwar.
-      </p>
-
-      <div class="hero-cta">
-        <a href="#tools-section" class="cta-primary" id="hero-browse-btn">
-          <span>Explore Tools</span>
-          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/></svg>
-        </a>
-        <a href="/downloads" class="cta-ghost" id="hero-download-btn">
-          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
-          <span>Downloads</span>
-        </a>
-      </div>
-    </div>
-
-    <!-- Floating bento preview cards -->
-    <div class="hero-showcase">
-      <div class="bento-grid">
-        <div class="bento-card bento-lg" id="bento-stat-tools">
-          <div class="bento-icon">🛠️</div>
-          <div class="bento-number" id="stat-tools">—</div>
-          <div class="bento-label">Tools Available</div>
+      <div class="hero-visual" aria-label="Featured tools">
+        <div class="visual-topline">
+          <span>Featured Tools</span>
+          <span class="visual-live">Live</span>
         </div>
-        <div class="bento-card bento-sm">
-          <div class="bento-icon">⚡</div>
-          <div class="bento-number">Fast</div>
-          <div class="bento-label">&amp; Reliable</div>
-        </div>
-        <div class="bento-card bento-sm bento-accent">
-          <div class="bento-icon">💎</div>
-          <div class="bento-number">Free</div>
-          <div class="bento-label">Forever</div>
+        <!-- ═══════ HERO TOOL SLIDESHOW ═══════ -->
+        <div class="hero-slideshow" id="hero-slideshow">
+          <div class="slideshow-viewport" id="slideshow-viewport">
+            <!-- Slides injected by JS -->
+          </div>
+          <div class="slideshow-dots" id="slideshow-dots"></div>
         </div>
       </div>
     </div>
@@ -306,17 +315,135 @@ function renderCustom(w) { return `<div style="border-bottom:1px solid #e5e7eb;"
 // ── Fireworks ──
 function startFireworks(customText='',options={}) { const canvas=document.getElementById('fireworks-canvas'); canvas.style.display='block'; canvas.width=window.innerWidth; canvas.height=window.innerHeight; const ctx=canvas.getContext('2d'), particles=[], colors=['#f59e0b','#ef4444','#6366f1','#22c55e','#f472b6','#38bdf8','#fde68a'], fwText=customText?customText.trim():'', intensity=options.intensity||60, durLimit=options.duration===999?99999:((options.duration||5)*60)/40, tStyle=options.textStyle||'sans-serif', tSizeBase=options.textSize||40; function spawnBurst(){const x=Math.random()*canvas.width,y=Math.random()*canvas.height*0.5;if(fwText&&Math.random()>0.3){particles.push({x,y,vx:(Math.random()-0.5),vy:-1-Math.random()*2,life:1,color:colors[Math.floor(Math.random()*colors.length)],text:fwText,scale:0});}for(let i=0;i<intensity;i++){const ang=(Math.PI*2/intensity)*i,speed=2+Math.random()*4;particles.push({x,y,vx:Math.cos(ang)*speed,vy:Math.sin(ang)*speed,life:1,color:colors[Math.floor(Math.random()*colors.length)]});}} spawnBurst(); let t=0,burstsDone=0; function loop(){ctx.clearRect(0,0,canvas.width,canvas.height);t++;if(t%40===0&&burstsDone<durLimit){spawnBurst();burstsDone++;}for(let i=particles.length-1;i>=0;i--){const p=particles[i];if(p.text){p.x+=p.vx;p.y+=p.vy;p.life-=0.008;p.scale+=0.8;if(p.life<=0){particles.splice(i,1);continue;}ctx.globalAlpha=Math.max(0,p.life);ctx.fillStyle=p.color;ctx.font="bold "+Math.min(20+p.scale,tSizeBase*1.5)+"px "+tStyle;ctx.textAlign="center";ctx.fillText(p.text,p.x,p.y);}else{p.x+=p.vx;p.y+=p.vy;p.vy+=0.12;p.life-=0.015;if(p.life<=0){particles.splice(i,1);continue;}ctx.globalAlpha=p.life;ctx.fillStyle=p.color;ctx.beginPath();ctx.arc(p.x,p.y,3,0,Math.PI*2);ctx.fill();}}ctx.globalAlpha=1;if(particles.length>0||burstsDone<durLimit)requestAnimationFrame(loop);else{setTimeout(()=>canvas.style.display='none',500);}} loop(); window.addEventListener('resize',()=>{canvas.width=window.innerWidth;canvas.height=window.innerHeight;}); }
 
-// ── Update tool count ──
-document.addEventListener('DOMContentLoaded', () => {
-  setTimeout(() => {
-    const grid = document.getElementById('tools-grid');
-    const stat = document.getElementById('stat-tools');
-    if (grid && stat) {
-      const count = grid.querySelectorAll('.tool-card:not(.skeleton)').length;
-      if (count > 0) stat.textContent = count;
-    }
-  }, 2500);
-});
+// ── Hero Tool Slideshow (One at a time, big format) ──
+(function initHeroSlideshow() {
+  let initialized = false;
+  let currentSlide = 0;
+  let slideInterval = null;
+  let isPaused = false;
+  const SLIDE_DURATION = 4000; // 4 seconds per slide
+
+  function waitForTools() {
+    return new Promise((resolve) => {
+      const check = () => {
+        fetch('/tools.config.json?t=' + Date.now())
+          .then(r => r.json())
+          .then(data => {
+            const tools = (data.tools || []).filter(t => t.visible !== false);
+            const toolStat = document.getElementById('stat-tools');
+            const categoryStat = document.getElementById('stat-categories');
+            if (toolStat) toolStat.textContent = tools.length || '0';
+            if (categoryStat) {
+              const categoryCount = (data.categories || []).filter(cat => cat !== 'All').length;
+              categoryStat.textContent = categoryCount || '0';
+            }
+            if (tools.length > 0) resolve(tools);
+            else setTimeout(check, 500);
+          })
+          .catch(() => setTimeout(check, 500));
+      };
+      check();
+    });
+  }
+
+  function buildSlideshow(tools) {
+    const viewport = document.getElementById('slideshow-viewport');
+    const dotsContainer = document.getElementById('slideshow-dots');
+    if (!viewport || initialized) return;
+    initialized = true;
+
+    const fallbackSvg = (name) =>
+      `data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='800' height='400' fill='%23ede9fe'%3E%3Crect width='800' height='400'/%3E%3Ctext x='400' y='200' text-anchor='middle' dominant-baseline='middle' fill='%237c3aed' font-family='Inter,sans-serif' font-size='28' font-weight='700'%3E${encodeURIComponent(name)}%3C/text%3E%3C/svg%3E`;
+
+    // Build slides
+    viewport.innerHTML = tools.map((tool, i) => `
+      <div class="hero-slide ${i === 0 ? 'active' : ''}" data-index="${i}">
+        <a href="${tool.siteUrl}" target="_blank" rel="noopener noreferrer" class="hero-slide-link">
+          <div class="hero-slide-img">
+            <img src="${tool.thumbnail}" alt="${tool.name}" loading="${i < 2 ? 'eager' : 'lazy'}" onerror="this.src='${fallbackSvg(tool.name)}'">
+            <div class="hero-slide-overlay"></div>
+          </div>
+          <div class="hero-slide-info">
+            <span class="hero-slide-badge">${tool.category || 'Tool'}</span>
+            <h3 class="hero-slide-name">${tool.name}</h3>
+            <p class="hero-slide-desc">${tool.description || ''}</p>
+            <span class="hero-slide-cta">
+              Visit Site
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/></svg>
+            </span>
+          </div>
+        </a>
+        <div class="hero-slide-progress"><div class="hero-slide-progress-bar"></div></div>
+      </div>
+    `).join('');
+
+    // Build dots
+    dotsContainer.innerHTML = tools.map((_, i) =>
+      `<button class="slideshow-dot ${i === 0 ? 'active' : ''}" data-slide="${i}" aria-label="Go to slide ${i+1}"></button>`
+    ).join('');
+
+    // Dot click handlers
+    dotsContainer.querySelectorAll('.slideshow-dot').forEach(dot => {
+      dot.addEventListener('click', () => {
+        goToSlide(parseInt(dot.dataset.slide), tools.length);
+        resetAutoplay(tools.length);
+      });
+    });
+
+    // Pause on hover
+    const slideshow = document.getElementById('hero-slideshow');
+    slideshow.addEventListener('mouseenter', () => { isPaused = true; });
+    slideshow.addEventListener('mouseleave', () => { isPaused = false; });
+
+    // Mobile swipe
+    let touchStartX = 0;
+    slideshow.addEventListener('touchstart', (e) => {
+      touchStartX = e.touches[0].clientX;
+    }, { passive: true });
+    slideshow.addEventListener('touchend', (e) => {
+      const diff = touchStartX - e.changedTouches[0].clientX;
+      if (Math.abs(diff) > 50) {
+        if (diff > 0) goToSlide((currentSlide + 1) % tools.length, tools.length);
+        else goToSlide((currentSlide - 1 + tools.length) % tools.length, tools.length);
+        resetAutoplay(tools.length);
+      }
+    }, { passive: true });
+
+    // Start autoplay
+    startAutoplay(tools.length);
+  }
+
+  function goToSlide(index, total) {
+    const slides = document.querySelectorAll('.hero-slide');
+    const dots = document.querySelectorAll('.slideshow-dot');
+    if (!slides.length) return;
+
+    // Remove active from current
+    slides[currentSlide]?.classList.remove('active');
+    dots[currentSlide]?.classList.remove('active');
+
+    currentSlide = index % total;
+
+    // Add active to new
+    slides[currentSlide]?.classList.add('active');
+    dots[currentSlide]?.classList.add('active');
+  }
+
+  function startAutoplay(total) {
+    slideInterval = setInterval(() => {
+      if (!isPaused) {
+        goToSlide((currentSlide + 1) % total, total);
+      }
+    }, SLIDE_DURATION);
+  }
+
+  function resetAutoplay(total) {
+    clearInterval(slideInterval);
+    startAutoplay(total);
+  }
+
+  waitForTools().then(buildSlideshow);
+})();
   </script>
 </body>
 </html>
