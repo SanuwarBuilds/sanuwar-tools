@@ -13,21 +13,6 @@
         "color": "blue"
       },
       "created_at": "2026-05-03T19:31:36.552648"
-    },
-    {
-      "id": "ea173f02-35c4-4471-9d2e-ee56ce539aec",
-      "type": "winner",
-      "enabled": true,
-      "order": 1,
-      "data": {
-        "winner_name": "SANUWAR HUSSAIN",
-        "event_name": "MLA",
-        "photo_url": "",
-        "message": "",
-        "fireworks": true,
-        "fireworks_text": ""
-      },
-      "created_at": "2026-05-03T19:32:38.770749"
     }
   ],
   "admin": {
