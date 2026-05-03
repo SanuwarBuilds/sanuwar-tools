@@ -1,5 +1,20 @@
 {
-  "widgets": [],
+  "widgets": [
+    {
+      "id": "669f3229-ead1-436b-8606-34b390e0a1a8",
+      "type": "link_card",
+      "enabled": true,
+      "order": 0,
+      "data": {
+        "title": "Assam Elections Results",
+        "url": "https://results.eci.gov.in/",
+        "description": "",
+        "button_text": "Visit Site",
+        "color": "blue"
+      },
+      "created_at": "2026-05-03T19:31:36.552648"
+    }
+  ],
   "admin": {
     "username": "admin",
     "password_hash": "$2b$12$cEeI9lFioQkZH1s.HXL/7.Po0JfpDNOhj7uUn5Zb668Bs7OL3c48e"
