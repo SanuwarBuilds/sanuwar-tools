@@ -14,7 +14,7 @@
   },
   "site": {
     "defaultTheme": "light",
-    "favicon": "/assets/favicon.ico",
+    "favicon": "/assets/favicon.png",
     "name": "SanuwarTools",
     "tagline": "All my tools, one place."
   },
