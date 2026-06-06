@@ -338,12 +338,13 @@
 
   // ── Tool Detail Modal ───────────────────
   function initToolModal() {
-    const overlay = document.getElementById('tool-modal-overlay');
-    const closeBtn = document.getElementById('tool-modal-close');
+    const overlay = document.getElementById('tool-drawer-overlay');
+    const drawer = document.getElementById('tool-drawer');
+    const closeBtn = document.getElementById('tool-drawer-close');
 
-    if (!overlay || !closeBtn) return;
+    if (!overlay || !closeBtn || !drawer) return;
 
-    // Delegate click on tool card name for detail modal
+    // Delegate click on tool card name for detail drawer
     document.addEventListener('click', (e) => {
       const cardName = e.target.closest('.tool-card-name');
       if (cardName) {
@@ -356,30 +357,53 @@
 
     closeBtn.addEventListener('click', () => {
       overlay.classList.remove('open');
+      drawer.classList.remove('open');
       document.body.style.overflow = '';
     });
 
     overlay.addEventListener('click', (e) => {
       if (e.target === overlay) {
         overlay.classList.remove('open');
+        drawer.classList.remove('open');
         document.body.style.overflow = '';
       }
     });
   }
 
   function showToolModal(tool) {
-    const overlay = document.getElementById('tool-modal-overlay');
-    const modalName = document.getElementById('modal-tool-name');
-    const modalDesc = document.getElementById('modal-tool-desc');
-    const modalLink = document.getElementById('modal-tool-link');
+    const overlay = document.getElementById('tool-drawer-overlay');
+    const drawer = document.getElementById('tool-drawer');
+    const drawerName = document.getElementById('drawer-tool-name');
+    const drawerDesc = document.getElementById('drawer-tool-desc');
+    const drawerLink = document.getElementById('drawer-tool-link');
+    const drawerImg = document.getElementById('drawer-tool-img');
+    const drawerCategory = document.getElementById('drawer-tool-category');
+    const drawerTags = document.getElementById('drawer-tool-tags');
 
-    if (!overlay) return;
+    if (!overlay || !drawer) return;
 
-    modalName.textContent = tool.name;
-    modalDesc.textContent = tool.longDescription || tool.description;
-    modalLink.href = tool.siteUrl;
+    drawerName.textContent = tool.name;
+    drawerDesc.textContent = tool.longDescription || tool.description;
+    drawerLink.href = tool.siteUrl;
+    
+    if (tool.thumbnail) {
+      drawerImg.src = tool.thumbnail;
+      drawerImg.style.display = 'block';
+    } else {
+      drawerImg.src = '';
+      drawerImg.style.display = 'none';
+    }
+
+    if (drawerCategory) {
+      drawerCategory.textContent = tool.category || 'Tool';
+    }
+
+    if (drawerTags) {
+      drawerTags.innerHTML = (tool.tags || []).map(t => `<span class="drawer-tag">${t}</span>`).join('');
+    }
 
     overlay.classList.add('open');
+    drawer.classList.add('open');
     document.body.style.overflow = 'hidden';
   }
 

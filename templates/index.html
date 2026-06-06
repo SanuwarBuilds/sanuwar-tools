@@ -11,8 +11,10 @@
   <link rel="stylesheet" href="/assets/css/style.css">
   <script>
     (function() {
-      document.documentElement.removeAttribute('data-theme');
-      localStorage.setItem('sanuwartools-theme', 'light');
+      const saved = localStorage.getItem('sanuwartools-theme');
+      if (saved) {
+        document.documentElement.setAttribute('data-theme', saved);
+      }
     })();
   </script>
 </head>
@@ -212,13 +214,34 @@
     </div>
   </footer>
 
-  <!-- ═══════ TOOL DETAIL MODAL ═══════ -->
-  <div class="modal-overlay" id="tool-modal-overlay">
-    <div class="modal">
-      <button class="modal-close" id="tool-modal-close">&times;</button>
-      <h3 id="modal-tool-name"></h3>
-      <p id="modal-tool-desc"></p>
-      <a href="#" id="modal-tool-link" target="_blank" rel="noopener noreferrer" class="cta-primary">🌐 Visit Site</a>
+  <!-- ═══════ TOOL DETAIL DRAWER ═══════ -->
+  <div class="drawer-overlay" id="tool-drawer-overlay">
+    <div class="drawer" id="tool-drawer">
+      <div class="drawer-header">
+        <h3 id="drawer-tool-name">Tool Details</h3>
+        <button class="drawer-close" id="tool-drawer-close" aria-label="Close">&times;</button>
+      </div>
+      <div class="drawer-body">
+        <div class="drawer-media">
+          <img id="drawer-tool-img" src="" alt="Tool Preview" onerror="this.style.display='none'">
+        </div>
+        <div class="drawer-details">
+          <div class="drawer-meta">
+            <span class="drawer-badge" id="drawer-tool-category">Utility</span>
+          </div>
+          <p id="drawer-tool-desc" class="drawer-desc"></p>
+          <div class="drawer-tags-section">
+            <h4 class="drawer-section-title">Tags</h4>
+            <div class="drawer-tags" id="drawer-tool-tags"></div>
+          </div>
+        </div>
+        <div class="drawer-actions">
+          <a href="#" id="drawer-tool-link" target="_blank" rel="noopener noreferrer" class="cta-primary">
+            <span>🌐 Visit Site</span>
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/></svg>
+          </a>
+        </div>
+      </div>
     </div>
   </div>
 
@@ -271,46 +294,218 @@ function renderWidget(w) {
 
 function renderNotice(w) {
   const d = w.data;
-  const styles = {
-    info:    { bg:'#eff6ff', border:'#3b82f6', icon:'\u2139\ufe0f', text:'#1d4ed8' },
-    warning: { bg:'#fffbeb', border:'#f59e0b', icon:'\u26a0\ufe0f', text:'#b45309' },
-    success: { bg:'#f0fdf4', border:'#22c55e', icon:'\u2705', text:'#16a34a' },
-    danger:  { bg:'#fef2f2', border:'#ef4444', icon:'\ud83d\udea8', text:'#dc2626' },
-  };
-  const s = styles[d.style] || styles.info;
-  return `<div style="background:${s.bg};border-left:4px solid ${s.border};padding:14px 20px;"><div style="max-width:900px;margin:0 auto;display:flex;gap:12px;align-items:flex-start;"><span style="font-size:20px;">${s.icon}</span><div>${d.title?`<div style="font-weight:700;color:${s.text};font-size:15px;margin-bottom:2px;">${d.title}</div>`:''}<div style="color:#4b5563;font-size:13px;line-height:1.5;">${d.message}</div></div></div></div>`;
+  const icons = { info: 'ℹ️', warning: '⚠️', success: '✅', danger: '🚨' };
+  const icon = icons[d.style] || icons.info;
+  return `
+    <div class="widget-notice-container widget-notice-${d.style || 'info'}">
+      <div class="widget-notice-inner">
+        <span class="widget-notice-icon">${icon}</span>
+        <div class="widget-notice-content">
+          ${d.title ? `<div class="widget-notice-title">${d.title}</div>` : ''}
+          <div class="widget-notice-message">${d.message}</div>
+        </div>
+      </div>
+    </div>`;
 }
 
 function renderPoll(w) {
-  const d = w.data, voted = localStorage.getItem('voted_'+w.id), total = (d.options||[]).reduce((s,o)=>s+(o.votes||0),0);
+  const d = w.data;
+  const voted = localStorage.getItem('voted_' + w.id);
+  const total = (d.options || []).reduce((s, o) => s + (o.votes || 0), 0);
   if (voted) {
-    const bars = (d.options||[]).map(o => { const pct = total?Math.round((o.votes/total)*100):0; const win = o.votes===Math.max(...d.options.map(x=>x.votes))&&total>0; return `<div style="margin-bottom:10px;"><div style="display:flex;justify-content:space-between;font-size:13px;margin-bottom:4px;"><span style="color:${win?'#b45309':'#374151'};font-weight:${win?700:400};">${win?'🥇 ':''}${o.text}</span><span style="color:#6b7280;">${o.votes} (${pct}%)</span></div><div style="background:#e5e7eb;border-radius:99px;height:8px;overflow:hidden;"><div style="height:100%;border-radius:99px;background:${win?'linear-gradient(90deg,#f59e0b,#fbbf24)':'linear-gradient(90deg,#6366f1,#818cf8)'};width:${pct}%;transition:width .8s;"></div></div></div>`; }).join('');
-    return `<div style="background:#f5f3ff;border-top:3px solid #6366f1;padding:20px 24px;"><div style="max-width:700px;margin:0 auto;"><div style="font-size:11px;color:#6366f1;font-weight:600;text-transform:uppercase;letter-spacing:.06em;margin-bottom:6px;">🗽 Poll Results • ${total} votes</div><div style="font-size:16px;font-weight:700;color:#1e293b;margin-bottom:14px;">${d.question}</div>${bars}<div style="font-size:11px;color:#9ca3af;margin-top:8px;">✓ You have already voted</div></div></div>`;
+    const bars = (d.options || []).map(o => {
+      const pct = total ? Math.round((o.votes / total) * 100) : 0;
+      const win = o.votes === Math.max(...d.options.map(x => x.votes)) && total > 0;
+      return `
+        <div class="widget-poll-result-row">
+          <div class="widget-poll-result-label">
+            <span class="widget-poll-option-text ${win ? 'win' : ''}">${win ? '🥇 ' : ''}${o.text}</span>
+            <span class="widget-poll-option-pct">${o.votes} (${pct}%)</span>
+          </div>
+          <div class="widget-poll-track">
+            <div class="widget-poll-fill ${win ? 'win' : ''}" style="width: ${pct}%;"></div>
+          </div>
+        </div>`;
+    }).join('');
+    return `
+      <div class="widget-poll-container">
+        <div class="widget-poll-inner">
+          <div class="widget-poll-header">🗽 Poll Results • ${total} votes</div>
+          <div class="widget-poll-question">${d.question}</div>
+          ${bars}
+          <div class="widget-poll-voted">✓ You have already voted</div>
+        </div>
+      </div>`;
   }
-  const opts = (d.options||[]).map(o=>`<button onclick="castVote('${w.id}','${o.id}',this)" class="poll-opt-btn" style="display:block;width:100%;text-align:left;background:#fff;border:1px solid #e5e7eb;border-radius:10px;padding:11px 16px;color:#1e293b;cursor:pointer;font-size:14px;margin-bottom:8px;transition:all .2s;">${o.text}</button>`).join('');
-  return `<div style="background:#f5f3ff;border-top:3px solid #6366f1;padding:20px 24px;"><div style="max-width:700px;margin:0 auto;"><div style="font-size:11px;color:#6366f1;font-weight:600;text-transform:uppercase;letter-spacing:.06em;margin-bottom:6px;">🗽 Vote Now</div><div style="font-size:16px;font-weight:700;color:#1e293b;margin-bottom:14px;">${d.question}</div><div id="poll-opts-${w.id}">${opts}</div></div></div>`;
+  const opts = (d.options || []).map(o => `
+    <button onclick="castVote('${w.id}','${o.id}',this)" class="poll-opt-btn widget-poll-btn">${o.text}</button>
+  `).join('');
+  return `
+    <div class="widget-poll-container">
+      <div class="widget-poll-inner">
+        <div class="widget-poll-header">🗽 Vote Now</div>
+        <div class="widget-poll-question">${d.question}</div>
+        <div id="poll-opts-${w.id}">${opts}</div>
+      </div>
+    </div>`;
 }
-async function castVote(wid, oid, btn) { btn.disabled=true; btn.textContent='Voting...'; try { const r=await fetch(`/api/widgets/${wid}/vote`,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({option_id:oid})}); if(r.status===403){localStorage.setItem('voted_'+wid,'1');location.reload();return;} const d=await r.json(); if(d.success){localStorage.setItem('voted_'+wid,'1');location.reload();}else{btn.disabled=false;btn.textContent='Vote';} }catch(e){btn.disabled=false;btn.textContent='Vote';} }
+async function castVote(wid, oid, btn) {
+  btn.disabled = true;
+  btn.textContent = 'Voting...';
+  try {
+    const r = await fetch(`/api/widgets/${wid}/vote`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ option_id: oid })
+    });
+    if (r.status === 403) {
+      localStorage.setItem('voted_' + wid, '1');
+      location.reload();
+      return;
+    }
+    const d = await r.json();
+    if (d.success) {
+      localStorage.setItem('voted_' + wid, '1');
+      location.reload();
+    } else {
+      btn.disabled = false;
+      btn.textContent = 'Vote';
+    }
+  } catch (e) {
+    btn.disabled = false;
+    btn.textContent = 'Vote';
+  }
+}
 
-function renderWinner(w) { const d=w.data,ph=(d.photo_url||'').trim(),wp=ph?`<img src="${ph}" alt="" style="width:80px;height:80px;border-radius:50%;object-fit:cover;border:3px solid #f59e0b;margin:0 auto 10px;display:block;" onerror="this.style.display='none'">`:''; return `<div style="background:linear-gradient(135deg,#fffbeb,#fef3c7);border-top:3px solid #f59e0b;padding:24px 20px;text-align:center;" id="winner-banner-${w.id}"><div style="font-size:40px;margin-bottom:8px;animation:bounce-winner 1s infinite alternate;">🏆</div>${wp}<div style="font-size:11px;color:#b45309;font-weight:600;text-transform:uppercase;letter-spacing:.1em;margin-bottom:4px;">Congratulations!</div><div style="font-size:clamp(20px,5vw,30px);font-weight:900;background:linear-gradient(90deg,#f59e0b,#d97706);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;margin-bottom:4px;">${d.winner_name}</div>${d.event_name?`<div style="color:#92400e;font-size:14px;font-weight:600;margin-bottom:8px;">${d.event_name}</div>`:''}${d.message?`<div style="color:#4b5563;font-size:13px;max-width:500px;margin:0 auto;">${d.message}</div>`:''}</div><style>@keyframes bounce-winner{from{transform:scale(1)}to{transform:scale(1.2) rotate(5deg)}}</style>`; }
+function renderWinner(w) {
+  const d = w.data;
+  const ph = (d.photo_url || '').trim();
+  const wp = ph ? `<img src="${ph}" alt="" class="widget-winner-photo" onerror="this.style.display='none'">` : '';
+  return `
+    <div class="widget-winner-container" id="winner-banner-${w.id}">
+      <div class="widget-winner-trophy">🏆</div>
+      ${wp}
+      <div class="widget-winner-label">Congratulations!</div>
+      <div class="widget-winner-name">${d.winner_name}</div>
+      ${d.event_name ? `<div class="widget-winner-event">${d.event_name}</div>` : ''}
+      ${d.message ? `<div class="widget-winner-message">${d.message}</div>` : ''}
+    </div>`;
+}
 
-function renderPersonCard(w) { const d=w.data,ph=(d.photo_url||'').trim(),pi=ph?`<img src="${ph}" alt="" style="width:72px;height:72px;border-radius:50%;object-fit:cover;border:2px solid #6366f1;" onerror="this.style.display='none'">`:`<div style="width:72px;height:72px;border-radius:50%;background:linear-gradient(135deg,#6366f1,#a78bfa);display:flex;align-items:center;justify-content:center;font-size:28px;">👤</div>`; return `<div style="background:#f8fafc;border-bottom:1px solid #e5e7eb;padding:16px 20px;"><div style="max-width:700px;margin:0 auto;display:flex;gap:16px;align-items:center;">${pi}<div><div style="font-size:17px;font-weight:700;color:#0f172a;">${d.name}</div>${d.role?`<div style="font-size:13px;color:#6366f1;font-weight:500;">${d.role}</div>`:''}${d.bio?`<div style="font-size:12px;color:#64748b;line-height:1.5;margin-top:4px;">${d.bio}</div>`:''}</div></div></div>`; }
+function renderPersonCard(w) {
+  const d = w.data;
+  const ph = (d.photo_url || '').trim();
+  const pi = ph ? `<img src="${ph}" alt="" class="widget-person-photo" onerror="this.style.display='none'">` : `<div class="widget-person-avatar">👤</div>`;
+  return `
+    <div class="widget-person-container">
+      <div class="widget-person-inner">
+        ${pi}
+        <div class="widget-person-info">
+          <div class="widget-person-name">${d.name}</div>
+          ${d.role ? `<div class="widget-person-role">${d.role}</div>` : ''}
+          ${d.bio ? `<div class="widget-person-bio">${d.bio}</div>` : ''}
+        </div>
+      </div>
+    </div>`;
+}
 
-function renderLinkCard(w) { const d=w.data,cols={blue:'#3b82f6',green:'#22c55e',purple:'#a855f7',orange:'#f97316',red:'#ef4444'},c=cols[d.color]||cols.blue; return `<div style="background:#f8fafc;border-bottom:1px solid #e5e7eb;padding:14px 20px;"><div style="max-width:700px;margin:0 auto;display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap;"><div><div style="font-size:15px;font-weight:700;color:#0f172a;">${d.title||'Link'}</div>${d.description?`<div style="font-size:12px;color:#64748b;margin-top:2px;">${d.description}</div>`:''}</div><a href="${d.url}" target="_blank" rel="noopener" style="background:${c};color:#fff;padding:9px 18px;border-radius:8px;font-size:13px;font-weight:600;text-decoration:none;">🔗 ${d.button_text||'Visit'}</a></div></div>`; }
+function renderLinkCard(w) {
+  const d = w.data;
+  const colorClass = `widget-link-btn-${d.color || 'blue'}`;
+  return `
+    <div class="widget-link-container">
+      <div class="widget-link-inner">
+        <div class="widget-link-text">
+          <div class="widget-link-title">${d.title || 'Link'}</div>
+          ${d.description ? `<div class="widget-link-desc">${d.description}</div>` : ''}
+        </div>
+        <a href="${d.url}" target="_blank" rel="noopener" class="widget-link-btn ${colorClass}">🔗 ${d.button_text || 'Visit'}</a>
+      </div>
+    </div>`;
+}
 
-function renderTicker2(w) { const d=w.data,sp={slow:'40s',medium:'25s',fast:'14s'}[d.speed]||'25s',ms=(d.messages||[]).join('  •  '); return `<div style="background:#f1f5f9;border-bottom:1px solid #e5e7eb;overflow:hidden;white-space:nowrap;" id="ticker-wrap-${w.id}"><div style="display:inline-block;padding:8px 0;padding-left:100%;animation:ticker-scroll-${w.id} ${sp} linear infinite;"><span style="font-size:13px;font-weight:500;color:#334155;">📰 ${ms}</span></div><style>@keyframes ticker-scroll-${w.id}{0%{transform:translateX(0)}100%{transform:translateX(-100%)}}</style></div>`; }
+function renderTicker2(w) {
+  const d = w.data;
+  const sp = { slow: '40s', medium: '25s', fast: '14s' }[d.speed] || '25s';
+  const ms = (d.messages || []).join('  •  ');
+  return `
+    <div class="widget-ticker-container" id="ticker-wrap-${w.id}">
+      <div class="widget-ticker-scroll" style="animation: ticker-scroll-${w.id} ${sp} linear infinite;">
+        <span class="widget-ticker-text">📰 ${ms}</span>
+      </div>
+      <style>@keyframes ticker-scroll-${w.id}{0%{transform:translateX(0)}100%{transform:translateX(-100%)}}</style>
+    </div>`;
+}
 function initTicker(id) {}
 
-function renderGallery(w) { const d=w.data,imgs=(d.images||[]).filter(i=>i&&i.url&&i.url.trim()); if(!imgs.length) return ''; const slides=imgs.map((img,i)=>{const u=img.url.trim(),c=(img.caption||'').trim();return`<div class="gallery-slide-${w.id}" style="display:${i===0?'block':'none'};position:relative;background:#f1f5f9;"><img src="${u}" alt="" style="width:100%;max-height:300px;object-fit:cover;display:block;" onerror="this.parentElement.style.display='none'">${c?`<div style="position:absolute;bottom:0;left:0;right:0;background:rgba(0,0,0,.55);color:#fff;padding:8px 14px;font-size:13px;">${c}</div>`:''}</div>`;}).join(''); return `<div style="background:#f8fafc;border-bottom:1px solid #e5e7eb;" id="gallery-${w.id}">${d.title?`<div style="padding:10px 16px 6px;font-size:13px;font-weight:600;color:#64748b;">🖼️ ${d.title}</div>`:''}<div id="gallery-slides-${w.id}">${slides}</div>${imgs.length>1?`<div style="position:absolute;top:50%;transform:translateY(-50%);left:8px;right:8px;display:flex;justify-content:space-between;pointer-events:none;"><button onclick="galleryNav('${w.id}',-1)" style="background:rgba(0,0,0,.5);border:none;color:#fff;width:32px;height:32px;border-radius:50%;cursor:pointer;pointer-events:all;font-size:16px;">‹</button><button onclick="galleryNav('${w.id}',+1)" style="background:rgba(0,0,0,.5);border:none;color:#fff;width:32px;height:32px;border-radius:50%;cursor:pointer;pointer-events:all;font-size:16px;">›</button></div>`:''}<div style="text-align:center;padding:6px;font-size:11px;color:#9ca3af;" id="gallery-counter-${w.id}">${imgs.length>1?`1 / ${imgs.length}`:''}</div></div>`; }
+function renderGallery(w) {
+  const d = w.data;
+  const imgs = (d.images || []).filter(i => i && i.url && i.url.trim());
+  if (!imgs.length) return '';
+  const slides = imgs.map((img, i) => {
+    const u = img.url.trim();
+    const c = (img.caption || '').trim();
+    return `
+      <div class="gallery-slide-${w.id} widget-gallery-slide" style="display:${i === 0 ? 'block' : 'none'};">
+        <img src="${u}" alt="" class="widget-gallery-img" onerror="this.parentElement.style.display='none'">
+        ${c ? `<div class="widget-gallery-caption">${c}</div>` : ''}
+      </div>`;
+  }).join('');
+  return `
+    <div class="widget-gallery-container" id="gallery-${w.id}">
+      ${d.title ? `<div class="widget-gallery-title">🖼️ ${d.title}</div>` : ''}
+      <div id="gallery-slides-${w.id}" class="widget-gallery-slides">${slides}</div>
+      ${imgs.length > 1 ? `
+        <div class="widget-gallery-nav">
+          <button onclick="galleryNav('${w.id}',-1)" class="widget-gallery-nav-btn widget-gallery-nav-prev">‹</button>
+          <button onclick="galleryNav('${w.id}',+1)" class="widget-gallery-nav-btn widget-gallery-nav-next">›</button>
+        </div>` : ''}
+      <div class="widget-gallery-counter" id="gallery-counter-${w.id}">${imgs.length > 1 ? `1 / ${imgs.length}` : ''}</div>
+    </div>`;
+}
 const _galleryIdx = {};
 function initGallery(id) { _galleryIdx[id] = 0; }
-function galleryNav(id, dir) { const s=document.querySelectorAll(`.gallery-slide-${id}`); if(!s.length) return; s[_galleryIdx[id]].style.display='none'; _galleryIdx[id]=(_galleryIdx[id]+dir+s.length)%s.length; s[_galleryIdx[id]].style.display='block'; const c=document.getElementById(`gallery-counter-${id}`); if(c) c.textContent=`${_galleryIdx[id]+1} / ${s.length}`; }
+function galleryNav(id, dir) {
+  const s = document.querySelectorAll(`.gallery-slide-${id}`);
+  if (!s.length) return;
+  s[_galleryIdx[id]].style.display = 'none';
+  _galleryIdx[id] = (_galleryIdx[id] + dir + s.length) % s.length;
+  s[_galleryIdx[id]].style.display = 'block';
+  const c = document.getElementById(`gallery-counter-${id}`);
+  if (c) c.textContent = `${_galleryIdx[id] + 1} / ${s.length}`;
+}
 
-function renderEvent(w) { const d=w.data,ds=d.date?new Date(d.date).toLocaleDateString('en-IN',{weekday:'long',year:'numeric',month:'long',day:'numeric'}):''; return `<div style="background:#f8fafc;border-bottom:1px solid #e5e7eb;padding:14px 20px;"><div style="max-width:700px;margin:0 auto;"><div style="font-size:11px;color:#ec4899;text-transform:uppercase;font-weight:600;letter-spacing:.06em;margin-bottom:4px;">📅 Upcoming Event</div><div style="font-size:16px;font-weight:700;color:#0f172a;margin-bottom:8px;">${d.title}</div><div style="display:flex;flex-wrap:wrap;gap:12px;">${ds?`<span style="font-size:12px;color:#64748b;">🗓️ ${ds}</span>`:''}${d.time?`<span style="font-size:12px;color:#64748b;">⏰ ${d.time}</span>`:''}${d.venue?`<span style="font-size:12px;color:#64748b;">📍 ${d.venue}</span>`:''}</div>${d.description?`<div style="font-size:12px;color:#64748b;margin-top:8px;">${d.description}</div>`:''}</div></div>`; }
+function renderEvent(w) {
+  const d = w.data;
+  const ds = d.date ? new Date(d.date).toLocaleDateString('en-IN', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' }) : '';
+  return `
+    <div class="widget-event-container">
+      <div class="widget-event-inner">
+        <div class="widget-event-header">📅 Upcoming Event</div>
+        <div class="widget-event-title">${d.title}</div>
+        <div class="widget-event-meta">
+          ${ds ? `<span class="widget-event-meta-item">🗓️ ${ds}</span>` : ''}
+          ${d.time ? `<span class="widget-event-meta-item">⏰ ${d.time}</span>` : ''}
+          ${d.venue ? `<span class="widget-event-meta-item">📍 ${d.venue}</span>` : ''}
+        </div>
+        ${d.description ? `<div class="widget-event-desc">${d.description}</div>` : ''}
+      </div>
+    </div>`;
+}
 
-function renderQuote(w) { const d=w.data; return `<div style="background:linear-gradient(135deg,#f5f3ff,#fdf4ff);border-bottom:1px solid #e5e7eb;padding:24px;text-align:center;"><div style="max-width:700px;margin:0 auto;"><div style="font-size:40px;color:#c4b5fd;line-height:1;margin-bottom:4px;">"</div><div style="font-size:clamp(14px,3vw,18px);color:#334155;font-style:italic;line-height:1.6;margin-bottom:8px;">${d.text}</div>${d.author?`<div style="font-size:13px;color:#7c3aed;font-weight:600;">— ${d.author}</div>`:''}</div></div>`; }
+function renderQuote(w) {
+  const d = w.data;
+  return `
+    <div class="widget-quote-container">
+      <div class="widget-quote-inner">
+        <div class="widget-quote-mark">"</div>
+        <div class="widget-quote-text">${d.text}</div>
+        ${d.author ? `<div class="widget-quote-author">— ${d.author}</div>` : ''}
+      </div>
+    </div>`;
+}
 
-function renderCustom(w) { return `<div style="border-bottom:1px solid #e5e7eb;">${w.data.html||''}</div>`; }
+function renderCustom(w) { return `<div class="widget-custom-container">${w.data.html || ''}</div>`; }
 
 // ── Fireworks ──
 function startFireworks(customText='',options={}) { const canvas=document.getElementById('fireworks-canvas'); canvas.style.display='block'; canvas.width=window.innerWidth; canvas.height=window.innerHeight; const ctx=canvas.getContext('2d'), particles=[], colors=['#f59e0b','#ef4444','#6366f1','#22c55e','#f472b6','#38bdf8','#fde68a'], fwText=customText?customText.trim():'', intensity=options.intensity||60, durLimit=options.duration===999?99999:((options.duration||5)*60)/40, tStyle=options.textStyle||'sans-serif', tSizeBase=options.textSize||40; function spawnBurst(){const x=Math.random()*canvas.width,y=Math.random()*canvas.height*0.5;if(fwText&&Math.random()>0.3){particles.push({x,y,vx:(Math.random()-0.5),vy:-1-Math.random()*2,life:1,color:colors[Math.floor(Math.random()*colors.length)],text:fwText,scale:0});}for(let i=0;i<intensity;i++){const ang=(Math.PI*2/intensity)*i,speed=2+Math.random()*4;particles.push({x,y,vx:Math.cos(ang)*speed,vy:Math.sin(ang)*speed,life:1,color:colors[Math.floor(Math.random()*colors.length)]});}} spawnBurst(); let t=0,burstsDone=0; function loop(){ctx.clearRect(0,0,canvas.width,canvas.height);t++;if(t%40===0&&burstsDone<durLimit){spawnBurst();burstsDone++;}for(let i=particles.length-1;i>=0;i--){const p=particles[i];if(p.text){p.x+=p.vx;p.y+=p.vy;p.life-=0.008;p.scale+=0.8;if(p.life<=0){particles.splice(i,1);continue;}ctx.globalAlpha=Math.max(0,p.life);ctx.fillStyle=p.color;ctx.font="bold "+Math.min(20+p.scale,tSizeBase*1.5)+"px "+tStyle;ctx.textAlign="center";ctx.fillText(p.text,p.x,p.y);}else{p.x+=p.vx;p.y+=p.vy;p.vy+=0.12;p.life-=0.015;if(p.life<=0){particles.splice(i,1);continue;}ctx.globalAlpha=p.life;ctx.fillStyle=p.color;ctx.beginPath();ctx.arc(p.x,p.y,3,0,Math.PI*2);ctx.fill();}}ctx.globalAlpha=1;if(particles.length>0||burstsDone<durLimit)requestAnimationFrame(loop);else{setTimeout(()=>canvas.style.display='none',500);}} loop(); window.addEventListener('resize',()=>{canvas.width=window.innerWidth;canvas.height=window.innerHeight;}); }

@@ -7,20 +7,29 @@
   <meta name="description" content="Browse and download apps, albums, and files from SanuwarTools Download Hub.">
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+  <script>
+    (function() {
+      const saved = localStorage.getItem('sanuwartools-theme');
+      if (saved) {
+        document.documentElement.setAttribute('data-theme', saved);
+      }
+    })();
+  </script>
   <style>
     *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
     :root {
-      --bg: #070b13;
-      --bg2: #0d1220;
-      --surface: rgba(255,255,255,0.038);
-      --surface2: rgba(255,255,255,0.06);
-      --surface-hover: rgba(255,255,255,0.075);
-      --border: rgba(255,255,255,0.07);
-      --border-accent: rgba(99,102,241,0.35);
-      --text: #eef2ff;
-      --text-secondary: #c7d2fe;
-      --muted: #718096;
+      /* Light theme (default) */
+      --bg: #f5f5f7;
+      --bg2: #ffffff;
+      --surface: rgba(15,23,42,0.035);
+      --surface2: rgba(15,23,42,0.06);
+      --surface-hover: rgba(15,23,42,0.08);
+      --border: rgba(15,23,42,0.08);
+      --border-accent: rgba(99,102,241,0.2);
+      --text: #0f172a;
+      --text-secondary: #475569;
+      --muted: #94a3b8;
       --accent: #6366f1;
       --accent2: #a855f7;
       --accent3: #06b6d4;
@@ -31,8 +40,22 @@
       --radius: 14px;
       --radius-lg: 20px;
       --radius-xl: 24px;
-      --shadow-accent: 0 0 40px rgba(99,102,241,0.2);
+      --shadow-accent: 0 0 40px rgba(99,102,241,0.15);
       --transition: all 0.25s cubic-bezier(.4,0,.2,1);
+    }
+
+    [data-theme="dark"] {
+      --bg: #070b13;
+      --bg2: #0d1220;
+      --surface: rgba(255,255,255,0.038);
+      --surface2: rgba(255,255,255,0.06);
+      --surface-hover: rgba(255,255,255,0.075);
+      --border: rgba(255,255,255,0.07);
+      --border-accent: rgba(99,102,241,0.35);
+      --text: #eef2ff;
+      --text-secondary: #c7d2fe;
+      --muted: #718096;
+      --shadow-accent: 0 0 40px rgba(99,102,241,0.2);
     }
 
     html { scroll-behavior: smooth; }
@@ -748,6 +771,9 @@
     </div>
     <div class="nav-right">
       <span class="nav-count" id="itemCount">Loading...</span>
+      <button id="theme-toggle-btn" class="pill" style="padding: 0.42rem 0.8rem; cursor: pointer;" aria-label="Toggle theme">
+        <i class="fa-solid fa-moon"></i>
+      </button>
       <a href="/" class="nav-back"><i class="fa-solid fa-arrow-left"></i> Home</a>
     </div>
   </div>
@@ -1217,6 +1243,26 @@
   // ── INIT ─────────────────────────────────────────────
   document.addEventListener('DOMContentLoaded', () => {
     loadData();
+
+    // Theme toggle handling
+    const themeBtn = document.getElementById('theme-toggle-btn');
+    if (themeBtn) {
+      themeBtn.addEventListener('click', () => {
+        const current = document.documentElement.getAttribute('data-theme') || 'light';
+        const next = current === 'dark' ? 'light' : 'dark';
+        document.documentElement.setAttribute('data-theme', next);
+        localStorage.setItem('sanuwartools-theme', next);
+        updateThemeBtnIcon();
+      });
+      
+      // Set initial icon state
+      updateThemeBtnIcon();
+    }
+    
+    function updateThemeBtnIcon() {
+      const isDark = document.documentElement.getAttribute('data-theme') === 'dark';
+      themeBtn.innerHTML = isDark ? '<i class="fa-solid fa-sun"></i>' : '<i class="fa-solid fa-moon"></i>';
+    }
 
     // Escape key closes modal
     document.addEventListener('keydown', e => {

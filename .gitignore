@@ -17,7 +17,6 @@ env/
 
 # Local uploads (don't commit uploaded files)
 static/assets/uploads/
-static/assets/thumbnails/
 
 # Temp
 *.tmp
