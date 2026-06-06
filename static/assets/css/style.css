@@ -212,6 +212,15 @@ input, select, textarea { font-size: 16px; font-family: inherit; }
   flex-shrink: 0;
 }
 
+.logo-img {
+  width: 32px;
+  height: 32px;
+  border-radius: 8px;
+  object-fit: cover;
+  flex-shrink: 0;
+  box-shadow: 0 4px 12px rgba(99, 102, 241, 0.25);
+}
+
 .topbar-nav {
   display: flex;
   align-items: center;
