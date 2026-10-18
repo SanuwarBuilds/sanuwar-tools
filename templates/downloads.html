@@ -1167,11 +1167,18 @@
     showToast('Preparing download...', 'loading');
 
     try {
-      // Strategy 1: GitHub raw URLs → direct anchor download (no CORS)
-      if (rawUrl.includes('raw.githubusercontent.com')) {
+      // Let the browser stream GitHub assets directly. Avoid buffering large APKs
+      // in JavaScript or opening a popup after a failed cross-origin fetch.
+      const downloadUrl = new URL(rawUrl, window.location.href);
+      const isGitHubAsset = downloadUrl.protocol === 'https:' && (
+        downloadUrl.hostname === 'raw.githubusercontent.com' ||
+        (downloadUrl.hostname === 'github.com' &&
+          /^\/[^/]+\/[^/]+\/releases\/download\//.test(downloadUrl.pathname))
+      );
+      if (isGitHubAsset) {
         const filename = extractFilename(rawUrl) || defaultName || 'download';
         triggerAnchorDownload(rawUrl, filename);
-        showToast(`Downloading ${filename}`, 'success');
+        showToast(`Download requested: ${filename}`, 'success');
         return;
       }
 
