@@ -1,5 +1,29 @@
 [
   {
+    "title": "Local Ludu",
+    "description": "Local friendly-match game. Use Ludo Remote on a second Android phone on the same Wi-Fi or compatible hotspot.",
+    "category": "Apps",
+    "image": "",
+    "link": "https://github.com/SanuwarBuilds/sanuwar-tools/releases/download/ludo-2026-10-18/Local-Ludu-Android12-Classic-All.apk",
+    "version": "Classic local build",
+    "is_album": false,
+    "album_files": [],
+    "id": "item_d27b51da",
+    "is_new": true
+  },
+  {
+    "title": "Ludo Remote",
+    "description": "Native Android controller for Local Ludu. Select the next roll by colour. Use with the game on another Android phone.",
+    "category": "Apps",
+    "image": "",
+    "link": "https://github.com/SanuwarBuilds/sanuwar-tools/releases/download/ludo-2026-10-18/LudoRemote-1.2.0-release.apk",
+    "version": "1.2.0",
+    "is_album": false,
+    "album_files": [],
+    "id": "item_d2613643",
+    "is_new": true
+  },
+  {
     "id": "item_6e0c8b5a",
     "title": "Files Album 6/12/2026",
     "description": "1 files",
