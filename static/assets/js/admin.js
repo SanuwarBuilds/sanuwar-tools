@@ -1,978 +1,1541 @@
-/* ============================================
-   SanuwarTools — Admin Panel JavaScript
-   Full CRUD, config management, import/export
-   ============================================ */
-
-(function () {
-  'use strict';
-
-  // ── Constants ───────────────────────────
-  const LS_CONFIG_KEY = 'sanuwartools-config';
-  const CONFIG_URL = '/tools.config.json';
-
-  let config = null;
-  let currentView = 'dashboard';
-  let editingToolId = null;
-  let editingToolTags = [];
-
-  // ── Toast Notifications ─────────────────
-  function showToast(message, type = 'info') {
-    const container = document.getElementById('toast-container');
-    if (!container) return;
-
-    const icons = {
-      success: '✅',
-      error: '❌',
-      info: 'ℹ️',
-      warning: '⚠️'
-    };
-
-    const toast = document.createElement('div');
-    toast.className = `toast ${type}`;
-    toast.innerHTML = `
-      <span class="toast-icon">${icons[type] || icons.info}</span>
-      <span>${message}</span>
-      <button class="toast-close" onclick="this.parentElement.classList.add('toast-exit'); setTimeout(() => this.parentElement.remove(), 300)">×</button>
-    `;
-    container.appendChild(toast);
-
-    setTimeout(() => {
-      toast.classList.add('toast-exit');
-      setTimeout(() => toast.remove(), 300);
-    }, 4000);
-  }
-
-  // ── Config Management ───────────────────
-  async function loadConfig() {
+"use strict";
+(async () => {
+  const { $, el, api, image, toast, open, close, empty } = ST;
+  const root = $("#admin-view");
+  let config,
+    downloads = [],
+    widgets = [],
+    store = [],
+    current = "dashboard";
+  const titles = {
+    dashboard: [
+      "Overview",
+      "A LITTLE PROGRESS, EVERY DAY",
+      "Your workspace, at a glance.",
+      "Everything you need to keep your toolkit moving.",
+      "Add a tool",
+    ],
+    tools: [
+      "Tools",
+      "THE EVERYDAY TOOLKIT",
+      "Useful things, thoughtfully organised.",
+      "Add, edit aur organise the tools your visitors use.",
+      "Add a tool",
+    ],
+    downloads: [
+      "Downloads",
+      "THE GOOD STUFF",
+      "A better place for every file.",
+      "Apps, albums aur files ko ek jagah manage karo.",
+      "Add a download",
+    ],
+    widgets: [
+      "Home widgets",
+      "MAKE IT YOURS",
+      "Give your homepage a little life.",
+      "Announcements, links, polls aur updates ko publish karo.",
+      "Add a widget",
+    ],
+    store: [
+      "Store apps",
+      "YOUR APP COLLECTION",
+      "Apps worth sharing.",
+      "Add, update aur organise your app collection.",
+      "Add an app",
+    ],
+    categories: [
+      "Categories",
+      "A PLACE FOR EVERYTHING",
+      "Keep things easy to find.",
+      "Organise your toolkit with clear, useful categories.",
+      "",
+    ],
+    settings: [
+      "Site settings",
+      "THE FINISHING TOUCHES",
+      "Make it feel like you.",
+      "Brand, links aur default theme ko update karo.",
+      "",
+    ],
+    backup: [
+      "Backup & restore",
+      "A LITTLE PEACE OF MIND",
+      "Keep a copy of the good work.",
+      "Tools configuration export karo ya saved backup restore karo.",
+      "",
+    ],
+  };
+  const uid = (prefix) => `${prefix}_${crypto.randomUUID()}`;
+  const state = (message) => {
+    $("#save-status").replaceChildren(
+      el("span", { class: "status-dot" }),
+      message,
+    );
+  };
+  const mutate = async (path, method, body) => {
+    state("Saving changes…");
     try {
-      // Always fetch fresh from server so deletes/edits are reflected everywhere
-      const res = await fetch(CONFIG_URL + '?t=' + Date.now());
-      if (!res.ok) throw new Error(`HTTP ${res.status}`);
-      config = await res.json();
-      localStorage.setItem(LS_CONFIG_KEY, JSON.stringify(config));
-    } catch (err) {
-      console.warn('Server fetch failed, trying localStorage:', err);
-      const cached = localStorage.getItem(LS_CONFIG_KEY);
-      if (cached) {
-        config = JSON.parse(cached);
-      } else {
-        config = {
-          site: { name: 'SanuwarTools', tagline: 'All my tools, one place.', favicon: '', defaultTheme: 'light' },
-          downloadPage: { enabled: true, url: '/downloads', buttonLabel: '⬇ Download Tools', buttonSubtext: 'Get all tools offline' },
-          tools: [],
-          categories: ['All', 'Utility', 'Downloader', 'Converter', 'Generator'],
-          socialLinks: { github: '', instagram: '', youtube: '', twitter: '' }
+      const result = await api(path, {
+        method,
+        ...(body !== undefined ? { body: JSON.stringify(body) } : {}),
+      });
+      state("Changes saved");
+      return result;
+    } catch (error) {
+      state("Save failed · retry");
+      throw error;
+    }
+  };
+  const saveConfig = async (next) => {
+    await mutate("/api/tools.config", "POST", next);
+    config = next;
+  };
+  const sidebarMedia = matchMedia("(max-width: 800px)");
+  const syncSidebar = () => {
+    $("#admin-sidebar").inert =
+      sidebarMedia.matches && !$("#admin-sidebar").classList.contains("open");
+  };
+  new MutationObserver(syncSidebar).observe($("#admin-sidebar"), {
+    attributes: true,
+    attributeFilter: ["class"],
+  });
+  sidebarMedia.addEventListener("change", syncSidebar);
+  syncSidebar();
+  const clone = (object) => JSON.parse(JSON.stringify(object));
+  const rowButton = (label, action, danger = false, aria) =>
+    el(
+      "button",
+      {
+        class: `row-button${danger ? " danger" : ""}`,
+        type: "button",
+        onclick: () => Promise.resolve(action()).catch((e) => toast(e.message)),
+        "aria-label": aria || label,
+      },
+      label,
+    );
+  const card = (title, content, sub) =>
+    el(
+      "section",
+      { class: "admin-card" },
+      el(
+        "div",
+        { class: "admin-card-header" },
+        el("div", {}, el("h2", {}, title), ...(sub ? [el("p", {}, sub)] : [])),
+      ),
+      el("div", { class: "admin-card-body" }, content),
+    );
+  const pill = (visible = true) =>
+    el(
+      "span",
+      { class: `status-pill${visible ? "" : " hidden"}` },
+      visible ? "Published" : "Hidden",
+    );
+  function updateCounts() {
+    $("#nav-tools-count").textContent = config.tools.length;
+    $("#nav-downloads-count").textContent = downloads.length;
+  }
+  function navigate(view) {
+    current = view;
+    const [crumb, kicker, title, description, action] = titles[view];
+    $("#view-breadcrumb").textContent = crumb;
+    $("#view-eyebrow").textContent = kicker;
+    $("#view-title").textContent = title;
+    $("#view-description").textContent = description;
+    const button = $("#primary-action");
+    button.hidden = !action;
+    button.replaceChildren(action, el("span", {}, "+"));
+    document
+      .querySelectorAll("[data-view]")
+      .forEach((b) => b.classList.toggle("selected", b.dataset.view === view));
+    $("#admin-sidebar").classList.remove("open");
+    $("#admin-menu").setAttribute("aria-expanded", "false");
+    updateCounts();
+    render();
+    window.scrollTo({ top: 0, behavior: "instant" });
+  }
+  const primary = () =>
+    ({
+      dashboard: () => editTool(),
+      tools: () => editTool(),
+      downloads: () => editDownload(),
+      widgets: () => editWidget(),
+      store: () => editStore(),
+    })[current]?.();
+  $("#primary-action").addEventListener("click", primary);
+  document
+    .querySelectorAll("[data-view]")
+    .forEach((button) =>
+      button.addEventListener("click", () => navigate(button.dataset.view)),
+    );
+  $("#admin-menu").addEventListener("click", () => {
+    const showing = $("#admin-sidebar").classList.toggle("open");
+    $("#admin-menu").setAttribute("aria-expanded", String(showing));
+  });
+  document.addEventListener("click", (event) => {
+    if (!event.target.closest("#admin-sidebar,#admin-menu")) {
+      $("#admin-sidebar").classList.remove("open");
+      $("#admin-menu").setAttribute("aria-expanded", "false");
+    }
+  });
+  document.addEventListener("keydown", (event) => {
+    if (event.key === "Escape") {
+      $("#admin-sidebar").classList.remove("open");
+      $("#admin-menu").setAttribute("aria-expanded", "false");
+    }
+  });
+  $("#logout").addEventListener("click", async () => {
+    try {
+      await fetch("/admin/logout", {
+        method: "POST",
+        headers: { "X-CSRF-Token": $('meta[name="csrf-token"]').content },
+      });
+      location.assign("/admin/login");
+    } catch {
+      toast("Sign out failed. Try again.");
+    }
+  });
+  function dashboard() {
+    const stats = [
+      [
+        config.tools.length,
+        "Total tools",
+        "↗",
+        `${config.tools.filter((t) => t.visible !== false).length} published on your website`,
+      ],
+      [
+        downloads.length,
+        "Download items",
+        "↓",
+        `${downloads.filter((i) => i.is_album).length} albums in the collection`,
+      ],
+      [
+        config.categories.filter((c) => c !== "All").length,
+        "Tool categories",
+        "≡",
+        "Everything in its right place",
+      ],
+      [
+        widgets.filter((w) => w.enabled).length,
+        "Active widgets",
+        "⊞",
+        `${widgets.length} widgets in your workspace`,
+      ],
+    ];
+    const recent = el(
+      "div",
+      {},
+      ...[...config.tools]
+        .sort((a, b) => (b.addedDate || "").localeCompare(a.addedDate || ""))
+        .slice(0, 4)
+        .map((tool) =>
+          el(
+            "div",
+            { class: "recent-row" },
+            image(tool.thumbnail, tool.name),
+            el(
+              "div",
+              {},
+              el("strong", {}, tool.name),
+              el("p", {}, tool.category || "Tool"),
+            ),
+            pill(tool.visible !== false),
+            rowButton("↗", () => editTool(tool), false, `Edit ${tool.name}`),
+          ),
+        ),
+    );
+    const recentCard = el(
+      "section",
+      { class: "admin-card" },
+      el(
+        "div",
+        { class: "admin-card-header" },
+        el("h2", {}, "Recently added"),
+        el(
+          "button",
+          { class: "text-link", onclick: () => navigate("tools") },
+          "All tools ↗",
+        ),
+      ),
+      recent,
+    );
+    const quick = el(
+      "div",
+      { class: "quick-create" },
+      el("span", { class: "eyebrow" }, "KEEP THE GOOD THINGS COMING"),
+      el(
+        "h2",
+        {},
+        "What will you",
+        el("br"),
+        el("span", { class: "serif" }, "build next?"),
+      ),
+      el(
+        "p",
+        {},
+        "Share something useful. Your next tool could make someone’s day.",
+      ),
+      el(
+        "button",
+        { class: "button button-dark", onclick: () => editTool() },
+        "Add to your toolkit",
+        el("span", {}, "↗"),
+      ),
+      el("span", { "aria-hidden": "true" }, "✳"),
+    );
+    const health = el(
+      "div",
+      { class: "admin-checklist" },
+      ...[
+        [
+          "↗",
+          "Explore your website",
+          "Check your latest content on desktop and mobile.",
+        ],
+        [
+          "↓",
+          "Keep downloads organised",
+          "Use albums for related files and memories.",
+        ],
+        [
+          "↙",
+          "Save a configuration backup",
+          "Export before making big catalogue changes.",
+        ],
+      ].map(([symbol, title, description]) =>
+        el(
+          "div",
+          {},
+          el("span", {}, symbol),
+          el("div", {}, el("h3", {}, title), el("p", {}, description)),
+        ),
+      ),
+    );
+    root.replaceChildren(
+      el(
+        "div",
+        { class: "dashboard-stats" },
+        ...stats.map(([count, label, icon, note]) =>
+          el(
+            "div",
+            { class: "dashboard-stat" },
+            el(
+              "div",
+              { class: "stat-top" },
+              el("span", {}, label),
+              el("span", {}, icon),
+            ),
+            el("strong", {}, String(count).padStart(2, "0")),
+            el("small", {}, note),
+          ),
+        ),
+      ),
+      el("div", { class: "dashboard-columns" }, recentCard, quick),
+      card("A little workspace care", health),
+    );
+  }
+  function listing(items, kind) {
+    const search = el("input", {
+      type: "search",
+      placeholder: `Search ${kind}…`,
+      "aria-label": `Search ${kind}`,
+    });
+    const body = el("tbody");
+    const count = el("div", { class: "table-bottom" });
+    const nameOf = (i) =>
+      i.name ||
+      i.title ||
+      i.data?.title ||
+      i.data?.question ||
+      i.data?.name ||
+      i.data?.winner_name ||
+      i.type ||
+      "Untitled";
+    const draw = () => {
+      const q = search.value.trim().toLowerCase();
+      const found = items.filter((i) =>
+        `${nameOf(i)} ${i.category || ""} ${i.type || ""}`
+          .toLowerCase()
+          .includes(q),
+      );
+      body.replaceChildren(
+        ...found.map((item) => {
+          const actions = [];
+          const edit = () =>
+            kind === "tools"
+              ? editTool(item)
+              : kind === "downloads"
+                ? editDownload(item)
+                : kind === "widgets"
+                  ? editWidget(item)
+                  : editStore(item);
+          actions.push(rowButton("Edit", edit, false, `Edit ${nameOf(item)}`));
+          if (kind === "tools" || kind === "widgets") {
+            const move = async (delta) => {
+              const list = kind === "tools" ? config.tools : widgets;
+              const index = list.findIndex((i) => i.id === item.id);
+              const next = index + delta;
+              if (next < 0 || next >= list.length) return;
+              const reordered = [...list];
+              [reordered[index], reordered[next]] = [
+                reordered[next],
+                reordered[index],
+              ];
+              if (kind === "tools") {
+                const draft = clone(config);
+                draft.tools = reordered;
+                await saveConfig(draft);
+              } else {
+                await mutate("/api/admin/widgets/reorder", "POST", {
+                  order: reordered.map((w) => w.id),
+                });
+                widgets = reordered;
+              }
+              render();
+            };
+            actions.push(
+              rowButton("↑", () => move(-1), false, `Move ${nameOf(item)} up`),
+              rowButton("↓", () => move(1), false, `Move ${nameOf(item)} down`),
+            );
+          }
+          actions.push(
+            rowButton(
+              "×",
+              () =>
+                confirmDelete(nameOf(item), async () => {
+                  if (kind === "tools") {
+                    const next = clone(config);
+                    next.tools = next.tools.filter((t) => t.id !== item.id);
+                    await saveConfig(next);
+                  } else if (kind === "downloads") {
+                    await mutate(
+                      `/api/delete_item/${encodeURIComponent(item.id)}`,
+                      "DELETE",
+                    );
+                    downloads = downloads.filter((i) => i.id !== item.id);
+                  } else if (kind === "widgets") {
+                    await mutate(
+                      `/api/admin/widgets/${encodeURIComponent(item.id)}`,
+                      "DELETE",
+                    );
+                    widgets = widgets.filter((i) => i.id !== item.id);
+                  } else {
+                    await mutate(
+                      `/api/admin/store-apps/${encodeURIComponent(item.id)}`,
+                      "DELETE",
+                    );
+                    store = store.filter((i) => i.id !== item.id);
+                  }
+                  updateCounts();
+                  render();
+                }),
+              true,
+              `Delete ${nameOf(item)}`,
+            ),
+          );
+          return el(
+            "tr",
+            {},
+            el(
+              "td",
+              {},
+              el(
+                "div",
+                { class: "table-name" },
+                ...(kind !== "widgets"
+                  ? [image(item.thumbnail || item.image, nameOf(item))]
+                  : []),
+                el(
+                  "div",
+                  {},
+                  el("strong", {}, nameOf(item)),
+                  el(
+                    "small",
+                    {},
+                    kind === "widgets"
+                      ? item.type
+                      : item.slug ||
+                          (item.is_album
+                            ? `${item.album_files?.length || 0} files`
+                            : item.version || "—"),
+                  ),
+                ),
+              ),
+            ),
+            el("td", {}, item.category || item.type || "General"),
+            el(
+              "td",
+              {},
+              pill(kind === "widgets" ? item.enabled : item.visible !== false),
+            ),
+            el("td", {}, el("div", { class: "row-actions" }, actions)),
+          );
+        }),
+      );
+      if (!found.length)
+        body.append(
+          el(
+            "tr",
+            {},
+            el(
+              "td",
+              { colspan: "4" },
+              "Koi result nahi mila. Search badal kar dekho.",
+            ),
+          ),
+        );
+      count.textContent = `${found.length} of ${items.length} ${kind} · Changes are saved to the server`;
+    };
+    search.addEventListener("input", draw);
+    const toolbar = el(
+      "div",
+      { class: "admin-list-toolbar" },
+      el("label", { class: "search-box" }, el("span", {}, "⌕"), search),
+      el(
+        "a",
+        {
+          class: "text-link",
+          href: kind === "downloads" ? "/downloads" : "/",
+          target: "_blank",
+          rel: "noopener",
+        },
+        "View live ↗",
+      ),
+    );
+    const panel = el(
+      "section",
+      { class: "admin-card" },
+      toolbar,
+      el(
+        "div",
+        { class: "table-wrap" },
+        el(
+          "table",
+          { class: "admin-table" },
+          el(
+            "thead",
+            {},
+            el(
+              "tr",
+              {},
+              ...["NAME", "CATEGORY / TYPE", "STATUS", "ACTIONS"].map((t) =>
+                el("th", {}, t),
+              ),
+            ),
+          ),
+          body,
+        ),
+      ),
+      count,
+    );
+    root.replaceChildren(panel);
+    if (kind === "downloads")
+      root.prepend(
+        card(
+          "A quicker way to share",
+          el(
+            "div",
+            {},
+            el(
+              "p",
+              { class: "form-note" },
+              "Multiple files ko upload karo. Individual downloads banao, ya ek album mein saath rakho.",
+            ),
+            el(
+              "div",
+              { class: "backup-actions" },
+              el(
+                "button",
+                { class: "button button-light", onclick: bulkUpload },
+                "Upload files",
+                el("span", {}, "↑"),
+              ),
+            ),
+          ),
+        ),
+      );
+    draw();
+  }
+  function field(label, value = "", type = "text", required = false) {
+    const input = el(type === "textarea" ? "textarea" : "input", {
+      ...(type === "textarea" ? { rows: "3" } : { type }),
+      required,
+      ...(type !== "textarea" ? { value } : {}),
+      maxlength: type === "url" ? "500000" : "20000",
+    });
+    if (type === "textarea") input.value = value;
+    return { input, node: el("label", {}, label, input) };
+  }
+  function checkbox(label, checked) {
+    const input = el("input", { type: "checkbox", checked });
+    return {
+      input,
+      node: el("label", { class: "checkbox-label" }, input, label),
+    };
+  }
+  function select(label, options, value) {
+    const input = el(
+      "select",
+      {},
+      ...options.map((o) => el("option", { value: o }, o)),
+    );
+    input.value = value;
+    return { input, node: el("label", {}, label, input) };
+  }
+  function editor(title, nodes, onSave, kicker = "CONTENT EDITOR") {
+    const error = el("p", { class: "form-error", role: "alert" });
+    const submit = el(
+      "button",
+      { class: "button button-orange", type: "submit" },
+      "Save changes",
+      el("span", {}, "✓"),
+    );
+    const form = el(
+      "form",
+      { class: "editor-form" },
+      nodes,
+      error,
+      el(
+        "div",
+        { class: "editor-actions" },
+        el(
+          "button",
+          { type: "button", class: "button button-light", onclick: close },
+          "Cancel",
+        ),
+        submit,
+      ),
+    );
+    form.addEventListener("submit", async (event) => {
+      event.preventDefault();
+      error.textContent = "";
+      if (Number(form.dataset.pendingUploads || 0)) {
+        error.textContent = "Upload complete hone tak wait karo.";
+        return;
+      }
+      submit.disabled = true;
+      try {
+        await onSave();
+        close();
+        toast("Changes save ho gaye.");
+        updateCounts();
+        render();
+      } catch (e) {
+        error.textContent = e.message;
+      } finally {
+        submit.disabled = false;
+      }
+    });
+    open(title, [form], kicker);
+    return form;
+  }
+  function uploadField(target, isImage = false) {
+    const status = el(
+      "span",
+      { class: "form-note" },
+      isImage
+        ? "PNG, JPG, WebP or GIF · max 32 MB"
+        : "Supported files · max 32 MB",
+    );
+    const input = el("input", {
+      type: "file",
+      ...(isImage
+        ? { accept: "image/png,image/jpeg,image/webp,image/gif" }
+        : {
+            accept:
+              ".jpg,.jpeg,.png,.webp,.gif,.pdf,.zip,.apk,.txt,.csv,.mp3,.mp4,.json,.aab",
+          }),
+      "aria-label": isImage ? "Upload thumbnail" : "Upload file",
+    });
+    input.addEventListener("change", async () => {
+      const file = input.files[0];
+      if (!file) return;
+      if (file.size > 32 * 1024 * 1024) {
+        status.textContent = "File 32 MB se chhoti honi chahiye.";
+        return;
+      }
+      const data = new FormData();
+      data.append(isImage ? "image" : "file", file);
+      input.disabled = true;
+      status.textContent = "Uploading…";
+      const form = input.closest("form");
+      if (form)
+        form.dataset.pendingUploads =
+          Number(form.dataset.pendingUploads || 0) + 1;
+      const saveButton = form?.querySelector("[type=submit]");
+      if (saveButton) saveButton.disabled = true;
+      try {
+        const result = await api(
+          isImage ? "/api/admin/upload" : "/api/admin/upload-download-file",
+          { method: "POST", body: data },
+        );
+        target.value = result.url;
+        status.textContent = `Uploaded: ${result.filename || file.name}`;
+      } catch (e) {
+        status.textContent = e.message;
+      } finally {
+        input.disabled = false;
+        if (form)
+          form.dataset.pendingUploads = Math.max(
+            0,
+            Number(form.dataset.pendingUploads || 0) - 1,
+          );
+        if (saveButton)
+          saveButton.disabled = Number(form?.dataset.pendingUploads || 0) > 0;
+      }
+    });
+    return el(
+      "div",
+      { class: "upload-field" },
+      "Or upload a file",
+      input,
+      status,
+    );
+  }
+  function editTool(tool) {
+    const t = tool || {};
+    const name = field("Tool name", t.name, "text", true),
+      category = select(
+        "Category",
+        config.categories.filter((c) => c !== "All"),
+        t.category || config.categories.find((c) => c !== "All"),
+      ),
+      description = field("Short description", t.description, "textarea"),
+      long = field("Full description", t.longDescription, "textarea"),
+      link = field("Website URL", t.siteUrl, "url", true),
+      thumb = field("Thumbnail URL", t.thumbnail),
+      tags = field("Tags · comma separated", (t.tags || []).join(", ")),
+      visible = checkbox("Publish on the website", t.visible !== false),
+      featured = checkbox("Feature this tool", t.featured || false);
+    editor(
+      tool ? "Edit tool" : "A new useful thing.",
+      [
+        el("div", { class: "form-grid" }, name.node, category.node),
+        description.node,
+        long.node,
+        link.node,
+        thumb.node,
+        uploadField(thumb.input, true),
+        tags.node,
+        el("div", { class: "form-grid" }, visible.node, featured.node),
+      ],
+      async () => {
+        const next = clone(config);
+        const updated = {
+          ...t,
+          id: t.id || uid("tool"),
+          name: name.input.value.trim(),
+          slug:
+            t.slug ||
+            name.input.value
+              .toLowerCase()
+              .replace(/[^a-z0-9]+/g, "-")
+              .replace(/^-|-$/g, ""),
+          category: category.input.value,
+          description: description.input.value,
+          longDescription: long.input.value,
+          siteUrl: link.input.value,
+          thumbnail: thumb.input.value,
+          tags: tags.input.value
+            .split(",")
+            .map((s) => s.trim())
+            .filter(Boolean),
+          visible: visible.input.checked,
+          featured: featured.input.checked,
+          addedDate: t.addedDate || new Date().toISOString().slice(0, 10),
+          downloadAvailable: t.downloadAvailable || false,
         };
-        saveConfig();
-        showToast('Created new config — add your tools!', 'info');
-      }
+        if (!updated.name) throw new Error("Tool name required.");
+        if (tool)
+          next.tools = next.tools.map((i) => (i.id === tool.id ? updated : i));
+        else next.tools.push(updated);
+        await saveConfig(next);
+      },
+    );
+  }
+  function editDownload(item) {
+    const i = item || {};
+    const title = field("Title", i.title, "text", true),
+      category = field("Category", i.category || "Apps", "text", true),
+      description = field("Description", i.description, "textarea"),
+      version = field("Version", i.version),
+      imageUrl = field("Cover image URL", i.image),
+      link = field("Download URL", i.link, "url"),
+      album = checkbox("This is an album", i.is_album || false);
+    const rows = el("div", { class: "file-rows" });
+    const albumRows = [];
+    function addFile(file = {}) {
+      const name = field("File name", file.name, "text", true),
+        url = field("HTTPS file URL", file.link, "url", true);
+      const row = { name, url };
+      row.node = el(
+        "div",
+        { class: "file-row" },
+        el("div", {}, name.node, url.node, uploadField(url.input)),
+        rowButton(
+          "×",
+          () => {
+            const index = albumRows.indexOf(row);
+            albumRows.splice(index, 1);
+            row.node.remove();
+          },
+          true,
+          "Remove file from album",
+        ),
+      );
+      albumRows.push(row);
+      rows.append(row.node);
     }
-
-    renderCurrentView();
-    updateDashboardStats();
-  }
-
-  // Push config to localStorage AND server
-  function saveConfig() {
-    localStorage.setItem(LS_CONFIG_KEY, JSON.stringify(config));
-    syncToServer();
-  }
-
-  async function syncToServer() {
-    try {
-      const res = await fetch('/api/tools.config', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(config)
+    (i.album_files || []).forEach(addFile);
+    const albumSection = el(
+      "div",
+      {},
+      rows,
+      el(
+        "button",
+        { type: "button", class: "text-link", onclick: () => addFile() },
+        "+ Add an album file",
+      ),
+    );
+    const linkSection = el("div", {}, link.node, uploadField(link.input));
+    function toggle() {
+      albumSection.hidden = !album.input.checked;
+      linkSection.hidden = album.input.checked;
+      albumRows.forEach((r) => {
+        r.name.input.required = album.input.checked;
+        r.url.input.required = album.input.checked;
       });
-      if (!res.ok) console.warn('Server sync failed:', await res.text());
-    } catch (e) {
-      console.warn('Server sync error:', e);
+      link.input.required = !album.input.checked;
     }
-  }
-
-  // ── Sidebar Navigation ──────────────────
-  function initSidebar() {
-    const links = document.querySelectorAll('.sidebar-link');
-    const sidebarToggle = document.getElementById('sidebar-toggle');
-    const sidebar = document.querySelector('.admin-sidebar');
-    const overlay = document.querySelector('.sidebar-overlay');
-
-    links.forEach(link => {
-      link.addEventListener('click', (e) => {
-        e.preventDefault();
-        const view = link.dataset.view;
-        if (view) {
-          currentView = view;
-          links.forEach(l => l.classList.remove('active'));
-          link.classList.add('active');
-          renderCurrentView();
-          updateTopbarTitle(view);
-
-          // Close mobile sidebar
-          sidebar?.classList.remove('mobile-open');
-          overlay?.classList.remove('active');
+    album.input.addEventListener("change", toggle);
+    toggle();
+    editor(
+      item ? "Edit download" : "Share something good.",
+      [
+        el("div", { class: "form-grid" }, title.node, category.node),
+        description.node,
+        el("div", { class: "form-grid" }, version.node, imageUrl.node),
+        uploadField(imageUrl.input, true),
+        album.node,
+        linkSection,
+        albumSection,
+      ],
+      async () => {
+        const payload = {
+          ...i,
+          title: title.input.value.trim(),
+          category: category.input.value.trim(),
+          description: description.input.value,
+          version: version.input.value,
+          image: imageUrl.input.value,
+          link: album.input.checked ? "" : link.input.value,
+          is_album: album.input.checked,
+          album_files: album.input.checked
+            ? albumRows.map((r) => ({
+                name: r.name.input.value,
+                link: r.url.input.value,
+              }))
+            : [],
+        };
+        if (payload.is_album && !payload.album_files.length)
+          throw new Error("Album mein kam se kam ek file add karo.");
+        if (item) {
+          await mutate("/api/update_item", "PUT", payload);
+          downloads = downloads.map((d) => (d.id === item.id ? payload : d));
+        } else {
+          const result = await mutate("/api/add_item", "POST", payload);
+          downloads.unshift(result.item);
         }
-      });
-    });
-
-    // Mobile sidebar toggle
-    if (sidebarToggle) {
-      sidebarToggle.addEventListener('click', () => {
-        sidebar.classList.toggle('mobile-open');
-        overlay.classList.toggle('active');
-      });
-    }
-
-    if (overlay) {
-      overlay.addEventListener('click', () => {
-        sidebar.classList.remove('mobile-open');
-        overlay.classList.remove('active');
-      });
-    }
+      },
+    );
   }
-
-  function updateTopbarTitle(view) {
-    const titles = {
-      dashboard: '📊 Dashboard',
-      tools: '🛠️ Manage Tools',
-      categories: '📁 Categories',
-      settings: '⚙️ Site Settings',
-      download: '⬇️ Download Settings',
-      theme: '🎨 Theme Settings',
-      export: '📤 Export Config',
-      import: '📥 Import Config'
+  function confirmDelete(name, action) {
+    const error = el("p", { class: "form-error", role: "alert" });
+    const button = el(
+      "button",
+      {
+        class: "button button-orange",
+        onclick: async () => {
+          button.disabled = true;
+          try {
+            await action();
+            close();
+            toast("Item removed.");
+          } catch (e) {
+            error.textContent = e.message;
+            button.disabled = false;
+          }
+        },
+      },
+      "Delete item",
+      el("span", {}, "×"),
+    );
+    open(
+      "Remove this item?",
+      [
+        el(
+          "p",
+          { class: "dialog-description" },
+          `“${name}” ko catalogue se delete karoge. Uploaded file apne host par rahegi. Delete karne se pehle backup export kar sakte ho.`,
+        ),
+        error,
+        el(
+          "div",
+          { class: "editor-actions" },
+          el(
+            "button",
+            { class: "button button-light", onclick: close },
+            "Keep item",
+          ),
+          button,
+        ),
+      ],
+      "CONFIRM DELETE",
+    );
+  }
+  const widgetSchemas = {
+    notice: [
+      ["title", "Title"],
+      ["message", "Message", "textarea"],
+    ],
+    poll: [["question", "Question"]],
+    winner: [
+      ["winner_name", "Winner name"],
+      ["event_name", "Event"],
+      ["photo_url", "Photo URL", "url"],
+      ["message", "Message", "textarea"],
+    ],
+    person_card: [
+      ["name", "Name"],
+      ["role", "Role"],
+      ["photo_url", "Photo URL", "url"],
+      ["bio", "Bio", "textarea"],
+    ],
+    link_card: [
+      ["title", "Title"],
+      ["url", "Website URL", "url"],
+      ["description", "Description", "textarea"],
+      ["button_text", "Button label"],
+    ],
+    ticker: [["messages", "Messages · one per line", "textarea"]],
+    gallery: [["images", "Image URLs · one per line", "textarea"]],
+    event_card: [
+      ["title", "Title"],
+      ["date", "Date", "date"],
+      ["time", "Time", "time"],
+      ["venue", "Venue"],
+      ["description", "Description", "textarea"],
+    ],
+    quote: [
+      ["text", "Quote", "textarea"],
+      ["author", "Author"],
+    ],
+    custom_html: [["html", "Text content", "textarea"]],
+  };
+  function editWidget(widget) {
+    const w = widget || {},
+      d = w.data || {};
+    const type = select(
+        "Widget type",
+        Object.keys(widgetSchemas),
+        w.type || "notice",
+      ),
+      enabled = checkbox("Publish this widget", w.enabled !== false);
+    const widgetLabels = {
+      notice: "Notice / alert",
+      poll: "Poll",
+      winner: "Winner celebration",
+      person_card: "Person card",
+      link_card: "Link card",
+      ticker: "News ticker",
+      gallery: "Image gallery",
+      event_card: "Event",
+      quote: "Quote",
+      custom_html: "Text block",
     };
-    const topbar = document.getElementById('topbar-title');
-    if (topbar) topbar.textContent = titles[view] || 'Admin';
-  }
-
-  // ── Render Views ────────────────────────
-  function renderCurrentView() {
-    document.querySelectorAll('.admin-view').forEach(v => v.classList.remove('active'));
-    const el = document.getElementById(`view-${currentView}`);
-    if (el) el.classList.add('active');
-
-    switch (currentView) {
-      case 'dashboard': renderDashboard(); break;
-      case 'tools': renderToolsTable(); break;
-      case 'categories': renderCategories(); break;
-      case 'settings': renderSettings(); break;
-      case 'download': renderDownloadSettings(); break;
-      case 'theme': renderThemeSettings(); break;
-      case 'export': renderExport(); break;
-      case 'import': renderImport(); break;
-    }
-  }
-
-  // ── Dashboard ───────────────────────────
-  function updateDashboardStats() {
-    const tools = config.tools || [];
-    document.getElementById('stat-total')?.textContent && (document.getElementById('stat-total').textContent = tools.length);
-    document.getElementById('stat-categories')?.textContent && (document.getElementById('stat-categories').textContent = (config.categories || []).filter(c => c !== 'All').length);
-    document.getElementById('stat-featured')?.textContent && (document.getElementById('stat-featured').textContent = tools.filter(t => t.featured).length);
-    document.getElementById('stat-visible')?.textContent && (document.getElementById('stat-visible').textContent = tools.filter(t => t.visible !== false).length);
-  }
-
-  function renderDashboard() {
-    updateDashboardStats();
-
-    const recentList = document.getElementById('recent-tools-list');
-    if (!recentList) return;
-
-    const recent = [...(config.tools || [])].sort((a, b) => new Date(b.addedDate) - new Date(a.addedDate)).slice(0, 5);
-
-    if (recent.length === 0) {
-      recentList.innerHTML = `<div class="empty-state"><div class="empty-icon">📦</div><h4>No tools yet</h4><p>Add your first tool to get started.</p></div>`;
-      return;
-    }
-
-    recentList.innerHTML = `
-      <table class="admin-table">
-        <thead>
-          <tr>
-            <th>Name</th>
-            <th>Category</th>
-            <th>Added</th>
-            <th>Status</th>
-          </tr>
-        </thead>
-        <tbody>
-          ${recent.map(t => `
-            <tr>
-              <td class="table-name">${t.name}</td>
-              <td><span class="table-category">${t.category}</span></td>
-              <td style="color: var(--admin-text-muted); font-size: 0.85rem;">${t.addedDate || '—'}</td>
-              <td>${t.visible !== false ? '<span style="color: var(--admin-success); font-weight: 600;">Visible</span>' : '<span style="color: var(--admin-text-muted);">Hidden</span>'}</td>
-            </tr>
-          `).join('')}
-        </tbody>
-      </table>
-    `;
-  }
-
-  // ── Tools Management ────────────────────
-  function renderToolsTable() {
-    const container = document.getElementById('tools-table-body');
-    if (!container) return;
-
-    const tools = config.tools || [];
-
-    if (tools.length === 0) {
-      container.innerHTML = `
-        <tr><td colspan="7" style="text-align: center; padding: 40px;">
-          <div class="empty-state"><div class="empty-icon">🛠️</div><h4>No tools added</h4><p>Click "Add New Tool" to add your first tool.</p></div>
-        </td></tr>
-      `;
-      return;
-    }
-
-    container.innerHTML = tools.map((tool, index) => `
-      <tr data-id="${tool.id}" draggable="true">
-        <td>
-          <img src="${tool.thumbnail}" alt="" class="table-thumb" onerror="this.src='data:image/svg+xml,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22 width=%2256%22 height=%2235%22 fill=%22%23f0f0f5%22%3E%3Crect width=%2256%22 height=%2235%22 rx=%224%22/%3E%3C/svg%3E'">
-        </td>
-        <td class="table-name">${tool.name}</td>
-        <td><span class="table-category">${tool.category}</span></td>
-        <td>
-          <label class="toggle">
-            <input type="checkbox" ${tool.visible !== false ? 'checked' : ''} onchange="window.adminToggleVisibility('${tool.id}', this.checked)">
-            <span class="toggle-slider"></span>
-          </label>
-        </td>
-        <td>
-          <label class="toggle">
-            <input type="checkbox" ${tool.featured ? 'checked' : ''} onchange="window.adminToggleFeatured('${tool.id}', this.checked)">
-            <span class="toggle-slider"></span>
-          </label>
-        </td>
-        <td>
-          <div class="table-actions">
-            <button class="table-action-btn edit" onclick="window.adminEditTool('${tool.id}')">✏️ Edit</button>
-            <button class="table-action-btn delete" onclick="window.adminDeleteTool('${tool.id}')">🗑️ Delete</button>
-          </div>
-        </td>
-      </tr>
-    `).join('');
-
-    initDragReorder();
-  }
-
-  // Drag to reorder
-  function initDragReorder() {
-    const tbody = document.getElementById('tools-table-body');
-    if (!tbody) return;
-
-    let draggedRow = null;
-
-    tbody.querySelectorAll('tr[draggable]').forEach(row => {
-      row.addEventListener('dragstart', (e) => {
-        draggedRow = row;
-        row.style.opacity = '0.4';
-        e.dataTransfer.effectAllowed = 'move';
-      });
-
-      row.addEventListener('dragend', () => {
-        row.style.opacity = '1';
-        draggedRow = null;
-        tbody.querySelectorAll('tr').forEach(r => r.style.borderTop = '');
-      });
-
-      row.addEventListener('dragover', (e) => {
-        e.preventDefault();
-        e.dataTransfer.dropEffect = 'move';
-        row.style.borderTop = '2px solid var(--admin-accent)';
-      });
-
-      row.addEventListener('dragleave', () => {
-        row.style.borderTop = '';
-      });
-
-      row.addEventListener('drop', (e) => {
-        e.preventDefault();
-        row.style.borderTop = '';
-        if (draggedRow && draggedRow !== row) {
-          tbody.insertBefore(draggedRow, row);
-
-          // Update config order
-          const newOrder = Array.from(tbody.querySelectorAll('tr[data-id]')).map(r => r.dataset.id);
-          const reordered = [];
-          newOrder.forEach(id => {
-            const tool = config.tools.find(t => t.id === id);
-            if (tool) reordered.push(tool);
-          });
-          config.tools = reordered;
-          saveConfig();
-          showToast('Tool order updated', 'success');
-        }
-      });
+    [...type.input.options].forEach((option) => {
+      option.textContent = widgetLabels[option.value];
     });
-  }
-
-  // Toggle visibility
-  window.adminToggleVisibility = function (id, value) {
-    const tool = config.tools.find(t => t.id === id);
-    if (tool) {
-      tool.visible = value;
-      saveConfig();
-      showToast(`${tool.name} is now ${value ? 'visible' : 'hidden'}`, 'success');
-    }
-  };
-
-  // Toggle featured
-  window.adminToggleFeatured = function (id, value) {
-    const tool = config.tools.find(t => t.id === id);
-    if (tool) {
-      tool.featured = value;
-      saveConfig();
-      updateDashboardStats();
-      showToast(`${tool.name} ${value ? 'marked as featured' : 'unfeatured'}`, 'success');
-    }
-  };
-
-  // Delete tool
-  window.adminDeleteTool = function (id) {
-    const tool = config.tools.find(t => t.id === id);
-    if (!tool) return;
-
-    if (confirm(`Delete "${tool.name}"? This cannot be undone.`)) {
-      config.tools = config.tools.filter(t => t.id !== id);
-      saveConfig();
-      renderToolsTable();
-      updateDashboardStats();
-      showToast(`"${tool.name}" deleted`, 'success');
-    }
-  };
-
-  // Edit tool
-  window.adminEditTool = function (id) {
-    const tool = config.tools.find(t => t.id === id);
-    if (!tool) return;
-
-    editingToolId = id;
-    editingToolTags = [...(tool.tags || [])];
-
-    document.getElementById('modal-title').textContent = 'Edit Tool';
-    document.getElementById('tool-form-name').value = tool.name || '';
-    document.getElementById('tool-form-slug').value = tool.slug || '';
-    document.getElementById('tool-form-category').value = tool.category || '';
-    document.getElementById('tool-form-description').value = tool.description || '';
-    document.getElementById('tool-form-long-desc').value = tool.longDescription || '';
-    document.getElementById('tool-form-url').value = tool.siteUrl || '';
-    document.getElementById('tool-form-thumbnail').value = tool.thumbnail || '';
-    document.getElementById('tool-form-download').checked = tool.downloadAvailable || false;
-    document.getElementById('tool-form-featured').checked = tool.featured || false;
-    document.getElementById('tool-form-visible').checked = tool.visible !== false;
-    document.getElementById('tool-form-date').value = tool.addedDate || '';
-
-    renderFormTags();
-    openModal();
-  };
-
-  // ── Add / Edit Tool Modal ───────────────
-  function openModal() {
-    const overlay = document.getElementById('tool-modal-overlay');
-    overlay?.classList.add('open');
-
-    // Populate category select
-    const select = document.getElementById('tool-form-category');
-    if (select && config.categories) {
-      select.innerHTML = config.categories.filter(c => c !== 'All').map(c =>
-        `<option value="${c}" ${select.value === c ? 'selected' : ''}>${c}</option>`
-      ).join('');
-
-      // Re-set value after rebuilding options
-      if (editingToolId) {
-        const tool = config.tools.find(t => t.id === editingToolId);
-        if (tool) select.value = tool.category;
+    if (widget) type.input.disabled = true;
+    const fieldsRoot = el("div", { class: "editor-form" });
+    let fields = {},
+      optionRows = [];
+    const draw = () => {
+      fields = {};
+      optionRows = [];
+      fieldsRoot.replaceChildren(
+        ...widgetSchemas[type.input.value].map(([key, label, kind]) => {
+          let value = d[key] || "";
+          if (key === "messages") value = (d.messages || []).join("\n");
+          if (key === "images")
+            value = (d.images || [])
+              .map((img) => (typeof img === "string" ? img : img.url || ""))
+              .join("\n");
+          const f = field(label, value, kind || "text");
+          fields[key] = f.input;
+          return f.node;
+        }),
+      );
+      if (type.input.value === "poll") {
+        const rows = el("div", { class: "file-rows" });
+        const addOption = (option = {}) => {
+          const text = field(
+            "Option",
+            option.text || option.label || "",
+            "text",
+            true,
+          );
+          const item = {
+            id: option.id || uid("option"),
+            votes: option.votes || 0,
+            input: text.input,
+          };
+          const line = el(
+            "div",
+            { class: "file-row" },
+            text.node,
+            rowButton(
+              "×",
+              () => {
+                optionRows = optionRows.filter((o) => o !== item);
+                line.remove();
+              },
+              true,
+              "Remove option",
+            ),
+          );
+          optionRows.push(item);
+          rows.append(line);
+        };
+        (d.options?.length ? d.options : [{}, {}]).forEach(addOption);
+        fieldsRoot.append(
+          rows,
+          el(
+            "button",
+            { type: "button", class: "text-link", onclick: () => addOption() },
+            "+ Add option",
+          ),
+        );
       }
-    }
+    };
+    type.input.addEventListener("change", draw);
+    draw();
+    editor(
+      widget ? "Edit homepage widget" : "A little homepage update.",
+      [type.node, enabled.node, fieldsRoot],
+      async () => {
+        const data = { ...d };
+        Object.entries(fields).forEach(([key, input]) => {
+          data[key] =
+            key === "messages" || key === "images"
+              ? input.value
+                  .split("\n")
+                  .map((s) => s.trim())
+                  .filter(Boolean)
+              : input.value;
+        });
+        if (type.input.value === "poll") {
+          if (!data.question.trim())
+            throw new Error("Poll ke liye question likho.");
+          if (optionRows.length < 2)
+            throw new Error("Poll ke liye kam se kam 2 options chahiye.");
+          data.options = optionRows.map((o) => ({
+            id: o.id,
+            text: o.input.value,
+            votes: o.votes,
+          }));
+        }
+        if (type.input.value === "link_card" && !data.url)
+          throw new Error("Website URL required.");
+        const payload = {
+          type: type.input.value,
+          enabled: enabled.input.checked,
+          data,
+        };
+        const result = await mutate(
+          widget
+            ? `/api/admin/widgets/${encodeURIComponent(w.id)}`
+            : "/api/admin/widgets",
+          widget ? "PUT" : "POST",
+          payload,
+        );
+        if (widget)
+          widgets = widgets.map((i) => (i.id === w.id ? result.widget : i));
+        else widgets.push(result.widget);
+      },
+      "HOME WIDGET",
+    );
   }
-
-  function closeModal() {
-    const overlay = document.getElementById('tool-modal-overlay');
-    overlay?.classList.remove('open');
-    editingToolId = null;
-    editingToolTags = [];
+  function editStore(item) {
+    const i = item || {};
+    const fields = Object.fromEntries(
+      [
+        ["title", "App name"],
+        ["description", "Description", "textarea"],
+        ["category", "Category"],
+        ["version", "Version"],
+        ["link", "Download URL", "url"],
+        ["image", "Image URL"],
+      ].map(([key, label, type]) => [
+        key,
+        field(
+          label,
+          i[key] || "",
+          type || "text",
+          key === "title" || key === "link",
+        ),
+      ]),
+    );
+    editor(
+      item ? "Edit store app" : "Add a store app",
+      Object.values(fields).map((f) => f.node),
+      async () => {
+        const payload = {
+          ...i,
+          ...Object.fromEntries(
+            Object.entries(fields).map(([key, f]) => [key, f.input.value]),
+          ),
+        };
+        const result = await mutate(
+          item
+            ? `/api/admin/store-apps/${encodeURIComponent(i.id)}`
+            : "/api/admin/store-apps",
+          item ? "PUT" : "POST",
+          payload,
+        );
+        if (item) store = store.map((a) => (a.id === i.id ? payload : a));
+        else store.push(result.app);
+      },
+    );
   }
-
-  function initToolForm() {
-    const addBtn = document.getElementById('add-tool-btn');
-    const closeBtn = document.getElementById('modal-close-btn');
-    const cancelBtn = document.getElementById('modal-cancel-btn');
-    const saveBtn = document.getElementById('modal-save-btn');
-    const tagsInput = document.getElementById('tool-form-tags-input');
-
-    if (addBtn) {
-      addBtn.addEventListener('click', () => {
-        editingToolId = null;
-        editingToolTags = [];
-        document.getElementById('modal-title').textContent = 'Add New Tool';
-        document.getElementById('tool-form').reset();
-        document.getElementById('tool-form-visible').checked = true;
-        document.getElementById('tool-form-date').value = new Date().toISOString().split('T')[0];
-        renderFormTags();
-        openModal();
-      });
-    }
-
-    if (closeBtn) closeBtn.addEventListener('click', closeModal);
-    if (cancelBtn) cancelBtn.addEventListener('click', closeModal);
-
-    // Close on overlay click
-    document.getElementById('tool-modal-overlay')?.addEventListener('click', (e) => {
-      if (e.target.id === 'tool-modal-overlay') closeModal();
+  function categories() {
+    const input = el("input", {
+      placeholder: "New category name",
+      required: true,
+      maxlength: "80",
+      "aria-label": "Category name",
     });
-
-    // Save
-    if (saveBtn) {
-      saveBtn.addEventListener('click', saveTool);
-    }
-
-    // Tags input
-    if (tagsInput) {
-      tagsInput.addEventListener('keydown', (e) => {
-        if (e.key === 'Enter' || e.key === ',') {
-          e.preventDefault();
-          const val = tagsInput.value.trim().replace(',', '');
-          if (val && !editingToolTags.includes(val)) {
-            editingToolTags.push(val);
-            renderFormTags();
-            tagsInput.value = '';
+    const list = el(
+      "div",
+      { class: "category-tags" },
+      ...config.categories
+        .filter((c) => c !== "All")
+        .map((c) =>
+          el(
+            "div",
+            { class: "category-tag" },
+            c,
+            el(
+              "button",
+              {
+                "aria-label": `Remove category ${c}`,
+                onclick: () => {
+                  if (config.tools.some((t) => t.category === c))
+                    return toast(
+                      "Is category mein tools hain. Pehle unki category change karo.",
+                    );
+                  if (config.categories.filter((c) => c !== "All").length < 2)
+                    return toast("Kam se kam ek category rehni chahiye.");
+                  confirmDelete(c, async () => {
+                    const next = clone(config);
+                    next.categories = next.categories.filter(
+                      (cat) => cat !== c,
+                    );
+                    await saveConfig(next);
+                    render();
+                  });
+                },
+              },
+              "×",
+            ),
+          ),
+        ),
+    );
+    const form = el(
+      "form",
+      { class: "category-add" },
+      input,
+      el(
+        "button",
+        { class: "button button-dark", type: "submit" },
+        "Add category",
+        el("span", {}, "+"),
+      ),
+    );
+    form.addEventListener("submit", async (event) => {
+      event.preventDefault();
+      const name = input.value.trim();
+      if (!name) return;
+      if (config.categories.some((c) => c.toLowerCase() === name.toLowerCase()))
+        return toast("Ye category pehle se hai.");
+      try {
+        const next = clone(config);
+        next.categories.push(name);
+        await saveConfig(next);
+        render();
+        toast("Category added.");
+      } catch (e) {
+        toast(e.message);
+      }
+    });
+    root.replaceChildren(card("Your categories", el("div", {}, list, form)));
+  }
+  function settings() {
+    const name = field(
+        "Site name",
+        config.site?.name || "SanuwarTools",
+        "text",
+        true,
+      ),
+      tagline = field("Tagline", config.site?.tagline || ""),
+      favicon = field(
+        "Favicon URL",
+        config.site?.favicon || "/assets/favicon.png",
+      ),
+      theme = select(
+        "Default theme",
+        ["light", "dark"],
+        config.site?.defaultTheme || "light",
+      );
+    const social = Object.fromEntries(
+      ["github", "instagram", "youtube", "twitter"].map((k) => [
+        k,
+        field(
+          k[0].toUpperCase() + k.slice(1),
+          config.socialLinks?.[k] || "",
+          "url",
+        ),
+      ]),
+    );
+    const enabled = checkbox(
+      "Show download collection",
+      config.downloadPage?.enabled !== false,
+    );
+    const error = el("p", { class: "form-error", role: "alert" });
+    const submit = el(
+      "button",
+      { class: "button button-orange", type: "submit" },
+      "Save settings",
+      el("span", {}, "✓"),
+    );
+    const form = el(
+      "form",
+      { class: "settings-form" },
+      el("div", { class: "form-grid" }, name.node, tagline.node),
+      el("div", { class: "form-grid" }, favicon.node, theme.node),
+      el(
+        "div",
+        { class: "form-grid" },
+        ...Object.values(social).map((f) => f.node),
+      ),
+      enabled.node,
+      error,
+      submit,
+    );
+    form.addEventListener("submit", async (event) => {
+      event.preventDefault();
+      submit.disabled = true;
+      error.textContent = "";
+      try {
+        const next = clone(config);
+        next.site = {
+          ...next.site,
+          name: name.input.value.trim(),
+          tagline: tagline.input.value,
+          favicon: favicon.input.value,
+          defaultTheme: theme.input.value,
+        };
+        next.socialLinks = {
+          ...next.socialLinks,
+          ...Object.fromEntries(
+            Object.entries(social).map(([k, f]) => [k, f.input.value]),
+          ),
+        };
+        next.downloadPage = {
+          ...next.downloadPage,
+          enabled: enabled.input.checked,
+          url: "/downloads",
+        };
+        await saveConfig(next);
+        toast("Site settings updated.");
+      } catch (e) {
+        error.textContent = e.message;
+      } finally {
+        submit.disabled = false;
+      }
+    });
+    root.replaceChildren(card("Brand & preferences", form));
+  }
+  function exportConfig() {
+    const blob = new Blob([JSON.stringify(config, null, 2)], {
+      type: "application/json",
+    });
+    const href = URL.createObjectURL(blob);
+    const anchor = el("a", {
+      href,
+      download: `sanuwartools-${new Date().toISOString().slice(0, 10)}.json`,
+    });
+    anchor.click();
+    setTimeout(() => URL.revokeObjectURL(href), 5000);
+    toast("Tools configuration exported.");
+  }
+  function backup() {
+    const importFile = el("input", {
+      type: "file",
+      accept: ".json,application/json",
+      "aria-label": "Import tools configuration",
+    });
+    const preview = el("div");
+    importFile.addEventListener("change", async () => {
+      const file = importFile.files[0];
+      if (!file) return;
+      try {
+        if (file.size > 2 * 1024 * 1024)
+          throw new Error("Backup 2 MB se chhota hona chahiye.");
+        const next = JSON.parse(await file.text());
+        if (
+          !Array.isArray(next.tools) ||
+          !Array.isArray(next.categories) ||
+          !next.site
+        )
+          throw new Error("Valid tools configuration chuno.");
+        preview.replaceChildren(
+          el(
+            "div",
+            { class: "import-preview" },
+            el(
+              "h3",
+              {},
+              `${next.tools.length} tools · ${next.categories.length} categories`,
+            ),
+            el(
+              "p",
+              { class: "form-note" },
+              "Restore karne se current tools configuration replace hoga. Downloads aur home widgets is backup ka hissa nahi hain.",
+            ),
+            el(
+              "div",
+              { class: "backup-actions" },
+              el(
+                "button",
+                { class: "button button-light", onclick: exportConfig },
+                "Export current backup ↓",
+              ),
+              el(
+                "button",
+                {
+                  class: "button button-orange",
+                  onclick: () => {
+                    const button = el(
+                      "button",
+                      {
+                        class: "button button-orange",
+                        onclick: async () => {
+                          button.disabled = true;
+                          try {
+                            await saveConfig(next);
+                            close();
+                            navigate("backup");
+                            toast("Configuration restored.");
+                          } catch (e) {
+                            toast(e.message);
+                            button.disabled = false;
+                          }
+                        },
+                      },
+                      "Replace configuration",
+                    );
+                    open(
+                      "Restore this configuration?",
+                      [
+                        el(
+                          "p",
+                          { class: "dialog-description" },
+                          `${next.tools.length} tools se current catalogue replace hoga. Pehle current backup export kar lo.`,
+                        ),
+                        el(
+                          "div",
+                          { class: "editor-actions" },
+                          el(
+                            "button",
+                            { class: "button button-light", onclick: close },
+                            "Cancel",
+                          ),
+                          button,
+                        ),
+                      ],
+                      "CONFIRM RESTORE",
+                    );
+                  },
+                },
+                "Review restore →",
+              ),
+            ),
+          ),
+        );
+      } catch (e) {
+        toast(e.message);
+        preview.replaceChildren();
+      }
+    });
+    root.replaceChildren(
+      el(
+        "div",
+        { class: "settings-grid" },
+        card(
+          "Export tools configuration",
+          el(
+            "div",
+            {},
+            el(
+              "p",
+              { class: "form-note" },
+              "Site settings, categories aur tools ki JSON copy download karo. Downloads, uploads, store apps aur widgets is file mein include nahi hote.",
+            ),
+            el(
+              "div",
+              { class: "backup-actions" },
+              el(
+                "button",
+                { class: "button button-dark", onclick: exportConfig },
+                "Download backup",
+                el("span", {}, "↓"),
+              ),
+            ),
+          ),
+        ),
+        card(
+          "Restore tools configuration",
+          el(
+            "div",
+            {},
+            el(
+              "p",
+              { class: "form-note" },
+              "Apni exported JSON file choose karo. Replace karne se pehle preview aur confirmation milega.",
+            ),
+            el("div", { class: "upload-field" }, importFile),
+            preview,
+          ),
+        ),
+      ),
+    );
+  }
+  function bulkUpload() {
+    const files = el("input", {
+      type: "file",
+      multiple: true,
+      "aria-label": "Choose files to upload",
+      accept:
+        ".jpg,.jpeg,.png,.webp,.gif,.pdf,.zip,.apk,.txt,.csv,.mp3,.mp4,.json,.aab",
+    });
+    const category = field("Category", "Files", "text", true),
+      album = checkbox("Create one album", true),
+      title = field("Album title", "My new album", "text", true);
+    const progress = el("span"),
+      bar = el("div", { class: "bulk-progress" }, progress),
+      list = el("div", { class: "bulk-file-list" });
+    album.input.addEventListener("change", () => {
+      title.node.hidden = !album.input.checked;
+      title.input.required = album.input.checked;
+    });
+    files.addEventListener("change", () => {
+      list.replaceChildren(
+        ...[...files.files].map((f) =>
+          el("div", {}, `${f.name} · ${(f.size / 1024 / 1024).toFixed(1)} MB`),
+        ),
+      );
+    });
+    let uploaded = [],
+      completed = new Set();
+    editor(
+      "Share a few good things.",
+      [
+        el(
+          "div",
+          { class: "upload-field" },
+          "Choose files · up to 32 MB each",
+          files,
+        ),
+        el("div", { class: "form-grid" }, category.node, title.node),
+        album.node,
+        bar,
+        list,
+      ],
+      async () => {
+        if (!files.files.length) throw new Error("Pehle files choose karo.");
+        if ([...files.files].some((f) => f.size > 32 * 1024 * 1024))
+          throw new Error("Har file 32 MB se chhoti honi chahiye.");
+        const keyOf = (f) => `${f.name}:${f.size}:${f.lastModified}`;
+        for (const file of files.files) {
+          const key = keyOf(file);
+          if (uploaded.some((f) => f.key === key)) continue;
+          const data = new FormData();
+          data.append("file", file);
+          const result = await api("/api/admin/upload-download-file", {
+            method: "POST",
+            body: data,
+          });
+          uploaded.push({ key, name: file.name, link: result.url });
+          progress.style.width = `${(uploaded.length / files.files.length) * 80}%`;
+        }
+        const currentFiles = uploaded.filter((f) =>
+          [...files.files].some((file) => keyOf(file) === f.key),
+        );
+        if (album.input.checked) {
+          const result = await mutate("/api/add_item", "POST", {
+            title: title.input.value,
+            description: `${currentFiles.length} files`,
+            category: category.input.value,
+            is_album: true,
+            album_files: currentFiles.map(({ name, link }) => ({ name, link })),
+            image: "",
+            link: "",
+          });
+          downloads.unshift(result.item);
+        } else {
+          for (const file of currentFiles) {
+            if (completed.has(file.key)) continue;
+            const result = await mutate("/api/add_item", "POST", {
+              title: file.name,
+              category: category.input.value,
+              link: file.link,
+              is_album: false,
+              album_files: [],
+              image: "",
+            });
+            downloads.unshift(result.item);
+            completed.add(file.key);
           }
         }
-      });
-    }
-
-    // Image upload
-    const thumbUpload = document.getElementById('tool-form-thumb-upload');
-    if (thumbUpload) {
-      thumbUpload.addEventListener('change', (e) => {
-        const file = e.target.files[0];
-        if (!file) return;
-
-        const reader = new FileReader();
-        reader.onload = (ev) => {
-          document.getElementById('tool-form-thumbnail').value = ev.target.result;
-          showToast('Thumbnail loaded as Base64', 'info');
-        };
-        reader.readAsDataURL(file);
-      });
-    }
-
-    // Auto-generate slug
-    const nameInput = document.getElementById('tool-form-name');
-    const slugInput = document.getElementById('tool-form-slug');
-    if (nameInput && slugInput) {
-      nameInput.addEventListener('input', () => {
-        if (!editingToolId) {
-          slugInput.value = nameInput.value.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/(^-|-$)/g, '');
-        }
-      });
-    }
+        progress.style.width = "100%";
+      },
+      "BULK UPLOAD",
+    );
   }
-
-  function renderFormTags() {
-    const container = document.getElementById('tool-form-tags-container');
-    if (!container) return;
-
-    const input = document.getElementById('tool-form-tags-input');
-    container.innerHTML = '';
-
-    editingToolTags.forEach((tag, i) => {
-      const pill = document.createElement('span');
-      pill.className = 'tag-pill';
-      pill.innerHTML = `${tag}<button class="tag-remove" data-index="${i}">×</button>`;
-      container.appendChild(pill);
-    });
-
-    container.appendChild(input);
-
-    // Tag removal
-    container.querySelectorAll('.tag-remove').forEach(btn => {
-      btn.addEventListener('click', () => {
-        editingToolTags.splice(parseInt(btn.dataset.index), 1);
-        renderFormTags();
-      });
-    });
+  function render() {
+    ({
+      dashboard,
+      categories,
+      settings,
+      backup,
+      tools: () => listing(config.tools, "tools"),
+      downloads: () => listing(downloads, "downloads"),
+      widgets: () => listing(widgets, "widgets"),
+      store: () => listing(store, "store"),
+    })[current]();
   }
-
-  window.removeFormTag = function (index) {
-    editingToolTags.splice(index, 1);
-    renderFormTags();
-  };
-
-  function saveTool() {
-    const name = document.getElementById('tool-form-name').value.trim();
-    const slug = document.getElementById('tool-form-slug').value.trim();
-    const category = document.getElementById('tool-form-category').value;
-    const description = document.getElementById('tool-form-description').value.trim();
-    const longDesc = document.getElementById('tool-form-long-desc').value.trim();
-    const url = document.getElementById('tool-form-url').value.trim();
-    const thumbnail = document.getElementById('tool-form-thumbnail').value.trim();
-    const download = document.getElementById('tool-form-download').checked;
-    const featured = document.getElementById('tool-form-featured').checked;
-    const visible = document.getElementById('tool-form-visible').checked;
-    const date = document.getElementById('tool-form-date').value;
-
-    // Validation
-    if (!name) { showToast('Tool name is required', 'error'); return; }
-    if (!url) { showToast('Site URL is required', 'error'); return; }
-
-    if (editingToolId) {
-      // Update existing
-      const tool = config.tools.find(t => t.id === editingToolId);
-      if (tool) {
-        Object.assign(tool, {
-          name, slug, category, description, longDescription: longDesc,
-          siteUrl: url, thumbnail, downloadAvailable: download,
-          featured, visible, tags: [...editingToolTags], addedDate: date
-        });
-        showToast(`"${name}" updated`, 'success');
-      }
-    } else {
-      // Add new
-      const id = 'tool-' + Date.now().toString(36);
-      config.tools.push({
-        id, name, slug, category, description, longDescription: longDesc,
-        siteUrl: url, thumbnail: thumbnail || `/assets/thumbnails/${id}.png`,
-        downloadAvailable: download, featured, visible,
-        tags: [...editingToolTags], addedDate: date
-      });
-      showToast(`"${name}" added`, 'success');
-    }
-
-    saveConfig();
-    closeModal();
-    renderToolsTable();
-    updateDashboardStats();
-  }
-
-  // ── Categories ──────────────────────────
-  function renderCategories() {
-    const list = document.getElementById('categories-list');
-    if (!list) return;
-
-    const cats = (config.categories || []).filter(c => c !== 'All');
-    const toolCounts = {};
-    (config.tools || []).forEach(t => {
-      toolCounts[t.category] = (toolCounts[t.category] || 0) + 1;
-    });
-
-    list.innerHTML = cats.map(cat => `
-      <div class="category-item" data-category="${cat}">
-        <span class="drag-handle">⠿</span>
-        <span class="category-name">${cat}</span>
-        <span class="category-count">${toolCounts[cat] || 0} tools</span>
-        <button class="category-delete" onclick="window.adminDeleteCategory('${cat}')" title="Delete category">×</button>
-      </div>
-    `).join('');
-  }
-
-  window.adminDeleteCategory = function (cat) {
-    if (confirm(`Delete category "${cat}"? Tools in this category won't be deleted.`)) {
-      config.categories = config.categories.filter(c => c !== cat);
-      saveConfig();
-      renderCategories();
-      showToast(`Category "${cat}" deleted`, 'success');
-    }
-  };
-
-  function initCategoryForm() {
-    const addBtn = document.getElementById('add-category-btn');
-    const input = document.getElementById('new-category-input');
-
-    if (addBtn && input) {
-      const addCategory = () => {
-        const name = input.value.trim();
-        if (!name) { showToast('Enter a category name', 'error'); return; }
-        if (config.categories.includes(name)) { showToast('Category already exists', 'warning'); return; }
-        config.categories.push(name);
-        saveConfig();
-        renderCategories();
-        input.value = '';
-        showToast(`Category "${name}" added`, 'success');
-      };
-
-      addBtn.addEventListener('click', addCategory);
-      input.addEventListener('keydown', (e) => {
-        if (e.key === 'Enter') addCategory();
-      });
+  async function load() {
+    try {
+      [config, downloads, widgets, store] = await Promise.all([
+        api("/api/admin/tools.config"),
+        api("/api/downloads_data"),
+        api("/api/admin/widgets"),
+        api("/api/admin/store-apps"),
+      ]);
+      navigate("dashboard");
+    } catch (error) {
+      empty(root, "Workspace unavailable.", error.message, load, "Try again");
     }
   }
-
-  // ── Site Settings ───────────────────────
-  function renderSettings() {
-    const site = config.site || {};
-    const social = config.socialLinks || {};
-
-    setValue('settings-name', site.name);
-    setValue('settings-tagline', site.tagline);
-    setValue('settings-favicon', site.favicon);
-    setValue('settings-github', social.github);
-    setValue('settings-instagram', social.instagram);
-    setValue('settings-youtube', social.youtube);
-    setValue('settings-twitter', social.twitter);
-  }
-
-  function initSettingsForm() {
-    const saveBtn = document.getElementById('save-settings-btn');
-    if (saveBtn) {
-      saveBtn.addEventListener('click', () => {
-        if (!config.site) config.site = {};
-        if (!config.socialLinks) config.socialLinks = {};
-        config.site.name = getValue('settings-name');
-        config.site.tagline = getValue('settings-tagline');
-        config.site.favicon = getValue('settings-favicon');
-        config.socialLinks.github = getValue('settings-github');
-        config.socialLinks.instagram = getValue('settings-instagram');
-        config.socialLinks.youtube = getValue('settings-youtube');
-        config.socialLinks.twitter = getValue('settings-twitter');
-        saveConfig();
-        showToast('Site settings saved & synced to server ✅', 'success');
-      });
-    }
-  }
-
-  // ── Download Settings ───────────────────
-  function renderDownloadSettings() {
-    const dp = config.downloadPage || {};
-    const toggle = document.getElementById('download-enabled');
-    if (toggle) toggle.checked = dp.enabled !== false;
-    setValue('download-url', dp.url);
-    setValue('download-label', dp.buttonLabel);
-    setValue('download-subtext', dp.buttonSubtext);
-    // Refresh the store apps list
-    if (typeof appHubRenderer !== 'undefined') {
-      appHubRenderer.refresh();
-    }
-  }
-
-  function initDownloadSettingsForm() {
-    const saveBtn = document.getElementById('save-download-btn');
-    if (saveBtn) {
-      saveBtn.addEventListener('click', () => {
-        config.downloadPage.enabled = document.getElementById('download-enabled')?.checked ?? true;
-        config.downloadPage.url = getValue('download-url');
-        config.downloadPage.buttonLabel = getValue('download-label');
-        config.downloadPage.buttonSubtext = getValue('download-subtext');
-        saveConfig();
-        showToast('Download settings saved', 'success');
-      });
-    }
-  }
-
-  // ── Theme Settings ──────────────────────
-  function renderThemeSettings() {
-    const select = document.getElementById('default-theme-select');
-    if (select) {
-      select.value = config.site?.defaultTheme || 'light';
-    }
-  }
-
-  function initThemeSettingsForm() {
-    const saveBtn = document.getElementById('save-theme-btn');
-    if (saveBtn) {
-      saveBtn.addEventListener('click', () => {
-        config.site.defaultTheme = document.getElementById('default-theme-select')?.value || 'light';
-        saveConfig();
-        showToast('Default theme updated', 'success');
-      });
-    }
-  }
-
-  // ── Export ──────────────────────────────
-  function renderExport() {
-    const preview = document.getElementById('export-preview');
-    if (preview) {
-      preview.textContent = JSON.stringify(config, null, 2);
-    }
-  }
-
-  function initExport() {
-    const downloadBtn = document.getElementById('export-download-btn');
-    const copyBtn = document.getElementById('export-copy-btn');
-
-    if (downloadBtn) {
-      downloadBtn.addEventListener('click', () => {
-        const blob = new Blob([JSON.stringify(config, null, 2)], { type: 'application/json' });
-        const url = URL.createObjectURL(blob);
-        const a = document.createElement('a');
-        a.href = url;
-        a.download = 'tools.config.json';
-        a.click();
-        URL.revokeObjectURL(url);
-        showToast('Config file downloaded', 'success');
-      });
-    }
-
-    if (copyBtn) {
-      copyBtn.addEventListener('click', () => {
-        navigator.clipboard.writeText(JSON.stringify(config, null, 2))
-          .then(() => showToast('Copied to clipboard', 'success'))
-          .catch(() => showToast('Failed to copy', 'error'));
-      });
-    }
-  }
-
-  // ── Import ──────────────────────────────
-  function renderImport() {
-    // Already rendered in HTML
-  }
-
-  function initImport() {
-    const dropZone = document.getElementById('import-drop-zone');
-    const fileInput = document.getElementById('import-file-input');
-
-    if (dropZone && fileInput) {
-      dropZone.addEventListener('click', () => fileInput.click());
-
-      dropZone.addEventListener('dragover', (e) => {
-        e.preventDefault();
-        dropZone.style.borderColor = 'var(--admin-accent)';
-        dropZone.style.background = 'var(--admin-accent-lighter)';
-      });
-
-      dropZone.addEventListener('dragleave', () => {
-        dropZone.style.borderColor = '';
-        dropZone.style.background = '';
-      });
-
-      dropZone.addEventListener('drop', (e) => {
-        e.preventDefault();
-        dropZone.style.borderColor = '';
-        dropZone.style.background = '';
-        const file = e.dataTransfer.files[0];
-        if (file) processImportFile(file);
-      });
-
-      fileInput.addEventListener('change', () => {
-        if (fileInput.files[0]) processImportFile(fileInput.files[0]);
-      });
-    }
-  }
-
-  function processImportFile(file) {
-    if (!file.name.endsWith('.json')) {
-      showToast('Please upload a JSON file', 'error');
-      return;
-    }
-
-    const reader = new FileReader();
-    reader.onload = (e) => {
-      try {
-        const imported = JSON.parse(e.target.result);
-
-        // Validate structure
-        if (!imported.site || !imported.tools) {
-          showToast('Invalid config format — missing required fields', 'error');
-          return;
-        }
-
-        if (confirm(`Import config with ${imported.tools.length} tools? This will replace your current config.`)) {
-          config = imported;
-          saveConfig();
-          renderCurrentView();
-          updateDashboardStats();
-          showToast(`Config imported — ${imported.tools.length} tools loaded`, 'success');
-        }
-      } catch (err) {
-        showToast('Invalid JSON file', 'error');
-      }
-    };
-    reader.readAsText(file);
-  }
-
-  // ── Utilities ───────────────────────────
-  function setValue(id, value) {
-    const el = document.getElementById(id);
-    if (el) el.value = value || '';
-  }
-
-  function getValue(id) {
-    return document.getElementById(id)?.value?.trim() || '';
-  }
-
-  // ── Initialize ──────────────────────────
-  function init() {
-    initSidebar();
-    initToolForm();
-    initCategoryForm();
-    initSettingsForm();
-    initDownloadSettingsForm();
-    initThemeSettingsForm();
-    initExport();
-    initImport();
-    loadConfig();
-  }
-
-  if (document.readyState === 'loading') {
-    document.addEventListener('DOMContentLoaded', init);
-  } else {
-    init();
-  }
+  await load();
 })();
-
-
-const appHubRenderer = {
-  items: [],
-  init: async function() {
-    this.refresh();
-  },
-  refresh: async function() {
-    try {
-      const r = await fetch('/api/admin/store-apps');
-      this.items = await r.json();
-      this.render();
-    } catch(e) {}
-  },
-  render: function() {
-    const el = document.getElementById('store-apps-list');
-    if(!this.items.length) { el.innerHTML = '<p>No apps added yet.</p>'; return; }
-    let html = `<table class="admin-table"><thead><tr><th>App</th><th>Details</th><th>Actions</th></tr></thead><tbody>`;
-    this.items.forEach(app => {
-      html += `<tr>
-        <td>
-          <div style="display:flex;align-items:center;gap:10px;">
-            <img src="${app.image||''}" style="width:40px;height:40px;border-radius:8px;object-fit:cover;background:#333;">
-            <strong>${app.title}</strong>
-          </div>
-        </td>
-        <td><small>${app.description||'-'}</small></td>
-        <td>
-          <button class="admin-btn admin-btn-sm" style="background:#555;" onclick="appHubRenderer.edit('${app.id}')">Edit</button>
-          <button class="admin-btn admin-btn-sm" style="background:var(--admin-danger, #ef4444);" onclick="appHubRenderer.del('${app.id}')">Del</button>
-        </td>
-      </tr>`;
-    });
-    html += `</tbody></table>`;
-    el.innerHTML = html;
-  },
-  openModal: function(app=null) {
-    document.getElementById('store-app-id').value = app ? app.id : '';
-    document.getElementById('store-app-title').value = app ? app.title : '';
-    document.getElementById('store-app-desc').value = app ? app.description : '';
-    document.getElementById('store-app-version').value = app ? app.version : '';
-    document.getElementById('store-app-link').value = app ? app.link : '';
-    document.getElementById('store-app-image').value = app ? app.image : '';
-    
-    const overlay = document.getElementById('store-modal-overlay');
-    overlay.style.display = 'flex'; // Remove inline display:none if it exists
-    overlay.classList.add('open');
-    document.body.style.overflow = 'hidden';
-  },
-  edit: function(id) {
-    const app = this.items.find(x => x.id === id);
-    if(app) this.openModal(app);
-  },
-  closeModal: function() {
-    const overlay = document.getElementById('store-modal-overlay');
-    overlay.classList.remove('open');
-    document.body.style.overflow = '';
-    // Optional: add a small timeout to set display:none after transition
-    setTimeout(() => { if(!overlay.classList.contains('open')) overlay.style.display = 'none'; }, 300);
-  },
-  saveModal: async function() {
-    const id = document.getElementById('store-app-id').value;
-    const body = {
-      title: document.getElementById('store-app-title').value,
-      description: document.getElementById('store-app-desc').value,
-      version: document.getElementById('store-app-version').value,
-      link: document.getElementById('store-app-link').value,
-      image: document.getElementById('store-app-image').value,
-      category: 'Apps'
-    };
-    
-    if(!body.title) {
-        alert("Title is required!");
-        return;
-    }
-    
-    let url = id ? '/api/admin/store-apps/' + id : '/api/admin/store-apps';
-    let method = id ? 'PUT' : 'POST';
-    
-    try {
-        const r = await fetch(url, {
-          method, headers:{'Content-Type':'application/json'},
-          body: JSON.stringify(body)
-        });
-        if(r.ok) {
-          this.closeModal();
-          this.refresh();
-          if(typeof showToast === 'function') showToast('App saved successfully', 'success');
-        } else {
-            const err = await r.json();
-            alert("Error saving: " + (err.error || r.statusText));
-        }
-    } catch(e) {
-        alert("Network error: " + e.message);
-    }
-  },
-  del: async function(id) {
-    if(!confirm("Are you sure?")) return;
-    try {
-        const r = await fetch('/api/admin/store-apps/' + id, {method:'DELETE'});
-        if(r.ok) { this.refresh(); if(typeof showToast === 'function') showToast('App deleted', 'success'); }
-        else { alert("Error deleting app"); }
-    } catch(e) { alert("Network error"); }
-  },
-  
-  uploadFile: async function(input, targetInputId) {
-    const file = input.files[0];
-    if(!file) return;
-    const stat = document.getElementById('store-app-upload-status');
-    if(stat) stat.textContent = 'Uploading to Server/Cloudinary...';
-    
-    const fd = new FormData();
-    fd.append('image', file); // API expects 'image' key
-    try {
-        const r = await fetch('/api/admin/upload', { method:'POST', body:fd });
-        const data = await r.json();
-        if(data.url) {
-            document.getElementById(targetInputId).value = data.url;
-            if(stat) stat.textContent = '✓ Uploaded';
-        } else {
-            if(stat) stat.textContent = '❌ Upload Failed: ' + (data.error||'Unknown');
-            alert('Upload Failed: ' + data.error);
-        }
-    } catch(e) {
-        if(stat) stat.textContent = '❌ Upload Error';
-    }
-    input.value = '';
-  }
-};
-
-document.addEventListener('DOMContentLoaded', () => { setTimeout(()=>appHubRenderer.init(), 1000); });
-
-
-document.addEventListener('DOMContentLoaded', () => {
-    const btn = document.getElementById('export-download-btn');
-    if(btn) {
-        btn.addEventListener('click', async (e) => {
-            e.stopImmediatePropagation();
-            const currentConfig = JSON.parse(localStorage.getItem('sanuwartools-config') || 'null');
-            if(currentConfig) {
-                try {
-                    const r = await fetch('/api/tools.config', {
-                        method: 'POST',
-                        headers: { 'Content-Type': 'application/json' },
-                        body: JSON.stringify(currentConfig)
-                    });
-                    if(r.ok) {
-                        if(typeof showToast === 'function') showToast('Config saved to server!', 'success');
-                        const blob = new Blob([JSON.stringify(currentConfig, null, 2)], { type: 'application/json' });
-                        const url = URL.createObjectURL(blob);
-                        const a = document.createElement('a');
-                        a.href = url; a.download = 'tools.config.json'; a.click();
-                        URL.revokeObjectURL(url);
-                    } else {
-                        if(typeof showToast === 'function') showToast('Failed to save to server', 'error');
-                    }
-                } catch(err) {
-                    if(typeof showToast === 'function') showToast('Server error while saving', 'error');
-                }
-            }
-        }, {capture: true});
-        btn.textContent = '💾 Save to Server';
-    }
-});

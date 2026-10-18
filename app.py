@@ -2,9 +2,16 @@ import os
 import json
 import uuid
 import datetime
+import secrets
+import hmac
+import tempfile
+from PIL import Image, UnidentifiedImageError
+from werkzeug.security import check_password_hash
+from werkzeug.utils import secure_filename
+import security
 import cloudinary
 import cloudinary.uploader
-from flask import Flask, request, render_template, session, redirect, jsonify, url_for, send_file, send_from_directory
+from flask import Flask, request, render_template, session, redirect, jsonify, url_for, send_file, send_from_directory, abort
 from dotenv import load_dotenv
 import utils
 
@@ -21,6 +28,16 @@ cloudinary.config(
 
 def upload_to_cloudinary(file_storage, resource_type="auto", folder="sanuwar-tools"):
     """Upload a Flask FileStorage to Cloudinary. Returns (url, filename)."""
+    filename = secure_filename(file_storage.filename or '')
+    extension = os.path.splitext(filename)[1].lower()
+    allowed = {'.jpg', '.jpeg', '.png', '.webp', '.gif', '.pdf', '.zip', '.apk', '.txt', '.csv', '.mp3', '.mp4', '.json', '.aab'}
+    if not filename or extension not in allowed:
+        raise ValueError('Unsupported file type')
+    if resource_type == 'image':
+        if extension not in {'.jpg', '.jpeg', '.png', '.webp', '.gif'}:
+            raise ValueError('Choose a PNG, JPEG, WebP or GIF image')
+        Image.open(file_storage.stream).verify()
+        file_storage.stream.seek(0)
     # Use .stream so Flask FileStorage is read correctly by Cloudinary SDK
     result = cloudinary.uploader.upload(
         file_storage.stream,
@@ -32,7 +49,7 @@ def upload_to_cloudinary(file_storage, resource_type="auto", folder="sanuwar-too
     )
     return result.get("secure_url", ""), (file_storage.filename or "file")
 
-app.secret_key = "SANUWAR_TOOLS_SECRET"
+security.install(app)
 
 def login_required(f):
     from functools import wraps
@@ -50,23 +67,39 @@ def index():
     return render_template("index.html")
 
 @app.route("/downloads")
+@app.route("/download.html")
 def downloads():
+    if not (safe_read(TOOLS_CONFIG_REL) or {}).get('downloadPage', {}).get('enabled', True):
+        abort(404)
     return render_template("downloads.html")
 
 @app.route("/admin/login", methods=["GET", "POST"])
 def admin_login():
     if request.method == "POST":
-        data = request.json or {}
-        username = data.get("username", "")
-        password = data.get("password", "")
-        
-        expected_user = os.getenv("ADMIN_USER", "admin")
-        expected_pass = os.getenv("ADMIN_PASSWORD", "admin")
-        
-        if username == expected_user and password == expected_pass:
-            session["admin_logged_in"] = True
-            return jsonify({"success": True})
-        return jsonify({"error": "Invalid credentials"}), 401
+        if security.limited(('login', request.remote_addr)):
+            response = jsonify(error="Too many attempts. Try again in 15 minutes.")
+            response.headers['Retry-After'] = '900'
+            return response, 429
+        data = request.get_json(silent=True) or {}
+        username, password = data.get('username', ''), data.get('password', '')
+        expected_user = os.getenv('ADMIN_USER', '')
+        password_hash = os.getenv('ADMIN_PASSWORD_HASH', '')
+        expected_pass = os.getenv('ADMIN_PASSWORD', '')
+        if not expected_user or not (password_hash or len(expected_pass) >= 12):
+            return jsonify(error="Admin access needs configuration. Set ADMIN_USER and ADMIN_PASSWORD_HASH (or ADMIN_PASSWORD with at least 12 characters) on the server."), 503
+        valid = False
+        if isinstance(password, str) and len(password) <= 1024:
+            try:
+                valid = check_password_hash(password_hash, password) if password_hash else hmac.compare_digest(password.encode('utf-8'), expected_pass.encode('utf-8'))
+            except (ValueError, TypeError, AttributeError):
+                valid = False
+        if isinstance(username, str) and hmac.compare_digest(username.encode('utf-8'), expected_user.encode('utf-8')) and valid:
+            session.clear()
+            session.permanent = True
+            session['admin_logged_in'] = True
+            session['csrf_token'] = secrets.token_urlsafe(32)
+            return jsonify(success=True)
+        return jsonify(error="Invalid username or password"), 401
     return render_template("login.html")
 
 @app.route("/admin")
@@ -74,9 +107,9 @@ def admin_login():
 def admin():
     return render_template("admin.html")
 
-@app.route("/admin/logout")
+@app.route("/admin/logout", methods=["POST"])
 def admin_logout():
-    session.pop("admin_logged_in", None)
+    session.clear()
     return redirect(url_for("admin_login"))
 
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))
@@ -112,9 +145,11 @@ def github_push(file_rel_path, content_str):
                    "content": base64.b64encode(content_str.encode()).decode()}
         if sha:
             payload["sha"] = sha
-        req.put(api, json=payload, headers=headers, timeout=10)
+        response = req.put(api, json=payload, headers=headers, timeout=10)
+        response.raise_for_status()
     except Exception as e:
-        print(f"GitHub push warning: {e}")
+        app.logger.exception("Persistent configuration write failed")
+        raise RuntimeError("Could not persist changes to GitHub; retry the save") from e
 
 def safe_read(rel_path):
     path = get_writable_path(rel_path)
@@ -130,14 +165,24 @@ def safe_read(rel_path):
 def safe_write(rel_path, data):
     path = get_writable_path(rel_path)
     content_str = json.dumps(data, indent=2)
-    try:
-        os.makedirs(os.path.dirname(path), exist_ok=True)
-        with open(path, "w") as f:
-            f.write(content_str)
-    except Exception as e:
-        print(f"Write error {path}: {e}")
-    # Always push to GitHub so it persists on Vercel across cold starts
+    # Verify remote persistence before acknowledging an admin save.
+    if IS_VERCEL and not (os.getenv('GITHUB_PAT') and os.getenv('GITHUB_USER')):
+        raise RuntimeError('Persistent saves require GITHUB_PAT and GITHUB_USER on Vercel')
     github_push(rel_path, content_str)
+    os.makedirs(os.path.dirname(path), exist_ok=True)
+    fd, temporary = tempfile.mkstemp(dir=os.path.dirname(path), suffix='.tmp')
+    try:
+        with os.fdopen(fd, 'w') as handle:
+            handle.write(content_str)
+            handle.flush()
+            os.fsync(handle.fileno())
+        os.replace(temporary, path)
+    finally:
+        if os.path.exists(temporary):
+            os.remove(temporary)
+
+utils.safe_reader = safe_read
+utils.safe_writer = safe_write
 
 TOOLS_CONFIG_REL = "data/tools.config.json"
 DOWNLOADS_REL    = "data/downloads.json"
@@ -147,7 +192,18 @@ def serve_config():
     data = safe_read(TOOLS_CONFIG_REL)
     if data is None:
         data = {"tools": [], "categories": ["All"], "site": {}, "socialLinks": {}, "widgets": []}
+    data = dict(data)
+    data['tools'] = [tool for tool in data.get('tools', []) if tool.get('visible', True)]
     return jsonify(data)
+
+@app.context_processor
+def site_context():
+    return {'public_config': safe_read(TOOLS_CONFIG_REL) or {}, 'now_year': datetime.datetime.now().year}
+
+@app.route('/api/admin/tools.config')
+@login_required
+def admin_tools_config():
+    return jsonify(safe_read(TOOLS_CONFIG_REL) or {'tools': [], 'categories': ['All'], 'site': {}})
 
 @app.route("/api/tools.config", methods=["POST"])
 @login_required
@@ -159,9 +215,11 @@ def update_config():
         safe_write(TOOLS_CONFIG_REL, data)
         return jsonify({"success": True})
     except Exception as e:
-        return jsonify({"error": str(e)}), 500
+        app.logger.exception("Operation failed")
+        return jsonify({"error": "Could not save or upload. Check server configuration and try again."}), 500
 
 @app.route("/api/admin/store-apps", methods=["GET"])
+@login_required
 def get_store_apps():
     config = utils.load_config()
     return jsonify(config.get("store_apps", []))
@@ -179,7 +237,8 @@ def add_store_app():
         utils.save_config(config)
         return jsonify({"success": True, "app": data})
     except Exception as e:
-        return jsonify({"error": str(e)}), 500
+        app.logger.exception("Operation failed")
+        return jsonify({"error": "Could not save or upload. Check server configuration and try again."}), 500
 
 @app.route("/api/admin/store-apps/<app_id>", methods=["PUT"])
 @login_required
@@ -190,12 +249,15 @@ def update_store_app(app_id):
         apps = config.get("store_apps", [])
         for app in apps:
             if app.get("id") == app_id:
-                app.update(data)
+                app.update({key:value for key,value in data.items() if key != "id"})
                 break
+        else:
+            return jsonify(error="App not found"), 404
         utils.save_config(config)
         return jsonify({"success": True})
     except Exception as e:
-        return jsonify({"error": str(e)}), 500
+        app.logger.exception("Operation failed")
+        return jsonify({"error": "Could not save or upload. Check server configuration and try again."}), 500
 
 @app.route("/api/admin/store-apps/<app_id>", methods=["DELETE"])
 @login_required
@@ -207,7 +269,8 @@ def delete_store_app(app_id):
         utils.save_config(config)
         return jsonify({"success": True})
     except Exception as e:
-        return jsonify({"error": str(e)}), 500
+        app.logger.exception("Operation failed")
+        return jsonify({"error": "Could not save or upload. Check server configuration and try again."}), 500
 
 @app.route("/api/admin/upload", methods=["POST"])
 @login_required
@@ -218,8 +281,11 @@ def upload_file():
         file = request.files['image']
         url, _ = upload_to_cloudinary(file, resource_type="image", folder="sanuwar-tools/thumbnails")
         return jsonify({"url": url})
-    except Exception as e:
-        return jsonify({"error": str(e)}), 500
+    except (ValueError, UnidentifiedImageError, Image.DecompressionBombError):
+        return jsonify(error="Unsupported or invalid file. Choose a supported file up to 32 MB."), 400
+    except Exception:
+        app.logger.exception("Upload failed")
+        return jsonify(error="Upload unavailable. Check Cloudinary configuration and try again."), 500
 
 # ════════════════════════════════════════════
 # DOWNLOAD HUB API
@@ -265,7 +331,8 @@ def api_add_item():
         save_downloads(items)
         return jsonify({"success": True, "item": new_item})
     except Exception as e:
-        return jsonify({"error": str(e)}), 500
+        app.logger.exception("Operation failed")
+        return jsonify({"error": "Could not save or upload. Check server configuration and try again."}), 500
 
 @app.route("/api/update_item", methods=["PUT"])
 @login_required
@@ -300,7 +367,8 @@ def api_update_item():
         save_downloads(items)
         return jsonify({"success": True})
     except Exception as e:
-        return jsonify({"error": str(e)}), 500
+        app.logger.exception("Operation failed")
+        return jsonify({"error": "Could not save or upload. Check server configuration and try again."}), 500
 
 @app.route("/api/delete_item/<item_id>", methods=["DELETE"])
 @login_required
@@ -314,7 +382,8 @@ def api_delete_item(item_id):
         save_downloads(new_items)
         return jsonify({"success": True})
     except Exception as e:
-        return jsonify({"error": str(e)}), 500
+        app.logger.exception("Operation failed")
+        return jsonify({"error": "Could not save or upload. Check server configuration and try again."}), 500
 
 @app.route("/api/downloads/categories", methods=["GET"])
 def api_download_categories():
@@ -336,12 +405,15 @@ def upload_download_file():
         original_name = file.filename or "upload"
         # Images go to image folder, everything else as raw
         ext = os.path.splitext(original_name)[1].lower()
-        is_image = ext in ('.jpg', '.jpeg', '.png', '.gif', '.webp', '.svg')
+        is_image = ext in ('.jpg', '.jpeg', '.png', '.gif', '.webp')
         rtype = "image" if is_image else "raw"
         url, fname = upload_to_cloudinary(file, resource_type=rtype, folder="sanuwar-tools/downloads")
         return jsonify({"url": url, "filename": original_name})
-    except Exception as e:
-        return jsonify({"error": str(e)}), 500
+    except (ValueError, UnidentifiedImageError, Image.DecompressionBombError):
+        return jsonify(error="Unsupported or invalid file. Choose a supported file up to 32 MB."), 400
+    except Exception:
+        app.logger.exception("Upload failed")
+        return jsonify(error="Upload unavailable. Check Cloudinary configuration and try again."), 500
 
 # ============================================================
 # --- WIDGET ROUTES (Home Screen Builder) ---
@@ -385,7 +457,8 @@ def api_admin_widgets_add():
         utils.save_config(config)
         return jsonify({"success": True, "widget": new_widget})
     except Exception as e:
-        return jsonify({"error": str(e)}), 500
+        app.logger.exception("Operation failed")
+        return jsonify({"error": "Could not save or upload. Check server configuration and try again."}), 500
 
 @app.route("/api/admin/widgets/<widget_id>", methods=["PUT"])
 @login_required
@@ -404,7 +477,8 @@ def api_admin_widgets_update(widget_id):
         utils.save_config(config)
         return jsonify({"success": True, "widget": w})
     except Exception as e:
-        return jsonify({"error": str(e)}), 500
+        app.logger.exception("Operation failed")
+        return jsonify({"error": "Could not save or upload. Check server configuration and try again."}), 500
 
 @app.route("/api/admin/widgets/<widget_id>", methods=["DELETE"])
 @login_required
@@ -415,7 +489,8 @@ def api_admin_widgets_delete(widget_id):
         utils.save_config(config)
         return jsonify({"success": True})
     except Exception as e:
-        return jsonify({"error": str(e)}), 500
+        app.logger.exception("Operation failed")
+        return jsonify({"error": "Could not save or upload. Check server configuration and try again."}), 500
 
 @app.route("/api/admin/widgets/reorder", methods=["POST"])
 @login_required
@@ -432,11 +507,14 @@ def api_admin_widgets_reorder():
         utils.save_config(config)
         return jsonify({"success": True})
     except Exception as e:
-        return jsonify({"error": str(e)}), 500
+        app.logger.exception("Operation failed")
+        return jsonify({"error": "Could not save or upload. Check server configuration and try again."}), 500
 
 @app.route("/api/widgets/<widget_id>/vote", methods=["POST"])
 def api_widget_vote(widget_id):
     """Session-protected poll voting — a user can only vote once."""
+    if security.limited(('vote', request.remote_addr), maximum=20, window=60):
+        return jsonify(error='Please wait before voting again'), 429
     try:
         data = request.json
         option_id = data.get("option_id")
@@ -447,7 +525,7 @@ def api_widget_vote(widget_id):
             return jsonify({"error": "already_voted"}), 403
         config = utils.load_config()
         widgets = config.get("widgets", [])
-        w = next((x for x in widgets if x["id"] == widget_id and x["type"] == "poll"), None)
+        w = next((x for x in widgets if x["id"] == widget_id and x["type"] == "poll" and x.get("enabled")), None)
         if not w:
             return jsonify({"error": "poll_not_found"}), 404
         options = w["data"].get("options", [])
@@ -460,7 +538,8 @@ def api_widget_vote(widget_id):
         session[voted_key] = True
         return jsonify({"success": True, "options": options})
     except Exception as e:
-        return jsonify({"error": str(e)}), 500
+        app.logger.exception("Operation failed")
+        return jsonify({"error": "Could not save or upload. Check server configuration and try again."}), 500
 
 if __name__ == "__main__":
-    app.run(host="0.0.0.0", port=5002, debug=True)
+    app.run(host="0.0.0.0", port=5002, debug=os.getenv('FLASK_DEBUG') == '1')

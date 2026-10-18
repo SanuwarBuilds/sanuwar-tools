@@ -1,0 +1,29 @@
+<!doctype html>
+<html lang="hi-Latn" data-theme="{{ public_config.get('site', {}).get('defaultTheme', 'light') }}">
+<head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="csrf-token" content="{{ csrf_token }}">
+<meta name="description" content="SanuwarTools — useful web tools, Android apps aur downloads, ek hi jagah.">
+<meta name="theme-color" content="#f6f5ef">
+<title>{% block title %}SanuwarTools — Make everyday a little easier.{% endblock %}</title>
+<link rel="icon" href="{{ public_config.get('site', {}).get('favicon', '/assets/favicon.png') }}"><link rel="stylesheet" href="/assets/css/style.css">
+<script src="/assets/js/shared.js" defer></script>
+{% block head %}{% endblock %}
+</head>
+<body class="{% block bodyclass %}{% endblock %}">
+<a class="skip-link" href="#main">Skip to content</a>
+{% block header %}
+<header class="site-header wrap">
+<a class="brand" href="/" aria-label="SanuwarTools home"><span class="brand-symbol">s<span>↗</span></span><span>{{ public_config.get('site', {}).get('name', 'SanuwarTools') }}<span class="brand-dot">.</span></span></a>
+<nav id="site-nav" aria-label="Main navigation"><a href="/#tools" {% if request.path == '/' %}class="active"{% endif %}>Explore tools</a>{% if public_config.get('downloadPage', {}).get('enabled', True) %}<a href="/downloads" {% if request.path != '/' %}class="active"{% endif %}>Downloads</a>{% endif %}<a href="/#how-it-works">How it works</a></nav>
+<div class="nav-actions"><button class="icon-button" id="theme-toggle" aria-label="Switch color theme">◐</button><a class="button button-dark nav-cta" href="/#tools">Find your tool <span>↗</span></a><button class="icon-button menu-toggle" aria-controls="site-nav" aria-expanded="false" aria-label="Open navigation">☰</button></div>
+</header>
+{% endblock %}
+<main id="main">{% block content %}{% endblock %}</main>
+{% block footer %}
+<footer class="wrap site-footer"><div><a class="brand" href="/"><span class="brand-symbol">s<span>↗</span></span><span>SanuwarTools<span class="brand-dot">.</span></span></a><p>{{ public_config.get('site', {}).get('tagline', 'Chhote tools. Bade kaam.') }}</p></div><nav aria-label="Footer"><a href="/#tools">Tools</a>{% if public_config.get('downloadPage', {}).get('enabled', True) %}<a href="/downloads">Downloads</a>{% endif %}{% for label, link in public_config.get('socialLinks', {}).items() %}{% if link %}<a href="{{ link }}" target="_blank" rel="noopener noreferrer">{{ label | capitalize }} ↗</a>{% endif %}{% endfor %}<a href="/admin">Admin ↗</a></nav><p class="copyright">Made with care by Sanuwar.<br>© {{ now_year }} SanuwarTools</p></footer>
+{% endblock %}
+<div class="toast" id="toast" role="status" aria-live="polite"></div>
+<dialog id="content-dialog" aria-labelledby="dialog-title"><div class="dialog-head"><div><span class="eyebrow" id="dialog-kicker">A closer look</span><h2 id="dialog-title"></h2></div><button class="icon-button" data-close-dialog aria-label="Close dialog">×</button></div><div id="dialog-body"></div></dialog>
+{% block scripts %}{% endblock %}
+</body></html>

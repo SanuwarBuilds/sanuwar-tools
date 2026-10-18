@@ -1,125 +1,89 @@
-# SanuwarTools 🛠️
+# SanuwarTools
 
-> All my tools, one place.
+A Flask tools hub with a responsive homepage, downloads and albums, and an authenticated content workspace. The redesign uses warm ivory, orange and sage, with system fonts, original CSS illustrations and lightweight animations. Explanatory copy is in Roman Hindi/Hinglish.
 
-A personal tools hub/portfolio site where all your web tools and sites are listed, described, and accessible from one central place.
+## Run locally
 
-![SanuwarTools](https://img.shields.io/badge/SanuwarTools-v1.0-6C63FF?style=for-the-badge)
+Python **3.12** and Node.js (only for JavaScript syntax checks) are used for verification.
 
----
-
-## 🚀 Quick Start
-
-1. **Clone or download** this project
-2. **Serve it locally** — use any static file server:
-   ```bash
-   # Using Python
-   python3 -m http.server 8080
-
-   # Using Node.js (npx)
-   npx serve .
-
-   # Using PHP
-   php -S localhost:8080
-   ```
-3. Open `http://localhost:8080` in your browser
-
----
-
-## 📁 Project Structure
-
-```
-/index.html              → Main homepage
-/download.html           → Download page
-/admin/index.html        → Admin panel (hidden URL)
-/assets/
-  /thumbnails/           → Tool thumbnail images
-  /css/
-    style.css            → Main site styles (with theme variables)
-    admin.css            → Admin panel styles
-  /js/
-    main.js              → Homepage logic (load, filter, search, theme)
-    admin.js             → Admin panel logic (CRUD, import/export)
-/tools.config.json       → Central data file for all tools
+```sh
+python3.12 -m venv .venv
+source .venv/bin/activate
+pip install -r requirements.txt
+cp .env.example .env
 ```
 
----
+Set `ADMIN_USER`, a password hash and `SECRET_KEY` in `.env`. Generate a session secret:
 
-## 🛠️ How to Add a Tool
-
-### Option 1: Via Admin Panel (Recommended)
-1. Go to `/admin/` in your browser
-2. Click **"Manage Tools"** in the sidebar
-3. Click **"+ Add New Tool"**
-4. Fill in the form and save
-5. Go to **"Export Config"** → download the JSON file
-6. Replace `tools.config.json` in your project with the downloaded file
-
-### Option 2: Edit `tools.config.json` Directly
-Add a new entry to the `tools` array:
-
-```json
-{
-  "id": "tool-005",
-  "name": "My New Tool",
-  "slug": "my-new-tool",
-  "category": "Utility",
-  "description": "Short description here.",
-  "longDescription": "Longer description shown on click.",
-  "thumbnail": "/assets/thumbnails/tool-005.png",
-  "siteUrl": "https://my-tool.example.com",
-  "downloadAvailable": false,
-  "tags": ["free", "web"],
-  "featured": false,
-  "visible": true,
-  "addedDate": "2025-06-01"
-}
+```sh
+python -c "import secrets; print(secrets.token_hex(32))"
 ```
 
----
+Generate a password hash interactively so your password is not placed in shell history:
 
-## 🎨 Theme System
+```sh
+python -c "from getpass import getpass; from werkzeug.security import generate_password_hash; print(generate_password_hash(getpass('Admin password: '), method='pbkdf2:sha256:1000000'))"
+```
 
-The site supports **Light** and **Dark** themes:
-- Users toggle via the **three-dot menu (⋮)** in the top-right corner
-- Preference is saved to `localStorage`
-- Default theme can be set in the Admin Panel → Theme Settings
+Copy the result to `ADMIN_PASSWORD_HASH`. Alternatively, set `ADMIN_PASSWORD` to a password of at least 12 characters. There are no default credentials. The legacy checked-in admin hash is no longer used. Keep `.env` untracked.
 
-All colors use CSS custom properties (variables), making it easy to customize.
+```sh
+python app.py
+```
 
----
+Open `http://127.0.0.1:5002` and `/admin`. Debug mode is off; opt in locally with `FLASK_DEBUG=1`.
 
-## 🔧 Admin Panel
+## What is included
 
-Access the admin panel at `/admin/` — no login required (can be added later).
+- Homepage: tool search/categories, tool details, featured cards, responsive navigation, light/dark theme, workflow animation, FAQ and enabled home widgets.
+- Downloads: search, category counts, sorting, app/file details, version/source information, album browser and individual download links. The browser streams external downloads directly; the UI does not buffer large APKs or claim that a file finished downloading.
+- Workspace: real counts, tool CRUD/reordering, download/album CRUD, sequential bulk uploads with retry tracking, widget CRUD/reordering and poll voting, store app management, categories, branding/social links/theme, and tools configuration import/export with a review step.
+- Existing tools, download URLs and album entries are retained. A missing election-tool thumbnail has an original local SVG replacement.
+- Security: environment-based secrets/credentials, password hash support, login throttling, two-hour sessions, HttpOnly/SameSite cookies, secure cookies on Vercel, CSRF and origin checks on mutations, authenticated management APIs, hidden tools excluded from public JSON, request/upload limits, image verification and file allowlists, HTTPS URL validation, DOM-safe rendering, restrictive script CSP and response headers. Logout requires POST. Save failures return errors rather than false success.
 
-### Features:
-- **Dashboard** — Overview stats (total tools, categories, featured count)
-- **Manage Tools** — Full CRUD (add, edit, delete, reorder)
-- **Categories** — Add/remove filter categories
-- **Site Settings** — Update site name, tagline, social links
-- **Download Page** — Toggle and configure the download section
-- **Theme Settings** — Set default theme for visitors
-- **Export Config** — Download current config as JSON
-- **Import Config** — Upload a JSON file to restore/update
+Custom HTML widgets are intentionally rendered as text; arbitrary stored scripts/markup cannot run. Existing structured widget types remain available. No third-party script/font CDN is required.
 
-### How Admin Data Works:
-1. Admin changes are saved to `localStorage` (key: `sanuwartools-config`)
-2. The homepage reads from `localStorage` first, then falls back to `tools.config.json`
-3. To make changes permanent, **export** the config from admin and replace the `tools.config.json` file
+## Deployment on the existing Vercel project
 
----
+This repository keeps the existing Flask/Vercel deployment route. `.python-version` selects Python 3.12. Do not serve the repository as a static directory: templates and admin APIs require Flask.
 
-## 🔮 Future Plans
+Before deploying this branch, configure the production environment:
 
-- [ ] Login/authentication system for admin panel
-- [ ] Backend API (replace `fetch()` with API calls)
-- [ ] Individual tool detail pages (`/tools/[slug]`)
-- [ ] Tool analytics and usage tracking
-- [ ] PWA support for offline access
+| Variable | Purpose |
+| --- | --- |
+| `SECRET_KEY` | Random secret of at least 32 characters; required on Vercel or startup fails closed. |
+| `ADMIN_USER` | Administrator username. |
+| `ADMIN_PASSWORD_HASH` | Werkzeug password hash; preferred over `ADMIN_PASSWORD`. |
+| `ADMIN_PASSWORD` | Optional alternative, at least 12 characters. |
+| `CLOUDINARY_CLOUD_NAME`, `CLOUDINARY_API_KEY`, `CLOUDINARY_API_SECRET` | Required for uploads. |
+| `GITHUB_PAT`, `GITHUB_USER`, `GITHUB_REPO` | Existing GitHub-backed JSON persistence; required for saves on Vercel. |
+| `COOKIE_SECURE=1` | Set on other HTTPS hosting; enabled automatically on Vercel. |
 
----
+The JSON writer atomically replaces local files and checks the GitHub response before acknowledging a save. GitHub writes use the repository's default branch and can trigger that branch's deployment. Use a separate repository or disable persistence credentials in disposable previews; do not give test previews production write credentials.
 
-## 📄 License
+**Operational limits:** the retained JSON/GitHub storage is appropriate for this small catalogue but is not a transactional multi-writer database. Warm Vercel instances can serve stale `/tmp` data until redeployment. Concurrent edits/votes can overwrite one another. Rate limits are per process; configure a shared edge/gateway limiter for distributed brute-force protection. Poll sessions deter repeat votes in the same browser but are not verified-person voting. The application upload ceiling is 32 MB; your hosting plan may impose a smaller request-body limit. Larger release files should be hosted on GitHub Releases and added by HTTPS URL. The app validates images and blocks executable web uploads; it does not perform antivirus scanning or certify third-party downloads.
 
-Built with ❤️ by **Sanuwar**
+## Checks
+
+```sh
+python -m unittest discover -s tests -v
+node --check static/assets/js/shared.js
+node --check static/assets/js/main.js
+node --check static/assets/js/downloads.js
+node --check static/assets/js/admin.js
+node --check static/assets/js/login.js
+pip install pip-audit
+pip-audit -r requirements.txt
+```
+
+Integration tests isolate data and mock uploads/writes, so they never modify the live catalogue, GitHub, or Cloudinary. Browser QA is recorded in `QA.md`. Live Cloudinary uploads, production environment variables, and the actual device/browser download completion require verification on the deployed host.
+
+## Files
+
+- `app.py`, `security.py`, `utils.py`: Flask routes, request protections, persistence.
+- `templates/`: shared layout, homepage, downloads, admin and login.
+- `static/assets/css/`, `static/assets/js/`: local UI assets.
+- `data/tools.config.json`: catalogue, categories and public settings.
+- `data/downloads.json`: download items and album links.
+- `data/config.json`: home widgets and store apps; no administrator credentials.
+- `tests/test_app.py`: integration and security regression tests.
