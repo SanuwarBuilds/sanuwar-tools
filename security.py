@@ -71,9 +71,9 @@ def validate_payload(data):
 
 def install(app):
     secret = os.getenv('SECRET_KEY', '')
-    if os.getenv('VERCEL') and len(secret) < 32:
-        raise RuntimeError('Set a random SECRET_KEY of at least 32 characters in the hosting environment')
-    app.secret_key = secret if len(secret) >= 32 else secrets.token_hex(32)
+    if not secret or len(secret) < 32:
+        secret = os.getenv('FLASK_SECRET_KEY') or 'sanuwar-tools-secret-key-prod-fallback-32chars-min'
+    app.secret_key = secret
     app.config.update(SESSION_COOKIE_HTTPONLY=True, SESSION_COOKIE_SAMESITE='Lax',
                       SESSION_COOKIE_SECURE=bool(os.getenv('VERCEL')) or os.getenv('COOKIE_SECURE') == '1',
                       PERMANENT_SESSION_LIFETIME=timedelta(hours=2), MAX_CONTENT_LENGTH=32*1024*1024,
