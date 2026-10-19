@@ -21,3 +21,4 @@ static/assets/uploads/
 # Temp
 *.tmp
 syntax_check.html
+.env*
