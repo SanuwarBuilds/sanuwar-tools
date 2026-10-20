@@ -6,7 +6,15 @@
 <meta name="description" content="SanuwarTools — useful web tools, Android apps aur downloads, ek hi jagah.">
 <meta name="theme-color" content="#f6f5ef">
 <title>{% block title %}SanuwarTools — Make everyday a little easier.{% endblock %}</title>
-<link rel="icon" href="{{ public_config.get('site', {}).get('favicon', '/assets/favicon.png') }}"><link rel="stylesheet" href="/assets/css/style.css">
+{% set favicon = public_config.get('site', {}).get('favicon') or '/assets/favicon.png' %}
+{% if favicon == '/assets/favicon.png' %}
+<link rel="icon" type="image/png" sizes="256x256" href="/assets/favicon.png?v=brand2">
+<link rel="icon" type="image/svg+xml" href="/assets/favicon.svg?v=brand2">
+<link rel="apple-touch-icon" sizes="180x180" href="/assets/apple-touch-icon.png?v=brand2">
+{% else %}
+<link rel="icon" href="{{ favicon }}">
+{% endif %}
+<link rel="stylesheet" href="/assets/css/style.css">
 <script src="/assets/js/shared.js" defer></script>
 {% block head %}{% endblock %}
 </head>
