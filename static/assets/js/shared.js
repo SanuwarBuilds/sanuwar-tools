@@ -213,5 +213,34 @@ window.ST = (() => {
       }
     }
   });
-  return { $, el, url, toast, api, image, external, empty, tabs, open, close };
+  const dateLabel = (value) => {
+    if (!value || !/(?:Z|[+-]\d{2}:\d{2})$/.test(value)) return "";
+    const date = new Date(value);
+    if (!Number.isFinite(date.getTime())) return "";
+    return (
+      new Intl.DateTimeFormat("en-IN", {
+        day: "2-digit",
+        month: "short",
+        year: "numeric",
+        hour: "2-digit",
+        minute: "2-digit",
+        hour12: true,
+        timeZone: "Asia/Kolkata",
+      }).format(date) + " IST"
+    );
+  };
+  return {
+    $,
+    el,
+    url,
+    toast,
+    api,
+    image,
+    external,
+    empty,
+    tabs,
+    open,
+    close,
+    dateLabel,
+  };
 })();

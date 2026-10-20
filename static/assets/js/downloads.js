@@ -1,11 +1,99 @@
 "use strict";
 (async () => {
-  const { $, el, api, image, empty, tabs, open, url, toast } = ST;
+  const { $, el, api, image, empty, tabs, open, url, toast, dateLabel } = ST;
   let items = [],
-    selected = "All";
+    selected = "All",
+    kind = "all";
   const grid = $("#downloads-grid");
-  function downloadLink(raw, title) {
-    let safe = url(raw);
+  const fileType = (file) => {
+    let path = "";
+    try {
+      path = new URL(file.link || "", location.origin).pathname;
+    } catch {}
+    const ext = (
+      (file.name || file.title || "").match(/\.([a-z0-9]{2,5})$/i)?.[1] ||
+      path.match(/\.([a-z0-9]{2,5})$/i)?.[1] ||
+      ""
+    ).toLowerCase();
+    if (
+      /^(jpe?g|png|gif|webp|svg|avif|bmp)$/.test(ext) ||
+      path.includes("/image/upload/")
+    )
+      return {
+        kind: "image",
+        label: "Photo",
+        ext: ext.toUpperCase() || "IMAGE",
+        icon: "▧",
+      };
+    if (/^(mp4|webm|mov|m4v)$/.test(ext))
+      return {
+        kind: "video",
+        label: "Video",
+        ext: ext.toUpperCase(),
+        icon: "▷",
+      };
+    if (/^(mp3|wav|m4a|ogg)$/.test(ext))
+      return {
+        kind: "audio",
+        label: "Audio",
+        ext: ext.toUpperCase(),
+        icon: "♫",
+      };
+    return {
+      kind: "file",
+      label:
+        ext === "pdf"
+          ? "PDF document"
+          : /^(apk|aab)$/.test(ext)
+            ? "Android app"
+            : ext === "zip"
+              ? "Archive"
+              : "File",
+      ext: ext.toUpperCase() || "FILE",
+      icon:
+        ext === "pdf"
+          ? "PDF"
+          : /^(apk|aab)$/.test(ext)
+            ? "APP"
+            : ext === "zip"
+              ? "ZIP"
+              : "↙",
+    };
+  };
+  const thumbnail = (raw, alt) => {
+    let source = raw;
+    try {
+      const parsed = new URL(raw, location.origin);
+      if (
+        parsed.hostname === "res.cloudinary.com" &&
+        parsed.pathname.includes("/image/upload/")
+      ) {
+        parsed.pathname = parsed.pathname.replace(
+          "/image/upload/",
+          "/image/upload/f_auto,q_auto,w_480,c_limit/",
+        );
+        source = parsed.href;
+      }
+    } catch {}
+    return image(source, alt);
+  };
+  const stamp = (file) => {
+    const value = file.uploaded_at || file.created_at || file.added_at;
+    const label = dateLabel(value);
+    return label
+      ? el(
+          "time",
+          { class: "file-date", datetime: value },
+          `${file.uploaded_at ? "Uploaded" : "Added"} ${label}`,
+        )
+      : el(
+          "span",
+          { class: "file-date unknown-date" },
+          "Upload date available nahi hai",
+        );
+  };
+  function downloadLink(raw, title = "Download") {
+    const safe = url(raw);
     if (!safe) return el("span", { class: "tag" }, "Link unavailable");
     const parsed = new URL(safe);
     if (
@@ -17,31 +105,251 @@
         "/upload/",
         "/upload/fl_attachment/",
       );
-    safe = parsed.href;
     return el(
       "a",
       {
-        class: "button button-dark",
-        href: safe,
+        class: "button button-dark direct-download",
+        href: parsed.href,
         target: "_blank",
         rel: "noopener noreferrer",
         download: "",
         onclick: () =>
-          toast(
-            "Download link open ho gaya. Browser ya file host par status dekho.",
-          ),
+          toast("Download link open hua. Browser mein download status dekho."),
       },
       title,
       el("span", {}, "↓"),
     );
   }
-  function detail(item) {
-    const nodes = [
+  const viewer = el("dialog", {
+    class: "media-viewer",
+    "aria-labelledby": "media-title",
+  });
+  document.body.append(viewer);
+  let mediaFiles = [],
+    mediaIndex = 0;
+  viewer.addEventListener("close", () => {
+    viewer.replaceChildren();
+    if (!$("#content-dialog").open)
+      document.body.classList.remove("modal-open");
+  });
+  viewer.addEventListener("click", (event) => {
+    if (event.target === viewer) {
+      const r = viewer.getBoundingClientRect();
+      if (
+        event.clientX < r.left ||
+        event.clientX > r.right ||
+        event.clientY < r.top ||
+        event.clientY > r.bottom
+      )
+        viewer.close();
+    }
+  });
+  function showMedia(files, index) {
+    mediaFiles = files;
+    mediaIndex = index;
+    const file = files[index],
+      type = fileType(file),
+      safe = url(file.link);
+    const name = file.name || file.title || `File ${index + 1}`;
+    const stage = el("div", { class: "media-stage" });
+    if (type.kind === "image") stage.append(image(file.link, name));
+    else if ((type.kind === "video" || type.kind === "audio") && safe) {
+      const media = el(type.kind, {
+        src: safe,
+        controls: true,
+        preload: "metadata",
+        "aria-label": name,
+        playsinline: true,
+      });
+      media.addEventListener(
+        "error",
+        () =>
+          stage.replaceChildren(
+            el(
+              "p",
+              {},
+              "Preview load nahi hua. Original file open ya download karo.",
+            ),
+          ),
+        { once: true },
+      );
+      stage.append(media);
+    } else
+      stage.append(
+        el(
+          "div",
+          { class: "file-type-preview" },
+          el("strong", {}, type.icon),
+          el("p", {}, type.label),
+          ST.external(file.link, "Open original", "button button-light"),
+        ),
+      );
+    const prev = el(
+      "button",
+      {
+        class: "button button-light",
+        type: "button",
+        disabled: index === 0,
+        onclick: () => showMedia(files, index - 1),
+        "aria-label": "Previous file",
+      },
+      "← Previous",
+    );
+    const next = el(
+      "button",
+      {
+        class: "button button-light",
+        type: "button",
+        disabled: index === files.length - 1,
+        onclick: () => showMedia(files, index + 1),
+        "aria-label": "Next file",
+      },
+      "Next →",
+    );
+    viewer.replaceChildren(
       el(
-        "p",
-        { class: "dialog-description" },
-        item.description || "Download ki details neeche hain.",
+        "div",
+        { class: "dialog-head" },
+        el(
+          "div",
+          {},
+          el(
+            "span",
+            { class: "eyebrow" },
+            `${type.label} · ${index + 1} / ${files.length}`,
+          ),
+          el("h2", { id: "media-title" }, name),
+        ),
+        el(
+          "button",
+          {
+            class: "icon-button",
+            type: "button",
+            "aria-label": "Close file preview",
+            onclick: () => viewer.close(),
+          },
+          "×",
+        ),
       ),
+      stage,
+      stamp(file),
+      el(
+        "div",
+        { class: "media-actions" },
+        prev,
+        downloadLink(file.link),
+        next,
+      ),
+    );
+    if (!viewer.open) {
+      document.body.classList.add("modal-open");
+      viewer.showModal();
+    }
+  }
+  function openAlbum(item) {
+    const files = item.album_files || [],
+      gallery = el("div", { class: "album-gallery" });
+    const search = el("input", {
+      type: "search",
+      placeholder: "Is album mein file dhoondo…",
+      "aria-label": "Search album files",
+    });
+    const count = el("span", { class: "album-count", role: "status" });
+    const draw = () => {
+      const q = search.value.trim().toLowerCase();
+      const visible = files
+        .map((file, index) => ({ file, index }))
+        .filter(({ file }) =>
+          `${file.name || ""} ${fileType(file).label}`
+            .toLowerCase()
+            .includes(q),
+        );
+      count.textContent = `${visible.length} of ${files.length} files · Tap a preview to see it bigger`;
+      gallery.replaceChildren(
+        ...visible.map(({ file, index }) => {
+          const type = fileType(file),
+            name = file.name || `File ${index + 1}`;
+          const preview = el(
+            "button",
+            {
+              type: "button",
+              class: "album-preview",
+              "aria-label": `Preview ${name}`,
+              onclick: () => showMedia(files, index),
+            },
+            ...(type.kind === "image"
+              ? [thumbnail(file.link, name)]
+              : [
+                  el(
+                    "span",
+                    { class: "file-type-icon", "aria-hidden": "true" },
+                    type.icon,
+                  ),
+                ]),
+            el("span", { class: "preview-type" }, type.ext),
+            el("span", { class: "preview-hint" }, "Preview ↗"),
+          );
+          return el(
+            "article",
+            { class: "album-file-card" },
+            preview,
+            el(
+              "div",
+              { class: "album-file-info" },
+              el("h3", {}, name),
+              stamp(file),
+              downloadLink(file.link),
+            ),
+          );
+        }),
+      );
+      if (!visible.length)
+        empty(
+          gallery,
+          "Koi file nahi mili.",
+          "File name badal kar search karo.",
+        );
+    };
+    search.addEventListener("input", draw);
+    draw();
+    open(
+      item.title,
+      [
+        el(
+          "div",
+          { class: "album-intro" },
+          stamp(item),
+          el(
+            "p",
+            {},
+            "Photo par tap karke dekho, phir apni pasand ki file download karo.",
+          ),
+        ),
+        ...(files.length > 6
+          ? [
+              el(
+                "label",
+                { class: "search-box album-search" },
+                el("span", {}, "⌕"),
+                search,
+              ),
+            ]
+          : []),
+        count,
+        gallery,
+      ],
+      `ALBUM · ${files.length} FILES`,
+    );
+    $("#content-dialog").classList.add("album-dialog");
+  }
+  function detail(item) {
+    if (item.is_album) return openAlbum(item);
+    $("#content-dialog").classList.remove("album-dialog");
+    const type = fileType(item);
+    const nodes = [
+      ...(item.image ? [image(item.image, item.title, "dialog-preview")] : []),
+      el("p", { class: "dialog-description" }, item.description || type.label),
+      stamp(item),
       el(
         "div",
         { class: "dialog-meta" },
@@ -51,67 +359,45 @@
           : []),
       ),
     ];
-    if (item.is_album) {
-      const files = el("div", { class: "album-files" });
-      (item.album_files || []).forEach((file, index) =>
-        files.append(
-          el(
-            "div",
-            { class: "album-file" },
-            el(
-              "span",
-              {},
-              `${String(index + 1).padStart(2, "0")} / ${file.name || `File ${index + 1}`}`,
-            ),
-            downloadLink(file.link, "Download"),
-          ),
+    const safe = url(item.link);
+    if (safe)
+      nodes.push(
+        el(
+          "p",
+          { class: "dialog-description" },
+          `Source: ${new URL(safe).hostname}`,
         ),
       );
-      nodes.push(files);
-      if (!item.album_files?.length)
-        nodes.push(el("p", {}, "Is album mein abhi koi file nahi hai."));
-    } else {
-      const safe = url(item.link);
-      if (safe) {
-        const host = new URL(safe).hostname;
-        nodes.push(
-          el(
-            "p",
-            { class: "dialog-description" },
-            `Source: ${host}. File external host se download hogi. Host ke hisaab se file direct save hogi ya download page khulega.`,
-          ),
-        );
-      }
-      nodes.push(downloadLink(item.link, "Continue to download"));
-    }
-    open(
-      item.title,
-      nodes,
-      item.is_album
-        ? `ALBUM / ${(item.album_files || []).length} FILES`
-        : "DOWNLOAD DETAILS",
-    );
+    if (type.kind !== "file")
+      nodes.push(
+        el(
+          "button",
+          { class: "button button-light", onclick: () => showMedia([item], 0) },
+          "Preview file ↗",
+        ),
+      );
+    nodes.push(downloadLink(item.link));
+    open(item.title, nodes, "FILE DETAILS");
   }
   function render() {
     const q = $("#download-search").value.trim().toLowerCase();
-    let filtered = items.filter(
-      (i) =>
-        (selected === "All" || (i.category || "Files") === selected) &&
-        `${i.title} ${i.description || ""} ${i.category || ""}`
+    const filtered = items.filter(
+      (item) =>
+        (selected === "All" || (item.category || "Files") === selected) &&
+        (kind === "all" ||
+          (kind === "albums" ? item.is_album : !item.is_album)) &&
+        `${item.title} ${item.description || ""} ${item.category || ""} ${(item.album_files || []).map((f) => f.name).join(" ")}`
           .toLowerCase()
           .includes(q),
     );
     const sort = $("#download-sort").value;
+    const time = (item) =>
+      Date.parse(item.created_at || item.uploaded_at || "") || 0;
     if (sort === "alpha")
       filtered.sort((a, b) => a.title.localeCompare(b.title));
-    if (sort === "albums")
-      filtered.sort(
-        (a, b) => Number(Boolean(b.is_album)) - Number(Boolean(a.is_album)),
-      );
-    if (sort === "apps")
-      filtered.sort(
-        (a, b) => Number(Boolean(a.is_album)) - Number(Boolean(b.is_album)),
-      );
+    if (sort === "default") filtered.sort((a, b) => time(b) - time(a));
+    if (sort === "oldest")
+      filtered.sort((a, b) => (time(a) || Infinity) - (time(b) || Infinity));
     const cats = ["All", ...new Set(items.map((i) => i.category || "Files"))];
     const counts = Object.fromEntries(
       cats.map((c) => [
@@ -125,42 +411,81 @@
       $("#download-categories"),
       cats,
       selected,
-      (c) => {
-        selected = c;
+      (cat) => {
+        selected = cat;
         render();
       },
       counts,
     );
+    document.querySelectorAll("[data-kind]").forEach((button) => {
+      button.classList.toggle("active", button.dataset.kind === kind);
+      button.setAttribute("aria-pressed", String(button.dataset.kind === kind));
+    });
     $("#download-count").textContent =
       `${filtered.length} of ${items.length} items`;
     if (!filtered.length)
       return empty(
         grid,
-        "No finds this time.",
-        "Search badal kar dekho ya filters clear karo.",
+        "Koi result nahi mila.",
+        "Search ya category badal kar dekho.",
         () => {
-          selected = "All";
           $("#download-search").value = "";
+          selected = "All";
+          kind = "all";
           render();
         },
       );
     grid.replaceChildren(
-      ...filtered.map((item, index) =>
-        el(
-          "article",
-          { class: "tool-card" },
+      ...filtered.map((item, index) => {
+        const cover =
+          item.image ||
+          (item.is_album
+            ? (item.album_files || []).find(
+                (file) => fileType(file).kind === "image",
+              )?.link
+            : "");
+        const thumb = el(
+          "button",
+          {
+            class: `card-visual tone-${index % 4}`,
+            type: "button",
+            "aria-label": `${item.is_album ? "Open album" : "Preview"} ${item.title}`,
+            onclick: () => detail(item),
+          },
+          thumbnail(cover, item.title),
           el(
-            "div",
-            { class: `card-visual tone-${index % 4}` },
-            image(item.image, item.title),
-            el(
-              "span",
-              { class: "card-badge" },
-              item.is_album
-                ? `▧ ALBUM · ${(item.album_files || []).length} FILES`
-                : "↓ DOWNLOAD",
-            ),
+            "span",
+            { class: "card-badge" },
+            item.is_album
+              ? `${(item.album_files || []).length} files`
+              : item.category || "File",
           ),
+        );
+        const title = el(
+          "h3",
+          {},
+          el(
+            "button",
+            {
+              class: "download-title",
+              type: "button",
+              onclick: () => detail(item),
+            },
+            item.title,
+          ),
+        );
+        const action = item.is_album
+          ? el(
+              "button",
+              { class: "button button-light", onclick: () => openAlbum(item) },
+              "View album",
+              el("span", {}, "↗"),
+            )
+          : downloadLink(item.link);
+        return el(
+          "article",
+          { class: "tool-card download-card" },
+          thumb,
           el(
             "div",
             { class: "card-body" },
@@ -171,64 +496,54 @@
               el(
                 "span",
                 {},
-                item.version
-                  ? `V${item.version.replace(/^v/i, "")}`
-                  : item.is_album
-                    ? "COLLECTION"
-                    : "FILE",
+                item.version || (item.is_album ? "ALBUM" : "FILE"),
               ),
             ),
-            el("h3", {}, item.title),
-            el(
-              "p",
-              {},
-              item.description ||
-                (item.is_album
-                  ? "Memories, ek jagah. Album open karke individual files dekho."
-                  : "Details dekho aur file ko apne device par download karo."),
-            ),
+            title,
+            el("p", { class: "download-description" }, item.description || ""),
+            stamp(item),
             el(
               "div",
               { class: "card-bottom" },
-              el(
-                "button",
-                {
-                  class: `button ${item.is_album ? "button-light" : "button-dark"}`,
-                  onclick: () => detail(item),
-                },
-                item.is_album ? "Explore album" : "Get download",
-                el("span", {}, item.is_album ? "↗" : "↓"),
-              ),
+              action,
+              ...(!item.is_album
+                ? [
+                    el(
+                      "button",
+                      {
+                        class: "info-button",
+                        "aria-label": `Details for ${item.title}`,
+                        onclick: () => detail(item),
+                      },
+                      "i",
+                    ),
+                  ]
+                : []),
             ),
           ),
-        ),
-      ),
+        );
+      }),
     );
   }
   $("#download-search").addEventListener("input", render);
   $("#download-sort").addEventListener("change", render);
+  document.querySelectorAll("[data-kind]").forEach((button) =>
+    button.addEventListener("click", () => {
+      kind = button.dataset.kind;
+      selected = "All";
+      render();
+    }),
+  );
   async function load() {
     try {
       items = await api("/api/downloads_data");
       const albums = items.filter((i) => i.is_album).length;
-      const files = items.reduce(
-        (n, i) => n + (i.is_album ? (i.album_files || []).length : 1),
-        0,
-      );
       $("#collection-stats").replaceChildren(
-        ...[
-          [items.length, "In the collection"],
-          [items.length - albums, "Apps & files"],
-          [albums, "Curated albums"],
-          [files, "Individual files"],
-        ].map(([count, label]) =>
-          el(
-            "div",
-            { class: "collection-stat" },
-            el("strong", {}, String(count).padStart(2, "0")),
-            el("span", {}, label),
-          ),
-        ),
+        el("strong", {}, items.length),
+        el("span", {}, "items"),
+        el("span", {}, "·"),
+        el("strong", {}, albums),
+        el("span", {}, "albums"),
       );
       render();
     } catch (error) {

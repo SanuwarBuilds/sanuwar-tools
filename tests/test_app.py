@@ -88,7 +88,7 @@ class WorkspaceTests(unittest.TestCase):
         self.login();response=self.request('/api/add_item',data={'title':'Android app','link':'https://example.com/app.apk'});self.assertEqual(response.status_code,200);item=response.json['item'];self.assertEqual(len(self.client.get('/api/downloads_data').json),1)
         self.assertEqual(self.request('/api/update_item','PUT',{'id':item['id'],'title':'Updated'}).status_code,200);self.assertEqual(self.client.get('/api/downloads_data').json[0]['title'],'Updated');self.assertEqual(self.request('/api/delete_item/'+item['id'],'DELETE',{}).status_code,200);self.assertEqual(self.client.get('/api/downloads_data').json,[])
     def test_album_roundtrip(self):
-        self.login();payload={'title':'Album','is_album':True,'album_files':[{'name':'Photo','link':'https://example.com/a.jpg'}]};response=self.request('/api/add_item',data=payload);self.assertEqual(response.status_code,200);self.assertEqual(response.json['item']['album_files'],payload['album_files'])
+        self.login();payload={'title':'Album','is_album':True,'album_files':[{'name':'Photo','link':'https://example.com/a.jpg'}]};response=self.request('/api/add_item',data=payload);self.assertEqual(response.status_code,200);self.assertEqual(response.json['item']['album_files'][0]['link'],payload['album_files'][0]['link']);self.assertIn('added_at',response.json['item']['album_files'][0])
     def test_widgets_crud_and_reorder(self):
         self.login();created=[]
         for title in ('One','Two'):
@@ -124,5 +124,46 @@ class WorkspaceTests(unittest.TestCase):
         self.login()
         with patch.object(module,'safe_write',side_effect=RuntimeError('private implementation details')):
             response=self.request('/api/add_item',data={'title':'Test','link':'https://example.com/x'});self.assertEqual(response.status_code,500);self.assertNotIn('private implementation',response.json['error'])
+
+    def test_creation_time_is_server_generated(self):
+        self.login()
+        response=self.request('/api/add_item',data={'title':'Dated','created_at':'2001-01-01T00:00:00Z'})
+        item=response.json['item']
+        self.assertNotEqual(item['created_at'],'2001-01-01T00:00:00Z')
+        self.assertEqual(item['created_at'],item['updated_at'])
+        self.assertTrue(item['created_at'].endswith('+00:00'))
+    def test_edit_preserves_original_upload_and_creation_times(self):
+        self.login()
+        original={'id':'old','title':'Old','link':'https://example.com/a.png','created_at':'2026-01-01T10:00:00+00:00','uploaded_at':'2026-01-01T09:00:00+00:00','album_files':[]}
+        self.records[module.DOWNLOADS_REL]=[original]
+        response=self.request('/api/update_item','PUT',{'id':'old','title':'Renamed','created_at':'2000-01-01T00:00:00Z'})
+        item=response.json['item']
+        self.assertEqual(item['created_at'],original['created_at'])
+        self.assertEqual(item['uploaded_at'],original['uploaded_at'])
+        self.assertIn('updated_at',item)
+    def test_legacy_album_dates_stay_unknown_and_new_files_are_dated(self):
+        self.login()
+        self.records[module.DOWNLOADS_REL]=[{'id':'album','title':'Legacy','is_album':True,'album_files':[{'name':'old.png','link':'https://example.com/old.png'}]}]
+        response=self.request('/api/update_item','PUT',{'id':'album','title':'Legacy','album_files':[{'name':'renamed.png','link':'https://example.com/old.png'},{'name':'new.png','link':'https://example.com/new.png','added_at':'2001-01-01T00:00:00Z'}]})
+        item=response.json['item']
+        self.assertNotIn('created_at',item)
+        self.assertNotIn('added_at',item['album_files'][0])
+        self.assertNotEqual(item['album_files'][1]['added_at'],'2001-01-01T00:00:00Z')
+    def test_new_file_preserves_upload_receipt_timestamp(self):
+        self.login()
+        timestamp='2026-01-01T09:00:00+00:00'
+        response=self.request('/api/add_item',data={'title':'Album','is_album':True,'album_files':[{'name':'a.png','link':'https://example.com/a.png','uploaded_at':timestamp}]})
+        self.assertEqual(response.json['item']['album_files'][0]['uploaded_at'],timestamp)
+    def test_invalid_upload_timestamp_is_ignored(self):
+        self.login()
+        response=self.request('/api/add_item',data={'title':'Bad date','uploaded_at':'not-a-date'})
+        self.assertNotIn('uploaded_at',response.json['item'])
+    def test_upload_endpoint_returns_server_time_and_size(self):
+        self.login()
+        with patch.object(module,'upload_to_cloudinary',return_value=('https://example.com/file.txt','file.txt')):
+            response=self.client.post('/api/admin/upload-download-file',data={'file':(io.BytesIO(b'hello'),'file.txt')},headers={'X-CSRF-Token':self.token})
+        self.assertEqual(response.status_code,200)
+        self.assertEqual(response.json['size'],5)
+        self.assertTrue(response.json['uploaded_at'].endswith('+00:00'))
 
 if __name__=='__main__':unittest.main()

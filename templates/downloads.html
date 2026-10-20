@@ -1,7 +1,19 @@
 {% extends 'base.html' %}
 {% block title %}Downloads — SanuwarTools{% endblock %}
+{% block bodyclass %}downloads-page{% endblock %}
 {% block content %}
-<section class="wrap downloads-hero"><div><span class="eyebrow"><span class="status-dot"></span> THE DOWNLOAD COLLECTION</span><h1>Small finds.<br><span class="serif">Big possibilities.</span><span class="orange-dot">↙</span></h1><p>Useful apps, files aur memories — carefully organised.<br>Apni pasand chuno, details dekho aur download karo.</p></div><div class="download-hero-icon" aria-hidden="true">↓<span>THE GOOD STUFF<br>RIGHT THIS WAY.</span><i>✳</i></div></section>
-<section class="wrap collection section"><div class="collection-stats" id="collection-stats"></div><div class="section-heading compact"><div><span class="eyebrow">BROWSE THE COLLECTION</span><h2>Your next <span class="serif">great find.</span></h2></div><label class="search-box"><span>⌕</span><input id="download-search" type="search" placeholder="Search downloads…" aria-label="Search downloads"><kbd>/</kbd></label></div><div class="catalog-toolbar"><div class="filter-tabs" id="download-categories" role="group" aria-label="Download category"></div><label class="sort-label">Sort by <select id="download-sort" aria-label="Sort downloads"><option value="default">Recently added</option><option value="alpha">Name: A–Z</option><option value="albums">Albums first</option><option value="apps">Files & apps first</option></select></label></div><div class="collection-info"><span id="download-count">Loading collection…</span><span>Direct links. No extra steps. ↙</span></div><div class="download-grid" id="downloads-grid" aria-live="polite"><div class="loading-state">Downloads load ho rahe hain…</div></div></section>
+<section class="wrap download-intro">
+  <div><span class="eyebrow">YOUR FILES, WITHOUT THE EXTRA SCROLL</span><h1>Pick it. <span class="serif">Get it.</span><span class="orange-text"> ↙</span></h1><p>Apps, files aur albums. Preview dekho, apni file chuno.</p></div>
+  <div id="collection-stats" class="download-summary" aria-label="Collection summary"></div>
+</section>
+<section class="wrap collection compact-collection" aria-label="Download collection">
+  <div class="download-controls">
+    <div class="download-search-row"><label class="search-box"><span>⌕</span><input id="download-search" type="search" placeholder="Search apps, albums, files…" aria-label="Search downloads"><kbd>/</kbd></label><label class="sort-label"><select id="download-sort" aria-label="Sort downloads"><option value="default">Newest first</option><option value="oldest">Oldest first</option><option value="alpha">Name: A–Z</option></select></label></div>
+    <div class="collection-types" role="group" aria-label="Collection type"><button class="filter-tab active" data-kind="all" aria-pressed="true">All items</button><button class="filter-tab" data-kind="files" aria-pressed="false">Apps & files</button><button class="filter-tab" data-kind="albums" aria-pressed="false">Albums</button></div>
+    <div class="filter-tabs download-category-tabs" id="download-categories" role="group" aria-label="Download category"></div>
+  </div>
+  <div class="collection-info"><span id="download-count" role="status">Loading collection…</span><span>Dates shown in India time · IST</span></div>
+  <div class="download-grid" id="downloads-grid" aria-live="polite"><div class="loading-state">Downloads load ho rahe hain…</div></div>
+</section>
 {% endblock %}
 {% block scripts %}<script src="/assets/js/downloads.js" defer></script>{% endblock %}

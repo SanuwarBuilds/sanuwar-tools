@@ -32,3 +32,13 @@ Screenshots:
 ## Deployment and service limits
 
 Vercel reported successful preview builds for application commit `2857abc`. After signing in through Safari, the initial preview returned HTTP 500. Vercel runtime logs confirmed startup failed because `SECRET_KEY` is missing. The configured live-site project is `sanuwar-tools-9qla` (`sanuwartools.vercel.app`); it has the existing admin, Cloudinary and GitHub variables for Production/Preview, but needs `SECRET_KEY` added before redeploying the redesign. The new-variable form was prepared without entering or saving a secret. Its [branch preview](https://sanuwar-tools-9qla-git-redesig-46f0a4-sanuwar-hussains-projects.vercel.app) should be checked after that setup. Live Cloudinary uploads and the production deployment have not been verified. Actual file completion is controlled by the browser/external file host; release URLs and album links were inspected without downloading every file. Production credentials were not inspected or changed. Production deployment needs the environment variables documented in README.md. The existing JSON/GitHub persistence and per-process rate-limiter limitations are documented there.
+
+
+## Mobile downloads and upload dates — 20 October 2026
+
+- 36 integration tests pass, including new creation/upload timestamps, timestamp preservation on edit, unknown legacy dates and upload metadata responses.
+- Mobile download rows, sticky filters and direct download links checked at 320, 390, 768 and 1280px with no page overflow. At 390px the first item starts approximately 416px from the top, so downloads are visible on the first screen.
+- The 16-file album renders real photo thumbnails, full-size previews, previous/next controls, filename search and individual download actions. PDF placeholder/original-file action checked with an isolated fixture.
+- An isolated in-memory Flask server (no GitHub writes, no real Cloudinary calls) verified the actual admin file-picker/upload/save flow through to the public card's upload timestamp. A known UTC fixture rendered as 20 Oct 2026, 05:28 am IST, confirming India timezone conversion.
+- Screenshots: [compact mobile downloads](docs/screenshots/downloads-mobile-compact.jpg), [album previews](docs/screenshots/album-mobile-previews.jpg).
+- Legacy dates remain unknown; browser download completion and live external media playback are controlled by the source host/browser.

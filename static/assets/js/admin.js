@@ -461,7 +461,21 @@
                 ),
               ),
             ),
-            el("td", {}, item.category || item.type || "General"),
+            el(
+              "td",
+              {},
+              item.category || item.type || "General",
+              ...(kind === "downloads"
+                ? [
+                    el(
+                      "small",
+                      { class: "admin-upload-date" },
+                      ST.dateLabel(item.uploaded_at || item.created_at) ||
+                        "Upload date unavailable",
+                    ),
+                  ]
+                : []),
+            ),
             el(
               "td",
               {},
@@ -669,7 +683,9 @@
           { method: "POST", body: data },
         );
         target.value = result.url;
-        status.textContent = `Uploaded: ${result.filename || file.name}`;
+        target.dataset.uploadedAt = result.uploaded_at || "";
+        target.dataset.uploadedUrl = result.url;
+        status.textContent = `Uploaded: ${result.filename || file.name}${result.uploaded_at ? " · " + ST.dateLabel(result.uploaded_at) : ""}`;
       } catch (e) {
         status.textContent = e.message;
       } finally {
@@ -766,11 +782,23 @@
     function addFile(file = {}) {
       const name = field("File name", file.name, "text", true),
         url = field("HTTPS file URL", file.link, "url", true);
-      const row = { name, url };
+      const row = { name, url, original: file };
       row.node = el(
         "div",
         { class: "file-row" },
-        el("div", {}, name.node, url.node, uploadField(url.input)),
+        el(
+          "div",
+          {},
+          name.node,
+          url.node,
+          el(
+            "p",
+            { class: "form-note" },
+            ST.dateLabel(file.uploaded_at || file.added_at) ||
+              "Upload date unavailable",
+          ),
+          uploadField(url.input),
+        ),
         rowButton(
           "×",
           () => {
@@ -813,6 +841,11 @@
       [
         el("div", { class: "form-grid" }, title.node, category.node),
         description.node,
+        el(
+          "p",
+          { class: "form-note" },
+          `Added: ${ST.dateLabel(i.created_at) || "Date unavailable"} · Last edited: ${ST.dateLabel(i.updated_at) || "Date unavailable"}`,
+        ),
         el("div", { class: "form-grid" }, version.node, imageUrl.node),
         uploadField(imageUrl.input, true),
         album.node,
@@ -829,18 +862,30 @@
           image: imageUrl.input.value,
           link: album.input.checked ? "" : link.input.value,
           is_album: album.input.checked,
+          uploaded_at:
+            link.input.dataset.uploadedUrl === link.input.value
+              ? link.input.dataset.uploadedAt
+              : i.link === link.input.value
+                ? i.uploaded_at
+                : undefined,
           album_files: album.input.checked
             ? albumRows.map((r) => ({
+                ...(r.original.link === r.url.input.value ? r.original : {}),
                 name: r.name.input.value,
                 link: r.url.input.value,
+                ...(r.url.input.dataset.uploadedUrl === r.url.input.value
+                  ? { uploaded_at: r.url.input.dataset.uploadedAt }
+                  : {}),
               }))
             : [],
         };
         if (payload.is_album && !payload.album_files.length)
           throw new Error("Album mein kam se kam ek file add karo.");
         if (item) {
-          await mutate("/api/update_item", "PUT", payload);
-          downloads = downloads.map((d) => (d.id === item.id ? payload : d));
+          const result = await mutate("/api/update_item", "PUT", payload);
+          downloads = downloads.map((d) =>
+            d.id === item.id ? result.item : d,
+          );
         } else {
           const result = await mutate("/api/add_item", "POST", payload);
           downloads.unshift(result.item);
@@ -1475,7 +1520,12 @@
             method: "POST",
             body: data,
           });
-          uploaded.push({ key, name: file.name, link: result.url });
+          uploaded.push({
+            key,
+            name: file.name,
+            link: result.url,
+            uploaded_at: result.uploaded_at,
+          });
           progress.style.width = `${(uploaded.length / files.files.length) * 80}%`;
         }
         const currentFiles = uploaded.filter((f) =>
@@ -1487,7 +1537,11 @@
             description: `${currentFiles.length} files`,
             category: category.input.value,
             is_album: true,
-            album_files: currentFiles.map(({ name, link }) => ({ name, link })),
+            album_files: currentFiles.map(({ name, link, uploaded_at }) => ({
+              name,
+              link,
+              uploaded_at,
+            })),
             image: "",
             link: "",
           });
@@ -1499,6 +1553,7 @@
               title: file.name,
               category: category.input.value,
               link: file.link,
+              uploaded_at: file.uploaded_at,
               is_album: false,
               album_files: [],
               image: "",

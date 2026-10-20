@@ -9,6 +9,7 @@ from PIL import Image, UnidentifiedImageError
 from werkzeug.security import check_password_hash
 from werkzeug.utils import secure_filename
 import security
+from download_metadata import utc_now, upload_time, album_metadata
 import cloudinary
 import cloudinary.uploader
 from flask import Flask, request, render_template, session, redirect, jsonify, url_for, send_file, send_from_directory, abort
@@ -315,6 +316,7 @@ def api_add_item():
         if not data.get("title"):
             return jsonify({"error": "title is required"}), 400
         items = load_downloads()
+        now = utc_now()
         new_item = {
             "id": "item_" + str(uuid.uuid4())[:8],
             "title": data.get("title", ""),
@@ -324,9 +326,13 @@ def api_add_item():
             "link": data.get("link", ""),
             "version": data.get("version", ""),
             "is_album": bool(data.get("is_album", False)),
-            "album_files": data.get("album_files", []),
+            "album_files": album_metadata(data.get("album_files", []), now=now),
+            "created_at": now,
+            "updated_at": now,
             "is_new": True,
         }
+        if upload_time(data.get('uploaded_at')):
+            new_item['uploaded_at'] = upload_time(data['uploaded_at'])
         items.insert(0, new_item)  # newest first
         save_downloads(items)
         return jsonify({"success": True, "item": new_item})
@@ -349,6 +355,7 @@ def api_update_item():
             if item.get("id") == item_id:
                 # Preserve ID, update the rest
                 items[i] = {
+                    **item,
                     "id": item_id,
                     "title": data.get("title", item.get("title", "")),
                     "description": data.get("description", item.get("description", "")),
@@ -357,15 +364,20 @@ def api_update_item():
                     "link": data.get("link", item.get("link", "")),
                     "version": data.get("version", item.get("version", "")),
                     "is_album": bool(data.get("is_album", item.get("is_album", False))),
-                    "album_files": data.get("album_files", item.get("album_files", [])),
+                    "album_files": album_metadata(data.get("album_files", item.get("album_files", [])), item.get("album_files", [])),
+                    "updated_at": utc_now(),
                     "is_new": item.get("is_new", False),
                 }
+                if data.get('link', item.get('link')) != item.get('link'):
+                    items[i].pop('uploaded_at', None)
+                if upload_time(data.get('uploaded_at')) and data.get('link') != item.get('link'):
+                    items[i]['uploaded_at'] = upload_time(data['uploaded_at'])
                 found = True
                 break
         if not found:
             return jsonify({"error": "Item not found"}), 404
         save_downloads(items)
-        return jsonify({"success": True})
+        return jsonify({"success": True, "item": items[i]})
     except Exception as e:
         app.logger.exception("Operation failed")
         return jsonify({"error": "Could not save or upload. Check server configuration and try again."}), 500
@@ -407,8 +419,11 @@ def upload_download_file():
         ext = os.path.splitext(original_name)[1].lower()
         is_image = ext in ('.jpg', '.jpeg', '.png', '.gif', '.webp')
         rtype = "image" if is_image else "raw"
+        file.stream.seek(0, 2)
+        size = file.stream.tell()
+        file.stream.seek(0)
         url, fname = upload_to_cloudinary(file, resource_type=rtype, folder="sanuwar-tools/downloads")
-        return jsonify({"url": url, "filename": original_name})
+        return jsonify({"url": url, "filename": original_name, "uploaded_at": utc_now(), "size": size})
     except (ValueError, UnidentifiedImageError, Image.DecompressionBombError):
         return jsonify(error="Unsupported or invalid file. Choose a supported file up to 32 MB."), 400
     except Exception:

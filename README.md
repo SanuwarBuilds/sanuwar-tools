@@ -36,7 +36,7 @@ Open `http://127.0.0.1:5002` and `/admin`. Debug mode is off; opt in locally wit
 ## What is included
 
 - Homepage: tool search/categories, tool details, featured cards, responsive navigation, light/dark theme, workflow animation, FAQ and enabled home widgets.
-- Downloads: search, category counts, sorting, app/file details, version/source information, album browser and individual download links. The browser streams external downloads directly; the UI does not buffer large APKs or claim that a file finished downloading.
+- Downloads: compact phone rows, sticky search/category filters, apps/files versus album filters, direct download buttons, sorting, app/file details, version/source information, album thumbnail galleries, full-size image/media previews and individual download links. The browser streams external downloads directly; the UI does not buffer large APKs or claim that a file finished downloading.
 - Workspace: real counts, tool CRUD/reordering, download/album CRUD, sequential bulk uploads with retry tracking, widget CRUD/reordering and poll voting, store app management, categories, branding/social links/theme, and tools configuration import/export with a review step.
 - Existing tools, download URLs and album entries are retained. A missing election-tool thumbnail has an original local SVG replacement.
 - Security: environment-based secrets/credentials, password hash support, login throttling, two-hour sessions, HttpOnly/SameSite cookies, secure cookies on Vercel, CSRF and origin checks on mutations, authenticated management APIs, hidden tools excluded from public JSON, request/upload limits, image verification and file allowlists, HTTPS URL validation, DOM-safe rendering, restrictive script CSP and response headers. Logout requires POST. Save failures return errors rather than false success.
@@ -87,3 +87,9 @@ Integration tests isolate data and mock uploads/writes, so they never modify the
 - `data/downloads.json`: download items and album links.
 - `data/config.json`: home widgets and store apps; no administrator credentials.
 - `tests/test_app.py`: integration and security regression tests.
+
+## Upload dates and mobile downloads
+
+New download entries receive server-generated UTC `created_at` and `updated_at` timestamps. Upload responses include `uploaded_at` and byte size; the individual-file editor, album editor and bulk uploader carry that upload time into the saved catalogue. Album links added manually receive `added_at`. Editing names/descriptions preserves original dates, while changing a file URL clears the old upload date unless a fresh upload result is supplied. Dates are shown publicly and in admin in **Asia/Kolkata (IST)**, independent of the visitor's timezone.
+
+Legacy items without recorded timestamps display “Upload date available nahi hai”; no dates are invented from filenames or deployment times. Photo thumbnails are lazy-loaded, with resized/auto-format Cloudinary previews when applicable; full-size originals open on demand. PDF/app/archive files show their type and an original-file link. Audio/video previews use browser controls when the host and format support playback. External file hosts may block previews; download links remain available.

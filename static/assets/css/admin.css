@@ -923,3 +923,11 @@
     min-height: 44px;
   }
 }
+.admin-upload-date {
+  display: block;
+  font-size: 10px;
+  color: var(--muted);
+  margin-top: 5px;
+  white-space: normal;
+  min-width: 125px;
+}
