@@ -72,7 +72,9 @@ def validate_payload(data):
 def install(app):
     secret = os.getenv('SECRET_KEY', '')
     if not secret or len(secret) < 32:
-        secret = os.getenv('FLASK_SECRET_KEY') or 'sanuwar-tools-secret-key-prod-fallback-32chars-min'
+        secret = os.getenv('FLASK_SECRET_KEY', '')
+        if len(secret) < 32:
+            secret = secrets.token_urlsafe(48)
     app.secret_key = secret
     app.config.update(SESSION_COOKIE_HTTPONLY=True, SESSION_COOKIE_SAMESITE='Lax',
                       SESSION_COOKIE_SECURE=bool(os.getenv('VERCEL')) or os.getenv('COOKIE_SECURE') == '1',
@@ -85,6 +87,9 @@ def install(app):
         return {'csrf_token': session['csrf_token']}
     @app.before_request
     def protect():
+        # Machine-to-machine payment callbacks authenticate their raw body with HMAC.
+        if request.path == '/api/payments/webhook' and request.method == 'POST':
+            return None
         # Native licensing uses per-device signed proofs, not browser session cookies.
         # Only these exact endpoints are exempt; all admin mutations retain CSRF checks.
         if request.method == 'POST' and request.path in ('/api/license/activate','/api/license/refresh'):
@@ -120,7 +125,7 @@ def install(app):
                     elif request.path in ('/api/add_item','/api/update_item'):
                         if not isinstance(payload, dict) or not isinstance(payload.get('title'), str) or not payload['title'].strip():
                             raise ValueError('A title is required')
-                        if not isinstance(payload.get('album_files', []), list) or any(not isinstance(f, dict) or not isinstance(f.get('name'), str) or not f.get('link') for f in payload.get('album_files', [])):
+                        if not isinstance(payload.get('album_files', []), list) or any(not isinstance(f, dict) or not isinstance(f.get('name'), str) or not (f.get('link') or isinstance(f.get('asset'), dict)) for f in payload.get('album_files', [])):
                             raise ValueError('Each album file needs a name and an HTTPS link')
                     elif request.path == '/api/admin/widgets' and request.method == 'POST':
                         if payload.get('type') not in {'notice','poll','winner','person_card','link_card','ticker','gallery','event_card','quote','custom_html'} or not isinstance(payload.get('data', {}), dict):
@@ -137,7 +142,7 @@ def install(app):
         response.headers['Content-Security-Policy'] = "default-src 'self'; script-src 'self'; style-src 'self' 'unsafe-inline'; img-src 'self' https: data:; font-src 'self'; connect-src 'self'; media-src 'self' https:; object-src 'none'; base-uri 'self'; frame-ancestors 'none'; form-action 'self'"
         if request.is_secure:
             response.headers['Strict-Transport-Security'] = 'max-age=31536000'
-        if request.path.startswith(('/admin','/api/')) or request.path == '/tools.config.json':
+        if request.path.startswith(('/admin','/api/','/purchase')) or request.path == '/tools.config.json':
             response.headers['Cache-Control'] = 'no-store'
         return response
     @app.errorhandler(HTTPException)

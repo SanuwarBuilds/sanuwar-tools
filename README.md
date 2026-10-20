@@ -93,3 +93,9 @@ Integration tests isolate data and mock uploads/writes, so they never modify the
 New download entries receive server-generated UTC `created_at` and `updated_at` timestamps. Upload responses include `uploaded_at` and byte size; the individual-file editor, album editor and bulk uploader carry that upload time into the saved catalogue. Album links added manually receive `added_at`. Editing names/descriptions preserves original dates, while changing a file URL clears the old upload date unless a fresh upload result is supplied. Dates are shown publicly and in admin in **Asia/Kolkata (IST)**, independent of the visitor's timezone.
 
 Legacy items without recorded timestamps display “Upload date available nahi hai”; no dates are invented from filenames or deployment times. Photo thumbnails are lazy-loaded, with resized/auto-format Cloudinary previews when applicable; full-size originals open on demand. PDF/app/archive files show their type and an original-file link. Audio/video previews use browser controls when the host and format support playback. External file hosts may block previews; download links remain available.
+
+## Paid downloads with YouPI
+
+Admin supports Free/Paid prices, INR discounts and whole-album purchases. Checkout stays disabled
+until the separately hosted gateway, private orders database and receiving account are configured.
+See [payment setup and verification](docs/PAYMENTS.md).

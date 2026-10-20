@@ -120,6 +120,117 @@
       el("span", {}, "↓"),
     );
   }
+  const rupees = (value) =>
+    new Intl.NumberFormat("en-IN", {
+      style: "currency",
+      currency: "INR",
+      maximumFractionDigits: 2,
+    }).format(value);
+  function priceLabel(item) {
+    if (!item.locked) return el("span", { class: "price-label" }, "Free");
+    return el(
+      "span",
+      { class: "price-label" },
+      ...(Number(item.pricing.discount) > 0
+        ? [el("del", {}, rupees(item.pricing.price))]
+        : []),
+      rupees(item.pricing.payable),
+      item.is_album ? " · Full album" : "",
+    );
+  }
+  function buyButton(item) {
+    let errorText;
+    const button = el(
+      "button",
+      {
+        class: "button button-dark",
+        onclick: async () => {
+          button.disabled = true;
+          if (errorText) errorText.textContent = "";
+          try {
+            // Checkout never starts if the browser cannot retain its purchase receipt.
+            localStorage.setItem("sanuwar-storage-check", "1");
+            localStorage.removeItem("sanuwar-storage-check");
+            const previous = localStorage.getItem(
+              "sanuwar-item-order-" + item.id,
+            );
+            if (previous) {
+              const saved = JSON.parse(
+                localStorage.getItem("sanuwar-purchase-" + previous) || "null",
+              );
+              if (saved?.receipt) {
+                const order = await api(`/api/payments/orders/${previous}`, {
+                  headers: { Authorization: `Bearer ${saved.receipt}` },
+                });
+                if (order.status === "PAID") {
+                  location.assign(`/purchase/${previous}`);
+                  return;
+                }
+                if (order.status === "PENDING" && order.checkout_url) {
+                  location.assign(`/purchase/${previous}`);
+                  return;
+                }
+              }
+            }
+            const order = await api("/api/payments/orders", {
+              method: "POST",
+              body: JSON.stringify({ item_id: item.id }),
+            });
+            localStorage.setItem(
+              "sanuwar-purchase-" + order.order_id,
+              JSON.stringify(order),
+            );
+            localStorage.setItem(
+              "sanuwar-item-order-" + item.id,
+              order.order_id,
+            );
+            location.assign(`/purchase/${order.order_id}`);
+          } catch (e) {
+            if (!errorText) {
+              errorText = el("p", {
+                class: "form-error purchase-error",
+                role: "alert",
+              });
+              button.insertAdjacentElement("afterend", errorText);
+            }
+            errorText.textContent = e.message;
+          } finally {
+            button.disabled = false;
+          }
+        },
+      },
+      `Buy · ${rupees(item.pricing.payable)}`,
+      el("span", {}, "↗"),
+    );
+    return button;
+  }
+  function fileAction(item, file = item, index = 0) {
+    if (item.locked) return buyButton(item);
+    if (!file.private_delivery) return downloadLink(file.link);
+    const button = el(
+      "button",
+      {
+        class: "button button-dark",
+        onclick: async () => {
+          button.disabled = true;
+          try {
+            const result = await api(
+              `/api/downloads/${encodeURIComponent(item.id)}/file`,
+              { method: "POST", body: JSON.stringify({ index }) },
+            );
+            const link = url(result.url);
+            if (link) location.assign(link);
+          } catch (e) {
+            toast(e.message);
+          } finally {
+            button.disabled = false;
+          }
+        },
+      },
+      "Download ↓",
+    );
+    return button;
+  }
   const viewer = el("dialog", {
     class: "media-viewer",
     "aria-labelledby": "media-title",
@@ -247,6 +358,38 @@
     }
   }
   function openAlbum(item) {
+    if (item.locked) {
+      open(
+        item.title,
+        [
+          ...(item.image
+            ? [image(item.image, item.title, "dialog-preview")]
+            : []),
+          priceLabel(item),
+          el(
+            "p",
+            { class: "dialog-description" },
+            item.description ||
+              "Poore album ke files ek purchase mein unlock honge.",
+          ),
+          el(
+            "div",
+            { class: "locked-file-list" },
+            ...(item.album_files || []).map((file) =>
+              el("div", {}, "▣ ", file.name),
+            ),
+          ),
+          buyButton(item),
+          el(
+            "p",
+            { class: "form-note" },
+            "Payment verify hone ke baad sab files download kar sakte ho.",
+          ),
+        ],
+        "PAID ALBUM",
+      );
+      return;
+    }
     const files = item.album_files || [],
       gallery = el("div", { class: "album-gallery" });
     const search = el("input", {
@@ -275,7 +418,10 @@
               type: "button",
               class: "album-preview",
               "aria-label": `Preview ${name}`,
-              onclick: () => showMedia(files, index),
+              onclick: () =>
+                file.private_delivery
+                  ? toast("Private file ka preview download ke baad dekho.")
+                  : showMedia(files, index),
             },
             ...(type.kind === "image"
               ? [thumbnail(file.link, name)]
@@ -298,7 +444,7 @@
               { class: "album-file-info" },
               el("h3", {}, name),
               stamp(file),
-              downloadLink(file.link),
+              fileAction(item, file, index),
             ),
           );
         }),
@@ -368,7 +514,7 @@
           `Source: ${new URL(safe).hostname}`,
         ),
       );
-    if (type.kind !== "file")
+    if (type.kind !== "file" && !item.locked && !item.private_delivery)
       nodes.push(
         el(
           "button",
@@ -376,7 +522,7 @@
           "Preview file ↗",
         ),
       );
-    nodes.push(downloadLink(item.link));
+    nodes.push(priceLabel(item), fileAction(item));
     open(item.title, nodes, "FILE DETAILS");
   }
   function render() {
@@ -481,7 +627,7 @@
               "View album",
               el("span", {}, "↗"),
             )
-          : downloadLink(item.link);
+          : fileAction(item);
         return el(
           "article",
           { class: "tool-card download-card" },
@@ -502,6 +648,7 @@
             title,
             el("p", { class: "download-description" }, item.description || ""),
             stamp(item),
+            priceLabel(item),
             el(
               "div",
               { class: "card-bottom" },

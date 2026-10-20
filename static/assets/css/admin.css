@@ -931,3 +931,6 @@
   white-space: normal;
   min-width: 125px;
 }
+.payment-checks { display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:8px;font-size:13px; }
+.payment-order { display:grid;gap:6px;padding:16px 0;border-bottom:1px solid var(--line);overflow-wrap:anywhere; }
+.payment-order small { color:var(--muted); }

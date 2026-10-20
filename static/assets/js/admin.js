@@ -57,6 +57,13 @@
       "Brand, links aur default theme ko update karo.",
       "",
     ],
+    payments: [
+      "Payments",
+      "PRICES & PURCHASES",
+      "Your downloads, your prices.",
+      "Downloads editor se Free/Paid, price aur discount set karo.",
+      "",
+    ],
     backup: [
       "Backup & restore",
       "A LITTLE PEACE OF MIND",
@@ -470,8 +477,11 @@
                     el(
                       "small",
                       { class: "admin-upload-date" },
-                      ST.dateLabel(item.uploaded_at || item.created_at) ||
-                        "Upload date unavailable",
+                      (ST.dateLabel(item.uploaded_at || item.created_at) ||
+                        "Upload date unavailable") +
+                        (item.pricing?.mode === "paid"
+                          ? ` · ₹${(Number(item.pricing.price) - Number(item.pricing.discount)).toFixed(2)}`
+                          : " · Free"),
                     ),
                   ]
                 : []),
@@ -642,7 +652,7 @@
     open(title, [form], kicker);
     return form;
   }
-  function uploadField(target, isImage = false) {
+  function uploadField(target, isImage = false, privateMode = () => false) {
     const status = el(
       "span",
       { class: "form-note" },
@@ -669,6 +679,7 @@
       }
       const data = new FormData();
       data.append(isImage ? "image" : "file", file);
+      if (!isImage && privateMode()) data.append("private", "1");
       input.disabled = true;
       status.textContent = "Uploading…";
       const form = input.closest("form");
@@ -683,8 +694,10 @@
           { method: "POST", body: data },
         );
         target.value = result.url;
+        target.dataset.asset = result.asset ? JSON.stringify(result.asset) : "";
         target.dataset.uploadedAt = result.uploaded_at || "";
         target.dataset.uploadedUrl = result.url;
+        target.dispatchEvent(new Event("input", { bubbles: true }));
         status.textContent = `Uploaded: ${result.filename || file.name}${result.uploaded_at ? " · " + ST.dateLabel(result.uploaded_at) : ""}`;
       } catch (e) {
         status.textContent = e.message;
@@ -776,7 +789,35 @@
       version = field("Version", i.version),
       imageUrl = field("Cover image URL", i.image),
       link = field("Download URL", i.link, "url"),
-      album = checkbox("This is an album", i.is_album || false);
+      album = checkbox("This is an album", i.is_album || false),
+      access = select(
+        "Download access",
+        ["Free", "Paid"],
+        i.pricing?.mode === "paid" ? "Paid" : "Free",
+      ),
+      price = field("Price · INR ₹", i.pricing?.price || "0", "number"),
+      discount = field(
+        "Discount · INR ₹ off",
+        i.pricing?.discount || "0",
+        "number",
+      );
+    [price.input, discount.input].forEach((input) => {
+      input.min = "0";
+      input.max = "100000";
+      input.step = "0.01";
+    });
+    const isPaid = () => access.input.value === "Paid";
+    const finalPrice = el("p", { class: "form-note" });
+    function updatePrice() {
+      price.input.disabled = discount.input.disabled = !isPaid();
+      finalPrice.textContent = isPaid()
+        ? `Customer pays ₹${Math.max(0, Number(price.input.value) - Number(discount.input.value)).toFixed(2)} · Poore album ke sab files included. Paid files private upload se dobara upload karo; cover public preview rahega.`
+        : "Free download · Payment ki zarurat nahi.";
+      toggle();
+    }
+    [access.input, price.input, discount.input].forEach((input) =>
+      input.addEventListener("input", updatePrice),
+    );
     const rows = el("div", { class: "file-rows" });
     const albumRows = [];
     function addFile(file = {}) {
@@ -797,7 +838,7 @@
             ST.dateLabel(file.uploaded_at || file.added_at) ||
               "Upload date unavailable",
           ),
-          uploadField(url.input),
+          uploadField(url.input, false, isPaid),
         ),
         rowButton(
           "×",
@@ -812,6 +853,7 @@
       );
       albumRows.push(row);
       rows.append(row.node);
+      url.input.required = !isPaid() && !file.asset;
     }
     (i.album_files || []).forEach(addFile);
     const albumSection = el(
@@ -824,18 +866,33 @@
         "+ Add an album file",
       ),
     );
-    const linkSection = el("div", {}, link.node, uploadField(link.input));
+    const linkSection = el(
+      "div",
+      {},
+      link.node,
+      uploadField(link.input, false, isPaid),
+    );
     function toggle() {
       albumSection.hidden = !album.input.checked;
       linkSection.hidden = album.input.checked;
       albumRows.forEach((r) => {
         r.name.input.required = album.input.checked;
-        r.url.input.required = album.input.checked;
+        r.url.input.required =
+          album.input.checked &&
+          !isPaid() &&
+          !r.url.input.dataset.asset &&
+          !r.original.asset;
       });
-      link.input.required = !album.input.checked;
+      link.input.required =
+        !album.input.checked &&
+        !isPaid() &&
+        !link.input.dataset.asset &&
+        !i.asset;
     }
     album.input.addEventListener("change", toggle);
-    toggle();
+    link.input.addEventListener("input", toggle);
+    rows.addEventListener("input", toggle);
+    updatePrice();
     editor(
       item ? "Edit download" : "Share something good.",
       [
@@ -848,6 +905,14 @@
         ),
         el("div", { class: "form-grid" }, version.node, imageUrl.node),
         uploadField(imageUrl.input, true),
+        el(
+          "div",
+          { class: "form-grid" },
+          access.node,
+          price.node,
+          discount.node,
+        ),
+        finalPrice,
         album.node,
         linkSection,
         albumSection,
@@ -862,6 +927,18 @@
           image: imageUrl.input.value,
           link: album.input.checked ? "" : link.input.value,
           is_album: album.input.checked,
+          pricing: {
+            mode: isPaid() ? "paid" : "free",
+            price: price.input.value || "0",
+            discount: discount.input.value || "0",
+          },
+          asset:
+            link.input.dataset.asset &&
+            link.input.dataset.uploadedUrl === link.input.value
+              ? JSON.parse(link.input.dataset.asset)
+              : i.link === link.input.value
+                ? i.asset
+                : undefined,
           uploaded_at:
             link.input.dataset.uploadedUrl === link.input.value
               ? link.input.dataset.uploadedAt
@@ -871,6 +948,13 @@
           album_files: album.input.checked
             ? albumRows.map((r) => ({
                 ...(r.original.link === r.url.input.value ? r.original : {}),
+                asset:
+                  r.url.input.dataset.asset &&
+                  r.url.input.dataset.uploadedUrl === r.url.input.value
+                    ? JSON.parse(r.url.input.dataset.asset)
+                    : r.original.link === r.url.input.value
+                      ? r.original.asset
+                      : undefined,
                 name: r.name.input.value,
                 link: r.url.input.value,
                 ...(r.url.input.dataset.uploadedUrl === r.url.input.value
@@ -1567,12 +1651,111 @@
       "BULK UPLOAD",
     );
   }
+  async function paymentDashboard() {
+    root.replaceChildren(el("p", {}, "Payment setup check ho raha hai…"));
+    try {
+      const data = await api("/api/admin/payments");
+      if (current !== "payments") return;
+      const labels = {
+        gateway_urls: "YouPI API & checkout URLs",
+        merchant_id: "Merchant ID",
+        webhook_secret: "Webhook signing secret",
+        site_url: "Site return URL",
+        private_database: "Private PostgreSQL orders database",
+        session_secret: "Secure site session key",
+        private_uploads: "Cloudinary private uploads",
+        payments_enabled: "Payments enabled",
+        database_connection: "Database connection",
+      };
+      const checks = el(
+        "div",
+        { class: "payment-checks" },
+        ...Object.entries(data.checks).map(([key, ok]) =>
+          el(
+            "p",
+            {},
+            ok ? "✓ " : "○ ",
+            labels[key] || key,
+            ok ? " · Ready" : " · Setup pending",
+          ),
+        ),
+      );
+      const list = el(
+        "div",
+        { class: "payment-orders" },
+        ...data.orders.map((order) =>
+          el(
+            "div",
+            { class: "payment-order" },
+            el("strong", {}, order.title),
+            el(
+              "span",
+              {},
+              `₹${(order.amount / 100).toFixed(2)} · ${order.status}`,
+            ),
+            el(
+              "small",
+              {},
+              ST.dateLabel(new Date(order.created_at * 1000).toISOString()),
+            ),
+            el("small", {}, `Order ${order.id}`),
+            ...(order.utr
+              ? [el("small", {}, `Bank reference ${order.utr}`)]
+              : []),
+          ),
+        ),
+      );
+      root.replaceChildren(
+        card(
+          data.ready ? "Payment checkout enabled" : "Payment setup pending",
+          el(
+            "div",
+            {},
+            checks,
+            el(
+              "a",
+              {
+                class: "button button-light",
+                href: "/payment-demo",
+                target: "_blank",
+                rel: "noopener",
+              },
+              "Try free payment demo ↗",
+            ),
+            el(
+              "p",
+              { class: "form-note" },
+              "YouPI ek alag server par chalega. Merchant dashboard mein apna receiving UPI account aur bank observer configure karo. Secrets sirf server environment mein set karo.",
+            ),
+            ...(data.webhook_url
+              ? [
+                  el(
+                    "p",
+                    { class: "form-note" },
+                    `Webhook URL: ${data.webhook_url}`,
+                  ),
+                ]
+              : []),
+          ),
+        ),
+        card(
+          "Recent purchases",
+          data.orders.length
+            ? list
+            : el("p", {}, "Abhi koi purchase nahi hai."),
+        ),
+      );
+    } catch (e) {
+      root.replaceChildren(el("p", { role: "alert" }, e.message));
+    }
+  }
   function render() {
     ({
       dashboard,
       categories,
       settings,
       backup,
+      payments: paymentDashboard,
       tools: () => listing(config.tools, "tools"),
       downloads: () => listing(downloads, "downloads"),
       widgets: () => listing(widgets, "widgets"),
@@ -1583,7 +1766,7 @@
     try {
       [config, downloads, widgets, store] = await Promise.all([
         api("/api/admin/tools.config"),
-        api("/api/downloads_data"),
+        api("/api/admin/downloads"),
         api("/api/admin/widgets"),
         api("/api/admin/store-apps"),
       ]);

@@ -9,6 +9,7 @@ from PIL import Image, UnidentifiedImageError
 from werkzeug.security import check_password_hash
 from werkzeug.utils import secure_filename
 import security
+import payments
 from download_metadata import utc_now, upload_time, album_metadata
 import cloudinary
 import cloudinary.uploader
@@ -69,6 +70,10 @@ licensing.install(app, login_required)
 @app.route("/")
 def index():
     return render_template("index.html")
+
+@app.route("/payment-demo")
+def payment_demo():
+    return render_template("payment_demo.html")
 
 @app.route("/downloads")
 @app.route("/download.html")
@@ -308,7 +313,12 @@ def save_downloads(items):
 def api_downloads_data():
     """Public endpoint — returns all download items."""
     items = load_downloads()
-    return jsonify(items)
+    return jsonify([payments.public_item(item) for item in items])
+
+@app.route("/api/admin/downloads")
+@login_required
+def admin_downloads():
+    return jsonify(load_downloads())
 
 @app.route("/api/add_item", methods=["POST"])
 @login_required
@@ -336,9 +346,15 @@ def api_add_item():
         }
         if upload_time(data.get('uploaded_at')):
             new_item['uploaded_at'] = upload_time(data['uploaded_at'])
+        new_item['pricing'] = payments.pricing(data)
+        if data.get('asset'):
+            new_item['asset'] = data['asset']
+        payments.protect_item(new_item)
         items.insert(0, new_item)  # newest first
         save_downloads(items)
         return jsonify({"success": True, "item": new_item})
+    except ValueError as e:
+        return jsonify(error=str(e)), 400
     except Exception as e:
         app.logger.exception("Operation failed")
         return jsonify({"error": "Could not save or upload. Check server configuration and try again."}), 500
@@ -373,14 +389,22 @@ def api_update_item():
                 }
                 if data.get('link', item.get('link')) != item.get('link'):
                     items[i].pop('uploaded_at', None)
-                if upload_time(data.get('uploaded_at')) and data.get('link') != item.get('link'):
+                if upload_time(data.get('uploaded_at')) and (data.get('link') != item.get('link') or data.get('asset') != item.get('asset')):
                     items[i]['uploaded_at'] = upload_time(data['uploaded_at'])
+                items[i]['pricing'] = payments.pricing(data, item)
+                if data.get('link', item.get('link')) != item.get('link') and 'asset' not in data:
+                    items[i].pop('asset', None)
+                if 'asset' in data:
+                    items[i]['asset'] = data['asset']
+                payments.protect_item(items[i])
                 found = True
                 break
         if not found:
             return jsonify({"error": "Item not found"}), 404
         save_downloads(items)
         return jsonify({"success": True, "item": items[i]})
+    except ValueError as e:
+        return jsonify(error=str(e)), 400
     except Exception as e:
         app.logger.exception("Operation failed")
         return jsonify({"error": "Could not save or upload. Check server configuration and try again."}), 500
@@ -425,6 +449,20 @@ def upload_download_file():
         file.stream.seek(0, 2)
         size = file.stream.tell()
         file.stream.seek(0)
+        if request.form.get('private') == '1':
+            filename = secure_filename(original_name)
+            if ext not in {'.jpg','.jpeg','.png','.webp','.gif','.pdf','.zip','.apk','.txt','.csv','.mp3','.mp4','.json','.aab'}:
+                raise ValueError('Unsupported file type')
+            if is_image:
+                Image.open(file.stream).verify()
+                file.stream.seek(0)
+            result = cloudinary.uploader.upload(file.stream, folder='sanuwar-tools/paid',
+                resource_type=rtype, type='authenticated', public_id=uuid.uuid4().hex + (ext if rtype == 'raw' else ''),
+                use_filename=False, unique_filename=True, overwrite=False)
+            asset = {key: result.get(key, '') for key in ('public_id', 'resource_type', 'format', 'type')}
+            if not payments.private_asset(asset):
+                raise ValueError('Private upload was not confirmed by Cloudinary')
+            return jsonify(url='', filename=original_name, asset=asset, uploaded_at=utc_now(), size=size)
         url, fname = upload_to_cloudinary(file, resource_type=rtype, folder="sanuwar-tools/downloads")
         return jsonify({"url": url, "filename": original_name, "uploaded_at": utc_now(), "size": size})
     except (ValueError, UnidentifiedImageError, Image.DecompressionBombError):
@@ -558,6 +596,8 @@ def api_widget_vote(widget_id):
     except Exception as e:
         app.logger.exception("Operation failed")
         return jsonify({"error": "Could not save or upload. Check server configuration and try again."}), 500
+
+payments.register(app, load_downloads, login_required)
 
 if __name__ == "__main__":
     app.run(host="0.0.0.0", port=5002, debug=os.getenv('FLASK_DEBUG') == '1')

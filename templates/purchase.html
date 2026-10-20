@@ -1,0 +1,12 @@
+{% extends "base.html" %}
+{% block title %}Your purchase — SanuwarTools{% endblock %}
+{% block content %}
+<section class="wrap purchase-page" data-order-id="{{ order_id }}">
+<span class="eyebrow">YOUR DOWNLOADS</span><h1>One payment.<br><span class="serif">Your files.</span></h1>
+<div id="purchase-content" aria-live="polite"><p>Purchase check ho rahi hai…</p></div>
+<p class="form-note">Purchase isi browser mein saved rahegi. Receipt download karke safe rakho; doosre device par bhi restore kar sakte ho. Receipt kisi ke saath share mat karo.</p>
+<label class="receipt-restore">Saved receipt restore karo <input id="restore-receipt" type="file" accept="application/json,.json"></label>
+<a class="text-link" href="/downloads">← Back to downloads</a>
+</section>
+{% endblock %}
+{% block scripts %}<script src="/assets/js/purchase.js" defer></script>{% endblock %}

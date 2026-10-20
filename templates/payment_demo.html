@@ -1,0 +1,29 @@
+{% extends "base.html" %}
+{% block title %}Payment demo — SanuwarTools{% endblock %}
+{% block content %}
+<section class="wrap payment-demo">
+<span class="demo-banner">DEMO ONLY · Koi real payment nahi hoga</span>
+<h1>Set a price.<br><span class="serif">Try the flow.</span></h1>
+<p class="dialog-description">Sample album par free access, discount aur payment ke baad download try karo. Is demo se tumhare live files ya prices change nahi honge.</p>
+<div class="demo-layout">
+<form id="demo-pricing" class="demo-panel">
+<span class="eyebrow">01 · YOUR PRICE</span><h2>Apni price rakho.</h2>
+<label>Download access <select id="demo-access"><option value="paid">Paid</option><option value="free">Free</option></select></label>
+<div class="form-grid"><label>Price · ₹ <input id="demo-price" type="number" min="1" max="100000" step="0.01" value="199" required></label><label>Discount · ₹ off <input id="demo-discount" type="number" min="0" max="99999" step="0.01" value="50" required></label></div>
+<p id="demo-price-error" class="form-error" role="alert"></p><p class="form-note">Live prices: Admin → Downloads → Edit → Download access.</p>
+</form>
+<div class="demo-panel demo-product">
+<span class="eyebrow">02 · BUYER VIEW</span><div class="demo-album-cover"><span>▧</span><strong>Creative<br><i>starter pack.</i></strong><small>ONE ALBUM · TWO SAMPLE FILES</small></div>
+<h2>Creative starter pack</h2><p>Sample files · Poore album ka ek price.</p><div id="demo-total" class="purchase-total"></div>
+<button id="demo-buy" class="button button-dark">Try checkout ↗</button>
+</div>
+<div class="demo-panel" id="demo-delivery">
+<span class="eyebrow">03 · YOUR DOWNLOADS</span><h2>Ready when paid.</h2><p id="demo-status" class="payment-status" role="status">Files locked hain. Checkout try karo.</p>
+<div id="demo-simulator" hidden><p class="form-note">Yeh simulation controls hain. Real checkout mein payment confirmation server se aayegi.</p><div class="demo-sim-actions"><button id="demo-success" class="button button-orange">Simulate success ✓</button><button id="demo-fail" class="button button-light">Simulate failure ×</button></div></div>
+<div id="demo-files" class="purchase-files"></div><button id="demo-reset" class="text-link">Start again ↻</button>
+</div>
+</div>
+<p class="form-note">Yeh free flow preview hai. Real YouPI checkout ke liye alag gateway hosting, receiving account aur bank observer setup chahiye.</p>
+</section>
+{% endblock %}
+{% block scripts %}<script src="/assets/js/payment-demo.js" defer></script>{% endblock %}

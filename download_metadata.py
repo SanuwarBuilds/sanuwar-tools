@@ -22,11 +22,13 @@ def upload_time(value):
 
 def album_metadata(files, previous=(), now=None):
     now = now or utc_now()
-    old = {f.get('link'): f for f in previous}
+    def identity(file):
+        return file.get('asset', {}).get('public_id') or file.get('link')
+    old = {identity(f): f for f in previous}
     result = []
     for incoming in files:
         entry = dict(incoming)
-        prior = old.get(entry.get('link'))
+        prior = old.get(identity(entry))
         if prior is not None:
             # Editing a caption/name must never reset an existing file's dates.
             for key in ('added_at', 'uploaded_at'):

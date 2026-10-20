@@ -40,7 +40,7 @@ class WorkspaceTests(unittest.TestCase):
         self.assertEqual(response.status_code,200)
         with self.client.session_transaction() as session:self.token=session['csrf_token']
     def test_public_pages_render(self):
-        for path in ('/','/downloads','/download.html','/admin/login'):
+        for path in ('/','/downloads','/download.html','/admin/login','/payment-demo','/purchases'):
             response=self.client.get(path);self.assertEqual(response.status_code,200,path)
             self.assertNotIn(b'cdn.tailwindcss.com',response.data)
     def test_admin_requires_authentication(self):
