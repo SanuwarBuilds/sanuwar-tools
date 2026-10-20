@@ -22,3 +22,7 @@ static/assets/uploads/
 *.tmp
 syntax_check.html
 .env*
+
+# Private licensing state and keys
+*.sqlite*
+*.pem

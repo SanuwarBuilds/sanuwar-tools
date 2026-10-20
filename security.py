@@ -85,6 +85,12 @@ def install(app):
         return {'csrf_token': session['csrf_token']}
     @app.before_request
     def protect():
+        # Native licensing uses per-device signed proofs, not browser session cookies.
+        # Only these exact endpoints are exempt; all admin mutations retain CSRF checks.
+        if request.method == 'POST' and request.path in ('/api/license/activate','/api/license/refresh'):
+            if request.headers.get('Origin'):
+                return jsonify(error='Native application endpoint'), 403
+            return None
         if request.method in ('POST','PUT','PATCH','DELETE'):
             token = request.headers.get('X-CSRF-Token', '')
             if not token or not hmac.compare_digest(token, session.get('csrf_token', '')):

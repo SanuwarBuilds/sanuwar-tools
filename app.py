@@ -63,6 +63,9 @@ def login_required(f):
         return f(*args, **kwargs)
     return decorated_function
 
+import licensing
+licensing.install(app, login_required)
+
 @app.route("/")
 def index():
     return render_template("index.html")
