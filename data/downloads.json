@@ -24,15 +24,15 @@
     "is_new": true
   },
   {
+    "id": "item_d2613643",
     "title": "Ludo Remote",
     "description": "Android remote controller for Ludu King. Select the next roll by colour from a second phone on the same compatible Wi-Fi or hotspot.",
     "category": "Apps",
     "image": "data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSI2NDAiIGhlaWdodD0iMzUyIiB2aWV3Qm94PSIwIDAgNjQwIDM1MiI+PGRlZnM+PGxpbmVhckdyYWRpZW50IGlkPSJiZyIgeDI9IjEiIHkyPSIxIj48c3RvcCBzdG9wLWNvbG9yPSIjMTcyNTU0Ii8+PHN0b3Agb2Zmc2V0PSIxIiBzdG9wLWNvbG9yPSIjMzEyZTgxIi8+PC9saW5lYXJHcmFkaWVudD48Y2xpcFBhdGggaWQ9InJvdW5kIj48cmVjdCB4PSIyMzIiIHk9Ijg4IiB3aWR0aD0iMTc2IiBoZWlnaHQ9IjE3NiIgcng9IjM2Ii8+PC9jbGlwUGF0aD48L2RlZnM+PHJlY3Qgd2lkdGg9IjY0MCIgaGVpZ2h0PSIzNTIiIGZpbGw9InVybCgjYmcpIi8+PGcgY2xpcC1wYXRoPSJ1cmwoI3JvdW5kKSI+PHN2ZyB4PSIyMzIiIHk9Ijg4IiB3aWR0aD0iMTc2IiBoZWlnaHQ9IjE3NiIgdmlld0JveD0iMCAwIDEwOCAxMDgiPjxwYXRoIGZpbGw9IiM2NzUwQTQiIGQ9Ik0wLDBoMTA4djEwOGgtMTA4eiIvPjxwYXRoIGZpbGw9IiNGRkZGRkYiIGQ9Ik0zMCwyNGg0OGExMCwxMCAwIDAsMSAxMCwxMHY0MGExMCwxMCAwIDAsMSAtMTAsMTBoLTQ4YTEwLDEwIDAgMCwxIC0xMCwtMTB2LTQwYTEwLDEwIDAgMCwxIDEwLC0xMHoiLz48cGF0aCBmaWxsPSIjRTUzOTM1IiBkPSJNMzgsMzZtLTQsMGE0LDQgMCAxLDAgOCwwYTQsNCAwIDEsMCAtOCwwIi8+PHBhdGggZmlsbD0iI0U1MzkzNSIgZD0iTTcwLDM2bS00LDBhNCw0IDAgMSwwIDgsMGE0LDQgMCAxLDAgLTgsMCIvPjxwYXRoIGZpbGw9IiNFNTM5MzUiIGQ9Ik0zOCw2OG0tNCwwYTQsNCAwIDEsMCA4LDBhNCw0IDAgMSwwIC04LDAiLz48cGF0aCBmaWxsPSIjRTUzOTM1IiBkPSJNNzAsNjhtLTQsMGE0LDQgMCAxLDAgOCwwYTQsNCAwIDEsMCAtOCwwIi8+PHBhdGggZmlsbD0iI0U1MzkzNSIgZD0iTTU0LDUybS00LjUsMGE0LjUsNC41IDAgMSwwIDksMGE0LjUsNC41IDAgMSwwIC05LDAiLz48L3N2Zz48L2c+PC9zdmc+",
-    "link": "https://github.com/SanuwarBuilds/sanuwar-tools/releases/download/ludo-2026-10-20/LudoRemote-release.apk",
-    "version": "1.2.0",
+    "link": "https://github.com/SanuwarBuilds/sanuwar-tools/releases/download/fix_remote_error/LudoRemote-1.2.1-Discovery-Fix.apk",
+    "version": "1.2.1",
     "is_album": false,
     "album_files": [],
-    "id": "item_d2613643",
     "is_new": true
   },
   {
