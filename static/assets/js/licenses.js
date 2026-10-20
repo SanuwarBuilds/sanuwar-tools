@@ -26,7 +26,7 @@
           const button = document.createElement('button'); button.textContent = title;
           button.addEventListener('click', async () => {
             if (busy) return; busy = true; button.disabled = true;
-            try { await api(`/api/admin/licenses/${encodeURIComponent(item.id)}`, {action, days: Number(days.value)}); message(action === 'revoke' ? 'Access revoked. An offline lease can remain valid for up to 5 hours.' : 'Access renewed. Ask the customer to verify online.'); await load(); }
+            try { await api(`/api/admin/licenses/${encodeURIComponent(item.id)}`, {action, days: Number(days.value)}); message(action === 'revoke' ? 'Access revoked. An offline lease can remain valid for up to 24 hours.' : 'Access renewed. Ask the customer to verify online.'); await load(); }
             catch (e) { message(e.message, true); }
             finally { busy = false; button.disabled = false; }
           });

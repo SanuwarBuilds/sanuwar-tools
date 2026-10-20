@@ -4,7 +4,7 @@ Admin URL: `/admin/licenses`, using existing admin login and CSRF protection.
 
 Create a separate code per customer. Choose whole days (1–3650), label and batch size (1–100 per batch). Validity starts at first successful server activation, not code creation. One code binds to one Android Keystore P-256 public key. Repeated activation does not restart expiry. Codes are high-entropy random values, shown once and stored only as SHA256 hashes in a private PostgreSQL database. Customer labels and device bindings never go into public download JSON/GitHub.
 
-Renew adds days to the later of now or existing expiry; unactivated licenses gain days without starting the clock. It restores revoked access but preserves device binding. Revoke rejects the next online verification. Previously signed offline access lasts until its existing deadline: at most 5 hours and never beyond license expiry. App checks online on launch/resume and every15minutes while running. A phone restart requires online verification. If boot identity is unavailable, an online lease works in that process only.
+Renew adds days to the later of now or existing expiry; unactivated licenses gain days without starting the clock. It restores revoked access but preserves device binding. Revoke rejects the next online verification. Previously signed offline access lasts until its existing deadline: at most 24 hours and never beyond license expiry. App checks online on launch/resume and every15minutes while running. A phone restart requires online verification. If boot identity is unavailable, an online lease works in that process only.
 
 ## Configuration
 
@@ -24,7 +24,7 @@ HTTPS: `https://sanuwartools.vercel.app`.
 
 `POST /api/license/refresh`: JSON `{licenseId,nonce,signature}`. Sign `LR-REFRESH-1\n<licenseId>\n<nonce>` with bound device key. App does not persist activation code.
 
-Success `{payload,signature}`: payload is base64 UTF8 compact JSON. Server SHA256withECDSA signature covers exact decoded bytes. Payload: `{v:1,licenseId,deviceKeySha256,activatedAt,expiresAt,serverTime,offlineUntil,requestNonce,revision}`. Timestamps UTC seconds; `offlineUntil=min(expiresAt,serverTime+18000)`. App checks pinned public-key signature, device digest, fresh-response nonce, version and bounds. Cache reads never reset elapsed-time anchor. Phone wall-clock changes cannot extend access; copied preferences fail device-key verification.
+Success `{payload,signature}`: payload is base64 UTF8 compact JSON. Server SHA256withECDSA signature covers exact decoded bytes. Payload: `{v:1,licenseId,deviceKeySha256,activatedAt,expiresAt,serverTime,offlineUntil,requestNonce,revision}`. Timestamps UTC seconds; `offlineUntil=min(expiresAt,serverTime+86400)`. App checks pinned public-key signature, device digest, fresh-response nonce, version and bounds. Cache reads never reset elapsed-time anchor. Phone wall-clock changes cannot extend access; copied preferences fail device-key verification.
 
 Error `{code,error}`:400malformed,403invalid/expired/revoked/wrong device,409retry,429rate-limited,503unavailable/unconfigured. Definitive denial locks immediately. Network failures retain only a previously valid lease until its original deadline. All admin writes require session+CSRF; only two exact signed native POST endpoints are CSRF-exempt, and they reject browser Origin-bearing requests.
 

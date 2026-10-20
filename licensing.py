@@ -17,7 +17,7 @@ from sqlalchemy import (create_engine, MetaData, Table, Column, String, Text, In
                         BigInteger, Boolean, select, insert, update, delete, and_)
 from sqlalchemy.pool import NullPool
 
-OFFLINE_SECONDS = 5 * 60 * 60
+OFFLINE_SECONDS = 24 * 60 * 60
 meta = MetaData()
 licenses = Table('remote_licenses_v1', meta,
     Column('id', String(36), primary_key=True), Column('code_hash', String(64), unique=True, nullable=False),

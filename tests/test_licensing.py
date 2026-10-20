@@ -20,8 +20,8 @@ class LicensingTest(unittest.TestCase):
   out=self.store.issue(action,body);raw=base64.b64decode(out['payload'])
   self.server.public_key().verify(base64.b64decode(out['signature']),raw,ec.ECDSA(hashes.SHA256()))
   return json.loads(raw)
- def test_custom_days_first_activation_and_five_hour_cap(self):
-  self.now+=100000;p=self.lease();self.assertEqual(p['expiresAt'],self.now+9*86400);self.assertEqual(p['offlineUntil'],self.now+18000);self.assertEqual(OFFLINE_SECONDS,18000)
+ def test_custom_days_first_activation_and_twenty_four_hour_cap(self):
+  self.now+=100000;p=self.lease();self.assertEqual(p['expiresAt'],self.now+9*86400);self.assertEqual(p['offlineUntil'],self.now+86400);self.assertEqual(OFFLINE_SECONDS,86400)
  def test_repeat_activation_does_not_restart_expiry(self):
   first=self.lease();self.now+=86400;self.assertEqual(first['expiresAt'],self.lease()['expiresAt'])
  def test_independent_bulk_codes(self):
