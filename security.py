@@ -103,7 +103,8 @@ def install(app):
             origin = request.headers.get('Origin')
             if origin and origin != request.host_url.rstrip('/'):
                 return jsonify(error='Cross-origin request rejected'), 403
-            if request.path.startswith('/api/') and not request.is_json and not request.path.startswith('/api/admin/upload'):
+            empty_delete = request.method == 'DELETE' and not request.get_data(cache=True)
+            if request.path.startswith('/api/') and not request.is_json and not empty_delete and not request.path.startswith('/api/admin/upload'):
                 return jsonify(error='Send JSON with Content-Type application/json'), 415
             if request.is_json:
                 try:

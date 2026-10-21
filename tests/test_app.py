@@ -87,6 +87,25 @@ class WorkspaceTests(unittest.TestCase):
     def test_download_crud(self):
         self.login();response=self.request('/api/add_item',data={'title':'Android app','link':'https://example.com/app.apk'});self.assertEqual(response.status_code,200);item=response.json['item'];self.assertEqual(len(self.client.get('/api/downloads_data').json),1)
         self.assertEqual(self.request('/api/update_item','PUT',{'id':item['id'],'title':'Updated'}).status_code,200);self.assertEqual(self.client.get('/api/downloads_data').json[0]['title'],'Updated');self.assertEqual(self.request('/api/delete_item/'+item['id'],'DELETE',{}).status_code,200);self.assertEqual(self.client.get('/api/downloads_data').json,[])
+    def test_browser_empty_delete_removes_download(self):
+        self.login()
+        item = self.request('/api/add_item', data={'title':'Delete me','link':'https://example.com/file.apk'}).json['item']
+        response = self.client.delete('/api/delete_item/'+item['id'], headers={'X-CSRF-Token':self.token})
+        self.assertEqual(response.status_code, 200, response.json)
+        self.assertEqual(self.records[module.DOWNLOADS_REL], [])
+        self.assertEqual(self.client.get('/api/downloads_data').json, [])
+
+    def test_empty_delete_still_requires_csrf_and_admin(self):
+        self.assertEqual(self.client.delete('/api/delete_item/test').status_code, 403)
+        self.assertEqual(self.client.delete('/api/delete_item/test', headers={'X-CSRF-Token':self.token}).status_code, 401)
+        self.login()
+        self.assertEqual(self.client.delete('/api/delete_item/test', headers={'X-CSRF-Token':self.token,'Origin':'https://evil.example'}).status_code, 403)
+
+    def test_delete_non_json_body_is_rejected(self):
+        self.login()
+        response=self.client.delete('/api/delete_item/test',data='bad body',content_type='text/plain',headers={'X-CSRF-Token':self.token})
+        self.assertEqual(response.status_code,415)
+
     def test_album_roundtrip(self):
         self.login();payload={'title':'Album','is_album':True,'album_files':[{'name':'Photo','link':'https://example.com/a.jpg'}]};response=self.request('/api/add_item',data=payload);self.assertEqual(response.status_code,200);self.assertEqual(response.json['item']['album_files'][0]['link'],payload['album_files'][0]['link']);self.assertIn('added_at',response.json['item']['album_files'][0])
     def test_widgets_crud_and_reorder(self):

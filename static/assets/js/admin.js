@@ -84,7 +84,9 @@
     try {
       const result = await api(path, {
         method,
-        ...(body !== undefined ? { body: JSON.stringify(body) } : {}),
+        ...(body !== undefined || method === "DELETE"
+          ? { body: JSON.stringify(body ?? {}) }
+          : {}),
       });
       state("Changes saved");
       return result;
