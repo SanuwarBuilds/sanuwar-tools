@@ -31,6 +31,35 @@ class LicensingTest(unittest.TestCase):
   self.lease()
   with self.assertRaises(LicenseError) as ctx:self.lease(key=ec.generate_private_key(ec.SECP256R1()))
   self.assertEqual(ctx.exception.code,'DEVICE_BOUND')
+ def test_blocked_device_attempt_is_durable_without_changing_original_access(self):
+  first=self.lease();other=ec.generate_private_key(ec.SECP256R1())
+  for step in [0,20]:
+   self.now+=step
+   with self.assertRaises(LicenseError) as ctx:self.lease(key=other)
+   self.assertEqual(ctx.exception.code,'DEVICE_BOUND')
+  # A new store/connection must see events even though the activation raised.
+  independent=LicenseStore(str(self.store.engine.url),self.server,now=lambda:self.now)
+  row=independent.list()[0]
+  self.assertEqual(row['device_attempt_count'],2)
+  self.assertEqual(row['last_device_attempt_at'],self.now)
+  self.assertEqual(row['expires_at'],first['expiresAt'])
+  self.assertFalse(row['revoked'])
+  self.assertEqual(self.lease('refresh',licenseId=first['licenseId'])['expiresAt'],first['expiresAt'])
+ def test_same_phone_and_separate_codes_do_not_raise_device_alerts(self):
+  self.lease();self.lease()
+  fresh=self.store.create(7,'Other')[0]['code']
+  self.lease(key=ec.generate_private_key(ec.SECP256R1()),code=fresh)
+  for row in self.store.list():
+   self.assertEqual(row['device_attempt_count'],0)
+   self.assertIsNone(row['last_device_attempt_at'])
+ def test_invalid_signature_does_not_create_false_device_alert(self):
+  self.lease();public_key=ec.generate_private_key(ec.SECP256R1());signing_key=ec.generate_private_key(ec.SECP256R1())
+  nonce='b'*43
+  body={'code':self.code,'nonce':nonce,'devicePublicKey':base64.b64encode(public_key.public_key().public_bytes(serialization.Encoding.DER,serialization.PublicFormat.SubjectPublicKeyInfo)).decode(),
+   'signature':base64.b64encode(signing_key.sign(proof_message('activate',hashlib.sha256(self.code.encode()).hexdigest(),nonce),ec.ECDSA(hashes.SHA256()))).decode()}
+  with self.assertRaises(LicenseError) as ctx:self.store.issue('activate',body)
+  self.assertEqual(ctx.exception.code,'INVALID_PROOF')
+  self.assertEqual(self.store.list()[0]['device_attempt_count'],0)
  def test_atomic_concurrent_binding(self):
   def claim(_):
    try:return self.lease(key=ec.generate_private_key(ec.SECP256R1()))['licenseId']

@@ -14,7 +14,7 @@ from cryptography.hazmat.primitives.asymmetric import ec
 from cryptography.exceptions import InvalidSignature
 from flask import Blueprint, jsonify, request, render_template
 from sqlalchemy import (create_engine, MetaData, Table, Column, String, Text, Integer,
-                        BigInteger, Boolean, select, insert, update, delete, and_)
+                        BigInteger, Boolean, select, insert, update, delete, and_, func)
 from sqlalchemy.pool import NullPool
 
 OFFLINE_SECONDS = 24 * 60 * 60
@@ -97,8 +97,15 @@ class LicenseStore:
 
     def list(self):
         fields=[col for col in licenses.c if col.name not in ('code_hash','device_key')]
+        attempts=select(audit.c.license_id,
+            func.count().label('device_attempt_count'),func.max(audit.c.at).label('last_device_attempt_at')
+        ).where(audit.c.event=='device_mismatch').group_by(audit.c.license_id).subquery()
         with self.engine.connect() as c:
-            rows=c.execute(select(*fields, licenses.c.device_key.is_not(None).label('bound')).order_by(licenses.c.created_at.desc()).limit(500)).mappings()
+            rows=c.execute(select(*fields, licenses.c.device_key.is_not(None).label('bound'),
+                func.coalesce(attempts.c.device_attempt_count,0).label('device_attempt_count'),
+                attempts.c.last_device_attempt_at
+            ).outerjoin(attempts,attempts.c.license_id==licenses.c.id)
+             .order_by(licenses.c.created_at.desc()).limit(500)).mappings()
             return [dict(row) for row in rows]
 
     def change(self, identity, action, days=None):
@@ -133,6 +140,20 @@ class LicenseStore:
         if count>120: raise LicenseError('RATE_LIMITED','Too many requests. Please try again later.',429)
 
     def issue(self, action, data):
+        try:
+            return self._issue(action,data)
+        except LicenseError as error:
+            if error.code=='DEVICE_BOUND':
+                # _issue has already verified the supplied key's signature. Its rejected
+                # transaction is rolled back before this separate audit transaction begins.
+                # Never write the code, full key, IP or request body into this event.
+                with self.engine.begin() as c:
+                    identity=c.execute(select(licenses.c.id).where(
+                        licenses.c.code_hash==digest(normalize_code(data.get('code'))))).scalar_one()
+                    self.event(c,identity,'device_mismatch')
+            raise
+
+    def _issue(self, action, data):
         if action not in ('activate','refresh'): raise LicenseError('INVALID_ACTION','Invalid operation.',400)
         try:
             nonce=data['nonce']

@@ -28,7 +28,7 @@ class LicenseRoutesTest(unittest.TestCase):
  def test_panel_render_and_no_license_codes_in_list(self):
   self.authenticate();self.assertEqual(self.client.get('/admin/licenses').status_code,200)
   self.client.post('/api/admin/licenses',json={'days':21,'label':'<script>alert(1)</script>'},headers={'X-CSRF-Token':'test-csrf'})
-  out=self.client.get('/api/admin/licenses');self.assertEqual(out.status_code,200);self.assertNotIn('code_hash',out.json['licenses'][0])
+  out=self.client.get('/api/admin/licenses');self.assertEqual(out.status_code,200);self.assertNotIn('code_hash',out.json['licenses'][0]);self.assertNotIn('device_key',out.json['licenses'][0]);self.assertEqual(out.json['licenses'][0]['device_attempt_count'],0)
  def tearDown(self):self.app.config.pop('LICENSE_STORE',None)
 
 if __name__=='__main__':unittest.main()

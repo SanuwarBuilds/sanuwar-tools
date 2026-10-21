@@ -29,3 +29,11 @@ Success `{payload,signature}`: payload is base64 UTF8 compact JSON. Server SHA25
 Error `{code,error}`:400malformed,403invalid/expired/revoked/wrong device,409retry,429rate-limited,503unavailable/unconfigured. Definitive denial locks immediately. Network failures retain only a previously valid lease until its original deadline. All admin writes require session+CSRF; only two exact signed native POST endpoints are CSRF-exempt, and they reject browser Origin-bearing requests.
 
 First binding and all mutations are transactional/atomic. No local JSON production persistence. Codes, signing keys and full device keys are excluded from admin lists/logs.
+
+## Blocked device attempts
+
+A correctly signed activation of an already-bound code using a different device key is rejected with DEVICE_BOUND and saved as a device_mismatch event. The rejected activation transaction rolls back; a separate audit transaction commits the event, so errors do not silently erase it. This reuses the existing private audit table and needs no migration or APK update.
+
+The private admin list shows each license's attempt count and latest attempt time, plus an attention banner. The visible page refreshes every 30 seconds while not editing; Refresh list is immediate. No email, WhatsApp or push notification is configured. Existing events before this feature are not reconstructed.
+
+Counts are request attempts, not distinct phones or proof of concurrent use. Reinstall/data clear or a changed Keystore key can also produce an alert. Same-device activation, ordinary refresh and invalid signatures do not raise it. No automatic revocation: the original phone keeps its validity and admin reviews the signal. Events store only license ID, event type and UTC timestamp; no full code, public key, request body or IP address.
