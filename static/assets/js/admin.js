@@ -180,6 +180,16 @@
     const showing = $("#admin-sidebar").classList.toggle("open");
     $("#admin-menu").setAttribute("aria-expanded", String(showing));
   });
+  document.addEventListener("keydown", (event) => {
+    if (
+      event.key === "Escape" &&
+      $("#admin-sidebar").classList.contains("open")
+    ) {
+      $("#admin-sidebar").classList.remove("open");
+      $("#admin-menu").setAttribute("aria-expanded", "false");
+      $("#admin-menu").focus();
+    }
+  });
   document.addEventListener("click", (event) => {
     if (!event.target.closest("#admin-sidebar,#admin-menu")) {
       $("#admin-sidebar").classList.remove("open");

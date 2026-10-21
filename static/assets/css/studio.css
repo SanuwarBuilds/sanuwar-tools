@@ -1,0 +1,1984 @@
+@font-face {
+  font-family: Manrope;
+  src: url("/assets/fonts/Manrope-Variable.ttf") format("truetype");
+  font-style: normal;
+  font-weight: 200 800;
+  font-display: swap;
+}
+/* Minimal blue studio: one visual language across the public hub and workspace. */
+.studio-theme {
+  --bg: #f7f9fc;
+  --surface: #fff;
+  --text: #15243b;
+  --muted: #617087;
+  --line: #e3e9f1;
+  --soft: #edf3fc;
+  --orange: #245de9;
+  --lime: #e8f0ff;
+  --shadow: 0 8px 24px #183f7808;
+  --ease: cubic-bezier(0.22, 1, 0.36, 1);
+  background: var(--bg);
+  font-family: Manrope, Arial, sans-serif;
+  font-size: 14px;
+  line-height: 1.65;
+}
+html[data-theme="dark"] .studio-theme {
+  --bg: #101927;
+  --surface: #172337;
+  --text: #edf3ff;
+  --muted: #a6b5cd;
+  --line: #2b3c55;
+  --soft: #20334f;
+  --orange: #8cb3ff;
+  --lime: #213958;
+  --shadow: 0 8px 24px #0002;
+}
+.studio-theme .wrap {
+  width: min(1184px, calc(100% - 64px));
+}
+.studio-theme h1,
+.studio-theme h2,
+.studio-theme h3 {
+  font-weight: 750;
+  letter-spacing: -0.045em;
+  line-height: 1.18;
+}
+.studio-theme h2 {
+  font-size: 32px;
+}
+.studio-theme h3 {
+  font-size: 19px;
+}
+.studio-theme .serif {
+  font-family: inherit;
+  font-style: normal;
+  font-weight: 750;
+  letter-spacing: inherit;
+}
+.studio-theme .eyebrow {
+  font-size: 10px;
+  letter-spacing: 0.12em;
+  font-weight: 750;
+  color: var(--muted);
+}
+.studio-theme .status-dot {
+  background: var(--orange);
+  box-shadow: 0 0 0 4px #245de90b;
+}
+.studio-theme .button {
+  min-height: 44px;
+  padding: 11px 17px;
+  border-radius: 10px;
+  font-size: 12px;
+  font-weight: 750;
+  gap: 22px;
+  transition:
+    background 0.2s,
+    box-shadow 0.2s,
+    transform 0.2s;
+}
+.studio-theme .button-orange,
+.studio-theme .button-dark {
+  background: #245de9;
+  color: #fff;
+  border: 1px solid #245de9;
+  box-shadow: 0 3px 6px #245de911;
+}
+.studio-theme .button-orange:hover,
+.studio-theme .button-dark:hover {
+  background: #174bcc;
+  transform: translateY(-1px);
+  box-shadow: 0 5px 12px #245de922;
+}
+.studio-theme .button-light {
+  background: var(--surface);
+  border: 1px solid var(--line);
+  color: var(--text);
+}
+.studio-theme .button-light:hover {
+  background: var(--soft);
+  border-color: #a6bfe8;
+}
+.studio-theme .text-link {
+  font-size: 12px;
+  font-weight: 700;
+}
+.studio-theme .tag {
+  background: var(--soft);
+  color: var(--orange);
+  border: 0;
+  font-size: 10px;
+  border-radius: 6px;
+}
+.studio-theme .brand {
+  font-size: 21px;
+  font-weight: 800;
+  letter-spacing: -1px;
+  gap: 10px;
+}
+.studio-theme .brand-symbol {
+  background: #245de9;
+  color: #fff;
+  width: 34px;
+  height: 34px;
+  font-size: 29px;
+  border-radius: 10px;
+}
+.studio-theme .brand-dot {
+  color: #245de9;
+}
+.studio-theme .site-header {
+  height: 80px;
+  border: 0;
+  gap: 24px;
+  position: relative;
+  z-index: 30;
+}
+.studio-theme .site-header nav {
+  font-size: 12px;
+  gap: 25px;
+  font-weight: 650;
+}
+.studio-theme .site-header nav a.active {
+  color: var(--orange);
+}
+.studio-theme .site-header nav a.active:after {
+  width: 15px;
+  height: 2px;
+  border-radius: 1px;
+  bottom: -9px;
+}
+.studio-theme .nav-actions {
+  gap: 12px;
+}
+.studio-theme .icon-button {
+  width: 40px;
+  height: 40px;
+  font-size: 18px;
+  border: 1px solid var(--line);
+  border-radius: 10px;
+  background: var(--surface);
+}
+.studio-theme .menu-toggle {
+  font-size: 16px;
+}
+.studio-hero {
+  display: grid;
+  grid-template-columns: 1.1fr 1fr;
+  gap: 52px;
+  align-items: center;
+  padding: 40px 44px;
+  margin-top: 16px;
+  background: var(--surface);
+  border: 1px solid var(--line);
+  border-radius: 24px;
+  position: relative;
+  overflow: hidden;
+}
+.studio-hero:before {
+  content: "";
+  position: absolute;
+  left: 0;
+  top: 50px;
+  bottom: 50px;
+  width: 4px;
+  background: #245de9;
+  border-radius: 0 4px 4px 0;
+}
+.studio-kicker {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  font-size: 9px;
+  letter-spacing: 0.1em;
+  font-weight: 750;
+  color: var(--muted);
+}
+.studio-hero h1 {
+  font-size: clamp(42px, 4.2vw, 60px);
+  margin: 20px 0 17px;
+  line-height: 1.1;
+  letter-spacing: -0.06em;
+}
+.studio-hero h1 > span {
+  color: #245de9;
+}
+.studio-hero-copy > p {
+  font-size: 13px;
+  max-width: 390px;
+  line-height: 1.9;
+}
+.studio-hero-actions {
+  display: flex;
+  gap: 10px;
+  flex-wrap: wrap;
+  margin-top: 24px;
+}
+.studio-hero-note {
+  display: flex;
+  align-items: center;
+  gap: 11px;
+  margin-top: 28px;
+  font-size: 8px;
+  letter-spacing: 0.08em;
+  color: var(--muted);
+  font-weight: 750;
+}
+.studio-hero-note i {
+  width: 3px;
+  height: 3px;
+  border-radius: 50%;
+  background: #abb9cf;
+}
+.quick-access {
+  align-self: center;
+  border: 1px solid var(--line);
+  border-radius: 18px;
+  padding: 20px;
+  background: var(--bg);
+  position: relative;
+}
+.quick-access-heading {
+  display: flex;
+  justify-content: space-between;
+  gap: 8px;
+  align-items: center;
+  margin-bottom: 9px;
+}
+.quick-access-count {
+  font-size: 8px;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  color: var(--muted);
+}
+.quick-tool {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 15px 0;
+  border-bottom: 1px solid var(--line);
+  transition: transform 0.2s;
+}
+.quick-tool:hover {
+  transform: translateX(3px);
+}
+.quick-tool-icon {
+  width: 38px;
+  height: 38px;
+  flex-shrink: 0;
+  background: var(--surface);
+  border: 1px solid var(--line);
+  border-radius: 11px;
+  display: grid;
+  place-items: center;
+  color: var(--orange);
+  font:
+    600 11px ui-monospace,
+    monospace;
+}
+.quick-tool > span:nth-child(2) {
+  min-width: 0;
+}
+.quick-tool strong {
+  font-size: 12px;
+  display: block;
+  line-height: 1.5;
+  font-weight: 750;
+}
+.quick-tool small {
+  font-size: 10px;
+  color: var(--muted);
+  display: block;
+  margin-top: 2px;
+}
+.quick-tool-arrow {
+  margin-left: auto;
+  color: var(--muted);
+  font-size: 18px;
+}
+.quick-download-link {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  margin-top: 14px;
+  padding: 14px;
+  border-radius: 11px;
+  color: var(--orange);
+  background: var(--lime);
+}
+.quick-download-link b {
+  display: block;
+  font-size: 11px;
+}
+.quick-download-link small {
+  display: block;
+  font-size: 9px;
+  margin-top: 3px;
+  color: var(--muted);
+}
+.quick-download-link > span:last-child {
+  font-size: 22px;
+}
+.studio-theme .section {
+  padding-block: 52px;
+}
+.studio-theme .section-heading {
+  margin-bottom: 23px;
+  align-items: end;
+}
+.studio-theme .section-heading h2 {
+  margin-top: 10px;
+}
+.studio-theme .section-heading > p {
+  font-size: 12px;
+  max-width: 300px;
+}
+.section-index {
+  font-family: ui-monospace, monospace;
+  color: var(--orange);
+  padding: 2px 6px;
+  background: var(--lime);
+  border-radius: 4px;
+  margin-left: 8px;
+  font-size: 9px;
+  letter-spacing: 0;
+}
+.collection-total {
+  font-size: 11px;
+  color: var(--muted);
+  white-space: nowrap;
+}
+.collection-total b {
+  color: var(--text);
+  font-weight: 800;
+  margin-right: 5px;
+}
+.studio-theme .catalog-toolbar {
+  margin-bottom: 20px;
+  align-items: center;
+  gap: 16px;
+}
+.studio-theme .filter-tabs {
+  gap: 5px;
+}
+.studio-theme .filter-tab {
+  font-size: 11px;
+  min-height: 40px;
+  border: 1px solid transparent;
+  border-radius: 8px;
+  padding: 9px 14px;
+  color: var(--muted);
+  font-weight: 700;
+  background: transparent;
+}
+.studio-theme .filter-tab.active {
+  color: #245de9;
+  background: #e9f0ff;
+  border-color: #d7e4ff;
+}
+.studio-theme .filter-tab:hover {
+  background: var(--soft);
+}
+.studio-theme .search-box {
+  height: 44px;
+  border: 1px solid var(--line);
+  background: var(--surface);
+  border-radius: 10px;
+  box-shadow: none;
+}
+.studio-theme .search-box input {
+  font-size: 12px;
+}
+.studio-theme .search-box > span {
+  font-size: 19px;
+  color: #788aa4;
+}
+.studio-theme kbd {
+  background: var(--bg);
+  border-color: var(--line);
+  color: var(--muted);
+  font-family: inherit;
+}
+.studio-theme .tool-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 16px;
+}
+.studio-theme .tool-card {
+  border: 1px solid var(--line);
+  background: var(--surface);
+  border-radius: 16px;
+  box-shadow: none;
+  transition:
+    border-color 0.2s,
+    box-shadow 0.2s;
+  animation: none;
+}
+.studio-theme .tool-card:hover {
+  transform: none;
+  border-color: #bdd0ef;
+  box-shadow: 0 8px 20px #163c7007;
+}
+.home-page .tool-card {
+  display: grid;
+  grid-template-columns: 155px minmax(0, 1fr);
+  padding: 10px;
+  gap: 8px;
+}
+.home-page .tool-card .card-visual {
+  height: 100%;
+  min-height: 174px;
+  aspect-ratio: auto;
+  border-radius: 10px;
+  overflow: hidden;
+  background: var(--soft);
+}
+.home-page .tool-card .card-visual img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  transition: transform 0.3s;
+}
+.home-page .tool-card:hover .card-visual img {
+  transform: scale(1.025);
+}
+.studio-theme .card-badge {
+  font-size: 7px;
+  letter-spacing: 0.04em;
+  background: var(--surface);
+  color: var(--text);
+  border: 1px solid var(--line);
+  border-radius: 5px;
+  padding: 4px 6px;
+  top: 9px;
+  left: 9px;
+}
+.studio-theme .card-body {
+  padding: 15px;
+}
+.studio-theme .card-topline {
+  font-size: 8px;
+  letter-spacing: 0.07em;
+  color: var(--muted);
+  margin-bottom: 10px;
+  font-weight: 750;
+}
+.studio-theme .card-body h3 {
+  font-size: 17px;
+  line-height: 1.4;
+  letter-spacing: -0.035em;
+  margin-bottom: 7px;
+}
+.studio-theme .card-body > p {
+  font-size: 11px;
+  line-height: 1.8;
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+.studio-theme .card-bottom {
+  margin-top: 15px;
+  padding-top: 12px;
+  border-top: 1px solid var(--line);
+}
+.home-page .card-bottom .text-link {
+  color: var(--orange);
+  font-size: 11px;
+}
+.studio-theme .info-button {
+  width: 30px;
+  height: 30px;
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  font-size: 12px;
+  color: var(--muted);
+  background: var(--surface);
+}
+.studio-theme .widget-grid {
+  margin-top: 20px;
+  gap: 16px;
+}
+.studio-theme .widget-card {
+  padding: 20px;
+  border: 1px solid var(--line);
+  border-radius: 14px;
+  background: var(--surface);
+}
+.studio-theme .widget-card h3 {
+  font-size: 17px;
+}
+.studio-theme .widget-card p {
+  font-size: 12px;
+}
+.studio-workflow {
+  padding: 32px 0 46px;
+  border-top: 1px solid var(--line);
+}
+.studio-steps {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 20px;
+}
+.studio-steps article {
+  padding: 20px;
+  border: 1px solid var(--line);
+  border-radius: 16px;
+  background: var(--surface);
+  position: relative;
+}
+.studio-steps article > span {
+  font-size: 9px;
+  font-weight: 750;
+  color: var(--muted);
+  letter-spacing: 0.08em;
+}
+.studio-steps .step-symbol {
+  width: 39px;
+  height: 39px;
+  border-radius: 11px;
+  display: grid;
+  place-items: center;
+  color: var(--orange);
+  background: var(--lime);
+  font-size: 23px;
+  margin: 20px 0 18px;
+}
+.studio-steps h3 {
+  font-size: 17px;
+  margin-bottom: 9px;
+}
+.studio-steps p {
+  font-size: 11px;
+  line-height: 1.9;
+  max-width: 270px;
+}
+.studio-download-cta {
+  display: flex;
+  gap: 24px;
+  align-items: center;
+  margin-block: 0 48px;
+  background: #eaf1ff;
+  border: 1px solid #dce8ff;
+  border-radius: 18px;
+  padding: 28px 32px;
+}
+.studio-download-cta .cta-icon {
+  width: 65px;
+  height: 65px;
+  display: grid;
+  place-items: center;
+  border-radius: 18px;
+  background: #fff;
+  color: #245de9;
+  font-size: 34px;
+  flex-shrink: 0;
+}
+.studio-download-cta h2 {
+  font-size: 26px;
+  margin: 6px 0;
+}
+.studio-download-cta p {
+  font-size: 11px;
+}
+.studio-download-cta > .button {
+  margin-left: auto;
+  flex-shrink: 0;
+}
+.studio-download-cta .eyebrow {
+  color: #245de9;
+}
+.studio-theme .studio-faq {
+  padding-block: 0 54px;
+  gap: 50px;
+}
+.studio-faq h2 {
+  font-size: 28px;
+  margin-top: 10px;
+}
+.studio-theme .faq-list details {
+  border-color: var(--line);
+}
+.studio-theme .faq-list summary {
+  font-size: 12px;
+  padding-block: 20px;
+  font-weight: 700;
+}
+.studio-theme .faq-list details p {
+  font-size: 12px;
+}
+.studio-theme .site-footer {
+  border-top: 1px solid var(--line);
+  padding-block: 28px 30px;
+  gap: 24px;
+}
+.studio-theme .site-footer .brand {
+  font-size: 19px;
+}
+.studio-theme .site-footer .brand-symbol {
+  width: 28px;
+  height: 28px;
+  font-size: 24px;
+  border-radius: 8px;
+}
+.studio-theme .site-footer p {
+  font-size: 10px;
+  line-height: 1.9;
+}
+.studio-theme .site-footer nav {
+  font-size: 10px;
+  gap: 20px;
+}
+.studio-theme .copyright {
+  font-size: 9px;
+}
+/* A compact, consistent library; thumbnails and actions stay visible. */
+.studio-theme .download-intro {
+  padding-block: 28px 23px;
+  align-items: center;
+  gap: 20px;
+}
+.studio-theme .download-intro .eyebrow {
+  display: inline-flex;
+  font-size: 9px;
+}
+.studio-theme .download-intro h1 {
+  font-size: 42px;
+  line-height: 1.15;
+  letter-spacing: -0.05em;
+  margin: 9px 0 8px;
+}
+.download-intro h1 > span {
+  color: var(--orange);
+}
+.studio-theme .download-intro p {
+  font-size: 12px;
+}
+.download-intro-side {
+  display: grid;
+  justify-items: end;
+  gap: 20px;
+}
+.library-purchases {
+  display: inline-flex;
+  gap: 18px;
+  font-size: 11px;
+  font-weight: 700;
+  color: var(--orange);
+}
+.studio-theme .download-summary {
+  font-size: 10px;
+  gap: 6px;
+}
+.studio-theme .download-summary strong {
+  font-size: 12px;
+  font-weight: 800;
+}
+.studio-theme .download-controls {
+  padding: 12px;
+  background: var(--surface);
+  border: 1px solid var(--line);
+  border-radius: 14px;
+  box-shadow: 0 3px 12px #183f7804;
+  top: 8px;
+}
+.studio-theme .download-search-row {
+  gap: 10px;
+  margin-bottom: 10px;
+}
+.studio-theme .download-search-row .search-box {
+  height: 44px;
+  background: var(--bg);
+}
+.studio-theme .download-search-row select {
+  background: var(--bg);
+  border-radius: 9px;
+  border-color: var(--line);
+  font-size: 11px;
+  min-height: 44px;
+}
+.studio-theme .download-filter-row .collection-types {
+  background: var(--bg);
+  padding: 3px;
+  max-width: 280px;
+  border: 1px solid var(--line);
+  border-radius: 9px;
+}
+.studio-theme .download-filter-row .collection-types .filter-tab {
+  min-height: 34px;
+  font-size: 11px;
+  padding: 7px 12px;
+  border-radius: 6px;
+  font-weight: 750;
+}
+.studio-theme .download-filter-row .collection-types .filter-tab.active {
+  color: #245de9;
+  background: var(--surface);
+  box-shadow: 0 1px 4px #163c7015;
+}
+.studio-theme .download-category-select {
+  background: var(--bg);
+  border-radius: 9px;
+  min-height: 42px;
+  font-size: 11px;
+}
+.studio-theme .collection-info {
+  font-size: 10px;
+  margin: 14px 3px;
+  color: var(--muted);
+}
+.studio-theme .download-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 12px;
+  padding-bottom: 10px;
+}
+.studio-theme .download-card {
+  display: grid;
+  grid-template-columns: 108px minmax(0, 1fr);
+  padding: 8px;
+  gap: 8px;
+  min-height: 166px;
+  border-radius: 14px;
+}
+.studio-theme .download-card .card-visual {
+  width: 100%;
+  height: 100%;
+  min-height: 142px;
+  aspect-ratio: auto;
+  border-radius: 9px;
+  background: var(--bg);
+  overflow: hidden;
+}
+.studio-theme .download-card .card-visual img {
+  object-fit: contain;
+  padding: 8px;
+  width: 100%;
+  height: 100%;
+  max-height: 160px;
+}
+.studio-theme .download-card .card-badge {
+  top: auto;
+  bottom: 7px;
+  left: 7px;
+  right: 7px;
+  font-size: 7px;
+  text-align: center;
+  max-width: 100%;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  background: var(--surface);
+}
+.studio-theme .download-card .card-body {
+  padding: 6px 6px 3px;
+  min-width: 0;
+}
+.studio-theme .download-card .card-topline {
+  margin-bottom: 4px;
+  font-size: 7px;
+}
+.studio-theme .download-card h3 {
+  font-size: 14px;
+  margin-bottom: 4px;
+}
+.studio-theme .download-description {
+  display: none !important;
+}
+.studio-theme .download-card .file-date {
+  font-size: 8px;
+  line-height: 1.65;
+  margin: 0;
+}
+.studio-theme .download-card .price-label {
+  font-size: 10px;
+  margin: 5px 0;
+  color: var(--text);
+}
+.studio-theme .download-card .card-bottom {
+  margin-top: 6px;
+  padding-top: 0;
+  border: 0;
+  gap: 8px;
+}
+.studio-theme .download-card .button {
+  font-size: 10px;
+  min-height: 38px;
+  padding: 8px 12px;
+  border-radius: 8px;
+}
+.studio-theme .download-card .info-button {
+  width: 38px;
+  height: 38px;
+  flex-shrink: 0;
+}
+.studio-theme .download-card .card-bottom > .button {
+  max-width: 240px;
+}
+/* Dialogs and forms share the same typography and focus language. */
+.studio-theme dialog {
+  background: var(--surface);
+  color: var(--text);
+  border: 1px solid var(--line);
+  border-radius: 20px;
+  box-shadow: 0 24px 90px #152a4533;
+}
+.studio-theme dialog::backdrop {
+  background: #12243d66;
+  backdrop-filter: blur(5px);
+}
+.studio-theme .dialog-head h2 {
+  font-size: 25px;
+  line-height: 1.35;
+}
+.studio-theme .dialog-head {
+  border-color: var(--line);
+  padding-bottom: 18px;
+}
+.studio-theme .dialog-description {
+  font-size: 13px;
+}
+.studio-theme .dialog-meta {
+  gap: 7px;
+}
+.studio-theme .album-file-card {
+  border-radius: 12px;
+  border-color: var(--line);
+}
+.studio-theme .album-file-info h3 {
+  font-size: 12px;
+}
+.studio-theme .album-preview {
+  background: var(--bg);
+}
+.studio-theme .file-date {
+  color: var(--muted);
+}
+.studio-theme input,
+.studio-theme textarea,
+.studio-theme select {
+  border-radius: 9px;
+  border-color: var(--line);
+  font-size: 12px;
+}
+.studio-theme .toast {
+  border-radius: 12px;
+  background: #15243b;
+  color: #fff;
+  font-size: 12px;
+}
+/* Administrative workspace: clearer rows, readable labels, quieter chrome. */
+.studio-theme.admin-body {
+  font-size: 13px;
+}
+.studio-theme .admin-layout {
+  grid-template-columns: 224px minmax(0, 1fr);
+}
+.studio-theme .admin-sidebar {
+  padding: 25px 18px;
+  background: var(--surface);
+  border-color: var(--line);
+}
+.studio-theme .admin-sidebar .brand {
+  font-size: 19px;
+}
+.studio-theme .admin-sidebar nav button {
+  border-radius: 9px;
+  min-height: 44px;
+  font-size: 11px;
+}
+.studio-theme .admin-sidebar nav button.selected {
+  background: var(--lime);
+  color: var(--orange);
+}
+.studio-theme .admin-sidebar nav button.selected > span {
+  color: var(--orange);
+}
+.studio-theme .admin-topbar {
+  height: 72px;
+  background: var(--surface);
+  padding-inline: 30px;
+}
+.studio-theme .admin-content {
+  padding: 30px 30px 44px;
+}
+.studio-theme .admin-page-title {
+  margin-bottom: 24px;
+}
+.studio-theme .admin-page-title h1 {
+  font-size: 29px;
+  margin: 10px 0;
+}
+.studio-theme .admin-page-title p {
+  font-size: 11px;
+}
+.studio-theme .admin-page-title .eyebrow {
+  font-size: 9px;
+}
+.studio-theme .dashboard-stats {
+  gap: 12px;
+  margin-bottom: 20px;
+}
+.studio-theme .dashboard-stat {
+  border-radius: 13px;
+  padding: 18px;
+  box-shadow: none;
+}
+.studio-theme .dashboard-stat strong {
+  font-size: 32px;
+  font-weight: 800;
+}
+.studio-theme .dashboard-stat .stat-top {
+  font-size: 10px;
+}
+.studio-theme .admin-card {
+  border-radius: 14px;
+  border-color: var(--line);
+  box-shadow: none;
+}
+.studio-theme .admin-card-header {
+  padding: 18px 20px;
+}
+.studio-theme .admin-card-header h2 {
+  font-size: 15px;
+  letter-spacing: -0.02em;
+}
+.studio-theme .admin-card-body {
+  padding: 20px;
+}
+.studio-theme .admin-table th {
+  font-size: 9px;
+  background: var(--bg);
+  letter-spacing: 0.08em;
+}
+.studio-theme .admin-table td {
+  font-size: 11px;
+  padding: 14px 18px;
+}
+.studio-theme .table-name strong {
+  font-size: 12px;
+}
+.studio-theme .status-pill {
+  color: #225e46;
+  background: #edf7f2;
+  border-radius: 6px;
+  font-size: 9px;
+}
+.studio-theme .row-actions button {
+  border-radius: 7px;
+  font-size: 10px;
+  min-height: 34px;
+}
+.studio-theme .admin-avatar {
+  background: var(--lime);
+  color: var(--orange);
+  font-weight: 800;
+  border-radius: 9px;
+}
+.studio-theme .editor-form label {
+  font-size: 11px;
+}
+.studio-theme .editor-form input,
+.studio-theme .editor-form textarea,
+.studio-theme .editor-form select {
+  font-size: 12px;
+}
+.studio-theme .form-grid {
+  gap: 14px;
+}
+.studio-theme .login-intro {
+  background: #edf3ff;
+  color: #15243b;
+}
+.studio-theme .login-intro h1 {
+  font-size: 50px;
+}
+.studio-theme .login-flower {
+  color: #245de9;
+}
+.studio-theme .login-panel h2 {
+  font-size: 34px;
+}
+.studio-theme .login-layout {
+  background: var(--surface);
+}
+@keyframes studio-enter {
+  from {
+    opacity: 0;
+    transform: translateY(9px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+@media (prefers-reduced-motion: no-preference) {
+  .studio-hero-copy {
+    animation: studio-enter 0.5s var(--ease) both;
+  }
+  .quick-access {
+    animation: studio-enter 0.5s 0.08s var(--ease) both;
+  }
+}
+@media (min-width: 901px) {
+  .studio-theme .menu-toggle {
+    display: none;
+  }
+}
+@media (max-width: 1100px) {
+  .studio-hero {
+    gap: 30px;
+    padding: 32px;
+  }
+  .home-page .tool-card {
+    grid-template-columns: 125px minmax(0, 1fr);
+  }
+  .studio-hero h1 {
+    font-size: 48px;
+  }
+  .studio-theme .card-body {
+    padding: 11px;
+  }
+  .studio-theme .admin-layout {
+    grid-template-columns: 210px minmax(0, 1fr);
+  }
+}
+@media (max-width: 900px) {
+  .studio-theme .wrap {
+    width: calc(100% - 40px);
+  }
+  .studio-hero {
+    grid-template-columns: 1.1fr 1fr;
+    gap: 24px;
+    padding: 28px;
+  }
+  .studio-hero h1 {
+    font-size: 39px;
+  }
+  .studio-hero-copy > p {
+    font-size: 12px;
+  }
+  .studio-kicker {
+    font-size: 8px;
+  }
+  .studio-hero-actions {
+    gap: 8px;
+  }
+  .studio-hero-actions .button {
+    font-size: 11px;
+    padding-inline: 12px;
+    gap: 14px;
+  }
+  .studio-hero-note {
+    gap: 7px;
+    font-size: 7px;
+  }
+  .quick-access {
+    padding: 16px;
+  }
+  .quick-access-count {
+    display: none;
+  }
+  .quick-tool {
+    padding: 13px 0;
+    gap: 9px;
+  }
+  .quick-tool strong {
+    font-size: 11px;
+  }
+  .quick-tool-icon {
+    width: 32px;
+    height: 32px;
+    font-size: 9px;
+  }
+  .quick-download-link {
+    padding: 12px;
+  }
+  .quick-download-link b {
+    font-size: 10px;
+  }
+  .quick-download-link small {
+    font-size: 8px;
+  }
+  .home-page .tool-card {
+    grid-template-columns: 100px minmax(0, 1fr);
+    padding: 8px;
+    gap: 4px;
+  }
+  .studio-theme .card-body h3 {
+    font-size: 15px;
+  }
+  .home-page .tool-card .card-visual {
+    min-height: 165px;
+  }
+  .studio-theme .card-body > p {
+    font-size: 10px;
+  }
+  .studio-theme .download-grid {
+    gap: 10px;
+  }
+  .studio-theme .download-card {
+    grid-template-columns: 88px minmax(0, 1fr);
+    gap: 5px;
+  }
+  .studio-theme .download-card h3 {
+    font-size: 13px;
+  }
+  .studio-theme .download-card .card-topline > span:last-child {
+    max-width: 48%;
+  }
+  .studio-theme .admin-layout {
+    grid-template-columns: minmax(0, 1fr);
+  }
+  .studio-theme .admin-sidebar {
+    position: fixed;
+    z-index: 50;
+    width: 240px;
+    max-width: 86vw;
+  }
+  .studio-theme .admin-topbar {
+    padding-inline: 22px;
+  }
+  .studio-theme .admin-content {
+    padding: 26px 22px;
+  }
+  .studio-theme .admin-topbar #admin-menu {
+    display: inline-grid;
+    place-items: center;
+  }
+  .studio-theme .site-header nav.open {
+    background: var(--surface);
+    border: 1px solid var(--line);
+    border-radius: 14px;
+    box-shadow: var(--shadow);
+  }
+  .studio-theme .login-intro h1 {
+    font-size: 42px;
+  }
+}
+@media (max-width: 600px) {
+  .studio-theme .wrap {
+    width: calc(100% - 32px);
+  }
+  .studio-theme .site-header {
+    height: 68px;
+    gap: 12px;
+  }
+  .studio-theme .brand {
+    font-size: 19px;
+    gap: 8px;
+  }
+  .studio-theme .brand-symbol {
+    width: 30px;
+    height: 30px;
+    font-size: 26px;
+    border-radius: 8px;
+  }
+  .studio-theme .nav-actions {
+    gap: 7px;
+  }
+  .studio-theme .icon-button {
+    width: 36px;
+    height: 36px;
+    border-radius: 9px;
+    font-size: 16px;
+  }
+  .studio-theme .site-header .nav-cta {
+    display: none;
+  }
+  .studio-theme .site-header nav {
+    font-size: 13px;
+  }
+  .studio-hero {
+    display: block;
+    padding: 26px 22px;
+    border-radius: 18px;
+    margin-top: 7px;
+  }
+  .studio-hero:before {
+    top: 30px;
+    bottom: auto;
+    height: 50px;
+    width: 3px;
+  }
+  .studio-kicker {
+    font-size: 7px;
+    gap: 8px;
+    letter-spacing: 0.08em;
+  }
+  .studio-kicker .status-dot {
+    width: 5px;
+    height: 5px;
+  }
+  .studio-hero h1 {
+    font-size: 40px;
+    margin: 16px 0 13px;
+    letter-spacing: -0.065em;
+  }
+  .studio-hero-copy > p {
+    font-size: 11px;
+    line-height: 1.85;
+    max-width: 310px;
+  }
+  .studio-hero-actions {
+    margin-top: 20px;
+    gap: 8px;
+  }
+  .studio-hero-actions .button {
+    min-height: 44px;
+    font-size: 10px;
+    gap: 12px;
+    padding: 10px 12px;
+  }
+  .studio-hero-note {
+    margin-top: 21px;
+    font-size: 6.5px;
+    letter-spacing: 0.06em;
+  }
+  .quick-access {
+    display: none;
+  }
+  .studio-theme .section {
+    padding-block: 32px;
+  }
+  .studio-theme .section-heading {
+    display: flex;
+    align-items: end;
+    gap: 12px;
+    margin-bottom: 18px;
+  }
+  .studio-theme .section-heading h2 {
+    font-size: 25px;
+    line-height: 1.25;
+    margin-top: 8px;
+  }
+  .studio-theme .eyebrow {
+    font-size: 8px;
+  }
+  .collection-total {
+    font-size: 9px;
+    max-width: 64px;
+    white-space: normal;
+    text-align: right;
+    line-height: 1.6;
+  }
+  .collection-total b {
+    display: block;
+    font-size: 18px;
+    margin: 0;
+  }
+  .studio-theme .catalog-toolbar {
+    display: flex;
+    flex-direction: column-reverse;
+    align-items: stretch;
+    gap: 12px;
+    margin-bottom: 16px;
+  }
+  .studio-theme .catalog-toolbar .search-box {
+    max-width: none;
+    width: 100%;
+    height: 44px;
+  }
+  .studio-theme .search-box input {
+    font-size: 16px;
+  }
+  .studio-theme .catalog-toolbar .filter-tabs {
+    flex-wrap: nowrap;
+    overflow: auto;
+    padding-bottom: 2px;
+    scrollbar-width: none;
+  }
+  .studio-theme .filter-tab {
+    flex-shrink: 0;
+    padding: 8px 12px;
+    min-height: 40px;
+    font-size: 10px;
+  }
+  .studio-theme .tool-grid {
+    grid-template-columns: minmax(0, 1fr);
+    gap: 12px;
+  }
+  .home-page .tool-card {
+    grid-template-columns: 104px minmax(0, 1fr);
+    padding: 8px;
+    gap: 5px;
+  }
+  .home-page .tool-card .card-visual {
+    min-height: 157px;
+    border-radius: 9px;
+  }
+  .studio-theme .card-body {
+    padding: 9px 8px;
+  }
+  .studio-theme .card-topline {
+    font-size: 7px;
+    margin-bottom: 7px;
+  }
+  .studio-theme .card-body h3 {
+    font-size: 15px;
+  }
+  .studio-theme .card-body > p {
+    font-size: 10px;
+    line-height: 1.8;
+  }
+  .studio-theme .card-bottom {
+    margin-top: 10px;
+    padding-top: 9px;
+  }
+  .studio-theme .info-button {
+    min-width: 36px;
+    min-height: 36px;
+  }
+  .studio-theme .widget-grid {
+    grid-template-columns: 1fr;
+  }
+  .studio-theme .widget-card {
+    padding: 16px;
+  }
+  .studio-workflow {
+    padding: 26px 0 30px;
+  }
+  .studio-workflow .section-heading > p {
+    display: none;
+  }
+  .studio-steps {
+    grid-template-columns: 1fr;
+    gap: 10px;
+  }
+  .studio-steps article {
+    padding: 18px 18px 18px 68px;
+    min-height: 110px;
+  }
+  .studio-steps article > span {
+    font-size: 8px;
+  }
+  .studio-steps .step-symbol {
+    position: absolute;
+    left: 16px;
+    top: 25px;
+    margin: 0;
+    width: 36px;
+    height: 36px;
+    font-size: 21px;
+  }
+  .studio-steps h3 {
+    font-size: 16px;
+    margin: 6px 0;
+  }
+  .studio-steps p {
+    font-size: 10px;
+    max-width: none;
+  }
+  .studio-download-cta {
+    margin-bottom: 32px;
+    padding: 23px;
+    gap: 14px;
+    flex-wrap: wrap;
+    border-radius: 16px;
+  }
+  .studio-download-cta .cta-icon {
+    width: 43px;
+    height: 43px;
+    font-size: 26px;
+    border-radius: 12px;
+  }
+  .studio-download-cta > div:nth-child(2) {
+    flex: 1;
+    min-width: 0;
+  }
+  .studio-download-cta h2 {
+    font-size: 21px;
+    line-height: 1.3;
+  }
+  .studio-download-cta p {
+    font-size: 10px;
+    margin-top: 7px;
+  }
+  .studio-download-cta > .button {
+    width: 100%;
+    margin: 6px 0 0;
+    justify-content: space-between;
+  }
+  .studio-theme .studio-faq {
+    display: block;
+    padding-block: 0 32px;
+  }
+  .studio-faq > div:first-child {
+    margin-bottom: 15px;
+  }
+  .studio-faq h2 {
+    font-size: 24px;
+  }
+  .studio-theme .faq-list summary {
+    font-size: 11px;
+    padding-block: 17px;
+  }
+  .studio-theme .site-footer {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 20px;
+    padding-block: 24px;
+  }
+  .studio-theme .site-footer .brand {
+    font-size: 18px;
+  }
+  .studio-theme .site-footer nav {
+    justify-content: flex-start;
+    flex-wrap: wrap;
+    gap: 12px 22px;
+    font-size: 10px;
+  }
+  .studio-theme .copyright {
+    text-align: left;
+    font-size: 9px;
+  }
+  .studio-theme .download-intro {
+    padding-block: 20px 18px;
+    gap: 10px;
+    align-items: start;
+  }
+  .studio-theme .download-intro h1 {
+    font-size: 30px;
+    margin: 7px 0;
+  }
+  .studio-theme .download-intro .eyebrow {
+    font-size: 7px;
+    letter-spacing: 0.09em;
+  }
+  .studio-theme .download-intro p {
+    font-size: 10px;
+  }
+  .download-intro-side {
+    gap: 16px;
+    max-width: 102px;
+    text-align: right;
+    padding-top: 2px;
+  }
+  .library-purchases {
+    font-size: 9px;
+    gap: 8px;
+  }
+  .studio-theme .download-summary {
+    font-size: 8px;
+    gap: 4px;
+    flex-wrap: wrap;
+    justify-content: flex-end;
+  }
+  .studio-theme .download-summary strong {
+    font-size: 10px;
+  }
+  .studio-theme .download-controls {
+    padding: 8px;
+    top: 6px;
+    border-radius: 12px;
+  }
+  .studio-theme .download-search-row {
+    gap: 7px;
+    margin-bottom: 8px;
+  }
+  .studio-theme .download-search-row .search-box {
+    height: 44px;
+    padding-inline: 8px;
+  }
+  .studio-theme .download-search-row .search-box input {
+    font-size: 16px;
+  }
+  .studio-theme .download-search-row select {
+    width: 99px;
+    max-width: 99px;
+    font-size: 10px;
+    padding: 8px 6px;
+  }
+  .studio-theme .download-filter-row {
+    gap: 7px;
+  }
+  .studio-theme .download-filter-row .collection-types {
+    max-width: none;
+    border-radius: 8px;
+    padding: 2px;
+  }
+  .studio-theme .download-filter-row .collection-types .filter-tab {
+    min-height: 36px;
+    font-size: 10px;
+    padding: 6px 8px;
+  }
+  .studio-theme .download-category-select {
+    width: 100px;
+    font-size: 10px;
+    min-height: 42px;
+    padding-inline: 8px 20px;
+  }
+  .studio-theme .collection-info {
+    font-size: 9px;
+    margin: 12px 2px;
+  }
+  .studio-theme .download-grid {
+    grid-template-columns: 1fr;
+    gap: 10px;
+  }
+  .studio-theme .download-card {
+    grid-template-columns: 78px minmax(0, 1fr);
+    padding: 7px;
+    gap: 7px;
+    min-height: 143px;
+    border-radius: 12px;
+  }
+  .studio-theme .download-card .card-visual {
+    min-height: 128px;
+    border-radius: 8px;
+  }
+  .studio-theme .download-card .card-visual img {
+    padding: 4px;
+    max-height: 130px;
+  }
+  .studio-theme .download-card .card-badge {
+    font-size: 6px;
+    padding: 3px 2px;
+    bottom: 5px;
+    left: 4px;
+    right: 4px;
+  }
+  .studio-theme .download-card .card-body {
+    padding: 4px 3px 1px;
+  }
+  .studio-theme .download-card .card-topline {
+    font-size: 6px;
+    margin-bottom: 4px;
+    letter-spacing: 0.04em;
+  }
+  .studio-theme .download-card h3 {
+    font-size: 12px;
+    margin-bottom: 4px;
+    line-height: 1.4;
+  }
+  .studio-theme .download-card .file-date {
+    font-size: 7px;
+  }
+  .studio-theme .download-card .price-label {
+    font-size: 9px;
+    margin: 4px 0;
+  }
+  .studio-theme .download-card .button {
+    min-height: 38px;
+    font-size: 9px;
+    padding: 8px 10px;
+  }
+  .studio-theme .download-card .card-bottom {
+    gap: 6px;
+    margin-top: 6px;
+  }
+  .studio-theme .download-card .info-button {
+    width: 36px;
+    height: 38px;
+    min-width: 36px;
+    font-size: 11px;
+  }
+  .studio-theme .download-card .card-bottom > .button {
+    max-width: none;
+  }
+  .studio-theme .compact-collection {
+    padding-bottom: 28px;
+  }
+  .studio-theme dialog {
+    border-radius: 16px;
+    max-width: calc(100% - 24px);
+  }
+  .studio-theme .dialog-head h2 {
+    font-size: 20px;
+  }
+  .studio-theme .dialog-head .eyebrow {
+    font-size: 8px;
+  }
+  .studio-theme .album-gallery {
+    gap: 10px;
+  }
+  .studio-theme .album-file-info h3 {
+    font-size: 10px;
+  }
+  .studio-theme .album-file-info .button {
+    font-size: 10px;
+    padding-inline: 10px;
+    gap: 10px;
+  }
+  .studio-theme .admin-content {
+    padding: 20px 16px 32px;
+  }
+  .studio-theme .admin-topbar {
+    height: 64px;
+    padding-inline: 16px;
+    gap: 8px;
+  }
+  .studio-theme .admin-topbar > div {
+    gap: 10px;
+  }
+  .studio-theme .admin-page-title {
+    gap: 12px;
+    align-items: start;
+  }
+  .studio-theme .admin-page-title h1 {
+    font-size: 25px;
+    line-height: 1.3;
+    margin: 8px 0;
+  }
+  .studio-theme .admin-page-title p {
+    font-size: 10px;
+  }
+  .studio-theme .admin-page-title > .button {
+    font-size: 10px;
+    padding: 10px 12px;
+    gap: 10px;
+  }
+  .studio-theme .dashboard-stats {
+    grid-template-columns: 1fr 1fr;
+    gap: 10px;
+  }
+  .studio-theme .dashboard-stat {
+    padding: 14px;
+  }
+  .studio-theme .dashboard-stat strong {
+    font-size: 28px;
+  }
+  .studio-theme .dashboard-stat .stat-top {
+    font-size: 8px;
+  }
+  .studio-theme .admin-card-header,
+  .studio-theme .admin-card-body {
+    padding: 16px;
+  }
+  .studio-theme .admin-table td {
+    padding: 12px;
+    font-size: 10px;
+  }
+  .studio-theme .admin-footer {
+    padding: 18px 16px;
+  }
+  .studio-theme .editor-form input,
+  .studio-theme .editor-form textarea,
+  .studio-theme .editor-form select {
+    font-size: 16px;
+  }
+  .studio-theme .login-intro {
+    padding: 24px;
+  }
+  .studio-theme .login-intro h1 {
+    font-size: 34px;
+  }
+  .studio-theme .login-panel {
+    padding: 28px 22px;
+  }
+  .studio-theme .login-panel h2 {
+    font-size: 29px;
+  }
+}
+@media (max-width: 360px) {
+  .studio-theme .wrap {
+    width: calc(100% - 24px);
+  }
+  .studio-hero {
+    padding: 24px 18px;
+  }
+  .studio-hero h1 {
+    font-size: 35px;
+  }
+  .studio-kicker {
+    font-size: 6px;
+  }
+  .studio-hero-actions .button {
+    font-size: 9px;
+    padding-inline: 10px;
+  }
+  .studio-hero-note {
+    font-size: 5.5px;
+    gap: 7px;
+  }
+  .studio-theme .download-intro h1 {
+    font-size: 27px;
+  }
+  .studio-theme .download-intro p {
+    font-size: 9px;
+  }
+  .download-intro-side {
+    max-width: 89px;
+  }
+  .studio-theme .download-card {
+    grid-template-columns: 68px minmax(0, 1fr);
+  }
+  .studio-theme .download-card h3 {
+    font-size: 11px;
+  }
+  .studio-theme .download-card .card-topline {
+    font-size: 5.5px;
+  }
+  .studio-theme .download-category-select {
+    width: 88px;
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .studio-theme *,
+  .studio-theme *:before,
+  .studio-theme *:after {
+    animation: none !important;
+    scroll-behavior: auto !important;
+    transition: none !important;
+  }
+}
+/* Final touch targets and image framing. */
+.home-page .tool-card .card-visual img {
+  object-fit: contain;
+  padding: 6px;
+  max-width: none;
+  max-height: none;
+  margin: 0;
+}
+.studio-theme .nav-actions .icon-button {
+  width: 44px;
+  height: 44px;
+}
+.studio-theme .info-button {
+  min-width: 44px;
+  min-height: 44px;
+}
+@media (max-width: 600px) {
+  .studio-theme .download-intro {
+    display: flex;
+  }
+  .download-intro-side {
+    flex-shrink: 0;
+    justify-items: end;
+    gap: 12px;
+  }
+  .studio-theme .download-summary {
+    margin-top: 0;
+  }
+  .library-purchases {
+    white-space: nowrap;
+  }
+  .studio-theme .download-card {
+    min-height: 156px;
+  }
+  .studio-theme .download-card .card-visual {
+    min-height: 140px;
+  }
+  .studio-theme .download-card h3 {
+    font-size: 14px;
+  }
+  .studio-theme .download-card .file-date {
+    font-size: 9px;
+  }
+  .studio-theme .download-card .card-topline {
+    font-size: 8px;
+  }
+  .studio-theme .download-card .price-label {
+    font-size: 11px;
+  }
+  .studio-theme .download-card .button {
+    min-height: 44px;
+    font-size: 11px;
+  }
+  .studio-theme .download-card .info-button {
+    width: 44px;
+    height: 44px;
+  }
+  .studio-theme .download-filter-row .collection-types .filter-tab {
+    min-height: 40px;
+    font-size: 11px;
+  }
+  .studio-theme .download-card .card-visual img {
+    max-height: 150px;
+  }
+  .studio-theme .download-card .card-badge {
+    font-size: 8px;
+  }
+  .studio-theme .filter-tab {
+    min-height: 44px;
+  }
+  .studio-theme .catalog-toolbar .filter-tabs {
+    gap: 4px;
+  }
+  .studio-theme .card-body > p {
+    font-size: 11px;
+  }
+  .studio-theme .card-topline {
+    font-size: 8px;
+  }
+}
+@media (max-width: 360px) {
+  .studio-theme .download-card {
+    grid-template-columns: 64px minmax(0, 1fr);
+    gap: 6px;
+  }
+  .studio-theme .download-card h3 {
+    font-size: 12px;
+  }
+  .studio-theme .download-card .card-topline {
+    font-size: 7px;
+  }
+  .studio-theme .download-card .button {
+    font-size: 10px;
+    gap: 10px;
+    padding-inline: 8px;
+  }
+  .studio-theme .download-card .file-date {
+    font-size: 8px;
+  }
+  .studio-theme .download-card .info-button {
+    width: 40px;
+    min-width: 40px;
+  }
+}
+.studio-hero h1 > span {
+  color: var(--orange);
+}
+.studio-theme .filter-tab.active {
+  color: var(--orange);
+  background: var(--lime);
+  border-color: var(--line);
+}
+.studio-theme .download-filter-row .collection-types .filter-tab.active {
+  color: var(--orange);
+}
+.studio-download-cta {
+  background: var(--lime);
+  border-color: var(--line);
+}
+.studio-download-cta .cta-icon {
+  background: var(--surface);
+  color: var(--orange);
+}
+.studio-download-cta .eyebrow {
+  color: var(--orange);
+}
+.studio-theme .login-intro p,
+.studio-theme .login-intro .eyebrow {
+  color: #526580;
+}
+.home-page .tool-card .card-visual {
+  padding: 0;
+}
+.studio-theme .quick-create {
+  color: var(--text);
+}
+.studio-theme .quick-create p {
+  color: var(--muted);
+}
+.studio-theme .quick-create > span:last-child {
+  display: none;
+}
+@media (min-width: 801px) and (max-width: 900px) {
+  .studio-theme .admin-layout {
+    grid-template-columns: 210px minmax(0, 1fr);
+  }
+  .studio-theme .admin-sidebar {
+    position: sticky;
+    width: auto;
+    max-width: none;
+  }
+  .studio-theme .admin-topbar #admin-menu {
+    display: none;
+  }
+}
+/* Phone management rows become readable cards, with actions always on screen. */
+@media (max-width: 600px) {
+  .studio-theme .admin-table {
+    display: block;
+    min-width: 0;
+    width: 100%;
+  }
+  .studio-theme .table-wrap {
+    overflow: visible;
+  }
+  .studio-theme .admin-table thead {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    clip-path: inset(50%);
+    overflow: hidden;
+    white-space: nowrap;
+  }
+  .studio-theme .admin-table tbody {
+    display: grid;
+    gap: 10px;
+    padding: 10px;
+    background: var(--bg);
+  }
+  .studio-theme .admin-table tbody tr {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) auto;
+    gap: 8px;
+    padding: 12px;
+    background: var(--surface);
+    border: 1px solid var(--line);
+    border-radius: 11px;
+  }
+  .studio-theme .admin-table td {
+    padding: 0;
+    border: 0;
+    min-width: 0;
+  }
+  .studio-theme .admin-table td:first-child {
+    grid-column: 1/-1;
+  }
+  .studio-theme .admin-table td:nth-child(2) {
+    font-size: 10px;
+    align-self: center;
+    overflow-wrap: anywhere;
+  }
+  .studio-theme .admin-table td:nth-child(3) {
+    text-align: right;
+    align-self: center;
+  }
+  .studio-theme .admin-table td:last-child {
+    grid-column: 1/-1;
+    border-top: 1px solid var(--line);
+    padding-top: 8px;
+  }
+  .studio-theme .table-name {
+    min-width: 0;
+    gap: 10px;
+  }
+  .studio-theme .table-name strong {
+    white-space: normal;
+    overflow-wrap: anywhere;
+    max-width: none;
+    font-size: 12px;
+  }
+  .studio-theme .table-name img,
+  .studio-theme .table-name > .card-fallback {
+    width: 44px;
+    height: 44px;
+  }
+  .studio-theme .row-actions {
+    justify-content: flex-end;
+    gap: 7px;
+  }
+  .studio-theme .row-actions button {
+    min-width: 44px;
+    min-height: 44px;
+    font-size: 11px;
+  }
+  .studio-theme .admin-upload-date {
+    font-size: 9px;
+    line-height: 1.65;
+    margin-top: 3px;
+  }
+  .studio-theme .admin-table tr:has(td[colspan]) {
+    display: block;
+  }
+}
+@media (max-width: 800px) {
+  .studio-theme.admin-body:has(.admin-sidebar.open):before {
+    content: "";
+    position: fixed;
+    inset: 0;
+    background: #15243b55;
+    z-index: 40;
+  }
+  .studio-theme.admin-body:has(.admin-sidebar.open) #admin-menu {
+    position: fixed;
+    left: 252px;
+    top: 14px;
+    z-index: 60;
+    background: var(--surface);
+  }
+}

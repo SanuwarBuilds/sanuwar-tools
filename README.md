@@ -104,3 +104,7 @@ Cover uploads are resized to a maximum 640×640 WebP thumbnail (up to 96 KB, sou
 and stored with the catalogue, so Cloudinary is not required for covers. Admin shows a thumbnail
 preview and blocks saving after a failed upload until it is retried or the selection is cleared.
 Download originals continue to use Cloudinary or their existing external hosts.
+
+The current interface uses a compact white/blue design with self-hosted Manrope typography,
+consistent public/admin styling, responsive mobile management cards and a reduced-motion fallback.
+The plain S browser icon matches the updated blue site mark.

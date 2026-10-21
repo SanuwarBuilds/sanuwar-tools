@@ -42,3 +42,14 @@ Vercel reported successful preview builds for application commit `2857abc`. Afte
 - An isolated in-memory Flask server (no GitHub writes, no real Cloudinary calls) verified the actual admin file-picker/upload/save flow through to the public card's upload timestamp. A known UTC fixture rendered as 20 Oct 2026, 05:28 am IST, confirming India timezone conversion.
 - Screenshots: [compact mobile downloads](docs/screenshots/downloads-mobile-compact.jpg), [album previews](docs/screenshots/album-mobile-previews.jpg).
 - Legacy dates remain unknown; browser download completion and live external media playback are controlled by the source host/browser.
+
+
+## Minimal white/blue redesign — 21 October 2026
+
+- User selected the minimal light direction through the frontend-design skill. Added self-hosted Manrope typography, white surfaces, blue actions and a shared visual layer for homepage, download library, dialogs, login and admin.
+- 78 existing integration checks pass. JavaScript syntax checks and CSS parsing/formatting pass.
+- Browser-checked homepage/library at 320, 390, 768 and 1440px; no horizontal page overflow in the checked public layouts. The phone download list begins at approximately 348px, with three download actions visible at 390×844.
+- Search, category selection, mobile navigation, album gallery and full image preview work. Light/dark themes checked; animations are disabled for reduced-motion preferences.
+- Isolated in-memory admin preview verified cover preview, saving an edit and deleting a disposable fixture. The mobile management list renders cards with visible Edit/Delete actions; the sidebar remains closable and Escape restores focus to its toggle. No production catalogue changes were made for this redesign.
+- Screenshots: [desktop home](docs/screenshots/home-blue-desktop.jpg), [phone home](docs/screenshots/home-blue-mobile.jpg), [phone downloads](docs/screenshots/downloads-blue-mobile.jpg), [desktop admin](docs/screenshots/admin-blue-desktop.jpg), [phone admin](docs/screenshots/admin-blue-mobile.jpg).
+- Existing payment configuration and bank-settlement verification limits are unchanged; this is a frontend redesign.

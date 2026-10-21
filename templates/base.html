@@ -4,28 +4,30 @@
 <meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
 <meta name="csrf-token" content="{{ csrf_token }}">
 <meta name="description" content="SanuwarTools — useful web tools, Android apps aur downloads, ek hi jagah.">
-<meta name="theme-color" content="#f6f5ef">
+<meta name="theme-color" content="#ffffff">
 <title>{% block title %}SanuwarTools — Make everyday a little easier.{% endblock %}</title>
 {% set favicon = public_config.get('site', {}).get('favicon') or '/assets/favicon.png' %}
 {% if favicon == '/assets/favicon.png' %}
-<link rel="shortcut icon" type="image/x-icon" href="/favicon.ico?v=brand3">
-<link rel="icon" type="image/png" sizes="256x256" href="/assets/favicon.png?v=brand3">
-<link rel="icon" type="image/svg+xml" href="/assets/favicon.svg?v=brand3">
-<link rel="apple-touch-icon" sizes="180x180" href="/assets/apple-touch-icon.png?v=brand3">
+<link rel="shortcut icon" type="image/x-icon" href="/favicon.ico?v=brand4">
+<link rel="icon" type="image/png" sizes="256x256" href="/assets/favicon.png?v=brand4">
+<link rel="icon" type="image/svg+xml" href="/assets/favicon.svg?v=brand4">
+<link rel="apple-touch-icon" sizes="180x180" href="/assets/apple-touch-icon.png?v=brand4">
 {% else %}
 <link rel="icon" href="{{ favicon }}">
 {% endif %}
+<link rel="preload" href="/assets/fonts/Manrope-Variable.ttf" as="font" type="font/ttf" crossorigin>
 <link rel="stylesheet" href="/assets/css/style.css">
 <script src="/assets/js/shared.js" defer></script>
 {% block head %}{% endblock %}
+<link rel="stylesheet" href="/assets/css/studio.css?v=1">
 </head>
-<body class="{% block bodyclass %}{% endblock %}">
+<body class="studio-theme {% block bodyclass %}{% endblock %}">
 <a class="skip-link" href="#main">Skip to content</a>
 {% block header %}
 <header class="site-header wrap">
 <a class="brand" href="/" aria-label="SanuwarTools home"><span class="brand-symbol" aria-hidden="true">s</span><span>{{ public_config.get('site', {}).get('name', 'SanuwarTools') }}<span class="brand-dot">.</span></span></a>
-<nav id="site-nav" aria-label="Main navigation"><a href="/#tools" {% if request.path == '/' %}class="active"{% endif %}>Explore tools</a>{% if public_config.get('downloadPage', {}).get('enabled', True) %}<a href="/downloads" {% if request.path != '/' %}class="active"{% endif %}>Downloads</a>{% endif %}<a href="/#how-it-works">How it works</a></nav>
-<div class="nav-actions"><button class="icon-button" id="theme-toggle" aria-label="Switch color theme">◐</button><a class="button button-dark nav-cta" href="/#tools">Find your tool <span>↗</span></a><button class="icon-button menu-toggle" aria-controls="site-nav" aria-expanded="false" aria-label="Open navigation">☰</button></div>
+<nav id="site-nav" aria-label="Main navigation"><a href="/#tools" {% if request.path == '/' %}class="active"{% endif %}>Tools</a>{% if public_config.get('downloadPage', {}).get('enabled', True) %}<a href="/downloads" {% if request.path != '/' %}class="active"{% endif %}>Downloads</a>{% endif %}<a href="/#how-it-works">How it works</a></nav>
+<div class="nav-actions"><button class="icon-button" id="theme-toggle" aria-label="Switch color theme">◐</button><a class="button button-dark nav-cta" href="/#tools">Explore tools <span>↗</span></a><button class="icon-button menu-toggle" aria-controls="site-nav" aria-expanded="false" aria-label="Open navigation">☰</button></div>
 </header>
 {% endblock %}
 <main id="main">{% block content %}{% endblock %}</main>

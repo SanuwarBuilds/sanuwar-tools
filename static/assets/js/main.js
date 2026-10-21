@@ -69,7 +69,7 @@
             { class: `card-visual tone-${index % 4}` },
             image(tool.thumbnail, tool.name),
             ...(tool.featured
-              ? [el("span", { class: "card-badge" }, "✳ EDITOR’S PICK")]
+              ? [el("span", { class: "card-badge" }, "FEATURED")]
               : []),
           ),
           el(
@@ -79,7 +79,7 @@
               "div",
               { class: "card-topline" },
               el("span", {}, tool.category || "Web tool"),
-              el("span", {}, "WEB ↗"),
+              el("span", {}, "WEB TOOL"),
             ),
             el("h3", {}, tool.name),
             el(
