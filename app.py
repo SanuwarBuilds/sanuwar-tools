@@ -1,4 +1,5 @@
 import os
+import mimetypes
 import json
 import uuid
 import datetime
@@ -19,6 +20,7 @@ from dotenv import load_dotenv
 import utils
 
 load_dotenv()
+mimetypes.add_type('image/webp', '.webp')
 app = Flask(__name__, static_folder='static/assets', static_url_path='/assets')
 
 # ── Cloudinary setup ───────────────────────────────────────────
