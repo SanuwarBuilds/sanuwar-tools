@@ -10,6 +10,7 @@ from werkzeug.security import check_password_hash
 from werkzeug.utils import secure_filename
 import security
 import payments
+from cover_images import thumbnail_receipt
 from download_metadata import utc_now, upload_time, album_metadata
 import cloudinary
 import cloudinary.uploader
@@ -296,8 +297,9 @@ def upload_file():
         if 'image' not in request.files:
             return jsonify({"error": "No file"}), 400
         file = request.files['image']
-        url, _ = upload_to_cloudinary(file, resource_type="image", folder="sanuwar-tools/thumbnails")
-        return jsonify({"url": url})
+        # Covers are small public thumbnails; saving them with the catalogue avoids
+        # lost covers when an external upload service is not configured or unavailable.
+        return jsonify(thumbnail_receipt(file.stream, file.filename or "cover"))
     except (ValueError, UnidentifiedImageError, Image.DecompressionBombError):
         return jsonify(error="Unsupported or invalid file. Choose a supported file up to 32 MB."), 400
     except Exception:

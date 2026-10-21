@@ -99,3 +99,8 @@ Legacy items without recorded timestamps display “Upload date available nahi h
 Admin supports Free/Paid prices, INR discounts and whole-album purchases. Checkout stays disabled
 until the separately hosted gateway, private orders database and receiving account are configured.
 See [payment setup and verification](docs/PAYMENTS.md).
+
+Cover uploads are resized to a maximum 640×640 WebP thumbnail (up to 96 KB, source up to 16 MP)
+and stored with the catalogue, so Cloudinary is not required for covers. Admin shows a thumbnail
+preview and blocks saving after a failed upload until it is retried or the selection is cleared.
+Download originals continue to use Cloudinary or their existing external hosts.

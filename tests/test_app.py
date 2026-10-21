@@ -118,6 +118,28 @@ class WorkspaceTests(unittest.TestCase):
         self.assertEqual(self.request('/api/admin/widgets/'+ids[0],'DELETE',{}).status_code,200)
     def test_store_crud(self):
         self.login();response=self.request('/api/admin/store-apps',data={'title':'App','link':'https://example.com/a.apk'});self.assertEqual(response.status_code,200);item_id=response.json['app']['id'];self.assertEqual(self.request('/api/admin/store-apps/'+item_id,'PUT',{'title':'New'}).status_code,200);self.assertEqual(self.client.get('/api/admin/store-apps').json[0]['title'],'New');self.assertEqual(self.request('/api/admin/store-apps/'+item_id,'DELETE',{}).status_code,200)
+    def test_cover_upload_resizes_without_cloudinary_and_persists(self):
+        import base64
+        from PIL import Image
+        self.login()
+        source=io.BytesIO();Image.new('RGBA',(1600,900),(40,80,160,100)).save(source,format='PNG');source.seek(0)
+        with patch.object(module.cloudinary.uploader,'upload') as external:
+            response=self.client.post('/api/admin/upload',data={'image':(source,'cover.png')},headers={'X-CSRF-Token':self.token})
+            self.assertEqual(response.status_code,200,response.json);external.assert_not_called()
+        receipt=response.json
+        self.assertEqual((receipt['width'],receipt['height']),(640,360))
+        self.assertLessEqual(receipt['size'],96*1024)
+        decoded=Image.open(io.BytesIO(base64.b64decode(receipt['url'].split(',',1)[1])))
+        self.assertEqual(decoded.format,'WEBP');self.assertEqual(decoded.size,(640,360))
+        created=self.request('/api/add_item',data={'title':'With cover','image':receipt['url'],'link':'https://example.com/app.apk'})
+        self.assertEqual(created.status_code,200,created.json)
+        self.assertEqual(self.client.get('/api/downloads_data').json[0]['image'],receipt['url'])
+
+    def test_cover_upload_rejects_non_image_data(self):
+        self.login()
+        response=self.client.post('/api/admin/upload',data={'image':(io.BytesIO(b'broken image'),'broken.png')},headers={'X-CSRF-Token':self.token})
+        self.assertEqual(response.status_code,400)
+
     def test_upload_requires_auth(self):
         self.assertEqual(self.client.post('/api/admin/upload',data={},headers={'X-CSRF-Token':self.token}).status_code,401)
     def test_bad_image_does_not_reach_cloudinary(self):

@@ -638,6 +638,11 @@
         error.textContent = "Upload complete hone tak wait karo.";
         return;
       }
+      if (form.querySelector("[data-upload-error]")) {
+        error.textContent =
+          "Upload fail hua hai. Retry karo ya failed file selection clear karo.";
+        return;
+      }
       submit.disabled = true;
       try {
         await onSave();
@@ -675,7 +680,9 @@
     input.addEventListener("change", async () => {
       const file = input.files[0];
       if (!file) return;
+      delete input.dataset.uploadError;
       if (file.size > 32 * 1024 * 1024) {
+        input.dataset.uploadError = "1";
         status.textContent = "File 32 MB se chhoti honi chahiye.";
         return;
       }
@@ -700,9 +707,10 @@
         target.dataset.uploadedAt = result.uploaded_at || "";
         target.dataset.uploadedUrl = result.url;
         target.dispatchEvent(new Event("input", { bubbles: true }));
-        status.textContent = `Uploaded: ${result.filename || file.name}${result.uploaded_at ? " · " + ST.dateLabel(result.uploaded_at) : ""}`;
+        status.textContent = `${isImage ? "Cover ready" : "Uploaded"}: ${result.filename || file.name}${result.uploaded_at ? " · " + ST.dateLabel(result.uploaded_at) : ""} · Save changes to publish.`;
       } catch (e) {
-        status.textContent = e.message;
+        input.dataset.uploadError = "1";
+        status.textContent = `Upload failed: ${e.message}`;
       } finally {
         input.disabled = false;
         if (form)
@@ -714,12 +722,56 @@
           saveButton.disabled = Number(form?.dataset.pendingUploads || 0) > 0;
       }
     });
+    const preview = el("div", { class: "admin-cover-preview" });
+    function showCover() {
+      preview.replaceChildren();
+      if (isImage && ST.url(target.value, true))
+        preview.append(image(target.value, "Cover thumbnail preview"));
+      if (isImage && target.closest("label"))
+        target.closest("label").hidden = target.value.startsWith("data:image/");
+    }
+    if (isImage) {
+      target.addEventListener("input", showCover);
+      showCover();
+    }
+    const clear = el(
+      "button",
+      {
+        type: "button",
+        class: "text-link",
+        onclick: () => {
+          input.value = "";
+          delete input.dataset.uploadError;
+          status.textContent =
+            "Selection cleared. Existing saved cover/file remains.";
+        },
+      },
+      "Clear file selection",
+    );
     return el(
       "div",
       { class: "upload-field" },
-      "Or upload a file",
+      isImage ? "Choose cover image" : "Or upload a file",
       input,
+      preview,
       status,
+      clear,
+      ...(isImage
+        ? [
+            el(
+              "button",
+              {
+                type: "button",
+                class: "text-link",
+                onclick: () => {
+                  target.value = "";
+                  target.dispatchEvent(new Event("input", { bubbles: true }));
+                },
+              },
+              "Remove cover image",
+            ),
+          ]
+        : []),
     );
   }
   function editTool(tool) {
