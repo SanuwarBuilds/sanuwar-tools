@@ -10,8 +10,8 @@
 <section class="wrap collection compact-collection" aria-label="Download collection">
   <div class="download-controls">
     <div class="download-search-row"><label class="search-box"><span>⌕</span><input id="download-search" type="search" placeholder="Search apps, albums, files…" aria-label="Search downloads"><kbd>/</kbd></label><label class="sort-label"><select id="download-sort" aria-label="Sort downloads"><option value="default">Newest first</option><option value="oldest">Oldest first</option><option value="alpha">Name: A–Z</option></select></label></div>
-    <div class="collection-types" role="group" aria-label="Collection type"><button class="filter-tab active" data-kind="all" aria-pressed="true">All items</button><button class="filter-tab" data-kind="files" aria-pressed="false">Apps & files</button><button class="filter-tab" data-kind="albums" aria-pressed="false">Albums</button></div>
-    <div class="filter-tabs download-category-tabs" id="download-categories" role="group" aria-label="Download category"></div>
+    <div class="download-filter-row"><div class="collection-types" role="group" aria-label="Collection type"><button class="filter-tab active" data-kind="all" aria-pressed="true">All</button><button class="filter-tab" data-kind="files" aria-pressed="false">Files</button><button class="filter-tab" data-kind="albums" aria-pressed="false">Albums</button></div>
+    <select class="download-category-select" id="download-category" aria-label="Download category"><option value="All">Category</option></select></div>
   </div>
   <div class="collection-info"><span id="download-count" role="status">Loading collection…</span><span>Dates shown in India time · IST</span></div>
   <div class="download-grid" id="downloads-grid" aria-live="polite"><div class="loading-state">Downloads load ho rahe hain…</div></div>

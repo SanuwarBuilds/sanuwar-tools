@@ -67,6 +67,14 @@ def login_required(f):
 import licensing
 licensing.install(app, login_required)
 
+@app.route('/favicon.ico')
+def site_favicon():
+    return send_from_directory(app.static_folder, 'favicon.ico', mimetype='image/x-icon', max_age=0)
+
+@app.route('/apple-touch-icon.png')
+def site_touch_icon():
+    return send_from_directory(app.static_folder, 'apple-touch-icon.png', max_age=0)
+
 @app.route("/")
 def index():
     return render_template("index.html")

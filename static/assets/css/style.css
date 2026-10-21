@@ -2930,3 +2930,11 @@ body.modal-open {
 .demo-sim-actions { display:grid;gap:10px;margin-top:12px; }.demo-panel .purchase-file { flex-direction:column;align-items:stretch;font-size:13px; }.demo-panel [hidden] { display:none!important; }
 @media(max-width:900px){.demo-layout{grid-template-columns:1fr 1fr;}.demo-layout>#demo-delivery{grid-column:1/-1;}}
 @media(max-width:600px){.payment-demo{padding-top:24px;}.demo-layout{grid-template-columns:1fr;}.demo-panel{padding:20px;}.demo-layout>#demo-delivery{grid-column:auto;}.demo-album-cover{aspect-ratio:2;}.payment-demo h1{margin:18px 0;}}
+
+/* One collection switch, with an independent compact category selector. */
+.download-filter-row { display:flex;align-items:center;justify-content:space-between;gap:12px; }
+.download-filter-row .collection-types { display:flex;flex:1;max-width:330px;gap:3px;margin:0;padding:4px;background:var(--surface);border:1px solid var(--line);border-radius:12px; }
+.download-filter-row .collection-types .filter-tab { flex:1;min-width:0;border:0;border-radius:8px;padding:9px 12px;background:transparent;color:var(--muted);white-space:nowrap; }
+.download-filter-row .collection-types .filter-tab.active { background:var(--text);color:var(--bg);box-shadow:0 1px 3px #0001; }
+.download-category-select { width:155px;min-width:0;min-height:44px;border:1px solid var(--line);border-radius:12px;background:var(--surface);color:var(--text);padding:9px 28px 9px 12px;font:inherit;font-size:12px;text-overflow:ellipsis; }
+@media(max-width:600px){.download-filter-row{gap:8px;}.download-filter-row .collection-types{max-width:none;}.download-filter-row .collection-types .filter-tab{min-height:36px;padding:7px 8px;font-size:12px;}.download-category-select{width:110px;flex-shrink:0;font-size:12px;padding-inline:10px 22px;}}

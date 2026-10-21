@@ -1,6 +1,6 @@
 "use strict";
 (async () => {
-  const { $, el, api, image, empty, tabs, open, url, toast, dateLabel } = ST;
+  const { $, el, api, image, empty, open, url, toast, dateLabel } = ST;
   let items = [],
     selected = "All",
     kind = "all";
@@ -545,24 +545,9 @@
     if (sort === "oldest")
       filtered.sort((a, b) => (time(a) || Infinity) - (time(b) || Infinity));
     const cats = ["All", ...new Set(items.map((i) => i.category || "Files"))];
-    const counts = Object.fromEntries(
-      cats.map((c) => [
-        c,
-        c === "All"
-          ? items.length
-          : items.filter((i) => (i.category || "Files") === c).length,
-      ]),
-    );
-    tabs(
-      $("#download-categories"),
-      cats,
-      selected,
-      (cat) => {
-        selected = cat;
-        render();
-      },
-      counts,
-    );
+    const category = $("#download-category");
+    category.replaceChildren(...cats.map(cat => el("option", {value:cat}, cat === "All" ? "Category" : cat)));
+    category.value = selected;
     document.querySelectorAll("[data-kind]").forEach((button) => {
       button.classList.toggle("active", button.dataset.kind === kind);
       button.setAttribute("aria-pressed", String(button.dataset.kind === kind));
@@ -674,6 +659,7 @@
   }
   $("#download-search").addEventListener("input", render);
   $("#download-sort").addEventListener("change", render);
+  $("#download-category").addEventListener("change", (event) => { selected = event.target.value; render(); });
   document.querySelectorAll("[data-kind]").forEach((button) =>
     button.addEventListener("click", () => {
       kind = button.dataset.kind;

@@ -8,9 +8,10 @@
 <title>{% block title %}SanuwarTools — Make everyday a little easier.{% endblock %}</title>
 {% set favicon = public_config.get('site', {}).get('favicon') or '/assets/favicon.png' %}
 {% if favicon == '/assets/favicon.png' %}
-<link rel="icon" type="image/png" sizes="256x256" href="/assets/favicon.png?v=brand2">
-<link rel="icon" type="image/svg+xml" href="/assets/favicon.svg?v=brand2">
-<link rel="apple-touch-icon" sizes="180x180" href="/assets/apple-touch-icon.png?v=brand2">
+<link rel="shortcut icon" type="image/x-icon" href="/favicon.ico?v=brand3">
+<link rel="icon" type="image/png" sizes="256x256" href="/assets/favicon.png?v=brand3">
+<link rel="icon" type="image/svg+xml" href="/assets/favicon.svg?v=brand3">
+<link rel="apple-touch-icon" sizes="180x180" href="/assets/apple-touch-icon.png?v=brand3">
 {% else %}
 <link rel="icon" href="{{ favicon }}">
 {% endif %}
@@ -22,14 +23,14 @@
 <a class="skip-link" href="#main">Skip to content</a>
 {% block header %}
 <header class="site-header wrap">
-<a class="brand" href="/" aria-label="SanuwarTools home"><span class="brand-symbol">s<span>↗</span></span><span>{{ public_config.get('site', {}).get('name', 'SanuwarTools') }}<span class="brand-dot">.</span></span></a>
+<a class="brand" href="/" aria-label="SanuwarTools home"><span class="brand-symbol" aria-hidden="true">s</span><span>{{ public_config.get('site', {}).get('name', 'SanuwarTools') }}<span class="brand-dot">.</span></span></a>
 <nav id="site-nav" aria-label="Main navigation"><a href="/#tools" {% if request.path == '/' %}class="active"{% endif %}>Explore tools</a>{% if public_config.get('downloadPage', {}).get('enabled', True) %}<a href="/downloads" {% if request.path != '/' %}class="active"{% endif %}>Downloads</a>{% endif %}<a href="/#how-it-works">How it works</a></nav>
 <div class="nav-actions"><button class="icon-button" id="theme-toggle" aria-label="Switch color theme">◐</button><a class="button button-dark nav-cta" href="/#tools">Find your tool <span>↗</span></a><button class="icon-button menu-toggle" aria-controls="site-nav" aria-expanded="false" aria-label="Open navigation">☰</button></div>
 </header>
 {% endblock %}
 <main id="main">{% block content %}{% endblock %}</main>
 {% block footer %}
-<footer class="wrap site-footer"><div><a class="brand" href="/"><span class="brand-symbol">s<span>↗</span></span><span>SanuwarTools<span class="brand-dot">.</span></span></a><p>{{ public_config.get('site', {}).get('tagline', 'Chhote tools. Bade kaam.') }}</p></div><nav aria-label="Footer"><a href="/#tools">Tools</a>{% if public_config.get('downloadPage', {}).get('enabled', True) %}<a href="/downloads">Downloads</a>{% endif %}{% for label, link in public_config.get('socialLinks', {}).items() %}{% if link %}<a href="{{ link }}" target="_blank" rel="noopener noreferrer">{{ label | capitalize }} ↗</a>{% endif %}{% endfor %}<a href="/admin">Admin ↗</a></nav><p class="copyright">Made with care by Sanuwar.<br>© {{ now_year }} SanuwarTools</p></footer>
+<footer class="wrap site-footer"><div><a class="brand" href="/"><span class="brand-symbol" aria-hidden="true">s</span><span>SanuwarTools<span class="brand-dot">.</span></span></a><p>{{ public_config.get('site', {}).get('tagline', 'Chhote tools. Bade kaam.') }}</p></div><nav aria-label="Footer"><a href="/#tools">Tools</a>{% if public_config.get('downloadPage', {}).get('enabled', True) %}<a href="/downloads">Downloads</a>{% endif %}{% for label, link in public_config.get('socialLinks', {}).items() %}{% if link %}<a href="{{ link }}" target="_blank" rel="noopener noreferrer">{{ label | capitalize }} ↗</a>{% endif %}{% endfor %}<a href="/admin">Admin ↗</a></nav><p class="copyright">Made with care by Sanuwar.<br>© {{ now_year }} SanuwarTools</p></footer>
 {% endblock %}
 <div class="toast" id="toast" role="status" aria-live="polite"></div>
 <dialog id="content-dialog" aria-labelledby="dialog-title"><div class="dialog-head"><div><span class="eyebrow" id="dialog-kicker">A closer look</span><h2 id="dialog-title"></h2></div><button class="icon-button" data-close-dialog aria-label="Close dialog">×</button></div><div id="dialog-body"></div></dialog>
