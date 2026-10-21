@@ -13,6 +13,16 @@
         "color": "blue"
       },
       "created_at": "2026-05-03T19:31:36.552648"
+    },
+    {
+      "id": "380f538a-38ae-48c8-af25-98d267e8471d",
+      "type": "custom_html",
+      "enabled": true,
+      "order": 1,
+      "data": {
+        "html": "Ludu Remote Available "
+      },
+      "created_at": "2026-10-21T02:13:32.474058"
     }
   ],
   "admin": {
