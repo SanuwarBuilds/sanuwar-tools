@@ -75,7 +75,8 @@
       "mode": "free",
       "price": "0.00",
       "discount": "0.00"
-    }
+    },
+    "enabled": false
   },
   {
     "id": "item_d2613643",
