@@ -166,3 +166,31 @@ class PaymentTests(unittest.TestCase):
         with patch.object(payments.cloudinary.utils,'private_download_url',return_value='signed') as sign:
             self.assertEqual(payments.signed_download(ASSET),'signed');self.assertEqual(sign.call_args.kwargs['type'],'authenticated')
             self.assertTrue(sign.call_args.kwargs['attachment']);self.assertLessEqual(sign.call_args.kwargs['expires_at']-__import__('time').time(),60)
+
+    def test_disabled_item_cannot_checkout_or_request_private_file(self):
+        self.records[module.DOWNLOADS_REL][0]['enabled']=False
+        with patch.object(payments.requests,'post') as gateway, patch.object(payments,'signed_download') as sign:
+            self.assertEqual(self.post('/api/payments/orders',{'item_id':'paid-album'}).status_code,404)
+            self.assertEqual(self.post('/api/downloads/paid-album/file',{}).status_code,404)
+            gateway.assert_not_called(); sign.assert_not_called()
+        self.assertEqual(self.client.get('/api/downloads_data').json,[])
+
+    def test_disable_blocks_existing_paid_receipt_until_reenabled(self):
+        order=self.order(); self.hook(self.event(order))
+        self.records[module.DOWNLOADS_REL][0]['enabled']=False
+        self.assertEqual(self.status(order).status_code,404)
+        with patch.object(payments,'signed_download') as sign:
+            self.assertEqual(self.post('/api/payments/orders/'+order['order_id']+'/download',{'index':0},order['receipt']).status_code,404)
+            sign.assert_not_called()
+        # Settlement callbacks still reconcile even while delivery is disabled.
+        self.assertEqual(self.hook(self.event(order)).status_code,200)
+        self.records[module.DOWNLOADS_REL][0]['enabled']=True
+        self.assertEqual(self.status(order).json['status'],'PAID')
+        with patch.object(payments,'signed_download',return_value='https://example.com/short-lived'):
+            self.assertEqual(self.post('/api/payments/orders/'+order['order_id']+'/download',{'index':0},order['receipt']).status_code,200)
+
+    def test_global_library_disable_blocks_delivery(self):
+        order=self.order(); self.hook(self.event(order))
+        self.records[module.TOOLS_CONFIG_REL]={'downloadPage':{'enabled':False}}
+        self.assertEqual(self.status(order).status_code,404)
+        self.assertEqual(self.post('/api/downloads/paid-album/file',{}).status_code,404)

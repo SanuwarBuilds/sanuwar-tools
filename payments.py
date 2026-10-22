@@ -241,11 +241,11 @@ def register(app, load_downloads, login_required):
 
     @bp.post('/api/payments/orders')
     def create_order():
+        item = item_for((request.get_json() or {}).get('item_id'))
         if not readiness()['ready']: raise PaymentError('Payment setup pending hai. Abhi checkout available nahi hai.', 503)
         from security import limited
         if limited(('purchase', request.remote_addr), maximum=10, window=600):
             raise PaymentError('Please wait before starting another payment.', 429)
-        item = item_for((request.get_json() or {}).get('item_id'))
         if quote(item)['mode'] != 'paid': raise PaymentError('This download is free')
         protect_item(copy.deepcopy(item))
         token = secrets.token_urlsafe(32)
@@ -292,6 +292,7 @@ def register(app, load_downloads, login_required):
     @bp.get('/api/payments/orders/<identity>')
     def status(identity):
         order = get_store().get(identity, bearer())
+        item_for(order['item_id'])
         assets = json.loads(order['assets'])
         return jsonify(order_id=identity, item_id=order['item_id'], title=order['title'], status=order['status'],
             amount_paise=order['amount'], checkout_url=order['checkout_url'] if order['status'] != 'PAID' else None,
@@ -300,6 +301,7 @@ def register(app, load_downloads, login_required):
     @bp.post('/api/payments/orders/<identity>/download')
     def deliver(identity):
         order = get_store().get(identity, bearer())
+        item_for(order['item_id'])
         if order['status'] != 'PAID': raise PaymentError('Payment verification pending. Files abhi locked hain.', 402)
         index = (request.get_json() or {}).get('index', 0)
         files = json.loads(order['assets'])

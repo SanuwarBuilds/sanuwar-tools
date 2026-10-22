@@ -51,6 +51,8 @@ def validate_payload(data):
             if len(value) > 100:
                 raise ValueError('Too many fields')
             for key, child in value.items():
+                if key in ('enabled', 'visible', 'is_album', 'featured') and type(child) is not bool:
+                    raise ValueError(f'{key} must be true or false')
                 if key in ('url','siteUrl','link','image','thumbnail','favicon','github','instagram','youtube','twitter','photo_url','image_url') and not valid_url(child, key in ('image','thumbnail','favicon','photo_url','image_url')):
                     # Preserve the legacy local downloads route.
                     if not (key == 'url' and child in ('/downloads','/download.html')):
@@ -128,8 +130,12 @@ def install(app):
                             raise ValueError('A title is required')
                         if not isinstance(payload.get('album_files', []), list) or any(not isinstance(f, dict) or not isinstance(f.get('name'), str) or not (f.get('link') or isinstance(f.get('asset'), dict)) for f in payload.get('album_files', [])):
                             raise ValueError('Each album file needs a name and an HTTPS link')
-                    elif request.path == '/api/admin/widgets' and request.method == 'POST':
-                        if payload.get('type') not in {'notice','poll','winner','person_card','link_card','ticker','gallery','event_card','quote','custom_html'} or not isinstance(payload.get('data', {}), dict):
+                    elif request.path.startswith('/api/admin/widgets') and request.method in ('POST', 'PUT') and not request.path.endswith('/reorder'):
+                        if 'order' in payload and (type(payload['order']) is not int or not 0 <= payload['order'] <= 10000):
+                            raise ValueError('Widget order must be a nonnegative integer')
+                        if 'data' in payload and not isinstance(payload['data'], dict):
+                            raise ValueError('Widget fields must be an object')
+                        if (request.method == 'POST' or 'type' in payload) and payload.get('type') not in {'notice','poll','winner','person_card','link_card','ticker','gallery','event_card','quote','custom_html'}:
                             raise ValueError('Choose a supported widget type and fields')
 
                 except ValueError as error:
@@ -143,7 +149,7 @@ def install(app):
         response.headers['Content-Security-Policy'] = "default-src 'self'; script-src 'self'; style-src 'self' 'unsafe-inline'; img-src 'self' https: data:; font-src 'self'; connect-src 'self'; media-src 'self' https:; object-src 'none'; base-uri 'self'; frame-ancestors 'none'; form-action 'self'"
         if request.is_secure:
             response.headers['Strict-Transport-Security'] = 'max-age=31536000'
-        if request.path.startswith(('/admin','/api/','/purchase')) or request.path == '/tools.config.json':
+        if request.path.startswith(('/admin','/api/','/purchase')) or request.path in ('/', '/downloads', '/download.html', '/tools.config.json'):
             response.headers['Cache-Control'] = 'no-store'
         return response
     @app.errorhandler(HTTPException)

@@ -1,4 +1,6 @@
 import os
+import copy
+import base64
 import mimetypes
 import json
 import uuid
@@ -10,12 +12,13 @@ from PIL import Image, UnidentifiedImageError
 from werkzeug.security import check_password_hash
 from werkzeug.utils import secure_filename
 import security
+from availability import is_public, public_config
 import payments
 from cover_images import thumbnail_receipt
 from download_metadata import utc_now, upload_time, album_metadata
 import cloudinary
 import cloudinary.uploader
-from flask import Flask, request, render_template, session, redirect, jsonify, url_for, send_file, send_from_directory, abort
+from flask import Flask, request, render_template, session, redirect, jsonify, url_for, send_file, send_from_directory, abort, g, has_request_context
 from dotenv import load_dotenv
 import utils
 
@@ -158,9 +161,12 @@ def github_push(file_rel_path, content_str):
             return
         api = f"https://api.github.com/repos/{user}/{repo}/contents/{file_rel_path}"
         headers = {"Authorization": f"token {token}", "Accept": "application/vnd.github.v3+json"}
-        # Get current SHA
-        r = req.get(api, headers=headers, timeout=8)
-        sha = r.json().get("sha", "") if r.ok else ""
+        # Use the revision read by this mutation, so concurrent saves cannot overwrite it.
+        sha = getattr(g, 'catalogue_revisions', {}).get(file_rel_path) if has_request_context() else None
+        if sha is None:
+            r = req.get(api, headers=headers, timeout=8)
+            r.raise_for_status()
+            sha = r.json().get("sha", "")
         payload = {"message": f"auto: update {file_rel_path}",
                    "content": base64.b64encode(content_str.encode()).decode()}
         if sha:
@@ -172,6 +178,32 @@ def github_push(file_rel_path, content_str):
         raise RuntimeError("Could not persist changes to GitHub; retry the save") from e
 
 def safe_read(rel_path):
+    if IS_VERCEL and os.getenv('GITHUB_PAT') and os.getenv('GITHUB_USER'):
+        # /tmp and bundled JSON differ between serverless instances. Never use them
+        # as the publication authority: a disabled entry could otherwise reappear.
+        cached = getattr(g, 'catalogue_records', {}) if has_request_context() else {}
+        if rel_path in cached:
+            return copy.deepcopy(cached[rel_path])
+        try:
+            import requests as req
+            repo = os.getenv('GITHUB_REPO', 'sanuwar-tools')
+            response = req.get(f"https://api.github.com/repos/{os.environ['GITHUB_USER']}/{repo}/contents/{rel_path}",
+                headers={'Authorization': 'Bearer ' + os.environ['GITHUB_PAT'],
+                         'Accept': 'application/vnd.github+json', 'Cache-Control': 'no-cache'}, timeout=(3, 8))
+            response.raise_for_status()
+            remote = response.json()
+            data = json.loads(base64.b64decode(remote['content']))
+            if has_request_context():
+                if not hasattr(g, 'catalogue_records'):
+                    g.catalogue_records = {}; g.catalogue_revisions = {}
+                g.catalogue_records[rel_path] = data
+                g.catalogue_revisions[rel_path] = remote['sha']
+            return copy.deepcopy(data)
+        except Exception as error:
+            app.logger.error('Catalogue refresh unavailable: %s', type(error).__name__)
+            if has_request_context():
+                abort(503, description='Catalogue temporarily unavailable. Please retry.')
+            raise RuntimeError('Catalogue temporarily unavailable') from error
     path = get_writable_path(rel_path)
     try:
         with open(path, "r") as f:
@@ -212,13 +244,11 @@ def serve_config():
     data = safe_read(TOOLS_CONFIG_REL)
     if data is None:
         data = {"tools": [], "categories": ["All"], "site": {}, "socialLinks": {}, "widgets": []}
-    data = dict(data)
-    data['tools'] = [tool for tool in data.get('tools', []) if tool.get('visible', True)]
-    return jsonify(data)
+    return jsonify(public_config(data))
 
 @app.context_processor
 def site_context():
-    return {'public_config': safe_read(TOOLS_CONFIG_REL) or {}, 'now_year': datetime.datetime.now().year}
+    return {'public_config': public_config(safe_read(TOOLS_CONFIG_REL)), 'now_year': datetime.datetime.now().year}
 
 @app.route('/api/admin/tools.config')
 @login_required
@@ -321,10 +351,52 @@ def load_downloads():
 def save_downloads(items):
     safe_write(DOWNLOADS_REL, items)
 
+def public_downloads():
+    if (safe_read(TOOLS_CONFIG_REL) or {}).get('downloadPage', {}).get('enabled', True) is not True:
+        return []
+    return [item for item in load_downloads() if is_public(item)]
+
+
+@app.route('/api/admin/content/<kind>/<identity>/availability', methods=['PATCH'])
+@login_required
+def set_content_availability(kind, identity):
+    enabled = (request.get_json() or {}).get('enabled')
+    if type(enabled) is not bool:
+        return jsonify(error='enabled must be true or false'), 400
+    if kind == 'tools':
+        record = safe_read(TOOLS_CONFIG_REL) or {}
+        items = record.get('tools', [])
+    elif kind == 'downloads':
+        items = load_downloads()
+    elif kind in ('widgets', 'store'):
+        record = utils.load_config()
+        items = record.get('widgets' if kind == 'widgets' else 'store_apps', [])
+    else:
+        return jsonify(error='Content not found'), 404
+    item = next((item for item in items if item.get('id') == identity), None)
+    if item is None:
+        return jsonify(error='Content not found'), 404
+    # Normalize both legacy and current flags so re-enabling always works.
+    item['enabled'] = enabled
+    if kind == 'tools' or 'visible' in item:
+        item['visible'] = enabled
+    try:
+        if kind == 'tools':
+            safe_write(TOOLS_CONFIG_REL, record)
+        elif kind == 'downloads':
+            save_downloads(items)
+        else:
+            utils.save_config(record)
+    except Exception:
+        app.logger.exception('Could not save availability')
+        return jsonify(error='Could not save availability. Please retry.'), 500
+    return jsonify(success=True, item=item)
+
+
 @app.route("/api/downloads_data")
 def api_downloads_data():
     """Public endpoint — returns all download items."""
-    items = load_downloads()
+    items = public_downloads()
     return jsonify([payments.public_item(item) for item in items])
 
 @app.route("/api/admin/downloads")
@@ -355,6 +427,7 @@ def api_add_item():
             "created_at": now,
             "updated_at": now,
             "is_new": True,
+            "enabled": data.get("enabled", True),
         }
         if upload_time(data.get('uploaded_at')):
             new_item['uploaded_at'] = upload_time(data['uploaded_at'])
@@ -398,6 +471,7 @@ def api_update_item():
                     "album_files": album_metadata(data.get("album_files", item.get("album_files", [])), item.get("album_files", [])),
                     "updated_at": utc_now(),
                     "is_new": item.get("is_new", False),
+                    "enabled": data.get("enabled", item.get("enabled", True)),
                 }
                 if data.get('link', item.get('link')) != item.get('link'):
                     items[i].pop('uploaded_at', None)
@@ -408,6 +482,8 @@ def api_update_item():
                     items[i].pop('asset', None)
                 if 'asset' in data:
                     items[i]['asset'] = data['asset']
+                if "enabled" in data and "visible" in item:
+                    items[i]["visible"] = data["enabled"]
                 payments.protect_item(items[i])
                 found = True
                 break
@@ -439,7 +515,7 @@ def api_delete_item(item_id):
 @app.route("/api/downloads/categories", methods=["GET"])
 def api_download_categories():
     """Get distinct categories from downloads."""
-    items = load_downloads()
+    items = public_downloads()
     cats = list(set(i.get("category", "General") for i in items if i.get("category")))
     cats.sort()
     return jsonify(cats)
@@ -491,7 +567,7 @@ def upload_download_file():
 def api_widgets_public():
     """Public — returns all enabled widgets sorted by order."""
     config = utils.load_config()
-    widgets = [w for w in config.get("widgets", []) if w.get("enabled")]
+    widgets = [w for w in config.get("widgets", []) if w.get("enabled") is True and is_public(w)]
     widgets.sort(key=lambda x: x.get("order", 0))
     return jsonify(widgets)
 
@@ -538,7 +614,9 @@ def api_admin_widgets_update(widget_id):
         w = next((x for x in widgets if x["id"] == widget_id), None)
         if not w:
             return jsonify({"error": "not_found"}), 404
-        if "enabled" in data: w["enabled"] = bool(data["enabled"])
+        if "enabled" in data:
+            w["enabled"] = data["enabled"]
+            if "visible" in w: w["visible"] = data["enabled"]
         if "order" in data:   w["order"]   = int(data["order"])
         if "data" in data:    w["data"]    = data["data"]
         config["widgets"] = widgets
@@ -593,7 +671,7 @@ def api_widget_vote(widget_id):
             return jsonify({"error": "already_voted"}), 403
         config = utils.load_config()
         widgets = config.get("widgets", [])
-        w = next((x for x in widgets if x["id"] == widget_id and x["type"] == "poll" and x.get("enabled")), None)
+        w = next((x for x in widgets if x["id"] == widget_id and x["type"] == "poll" and x.get("enabled") is True and is_public(x)), None)
         if not w:
             return jsonify({"error": "poll_not_found"}), 404
         options = w["data"].get("options", [])
@@ -609,7 +687,7 @@ def api_widget_vote(widget_id):
         app.logger.exception("Operation failed")
         return jsonify({"error": "Could not save or upload. Check server configuration and try again."}), 500
 
-payments.register(app, load_downloads, login_required)
+payments.register(app, public_downloads, login_required)
 
 if __name__ == "__main__":
     app.run(host="0.0.0.0", port=5002, debug=os.getenv('FLASK_DEBUG') == '1')

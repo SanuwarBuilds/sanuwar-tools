@@ -207,4 +207,76 @@ class WorkspaceTests(unittest.TestCase):
         self.assertEqual(response.json['size'],5)
         self.assertTrue(response.json['uploaded_at'].endswith('+00:00'))
 
+    def test_download_disable_is_private_and_reversible(self):
+        self.login()
+        item = self.request('/api/add_item', data={'title':'Secret album','category':'Private category','is_album':True,
+            'album_files':[{'name':'Original.zip','link':'https://example.com/original.zip'}]}).json['item']
+        url = '/api/admin/content/downloads/' + item['id'] + '/availability'
+        response = self.request(url, 'PATCH', {'enabled':False})
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(self.client.get('/api/downloads_data').json, [])
+        self.assertEqual(self.client.get('/api/downloads/categories').json, [])
+        self.assertEqual(self.client.get('/api/admin/downloads').json[0]['album_files'], item['album_files'])
+        self.assertEqual(self.request(url, 'PATCH', {'enabled':True}).status_code, 200)
+        self.assertEqual(self.client.get('/api/downloads_data').json[0]['id'], item['id'])
+        restored = self.records[module.DOWNLOADS_REL][0]
+        self.assertEqual({k:v for k,v in restored.items() if k != 'enabled'}, {k:v for k,v in item.items() if k != 'enabled'})
+
+    def test_disabled_tools_removed_from_api_and_server_rendered_home(self):
+        self.login()
+        self.assertEqual(self.request('/api/admin/content/tools/visible/availability','PATCH',{'enabled':False}).status_code,200)
+        self.assertEqual(self.client.get('/tools.config.json').json['tools'], [])
+        self.assertNotIn(b'Visible',self.client.get('/').data)
+        self.assertEqual(len(self.client.get('/api/admin/tools.config').json['tools']),2)
+        self.request('/api/admin/content/tools/visible/availability','PATCH',{'enabled':True})
+        self.assertEqual(len(self.client.get('/tools.config.json').json['tools']),1)
+
+    def test_widget_and_store_availability_preserve_records(self):
+        self.login()
+        self.records['data/config.json']['widgets']=[{'id':'poll','type':'poll','enabled':True,'data':{'question':'Private poll','options':[{'id':'one','text':'One','votes':0}]}}]
+        self.records['data/config.json']['store_apps']=[{'id':'app','title':'Store app','link':'https://example.com/app.apk'}]
+        for kind, identity in [('widgets','poll'),('store','app')]:
+            path=f'/api/admin/content/{kind}/{identity}/availability'
+            self.assertEqual(self.request(path,'PATCH',{'enabled':False}).status_code,200)
+        self.assertEqual(self.client.get('/api/widgets').json,[])
+        self.assertEqual(self.request('/api/widgets/poll/vote',data={'option_id':'one'}).status_code,404)
+        self.assertEqual(self.client.get('/api/admin/store-apps').json[0]['enabled'],False)
+        for kind, identity in [('widgets','poll'),('store','app')]:
+            self.assertEqual(self.request(f'/api/admin/content/{kind}/{identity}/availability','PATCH',{'enabled':True}).status_code,200)
+        self.assertEqual(len(self.client.get('/api/widgets').json),1)
+
+    def test_availability_requires_auth_csrf_and_boolean(self):
+        path='/api/admin/content/tools/visible/availability'
+        self.assertEqual(self.request(path,'PATCH',{'enabled':False}).status_code,401)
+        self.login()
+        self.assertEqual(self.client.patch(path,json={'enabled':False}).status_code,403)
+        for value in ('false', 0, None, [], {}):
+            self.assertEqual(self.request(path,'PATCH',{'enabled':value}).status_code,400)
+        self.assertEqual(self.request('/api/admin/content/unknown/a/availability','PATCH',{'enabled':False}).status_code,404)
+        self.assertEqual(self.request('/api/admin/content/tools/missing/availability','PATCH',{'enabled':False}).status_code,404)
+        self.assertEqual(self.client.get('/tools.config.json').json['tools'][0]['id'],'visible')
+
+    def test_malformed_publication_flags_rejected_on_existing_writes(self):
+        self.login()
+        for path, method, data in [('/api/add_item','POST',{'title':'Hidden','enabled':'false'}),
+             ('/api/admin/widgets','POST',{'type':'notice','enabled':'false'}),
+             ('/api/admin/store-apps','POST',{'title':'App','visible':0}),
+             ('/api/admin/widgets/poll','PUT',{'data':[]}),
+             ('/api/admin/widgets/poll','PUT',{'order':'bad'})]:
+            self.assertEqual(self.request(path,method,data).status_code,400,(path,data))
+
+    def test_download_library_switch_hides_api_and_categories(self):
+        self.records[module.DOWNLOADS_REL]=[{'id':'one','title':'One','category':'Hidden category'}]
+        self.records[module.TOOLS_CONFIG_REL]['downloadPage']['enabled']=False
+        self.assertEqual(self.client.get('/api/downloads_data').json,[])
+        self.assertEqual(self.client.get('/api/downloads/categories').json,[])
+
+    def test_availability_failure_does_not_claim_success(self):
+        self.login()
+        with patch.object(module,'safe_write',side_effect=RuntimeError('private details')):
+            response=self.request('/api/admin/content/tools/visible/availability','PATCH',{'enabled':False})
+        self.assertEqual(response.status_code,500)
+        self.assertNotIn(b'private details',response.data)
+        self.assertEqual(len(self.client.get('/tools.config.json').json['tools']),1)
+
 if __name__=='__main__':unittest.main()

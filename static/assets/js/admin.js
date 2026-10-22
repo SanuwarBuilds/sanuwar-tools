@@ -137,7 +137,7 @@
     el(
       "span",
       { class: `status-pill${visible ? "" : " hidden"}` },
-      visible ? "Published" : "Hidden",
+      visible ? "Enabled" : "Disabled",
     );
   function updateCounts() {
     $("#nav-tools-count").textContent = config.tools.length;
@@ -352,6 +352,8 @@
       card("A little workspace care", health),
     );
   }
+  const isEnabled = (item) =>
+    ["enabled", "visible"].every((key) => item[key] === undefined || item[key] === true);
   function listing(items, kind) {
     const search = el("input", {
       type: "search",
@@ -388,6 +390,24 @@
                   ? editWidget(item)
                   : editStore(item);
           actions.push(rowButton("Edit", edit, false, `Edit ${nameOf(item)}`));
+          const enabled = isEnabled(item);
+          let changing = false;
+          const toggleButton = rowButton(enabled ? "Disable" : "Enable", async () => {
+            if (changing) return;
+            changing = true;
+            toggleButton.disabled = true;
+            try {
+              const result = await mutate(`/api/admin/content/${kind}/${encodeURIComponent(item.id)}/availability`, "PATCH", { enabled: !enabled });
+              Object.assign(item, result.item);
+              toast(enabled ? "Disabled · Public website se hata diya." : "Enabled · Public website par available hai.");
+              updateCounts();
+              draw();
+            } finally {
+              changing = false;
+              toggleButton.disabled = false;
+            }
+          }, false, `${enabled ? "Disable" : "Enable"} ${nameOf(item)}`);
+          actions.push(toggleButton);
           if (kind === "tools" || kind === "widgets") {
             const move = async (delta) => {
               const list = kind === "tools" ? config.tools : widgets;
@@ -501,7 +521,7 @@
             el(
               "td",
               {},
-              pill(kind === "widgets" ? item.enabled : item.visible !== false),
+              pill(isEnabled(item)),
             ),
             el("td", {}, el("div", { class: "row-actions" }, actions)),
           );
@@ -833,6 +853,7 @@
             .map((s) => s.trim())
             .filter(Boolean),
           visible: visible.input.checked,
+          enabled: visible.input.checked,
           featured: featured.input.checked,
           addedDate: t.addedDate || new Date().toISOString().slice(0, 10),
           downloadAvailable: t.downloadAvailable || false,
@@ -853,6 +874,7 @@
       version = field("Version", i.version),
       imageUrl = field("Cover image URL", i.image),
       link = field("Download URL", i.link, "url"),
+      published = checkbox("Enabled on website", isEnabled(i)),
       album = checkbox("This is an album", i.is_album || false),
       access = select(
         "Download access",
@@ -977,6 +999,7 @@
           discount.node,
         ),
         finalPrice,
+        published.node,
         album.node,
         linkSection,
         albumSection,
@@ -990,6 +1013,7 @@
           version: version.input.value,
           image: imageUrl.input.value,
           link: album.input.checked ? "" : link.input.value,
+          enabled: published.input.checked,
           is_album: album.input.checked,
           pricing: {
             mode: isPaid() ? "paid" : "free",
