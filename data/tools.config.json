@@ -74,22 +74,6 @@
       "tags": [],
       "thumbnail": "/assets/thumbnails/room-expense-manager.jpg",
       "visible": true
-    },
-    {
-      "id": "tool-moq61f3t",
-      "name": "Assam Elections Result",
-      "slug": "assam-elections-result",
-      "category": "Utility",
-      "description": "",
-      "longDescription": "",
-      "siteUrl": "https://results.eci.gov.in/",
-      "thumbnail": "/assets/thumbnails/assam-results.svg",
-      "downloadAvailable": false,
-      "featured": false,
-      "visible": false,
-      "tags": [],
-      "addedDate": "2026-05-03",
-      "enabled": false
     }
   ]
 }
