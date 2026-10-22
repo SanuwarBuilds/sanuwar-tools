@@ -46,7 +46,8 @@
     "version": "1.2.1",
     "is_album": false,
     "album_files": [],
-    "is_new": true
+    "is_new": true,
+    "enabled": false
   },
   {
     "id": "item_6e0c8b5a",
