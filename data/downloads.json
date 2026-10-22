@@ -85,7 +85,8 @@
         "link": "https://res.cloudinary.com/dpbuhcvui/image/upload/v1781272379/sanuwar-tools/downloads/stream_m20mbr.png"
       }
     ],
-    "is_new": true
+    "is_new": true,
+    "enabled": false
   },
   {
     "id": "item_35d48f98",
