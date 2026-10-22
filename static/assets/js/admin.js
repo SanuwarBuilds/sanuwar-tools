@@ -219,7 +219,7 @@
         config.tools.length,
         "Total tools",
         "↗",
-        `${config.tools.filter((t) => t.visible !== false).length} published on your website`,
+        `${config.tools.filter(isEnabled).length} published on your website`,
       ],
       [
         downloads.length,
@@ -257,7 +257,7 @@
               el("strong", {}, tool.name),
               el("p", {}, tool.category || "Tool"),
             ),
-            pill(tool.visible !== false),
+            pill(isEnabled(tool)),
             rowButton("↗", () => editTool(tool), false, `Edit ${tool.name}`),
           ),
         ),
@@ -817,7 +817,7 @@
       link = field("Website URL", t.siteUrl, "url", true),
       thumb = field("Thumbnail URL", t.thumbnail),
       tags = field("Tags · comma separated", (t.tags || []).join(", ")),
-      visible = checkbox("Publish on the website", t.visible !== false),
+      visible = checkbox("Publish on the website", isEnabled(t)),
       featured = checkbox("Feature this tool", t.featured || false);
     editor(
       tool ? "Edit tool" : "A new useful thing.",
@@ -1156,7 +1156,7 @@
         Object.keys(widgetSchemas),
         w.type || "notice",
       ),
-      enabled = checkbox("Publish this widget", w.enabled !== false);
+      enabled = checkbox("Publish this widget", isEnabled(w));
     const widgetLabels = {
       notice: "Notice / alert",
       poll: "Poll",
