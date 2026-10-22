@@ -103,7 +103,8 @@
         "link": "https://res.cloudinary.com/dpbuhcvui/image/upload/v1781272326/sanuwar-tools/downloads/stream_tosmk7.png"
       }
     ],
-    "is_new": true
+    "is_new": true,
+    "enabled": false
   },
   {
     "id": "item_80b32194",
