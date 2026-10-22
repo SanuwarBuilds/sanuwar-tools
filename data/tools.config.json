@@ -86,9 +86,10 @@
       "thumbnail": "/assets/thumbnails/assam-results.svg",
       "downloadAvailable": false,
       "featured": false,
-      "visible": true,
+      "visible": false,
       "tags": [],
-      "addedDate": "2026-05-03"
+      "addedDate": "2026-05-03",
+      "enabled": false
     }
   ]
 }
