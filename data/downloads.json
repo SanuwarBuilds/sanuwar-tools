@@ -97,7 +97,7 @@
       "price": "12000.00",
       "discount": "2000.00"
     },
-    "enabled": true
+    "enabled": false
   },
   {
     "id": "item_d27b51da",
