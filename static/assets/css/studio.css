@@ -1990,3 +1990,5 @@ html[data-theme="dark"] .studio-theme {
 .information-page h2{font-size:1.25rem;margin:32px 0 10px;line-height:1.4}.information-page p{margin:0 0 18px}
 .information-page p a{color:var(--accent,#2563eb);text-decoration:underline;text-underline-offset:3px}
 .information-intro{font-size:1.2rem}.information-actions{display:flex;gap:12px;flex-wrap:wrap;margin:24px 0}
+
+#privacy-choices[hidden]{display:none}

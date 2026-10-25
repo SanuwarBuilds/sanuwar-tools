@@ -6,13 +6,13 @@ The async tag loads only on successful HTTPS `sanuwartools.online` home and down
 
 Set `ADSENSE_ENABLED=0` in the deployment environment and redeploy to pause all ad scripts. `ADSENSE_CLIENT` can override the public publisher ID; malformed values fail closed. Keep the account's site, publisher ID and seller record aligned.
 
-Public ad pages use a per-response cryptographic nonce on every script and strict-dynamic CSP. HTTPS ad frames and resource requests are permitted on these pages only, while object embedding, base changes, framing the site and external form submission remain blocked. Other routes retain the original first-party CSP. The public script policy does not permit inline handlers or eval. Recheck browser errors if Google changes its runtime; do not weaken admin/API security to resolve an ad problem.
+Public ad pages use a per-response cryptographic nonce on every script and strict-dynamic CSP. HTTPS ad frames and resource requests are permitted on these pages only, while object embedding, base changes, framing the site and external form submission remain blocked. Other routes retain the original first-party CSP. The public script policy blocks inline handlers; trusted nonced ad scripts may use eval as required by Google's supported CSP. Private routes do not permit eval. Recheck browser errors if Google changes its runtime; do not weaken admin/API security to resolve an ad problem.
 
 ## Google account configuration
 
 Use AdSense Auto ads: normal in-page ads, dismissible bottom anchor, and vignette ads at a moderate interval (target 10 minutes if available). Disable extra vignette triggers and distracting ad intents. Direct download anchors opt out of vignette triggers. No custom popups, pop-unders, forced ad clicks, or simulated download buttons.
 
-Publish Google's European regulations consent message using `https://sanuwartools.online/privacy`, with consent, manage options and do-not-consent choices. Configure the account-provided privacy-choice link before personalized advertising for EEA/UK/Switzerland. Do not substitute an unverified custom consent banner. Configure page exclusions as a second layer if offered by Auto ads; server code is the primary boundary.
+Publish Google's European regulations consent message using `https://sanuwartools.online/privacy`, with consent, manage options and do-not-consent choices. The public footer exposes Google's documented consent revocation entry once its TCF API confirms European regulations apply. Do not substitute an unverified custom consent banner. Configure page exclusions as a second layer if offered by Auto ads; server code is the primary boundary.
 
 Complete the owner's actual payment/contact profile in AdSense, verify site ownership, then request site review. Tags and settings do not mean approval; Google controls review, ad delivery, fill and earnings. Never click your own ads while testing.
 

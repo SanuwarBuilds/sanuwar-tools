@@ -153,14 +153,14 @@ def install(app):
         import monetization
         if response.status_code == 200 and response.mimetype == 'text/html' and monetization.ads_enabled():
             response.headers['Content-Security-Policy'] = (
-                "default-src 'self'; script-src 'nonce-" + monetization.nonce() + "' 'strict-dynamic' https:; "
+                "default-src 'self'; script-src 'nonce-" + monetization.nonce() + "' 'unsafe-eval' 'strict-dynamic' https:; "
                 "style-src 'self' 'unsafe-inline' https:; img-src 'self' https: data:; "
                 "font-src 'self' https:; connect-src 'self' https:; frame-src https:; "
                 "media-src 'self' https:; object-src 'none'; base-uri 'none'; "
                 "frame-ancestors 'none'; form-action 'self'")
         if request.is_secure:
             response.headers['Strict-Transport-Security'] = 'max-age=31536000'
-        if request.path.startswith(('/admin','/api/','/purchase')) or request.path in ('/', '/downloads', '/download.html', '/tools.config.json'):
+        if request.path.startswith(('/admin','/api/','/purchase')) or request.path in ('/', '/downloads', '/download.html', '/tools.config.json', '/privacy', '/about', '/contact'):
             response.headers['Cache-Control'] = 'no-store'
         return response
     @app.errorhandler(HTTPException)
