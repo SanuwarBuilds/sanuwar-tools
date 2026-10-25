@@ -3,12 +3,12 @@
 {% block content %}
 <section class="catalogue-hero wrap">
   <h1>Everyday tools. <span>All in one place.</span></h1>
-  <p>Useful web tools, Android apps and albums, right at your fingertips.<br class="desktop-break"> Find what you need and get straight to it.</p>
+  <p>Photo tools, live scores and everyday utilities, right at your fingertips.<br class="desktop-break"> Find what you need and get straight to it.</p>
 </section>
-<section class="wrap catalogue-collection" id="tools" aria-label="Tools and downloads">
-  <div class="catalogue-search"><label class="search-box"><span aria-hidden="true">⌕</span><input type="search" id="tool-search" placeholder="Search tools, apps and albums…" aria-label="Search tools"><kbd>/</kbd></label></div>
-  <div class="catalogue-filters"><div class="filter-tabs" id="categories" role="group" aria-label="Filter tools"></div><span class="catalogue-count"><b id="tool-total">{{ public_config.get('tools', []) | length + initial_home_downloads | length }}</b> available</span></div>
-  <div class="tool-grid" id="tools-grid" aria-live="polite">{% include '_initial_tools.html' %}{% include '_home_downloads.html' %}</div>
+<section class="wrap catalogue-collection" id="tools" aria-label="Web tools">
+  <div class="catalogue-search"><label class="search-box"><span aria-hidden="true">⌕</span><input type="search" id="tool-search" placeholder="Search web tools…" aria-label="Search tools"><kbd>/</kbd></label></div>
+  <div class="catalogue-filters"><div class="filter-tabs" id="categories" role="group" aria-label="Filter tools"></div><span class="catalogue-count"><b id="tool-total">{{ public_config.get('tools', []) | length }}</b> available</span></div>
+  <div class="tool-grid" id="tools-grid" aria-live="polite">{% include '_initial_tools.html' %}</div>
   <div id="widgets" class="widget-grid"></div>
 </section>
 <section class="wrap catalogue-help" id="how-it-works">

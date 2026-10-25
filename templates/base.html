@@ -39,6 +39,7 @@
 <script nonce="{{ csp_nonce }}" src="/assets/js/shared.js" defer></script>
 {% block head %}{% endblock %}
 <link rel="stylesheet" href="/assets/css/studio.css?v=1">
+<link rel="stylesheet" href="/assets/css/visitor-nav.css?v=1">
 {% if request.path in ('/', '/downloads', '/download.html') %}<link rel="stylesheet" href="/assets/css/catalogue.css?v=1">{% endif %}
 </head>
 <body class="studio-theme {% block bodyclass %}{% endblock %}">
@@ -47,7 +48,7 @@
 <header class="site-header wrap">
 <a class="brand" href="/" aria-label="SanuwarTools home"><span class="brand-symbol" aria-hidden="true">s</span><span>{{ public_config.get('site', {}).get('name', 'SanuwarTools') }}<span class="brand-dot">.</span></span></a>
 <nav id="site-nav" aria-label="Main navigation"><a href="/#tools" {% if request.path == '/' %}class="active"{% endif %}>Tools</a>{% if public_config.get('downloadPage', {}).get('enabled', True) %}<a href="/downloads" {% if request.path in ('/downloads', '/download.html') %}class="active"{% endif %}>Downloads</a>{% endif %}<a href="/#how-it-works">How it works</a></nav>
-<div class="nav-actions"><button class="icon-button" id="theme-toggle" aria-label="Switch color theme">◐</button><a class="button button-dark nav-cta" href="/#tools">Browse tools <span>↗</span></a><button class="icon-button menu-toggle" aria-controls="site-nav" aria-expanded="false" aria-label="Open navigation">☰</button></div>
+<div class="nav-actions"><button class="icon-button" id="theme-toggle" aria-label="Switch color theme">◐</button>{% if visitor %}<a class="button button-light visitor-nav" href="/account" aria-label="My account">My account</a>{% else %}<a class="button button-light visitor-nav" href="/signin">Sign in</a>{% endif %}<button class="icon-button menu-toggle" aria-controls="site-nav" aria-expanded="false" aria-label="Open navigation">☰</button></div>
 </header>
 {% endblock %}
 <main id="main">{% block content %}{% endblock %}</main>

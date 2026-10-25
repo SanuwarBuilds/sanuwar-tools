@@ -1,0 +1,17 @@
+{% extends 'base.html' %}
+{% block title %}Sign in | SanuwarTools{% endblock %}
+{% block head %}<link rel="stylesheet" href="/assets/css/account.css?v=1">{% endblock %}
+{% block content %}
+<section class="visitor-layout wrap"><div class="visitor-card">
+<a class="brand visitor-brand" href="/"><span class="brand-symbol" aria-hidden="true">s</span><span>SanuwarTools.</span></a>
+<span class="eyebrow">YOUR ACCOUNT</span><h1>A familiar way<br>to sign in.</h1><p>Continue with your Google account.<br>No new password to remember.</p>
+{% if google_client_id %}
+<div id="google-signin-config" data-client-id="{{ google_client_id }}" data-nonce="{{ google_nonce }}"></div>
+<div id="google-signin-button" class="google-signin-button" aria-label="Sign in with Google"><span id="google-signin-loading">Loading Google sign-in…</span></div>
+{% else %}<p class="signin-notice" role="status">Google sign-in setup is in progress. You can keep browsing tools and downloads.</p>{% endif %}
+<p id="signin-error" class="form-error" role="alert"></p><button id="signin-retry" class="button button-light" hidden>Refresh sign-in</button>
+<p class="visitor-privacy">Google shares your name, email address and account identifier with SanuwarTools to sign you in. We never receive your Google password.</p>
+<a class="text-link" href="/privacy">Privacy policy ↗</a><a class="visitor-back" href="/">← Continue browsing</a>
+</div></section>
+{% endblock %}
+{% block scripts %}{% if google_client_id %}<script nonce="{{ csp_nonce }}" src="/assets/js/google-signin.js" defer></script><script nonce="{{ csp_nonce }}" src="https://accounts.google.com/gsi/client" defer></script>{% endif %}{% endblock %}

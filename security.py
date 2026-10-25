@@ -158,6 +158,14 @@ def install(app):
                 "font-src 'self' https:; connect-src 'self' https:; frame-src https:; "
                 "media-src 'self' https:; object-src 'none'; base-uri 'none'; "
                 "frame-ancestors 'none'; form-action 'self'")
+        if request.path == '/signin' and response.status_code == 200:
+            response.headers['Content-Security-Policy'] = (
+                "default-src 'self'; script-src 'self' https://accounts.google.com/gsi/client; "
+                "style-src 'self' 'unsafe-inline' https://accounts.google.com/gsi/style; "
+                "connect-src 'self' https://accounts.google.com/gsi/; frame-src https://accounts.google.com/gsi/; "
+                "img-src 'self' https: data:; font-src 'self'; object-src 'none'; base-uri 'self'; "
+                "frame-ancestors 'none'; form-action 'self'")
+            response.headers['Cross-Origin-Opener-Policy'] = 'same-origin-allow-popups'
         if request.is_secure:
             response.headers['Strict-Transport-Security'] = 'max-age=31536000'
         if request.path.startswith(('/admin','/api/','/purchase')) or request.path in ('/', '/downloads', '/download.html', '/tools.config.json', '/privacy', '/about', '/contact'):

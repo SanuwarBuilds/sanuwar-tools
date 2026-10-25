@@ -1,0 +1,9 @@
+{% extends 'base.html' %}
+{% block title %}My account | SanuwarTools{% endblock %}
+{% block head %}<link rel="stylesheet" href="/assets/css/account.css?v=1">{% endblock %}
+{% block content %}<section class="visitor-layout wrap"><div class="visitor-card">
+<span class="visitor-avatar" aria-hidden="true">{{ visitor.name[:1] | upper }}</span><span class="eyebrow">SIGNED IN WITH GOOGLE</span><h1>Welcome,<br>{{ visitor.name }}.</h1><p>{{ visitor.email }}</p>
+<div class="account-actions"><a class="button button-dark" href="/">Explore tools ↗</a>{% if public_config.get('downloadPage', {}).get('enabled', True) %}<a class="button button-light" href="/downloads">Browse downloads ↓</a>{% endif %}</div>
+<p class="visitor-privacy">Your Google account is connected for visitor sign-in.</p><p id="account-error" class="form-error" role="alert"></p><button id="visitor-signout" class="button button-light">Sign out</button>
+</div></section>{% endblock %}
+{% block scripts %}<script nonce="{{ csp_nonce }}" src="/assets/js/visitor-account.js" defer></script>{% endblock %}

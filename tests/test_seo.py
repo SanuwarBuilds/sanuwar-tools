@@ -50,16 +50,14 @@ class SearchDiscoveryTests(unittest.TestCase):
         for text in ('Public album','Public guide.pdf','https://example.com/guide.pdf','Paid album','Premium file.zip'):self.assertIn(text,page)
         for secret in ('Secret download title','https://example.com/hidden.zip','private/secret','secret-original.zip'):self.assertNotIn(secret,page)
 
-    def test_home_collection_only_includes_current_public_download_metadata(self):
-        text=self.client.get('/').get_data(as_text=True)
-        for public in ('Public album','Paid album','/downloads?item=free','/downloads?item=paid'):
-            self.assertIn(public,text)
-        for private in ('Secret download title','private/secret','secret-original.zip','https://example.com/hidden.zip'):
-            self.assertNotIn(private,text)
-        self.records[module.TOOLS_CONFIG_REL]['downloadPage']['enabled']=False
-        text=self.client.get('/').get_data(as_text=True)
-        self.assertNotIn('Public album',text)
-        self.assertNotIn('/downloads?item=',text)
+    def test_home_tools_never_load_or_render_download_records(self):
+        with patch.object(module, 'public_downloads', side_effect=AssertionError('Tools page must not load downloads')):
+            response=self.client.get('/')
+        self.assertEqual(response.status_code,200)
+        text=response.get_data(as_text=True)
+        self.assertIn('Useful photo tool',text)
+        for download in ('Public album','Paid album','Secret download title','/downloads?item='):
+            self.assertNotIn(download,text)
 
     def test_sitemap_only_includes_canonical_public_pages(self):
         response=self.client.get('/sitemap.xml')

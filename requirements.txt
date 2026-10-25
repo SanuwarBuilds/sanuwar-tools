@@ -17,3 +17,6 @@ six==1.17.0
 SQLAlchemy==2.0.55
 psycopg[binary]==3.3.6
 cryptography==50.0.2
+google-auth==2.62.0
+pyasn1==0.6.4
+pyasn1-modules==0.4.2

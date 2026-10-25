@@ -16,6 +16,7 @@ from availability import is_public, public_config
 import payments
 import seo
 import monetization
+import user_auth
 from cover_images import thumbnail_receipt
 from download_metadata import utc_now, upload_time, album_metadata
 import cloudinary
@@ -85,7 +86,7 @@ def site_touch_icon():
 
 @app.route("/")
 def index():
-    return render_template("index.html", initial_home_downloads=[payments.public_item(item) for item in public_downloads()])
+    return render_template("index.html")
 
 @app.route("/payment-demo")
 def payment_demo():
@@ -692,6 +693,7 @@ def api_widget_vote(widget_id):
 payments.register(app, public_downloads, login_required)
 seo.install(app, lambda: safe_read(TOOLS_CONFIG_REL))
 monetization.install(app)
+user_auth.install(app)
 
 if __name__ == "__main__":
     app.run(host="0.0.0.0", port=5002, debug=os.getenv('FLASK_DEBUG') == '1')

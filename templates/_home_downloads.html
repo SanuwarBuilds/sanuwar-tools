@@ -1,6 +1,0 @@
-{% for item in initial_home_downloads %}
-<article class="tool-card catalogue-card">
-  <div class="catalogue-card-top"><img class="catalogue-icon" src="/assets/icons/{{ 'album' if item.get('is_album') else 'download' }}.svg" alt="" width="48" height="48"><span class="catalogue-badge">{% if item.locked %}₹{{ item.pricing.payable }}{% else %}FREE{% endif %}</span></div>
-  <div class="card-body"><span class="catalogue-type">{{ 'ALBUM' if item.get('is_album') else 'DOWNLOAD' }} · {{ item.get('category', 'Files') }}</span><h3>{{ item.title }}</h3><p>{{ item.get('description') or ('Explore the files inside this album.' if item.get('is_album') else 'View details and download this file.') }}</p><div class="card-bottom"><a class="text-link catalogue-open" data-google-vignette="false" href="/downloads?item={{ item.id | urlencode }}">{{ 'View album' if item.get('is_album') else 'View download' }} <span aria-hidden="true">→</span></a></div></div>
-</article>
-{% endfor %}

@@ -11,11 +11,9 @@
   const render = () => {
     const query = $("#tool-search").value.trim().toLowerCase();
     const filtered = tools.filter((t) =>
-      (selected === "All" || (selected === "Web tools" && t.kind === "tool") ||
-       (selected === "Downloads" && t.kind === "file") || (selected === "Albums" && t.kind === "album")) &&
+      (selected === "All" || t.category === selected) &&
       `${t.name} ${t.description || ""} ${t.category || ""} ${(t.tags || []).join(" ")}`.toLowerCase().includes(query));
-    const cats = ["All", ...[["Web tools", "tool"], ["Downloads", "file"], ["Albums", "album"]]
-      .filter(([, kind]) => tools.some(t => t.kind === kind)).map(([label]) => label)];
+    const cats = ["All", ...new Set(tools.map(t => t.category).filter(Boolean))];
     tabs($("#categories"), cats, selected, (cat) => { selected = cat; render(); });
     $("#tool-total").textContent = filtered.length;
     if (!filtered.length) return empty(grid, "No matches found.", "Try another search or browse the full collection.", () => {
@@ -169,12 +167,6 @@
     try {
       config = await api("/tools.config.json");
       tools = (config.tools || []).filter((t) => t.visible !== false).map(t => ({...t, kind: "tool"}));
-      if (config.downloadPage?.enabled !== false) {
-        try {
-          const downloads = await api("/api/downloads_data");
-          tools.push(...downloads.map(item => ({...item, name: item.title, kind: item.is_album ? "album" : "file"})));
-        } catch { toast("Downloads abhi load nahi hue. Web tools available hain."); }
-      }
       render();
       await widgets();
     } catch (error) {
