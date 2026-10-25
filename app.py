@@ -14,6 +14,7 @@ from werkzeug.utils import secure_filename
 import security
 from availability import is_public, public_config
 import payments
+import seo
 from cover_images import thumbnail_receipt
 from download_metadata import utc_now, upload_time, album_metadata
 import cloudinary
@@ -94,7 +95,7 @@ def payment_demo():
 def downloads():
     if not (safe_read(TOOLS_CONFIG_REL) or {}).get('downloadPage', {}).get('enabled', True):
         abort(404)
-    return render_template("downloads.html")
+    return render_template("downloads.html", initial_downloads=[payments.public_item(item) for item in public_downloads()])
 
 @app.route("/admin/login", methods=["GET", "POST"])
 def admin_login():
@@ -688,6 +689,7 @@ def api_widget_vote(widget_id):
         return jsonify({"error": "Could not save or upload. Check server configuration and try again."}), 500
 
 payments.register(app, public_downloads, login_required)
+seo.install(app, lambda: safe_read(TOOLS_CONFIG_REL))
 
 if __name__ == "__main__":
     app.run(host="0.0.0.0", port=5002, debug=os.getenv('FLASK_DEBUG') == '1')

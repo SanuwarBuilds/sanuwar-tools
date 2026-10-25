@@ -13,7 +13,7 @@
     <div class="quick-access-heading"><span class="eyebrow">QUICK ACCESS</span><span class="quick-access-count">YOUR SHORTCUTS</span></div>
     {% set quick_tools = public_config.get('tools', []) | selectattr('visible', 'ne', false) | list %}
     {% for tool in quick_tools[:3] %}
-    <a class="quick-tool" href="{{ tool.siteUrl }}" target="_blank" rel="noopener noreferrer"><span class="quick-tool-icon" aria-hidden="true">{{ '%02d' | format(loop.index) }}</span><span><strong>{{ tool.name }}</strong><small>{{ tool.category or 'Web tool' }}</small></span><span class="quick-tool-arrow" aria-hidden="true">↗</span></a>
+    <a class="quick-tool" href="{{ tool.siteUrl | public_url }}" target="_blank" rel="noopener noreferrer"><span class="quick-tool-icon" aria-hidden="true">{{ '%02d' | format(loop.index) }}</span><span><strong>{{ tool.name }}</strong><small>{{ tool.category or 'Web tool' }}</small></span><span class="quick-tool-arrow" aria-hidden="true">↗</span></a>
     {% endfor %}
     {% if public_config.get('downloadPage', {}).get('enabled', True) %}<a class="quick-download-link" href="/downloads"><span><b>Something worth keeping.</b><small>Apps, albums & your next useful find.</small></span><span aria-hidden="true">↓</span></a>{% endif %}
   </aside>
@@ -21,7 +21,7 @@
 <section class="section wrap studio-toolkit" id="tools">
   <div class="section-heading"><div><span class="eyebrow">THE COLLECTION <span class="section-index">01</span></span><h2>Good tools. Less effort.</h2></div><span class="collection-total"><b id="tool-total">—</b> tools to explore</span></div>
   <div class="catalog-toolbar"><div class="filter-tabs" id="categories" role="group" aria-label="Filter tools"></div><label class="search-box"><span aria-hidden="true">⌕</span><input type="search" id="tool-search" placeholder="Find your next useful tool" aria-label="Search tools"><kbd>/</kbd></label></div>
-  <div class="tool-grid" id="tools-grid" aria-live="polite"><div class="loading-state">Aapka toolkit load ho raha hai…</div></div>
+  <div class="tool-grid" id="tools-grid" aria-live="polite">{% include '_initial_tools.html' %}</div>
   <div id="widgets" class="widget-grid"></div>
 </section>
 <section class="studio-workflow wrap" id="how-it-works">

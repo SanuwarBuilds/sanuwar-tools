@@ -1,5 +1,5 @@
 {% extends 'base.html' %}
-{% block title %}Downloads — SanuwarTools{% endblock %}
+{% block title %}Downloads — Android Apps &amp; Files | SanuwarTools{% endblock %}
 {% block bodyclass %}downloads-page{% endblock %}
 {% block content %}
 
@@ -13,8 +13,8 @@
     <div class="download-filter-row"><div class="collection-types" role="group" aria-label="Collection type"><button class="filter-tab active" data-kind="all" aria-pressed="true">All</button><button class="filter-tab" data-kind="files" aria-pressed="false">Files</button><button class="filter-tab" data-kind="albums" aria-pressed="false">Albums</button></div>
     <select class="download-category-select" id="download-category" aria-label="Download category"><option value="All">Category</option></select></div>
   </div>
-  <div class="collection-info"><span id="download-count" role="status">Loading collection…</span><span>Dates shown in India time · IST</span></div>
-  <div class="download-grid" id="downloads-grid" aria-live="polite"><div class="loading-state">Downloads load ho rahe hain…</div></div>
+  <div class="collection-info"><span id="download-count" role="status">{{ initial_downloads | length }} items</span><span>Dates shown in India time · IST</span></div>
+  <div class="download-grid" id="downloads-grid" aria-live="polite">{% include '_initial_downloads.html' %}</div>
 </section>
 {% endblock %}
 {% block scripts %}<script src="/assets/js/downloads.js" defer></script>{% endblock %}

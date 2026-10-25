@@ -3,10 +3,26 @@
 <head>
 <meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
 <meta name="csrf-token" content="{{ csrf_token }}">
-<meta name="description" content="SanuwarTools — useful web tools, Android apps aur downloads, ek hi jagah.">
+<meta name="description" content="{{ seo.description }}">
+{% if seo.indexable %}
+<meta name="robots" content="index, follow, max-image-preview:large">
+<link rel="canonical" href="{{ seo.canonical }}">
+<meta property="og:type" content="website">
+<meta property="og:site_name" content="SanuwarTools">
+<meta property="og:title" content="{{ seo.title }}">
+<meta property="og:description" content="{{ seo.description }}">
+<meta property="og:url" content="{{ seo.canonical }}">
+<meta property="og:image" content="{{ seo.image }}">
+<meta property="og:image:alt" content="SanuwarTools logo">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="{{ seo.title }}">
+<meta name="twitter:description" content="{{ seo.description }}">
+<meta name="twitter:image" content="{{ seo.image }}">
+<script type="application/ld+json">{{ seo.structured_data | tojson }}</script>
+{% else %}<meta name="robots" content="noindex, nofollow">{% endif %}
 <meta name="theme-color" content="#ffffff">
-<title>{% block title %}SanuwarTools — Make everyday a little easier.{% endblock %}</title>
-{% set favicon = public_config.get('site', {}).get('favicon') or '/assets/favicon.png' %}
+<title>{% block title %}SanuwarTools — Web Tools, Android Apps &amp; Downloads{% endblock %}</title>
+{% set favicon = (public_config.get('site', {}).get('favicon') | public_image) or '/assets/favicon.png' %}
 {% if favicon == '/assets/favicon.png' %}
 <link rel="shortcut icon" type="image/x-icon" href="/favicon.ico?v=brand4">
 <link rel="icon" type="image/png" sizes="256x256" href="/assets/favicon.png?v=brand4">
@@ -32,7 +48,7 @@
 {% endblock %}
 <main id="main">{% block content %}{% endblock %}</main>
 {% block footer %}
-<footer class="wrap site-footer"><div><a class="brand" href="/"><span class="brand-symbol" aria-hidden="true">s</span><span>SanuwarTools<span class="brand-dot">.</span></span></a><p>{{ public_config.get('site', {}).get('tagline', 'Chhote tools. Bade kaam.') }}</p></div><nav aria-label="Footer"><a href="/#tools">Tools</a>{% if public_config.get('downloadPage', {}).get('enabled', True) %}<a href="/downloads">Downloads</a>{% endif %}{% for label, link in public_config.get('socialLinks', {}).items() %}{% if link %}<a href="{{ link }}" target="_blank" rel="noopener noreferrer">{{ label | capitalize }} ↗</a>{% endif %}{% endfor %}<a href="/admin">Admin ↗</a></nav><p class="copyright">Made with care by Sanuwar.<br>© {{ now_year }} SanuwarTools</p></footer>
+<footer class="wrap site-footer"><div><a class="brand" href="/"><span class="brand-symbol" aria-hidden="true">s</span><span>SanuwarTools<span class="brand-dot">.</span></span></a><p>{{ public_config.get('site', {}).get('tagline', 'Chhote tools. Bade kaam.') }}</p></div><nav aria-label="Footer"><a href="/#tools">Tools</a>{% if public_config.get('downloadPage', {}).get('enabled', True) %}<a href="/downloads">Downloads</a>{% endif %}{% for label, link in public_config.get('socialLinks', {}).items() %}{% if link | public_url %}<a href="{{ link | public_url }}" target="_blank" rel="noopener noreferrer">{{ label | capitalize }} ↗</a>{% endif %}{% endfor %}<a href="/admin">Admin ↗</a></nav><p class="copyright">Made with care by Sanuwar.<br>© {{ now_year }} SanuwarTools</p></footer>
 {% endblock %}
 <div class="toast" id="toast" role="status" aria-live="polite"></div>
 <dialog id="content-dialog" aria-labelledby="dialog-title"><div class="dialog-head"><div><span class="eyebrow" id="dialog-kicker">A closer look</span><h2 id="dialog-title"></h2></div><button class="icon-button" data-close-dialog aria-label="Close dialog">×</button></div><div id="dialog-body"></div></dialog>
