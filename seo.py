@@ -16,6 +16,11 @@ PAGES = {
 
 
 def install(app, load_config):
+    def tool_icon(tool):
+        name = str(tool.get('name', '')).lower()
+        kind = 'photo' if 'photo' in name else 'score' if 'cricket' in name else 'wallet' if 'expense' in name else 'tool'
+        return '/assets/icons/' + kind + '.svg'
+    app.jinja_env.filters['tool_icon'] = tool_icon
     app.jinja_env.filters['public_url'] = lambda value: value if security.valid_url(value) else ''
     app.jinja_env.filters['public_image'] = lambda value: value if security.valid_url(value, image=True) else ''
 

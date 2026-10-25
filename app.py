@@ -85,7 +85,7 @@ def site_touch_icon():
 
 @app.route("/")
 def index():
-    return render_template("index.html")
+    return render_template("index.html", initial_home_downloads=[payments.public_item(item) for item in public_downloads()])
 
 @app.route("/payment-demo")
 def payment_demo():

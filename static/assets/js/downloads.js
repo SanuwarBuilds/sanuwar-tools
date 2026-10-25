@@ -685,4 +685,10 @@
     }
   }
   await load();
+  // A home-grid link opens its current public item directly; unpublished IDs do nothing.
+  const requestedId = new URLSearchParams(location.search).get("item");
+  if (requestedId) {
+    const requestedItem = items.find(item => item.id === requestedId);
+    if (requestedItem) detail(requestedItem);
+  }
 })();

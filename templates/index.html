@@ -1,34 +1,20 @@
 {% extends 'base.html' %}
-{% block bodyclass %}home-page{% endblock %}
+{% block bodyclass %}home-page catalogue-theme{% endblock %}
 {% block content %}
-<section class="studio-hero wrap">
-  <div class="studio-hero-copy">
-    <span class="studio-kicker"><span class="status-dot"></span> SMALL TOOLS. EVERYDAY POSSIBILITIES.</span>
-    <h1>Your everyday.<br><span>A little easier.</span></h1>
-    <p>Photo banana ho, scores check karne ho ya apni next app dhoondhni ho. Your useful corner of the internet.</p>
-    <div class="studio-hero-actions"><a class="button button-orange" href="#tools">Explore tools <span>↗</span></a>{% if public_config.get('downloadPage', {}).get('enabled', True) %}<a class="button button-light" href="/downloads">Browse downloads <span>↓</span></a>{% endif %}</div>
-    <div class="studio-hero-note"><span>WEB TOOLS</span><i></i><span>ANDROID APPS</span><i></i><span>ALBUMS & FILES</span></div>
-  </div>
-  <aside class="quick-access" aria-label="Quick access to tools">
-    <div class="quick-access-heading"><span class="eyebrow">QUICK ACCESS</span><span class="quick-access-count">YOUR SHORTCUTS</span></div>
-    {% set quick_tools = public_config.get('tools', []) | selectattr('visible', 'ne', false) | list %}
-    {% for tool in quick_tools[:3] %}
-    <a class="quick-tool" href="{{ tool.siteUrl | public_url }}" target="_blank" rel="noopener noreferrer"><span class="quick-tool-icon" aria-hidden="true">{{ '%02d' | format(loop.index) }}</span><span><strong>{{ tool.name }}</strong><small>{{ tool.category or 'Web tool' }}</small></span><span class="quick-tool-arrow" aria-hidden="true">↗</span></a>
-    {% endfor %}
-    {% if public_config.get('downloadPage', {}).get('enabled', True) %}<a class="quick-download-link" href="/downloads"><span><b>Something worth keeping.</b><small>Apps, albums & your next useful find.</small></span><span aria-hidden="true">↓</span></a>{% endif %}
-  </aside>
+<section class="catalogue-hero wrap">
+  <h1>Everyday tools. <span>All in one place.</span></h1>
+  <p>Useful web tools, Android apps and albums, right at your fingertips.<br class="desktop-break"> Find what you need and get straight to it.</p>
 </section>
-<section class="section wrap studio-toolkit" id="tools">
-  <div class="section-heading"><div><span class="eyebrow">THE COLLECTION <span class="section-index">01</span></span><h2>Good tools. Less effort.</h2></div><span class="collection-total"><b id="tool-total">—</b> tools to explore</span></div>
-  <div class="catalog-toolbar"><div class="filter-tabs" id="categories" role="group" aria-label="Filter tools"></div><label class="search-box"><span aria-hidden="true">⌕</span><input type="search" id="tool-search" placeholder="Find your next useful tool" aria-label="Search tools"><kbd>/</kbd></label></div>
-  <div class="tool-grid" id="tools-grid" aria-live="polite">{% include '_initial_tools.html' %}</div>
+<section class="wrap catalogue-collection" id="tools" aria-label="Tools and downloads">
+  <div class="catalogue-search"><label class="search-box"><span aria-hidden="true">⌕</span><input type="search" id="tool-search" placeholder="Search tools, apps and albums…" aria-label="Search tools"><kbd>/</kbd></label></div>
+  <div class="catalogue-filters"><div class="filter-tabs" id="categories" role="group" aria-label="Filter tools"></div><span class="catalogue-count"><b id="tool-total">{{ public_config.get('tools', []) | length + initial_home_downloads | length }}</b> available</span></div>
+  <div class="tool-grid" id="tools-grid" aria-live="polite">{% include '_initial_tools.html' %}{% include '_home_downloads.html' %}</div>
   <div id="widgets" class="widget-grid"></div>
 </section>
-<section class="studio-workflow wrap" id="how-it-works">
-  <div class="section-heading"><div><span class="eyebrow">KEEP IT SIMPLE <span class="section-index">02</span></span><h2>A shorter way to done.</h2></div><p>Kam steps. Clear choices.<br>Bas chuno aur shuru ho jao.</p></div>
-  <div class="studio-steps"><article><span>01 / DISCOVER</span><div class="step-symbol" aria-hidden="true">⌕</div><h3>Find your fit.</h3><p>Search karo, categories dekho. Apne kaam ka tool jaldi dhoondo.</p></article><article><span>02 / OPEN</span><div class="step-symbol" aria-hidden="true">↗</div><h3>Go straight to it.</h3><p>Tool open karo, ya album preview se apni download file chuno.</p></article><article><span>03 / DONE</span><div class="step-symbol" aria-hidden="true">✓</div><h3>Make a little progress.</h3><p>Kaam aasaan hua? Apna favourite tool save karke wapas aao.</p></article></div>
+<section class="wrap catalogue-help" id="how-it-works">
+  <div class="catalogue-help-intro"><span class="catalogue-eyebrow">SIMPLE BY DESIGN</span><h2>A little less effort.<br>A little more done.</h2><p>Everything is organised so you can spend less time looking and more time doing.</p></div>
+  <div class="catalogue-help-steps"><article><span>01</span><div><h3>Find your tool</h3><p>Search the collection or filter by what you need.</p></div></article><article><span>02</span><div><h3>Take a closer look</h3><p>Check tool details or preview the files inside an album.</p></div></article><article><span>03</span><div><h3>Open. Download. Done.</h3><p>Launch a tool or choose your file. Paid items show their price before checkout.</p></div></article></div>
 </section>
-{% if public_config.get('downloadPage', {}).get('enabled', True) %}<section class="wrap studio-download-cta"><div class="cta-icon" aria-hidden="true">↓</div><div><span class="eyebrow">THE DOWNLOAD LIBRARY</span><h2>Your next useful find.</h2><p>Apps, files aur albums. Preview first. Download what you need.</p></div><a class="button button-dark" href="/downloads">Open library <span>↗</span></a></section>{% endif %}
-<section class="wrap faq-section studio-faq"><div><span class="eyebrow">A LITTLE CLARITY</span><h2>Before you dive in.</h2></div><div class="faq-list"><details><summary>Tools kaise use karun?<span>+</span></summary><p>Tool card par “Open tool” select karo. Tool apni website par khulega. Info button se details dekh sakte ho.</p></details><details><summary>Phone par bhi kaam karega?<span>+</span></summary><p>Website phone, tablet aur desktop ke liye bani hai. Downloaded app ki compatibility uske platform aur version par depend karti hai.</p></details><details><summary>Album se apni file kaise chunun?<span>+</span></summary><p>Downloads mein album kholo, previews dekho aur apni file download karo. Paid albums mein payment verification ke baad access milta hai.</p></details></div></section>
+<section class="wrap catalogue-support"><div><h2>Need a hand?</h2><p>Broken link or a download question? Let's get it sorted.</p></div><a class="button button-light" href="/contact">Get support <span>↗</span></a></section>
 {% endblock %}
 {% block scripts %}<script nonce="{{ csp_nonce }}" src="/assets/js/main.js" defer></script>{% endblock %}

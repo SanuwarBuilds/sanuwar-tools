@@ -1,6 +1,6 @@
 {% for tool in public_config.get('tools', []) %}
-<article class="tool-card">
-  <div class="card-visual tone-{{ loop.index0 % 4 }}">{% if tool.get('thumbnail') | public_image %}<img src="{{ tool.thumbnail | public_image }}" alt="{{ tool.name }}" loading="lazy">{% else %}<span class="card-fallback" aria-hidden="true">s</span>{% endif %}{% if tool.get('featured') %}<span class="card-badge">FEATURED</span>{% endif %}</div>
-  <div class="card-body"><div class="card-topline"><span>{{ tool.get('category', 'Web tool') }}</span><span>WEB TOOL</span></div><h3>{{ tool.name }}</h3><p>{{ tool.get('description', '') }}</p>{% if tool.get('siteUrl') | public_url %}<div class="card-bottom"><a href="{{ tool.siteUrl | public_url }}" target="_blank" rel="noopener noreferrer" class="text-link">Open tool ↗</a></div>{% endif %}</div>
+<article class="tool-card catalogue-card">
+  <div class="catalogue-card-top"><img class="catalogue-icon" src="{{ tool | tool_icon }}" alt="" width="48" height="48">{% if tool.get('featured') %}<span class="catalogue-badge">FEATURED</span>{% endif %}</div>
+  <div class="card-body"><span class="catalogue-type">WEB TOOL · {{ tool.get('category', 'Utility') }}</span><h3>{{ tool.name }}</h3><p>{{ tool.get('description', '') }}</p>{% if tool.get('siteUrl') | public_url %}<div class="card-bottom"><a href="{{ tool.siteUrl | public_url }}" target="_blank" rel="noopener noreferrer" class="text-link catalogue-open">Open tool <span aria-hidden="true">↗</span></a></div>{% endif %}</div>
 </article>
 {% else %}<p class="empty-state">New tools will appear here when published.</p>{% endfor %}

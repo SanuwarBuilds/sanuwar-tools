@@ -1,111 +1,47 @@
 "use strict";
 (async () => {
   const { $, el, api, image, external, empty, tabs, open, toast } = ST;
-  let config,
-    tools = [],
-    selected = "All";
+  let config, tools = [], selected = "All";
   const grid = $("#tools-grid");
+  const iconFor = (tool) => {
+    if (tool.kind !== "tool") return tool.kind === "album" ? "album" : "download";
+    const name = tool.name.toLowerCase();
+    return name.includes("photo") ? "photo" : name.includes("cricket") ? "score" : name.includes("expense") ? "wallet" : "tool";
+  };
   const render = () => {
     const query = $("#tool-search").value.trim().toLowerCase();
-    const filtered = tools.filter(
-      (t) =>
-        (selected === "All" || t.category === selected) &&
-        `${t.name} ${t.description || ""} ${(t.tags || []).join(" ")}`
-          .toLowerCase()
-          .includes(query),
-    );
-    const cats = [
-      "All",
-      ...new Set([
-        ...(config.categories || []).filter((c) => c !== "All"),
-        ...tools.map((t) => t.category).filter(Boolean),
-      ]),
-    ];
-    tabs($("#categories"), cats, selected, (cat) => {
-      selected = cat;
-      render();
+    const filtered = tools.filter((t) =>
+      (selected === "All" || (selected === "Web tools" && t.kind === "tool") ||
+       (selected === "Downloads" && t.kind === "file") || (selected === "Albums" && t.kind === "album")) &&
+      `${t.name} ${t.description || ""} ${t.category || ""} ${(t.tags || []).join(" ")}`.toLowerCase().includes(query));
+    const cats = ["All", ...[["Web tools", "tool"], ["Downloads", "file"], ["Albums", "album"]]
+      .filter(([, kind]) => tools.some(t => t.kind === kind)).map(([label]) => label)];
+    tabs($("#categories"), cats, selected, (cat) => { selected = cat; render(); });
+    $("#tool-total").textContent = filtered.length;
+    if (!filtered.length) return empty(grid, "No matches found.", "Try another search or browse the full collection.", () => {
+      $("#tool-search").value = ""; selected = "All"; render();
     });
-    if (!filtered.length)
-      return empty(
-        grid,
-        "Nothing here just yet.",
-        "Search badal kar dekho ya saare tools explore karo.",
-        () => {
-          $("#tool-search").value = "";
-          selected = "All";
-          render();
-        },
-      );
-    grid.replaceChildren(
-      ...filtered.map((tool, index) => {
-        const info = () =>
-          open(
-            tool.name,
-            [
-              image(tool.thumbnail, tool.name, "dialog-preview"),
-              el(
-                "p",
-                { class: "dialog-description" },
-                tool.longDescription ||
-                  tool.description ||
-                  "Is tool ko explore karne ke liye neeche open karo.",
-              ),
-              el(
-                "div",
-                { class: "dialog-meta" },
-                ...(tool.tags || []).map((tag) =>
-                  el("span", { class: "tag" }, tag),
-                ),
-              ),
-              external(tool.siteUrl, "Open tool", "button button-orange"),
-            ],
-            tool.category || "WEB TOOL",
-          );
-        return el(
-          "article",
-          { class: "tool-card" },
-          el(
-            "div",
-            { class: `card-visual tone-${index % 4}` },
-            image(tool.thumbnail, tool.name),
-            ...(tool.featured
-              ? [el("span", { class: "card-badge" }, "FEATURED")]
-              : []),
-          ),
-          el(
-            "div",
-            { class: "card-body" },
-            el(
-              "div",
-              { class: "card-topline" },
-              el("span", {}, tool.category || "Web tool"),
-              el("span", {}, "WEB TOOL"),
-            ),
-            el("h3", {}, tool.name),
-            el(
-              "p",
-              {},
-              tool.description ||
-                "Ek useful tool. Explore karo aur apna kaam aasaan banao.",
-            ),
-            el(
-              "div",
-              { class: "card-bottom" },
-              external(tool.siteUrl, "Open tool"),
-              el(
-                "button",
-                {
-                  class: "info-button",
-                  "aria-label": `Details about ${tool.name}`,
-                  onclick: info,
-                },
-                "i",
-              ),
-            ),
-          ),
-        );
-      }),
-    );
+    grid.replaceChildren(...filtered.map((tool) => {
+      const isTool = tool.kind === "tool";
+      const label = isTool ? "WEB TOOL" : tool.kind === "album" ? "ALBUM" : "DOWNLOAD";
+      const info = () => open(tool.name, [
+        image(tool.thumbnail, tool.name, "dialog-preview"),
+        el("p", {class: "dialog-description"}, tool.longDescription || tool.description || "Open this tool to get started."),
+        el("div", {class: "dialog-meta"}, ...(tool.tags || []).map(tag => el("span", {class: "tag"}, tag))),
+        external(tool.siteUrl, "Open tool", "button button-orange"),
+      ], tool.category || "WEB TOOL");
+      const action = isTool ? external(tool.siteUrl, "Open tool", "text-link catalogue-open") :
+        el("a", {href: `/downloads?item=${encodeURIComponent(tool.id)}`, class: "text-link catalogue-open", "data-google-vignette": "false"}, tool.kind === "album" ? "View album →" : "View download →");
+      return el("article", {class: "tool-card catalogue-card"},
+        el("div", {class: "catalogue-card-top"},
+          el("img", {class: "catalogue-icon", src: `/assets/icons/${iconFor(tool)}.svg`, alt: "", width: "48", height: "48"}),
+          ...(!isTool || tool.featured ? [el("span", {class: "catalogue-badge"}, isTool ? "FEATURED" : tool.locked ? `₹${tool.pricing.payable}` : "FREE")] : [])),
+        el("div", {class: "card-body"},
+          el("span", {class: "catalogue-type"}, `${label} · ${tool.category || "Files"}`),
+          el("h3", {}, tool.name),
+          el("p", {}, tool.description || (tool.kind === "album" ? "Explore the files inside this album." : "View details and choose what you need.")),
+          el("div", {class: "card-bottom"}, action, ...(isTool ? [el("button", {class: "info-button", "aria-label": `Details about ${tool.name}`, onclick: info}, "i")] : []))));
+    }));
   };
   async function widgets() {
     try {
@@ -232,8 +168,13 @@
   async function load() {
     try {
       config = await api("/tools.config.json");
-      tools = (config.tools || []).filter((t) => t.visible !== false);
-      $("#tool-total").textContent = String(tools.length).padStart(2, "0");
+      tools = (config.tools || []).filter((t) => t.visible !== false).map(t => ({...t, kind: "tool"}));
+      if (config.downloadPage?.enabled !== false) {
+        try {
+          const downloads = await api("/api/downloads_data");
+          tools.push(...downloads.map(item => ({...item, name: item.title, kind: item.is_album ? "album" : "file"})));
+        } catch { toast("Downloads abhi load nahi hue. Web tools available hain."); }
+      }
       render();
       await widgets();
     } catch (error) {

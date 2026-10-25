@@ -77,7 +77,7 @@ window.ST = (() => {
       return el(
         "span",
         { class: "card-fallback", "aria-hidden": "true" },
-        "s↗",
+        "s",
       );
     const img = el("img", {
       src: safe,
@@ -90,7 +90,7 @@ window.ST = (() => {
       "error",
       () =>
         img.replaceWith(
-          el("span", { class: "card-fallback", "aria-hidden": "true" }, "s↗"),
+          el("span", { class: "card-fallback", "aria-hidden": "true" }, "s"),
         ),
       { once: true },
     );
