@@ -24,7 +24,8 @@ window.addEventListener('load', () => {
     },
   });
   loading.hidden = true;
-  google.accounts.id.renderButton(document.getElementById('google-signin-button'), {
-    theme:'outline', size:'large', shape:'rectangular', text:'continue_with', width:280,
+  const button = document.getElementById('google-signin-button');
+  google.accounts.id.renderButton(button, {
+    theme:'outline', size:'large', shape:'rectangular', text:'continue_with', width:Math.min(280, Math.floor(button.clientWidth)),
   });
 });
