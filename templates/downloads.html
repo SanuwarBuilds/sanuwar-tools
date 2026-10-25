@@ -17,4 +17,4 @@
   <div class="download-grid" id="downloads-grid" aria-live="polite">{% include '_initial_downloads.html' %}</div>
 </section>
 {% endblock %}
-{% block scripts %}<script src="/assets/js/downloads.js" defer></script>{% endblock %}
+{% block scripts %}<script nonce="{{ csp_nonce }}" src="/assets/js/downloads.js" defer></script>{% endblock %}

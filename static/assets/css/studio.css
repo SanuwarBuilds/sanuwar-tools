@@ -1982,3 +1982,11 @@ html[data-theme="dark"] .studio-theme {
     background: var(--surface);
   }
 }
+
+/* Readable, ad-free support and policy pages. */
+.information-page{max-width:820px;padding-top:48px;padding-bottom:64px;line-height:1.85;overflow-wrap:anywhere}
+.information-page>.text-link{display:block;margin-bottom:32px}.information-page>.eyebrow{display:block;margin-bottom:12px}
+.information-page h1{font-size:clamp(2.25rem,6vw,3.5rem);line-height:1.15;margin:0 0 20px;letter-spacing:-.04em}
+.information-page h2{font-size:1.25rem;margin:32px 0 10px;line-height:1.4}.information-page p{margin:0 0 18px}
+.information-page p a{color:var(--accent,#2563eb);text-decoration:underline;text-underline-offset:3px}
+.information-intro{font-size:1.2rem}.information-actions{display:flex;gap:12px;flex-wrap:wrap;margin:24px 0}

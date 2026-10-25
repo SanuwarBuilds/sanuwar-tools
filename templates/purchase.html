@@ -9,4 +9,4 @@
 <a class="text-link" href="/downloads">← Back to downloads</a>
 </section>
 {% endblock %}
-{% block scripts %}<script src="/assets/js/purchase.js" defer></script>{% endblock %}
+{% block scripts %}<script nonce="{{ csp_nonce }}" src="/assets/js/purchase.js" defer></script>{% endblock %}

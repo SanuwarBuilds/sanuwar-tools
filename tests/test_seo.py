@@ -35,7 +35,7 @@ class SearchDiscoveryTests(unittest.TestCase):
 
     def test_structured_data_is_valid_and_site_logo_is_public(self):
         text=self.client.get('/').get_data(as_text=True)
-        data=json.loads(re.search(r'<script type="application/ld\+json">(.*?)</script>',text,re.S).group(1))
+        data=json.loads(re.search(r'<script[^>]*type="application/ld\+json">(.*?)</script>',text,re.S).group(1))
         website, organization=data['@graph']
         self.assertEqual(website['name'],'SanuwarTools')
         self.assertEqual(website['alternateName'],'Sanuwar Tools')
@@ -56,7 +56,8 @@ class SearchDiscoveryTests(unittest.TestCase):
         self.assertEqual(response.mimetype,'application/xml')
         root=fromstring(response.data)
         self.assertEqual([node.text for node in root.iter('{http://www.sitemaps.org/schemas/sitemap/0.9}loc')],
-                         ['https://sanuwartools.online/','https://sanuwartools.online/downloads'])
+                         ['https://sanuwartools.online/','https://sanuwartools.online/downloads',
+                          'https://sanuwartools.online/about','https://sanuwartools.online/contact','https://sanuwartools.online/privacy'])
         self.records[module.TOOLS_CONFIG_REL]['downloadPage']['enabled']=False
         self.assertNotIn(b'/downloads',self.client.get('/sitemap.xml').data)
         self.assertEqual(self.client.get('/downloads').status_code,404)

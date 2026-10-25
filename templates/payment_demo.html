@@ -26,4 +26,4 @@
 <p class="form-note">Yeh free flow preview hai. Real YouPI checkout ke liye alag gateway hosting, receiving account aur bank observer setup chahiye.</p>
 </section>
 {% endblock %}
-{% block scripts %}<script src="/assets/js/payment-demo.js" defer></script>{% endblock %}
+{% block scripts %}<script nonce="{{ csp_nonce }}" src="/assets/js/payment-demo.js" defer></script>{% endblock %}

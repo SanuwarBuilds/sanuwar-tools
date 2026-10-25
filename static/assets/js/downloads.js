@@ -113,6 +113,7 @@
         target: "_blank",
         rel: "noopener noreferrer",
         download: "",
+        "data-google-vignette": "false",
         onclick: () =>
           toast("Download link open hua. Browser mein download status dekho."),
       },

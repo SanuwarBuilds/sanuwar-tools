@@ -18,8 +18,11 @@
 <meta name="twitter:title" content="{{ seo.title }}">
 <meta name="twitter:description" content="{{ seo.description }}">
 <meta name="twitter:image" content="{{ seo.image }}">
-<script type="application/ld+json">{{ seo.structured_data | tojson }}</script>
+<script nonce="{{ csp_nonce }}" type="application/ld+json">{{ seo.structured_data | tojson }}</script>
 {% else %}<meta name="robots" content="noindex, nofollow">{% endif %}
+{% if adsense_client %}
+<script nonce="{{ csp_nonce }}" async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client={{ adsense_client }}" crossorigin="anonymous"></script>
+{% endif %}
 <meta name="theme-color" content="#ffffff">
 <title>{% block title %}SanuwarTools — Web Tools, Android Apps &amp; Downloads{% endblock %}</title>
 {% set favicon = (public_config.get('site', {}).get('favicon') | public_image) or '/assets/favicon.png' %}
@@ -33,7 +36,7 @@
 {% endif %}
 <link rel="preload" href="/assets/fonts/Manrope-Variable.ttf" as="font" type="font/ttf" crossorigin>
 <link rel="stylesheet" href="/assets/css/style.css">
-<script src="/assets/js/shared.js" defer></script>
+<script nonce="{{ csp_nonce }}" src="/assets/js/shared.js" defer></script>
 {% block head %}{% endblock %}
 <link rel="stylesheet" href="/assets/css/studio.css?v=1">
 </head>
@@ -42,13 +45,13 @@
 {% block header %}
 <header class="site-header wrap">
 <a class="brand" href="/" aria-label="SanuwarTools home"><span class="brand-symbol" aria-hidden="true">s</span><span>{{ public_config.get('site', {}).get('name', 'SanuwarTools') }}<span class="brand-dot">.</span></span></a>
-<nav id="site-nav" aria-label="Main navigation"><a href="/#tools" {% if request.path == '/' %}class="active"{% endif %}>Tools</a>{% if public_config.get('downloadPage', {}).get('enabled', True) %}<a href="/downloads" {% if request.path != '/' %}class="active"{% endif %}>Downloads</a>{% endif %}<a href="/#how-it-works">How it works</a></nav>
+<nav id="site-nav" aria-label="Main navigation"><a href="/#tools" {% if request.path == '/' %}class="active"{% endif %}>Tools</a>{% if public_config.get('downloadPage', {}).get('enabled', True) %}<a href="/downloads" {% if request.path in ('/downloads', '/download.html') %}class="active"{% endif %}>Downloads</a>{% endif %}<a href="/#how-it-works">How it works</a></nav>
 <div class="nav-actions"><button class="icon-button" id="theme-toggle" aria-label="Switch color theme">◐</button><a class="button button-dark nav-cta" href="/#tools">Explore tools <span>↗</span></a><button class="icon-button menu-toggle" aria-controls="site-nav" aria-expanded="false" aria-label="Open navigation">☰</button></div>
 </header>
 {% endblock %}
 <main id="main">{% block content %}{% endblock %}</main>
 {% block footer %}
-<footer class="wrap site-footer"><div><a class="brand" href="/"><span class="brand-symbol" aria-hidden="true">s</span><span>SanuwarTools<span class="brand-dot">.</span></span></a><p>{{ public_config.get('site', {}).get('tagline', 'Chhote tools. Bade kaam.') }}</p></div><nav aria-label="Footer"><a href="/#tools">Tools</a>{% if public_config.get('downloadPage', {}).get('enabled', True) %}<a href="/downloads">Downloads</a>{% endif %}{% for label, link in public_config.get('socialLinks', {}).items() %}{% if link | public_url %}<a href="{{ link | public_url }}" target="_blank" rel="noopener noreferrer">{{ label | capitalize }} ↗</a>{% endif %}{% endfor %}<a href="/admin">Admin ↗</a></nav><p class="copyright">Made with care by Sanuwar.<br>© {{ now_year }} SanuwarTools</p></footer>
+<footer class="wrap site-footer"><div><a class="brand" href="/"><span class="brand-symbol" aria-hidden="true">s</span><span>SanuwarTools<span class="brand-dot">.</span></span></a><p>{{ public_config.get('site', {}).get('tagline', 'Chhote tools. Bade kaam.') }}</p></div><nav aria-label="Footer"><a href="/#tools">Tools</a>{% if public_config.get('downloadPage', {}).get('enabled', True) %}<a href="/downloads">Downloads</a>{% endif %}{% for label, link in public_config.get('socialLinks', {}).items() %}{% if link | public_url %}<a href="{{ link | public_url }}" target="_blank" rel="noopener noreferrer">{{ label | capitalize }} ↗</a>{% endif %}{% endfor %}<a href="/about">About</a><a href="/contact">Contact</a><a href="/privacy">Privacy</a><a href="/admin">Admin ↗</a></nav><p class="copyright">Made with care by Sanuwar.<br>© {{ now_year }} SanuwarTools</p></footer>
 {% endblock %}
 <div class="toast" id="toast" role="status" aria-live="polite"></div>
 <dialog id="content-dialog" aria-labelledby="dialog-title"><div class="dialog-head"><div><span class="eyebrow" id="dialog-kicker">A closer look</span><h2 id="dialog-title"></h2></div><button class="icon-button" data-close-dialog aria-label="Close dialog">×</button></div><div id="dialog-body"></div></dialog>

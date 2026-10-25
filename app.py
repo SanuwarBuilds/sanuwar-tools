@@ -15,6 +15,7 @@ import security
 from availability import is_public, public_config
 import payments
 import seo
+import monetization
 from cover_images import thumbnail_receipt
 from download_metadata import utc_now, upload_time, album_metadata
 import cloudinary
@@ -690,6 +691,7 @@ def api_widget_vote(widget_id):
 
 payments.register(app, public_downloads, login_required)
 seo.install(app, lambda: safe_read(TOOLS_CONFIG_REL))
+monetization.install(app)
 
 if __name__ == "__main__":
     app.run(host="0.0.0.0", port=5002, debug=os.getenv('FLASK_DEBUG') == '1')

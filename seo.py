@@ -7,6 +7,9 @@ ORIGIN = 'https://sanuwartools.online'
 PAGES = {
     '/': ('SanuwarTools — Web Tools, Android Apps & Downloads',
           'Explore SanuwarTools for useful web tools, passport photo tools, cricket scores, Android apps and downloadable files. Everything in one place.'),
+    '/privacy': ('Privacy Policy | SanuwarTools', 'How SanuwarTools uses cookies, local storage and advertising services, and how to contact us about your privacy.'),
+    '/about': ('About | SanuwarTools', 'Learn about SanuwarTools, a collection of useful web tools, Android apps and downloadable files maintained by Sanuwar.'),
+    '/contact': ('Contact & Support | SanuwarTools', 'Contact SanuwarTools for support, download issues, corrections, privacy requests or content concerns.'),
     '/downloads': ('Downloads — Android Apps & Files | SanuwarTools',
                    'Browse Android apps, files and albums on SanuwarTools. Preview available downloads, check versions and choose the files you need.'),
 }
@@ -52,6 +55,7 @@ def install(app, load_config):
         config = load_config() or {}
         if config.get('downloadPage', {}).get('enabled', True) is True:
             paths.append('/downloads')
+        paths.extend(['/about', '/contact', '/privacy'])
         root = Element('urlset', xmlns='http://www.sitemaps.org/schemas/sitemap/0.9')
         for path in paths:
             SubElement(SubElement(root, 'url'), 'loc').text = ORIGIN + path

@@ -147,6 +147,17 @@ def install(app):
         response.headers['Referrer-Policy'] = 'strict-origin-when-cross-origin'
         response.headers['Permissions-Policy'] = 'camera=(), microphone=(), geolocation=()'
         response.headers['Content-Security-Policy'] = "default-src 'self'; script-src 'self'; style-src 'self' 'unsafe-inline'; img-src 'self' https: data:; font-src 'self'; connect-src 'self'; media-src 'self' https:; object-src 'none'; base-uri 'self'; frame-ancestors 'none'; form-action 'self'"
+        # Google supports nonce-based strict CSP for AdSense. Only successful public
+        # ad pages allow third-party ad resources; admin, APIs and checkout retain
+        # the restrictive first-party policy above.
+        import monetization
+        if response.status_code == 200 and response.mimetype == 'text/html' and monetization.ads_enabled():
+            response.headers['Content-Security-Policy'] = (
+                "default-src 'self'; script-src 'nonce-" + monetization.nonce() + "' 'strict-dynamic' https:; "
+                "style-src 'self' 'unsafe-inline' https:; img-src 'self' https: data:; "
+                "font-src 'self' https:; connect-src 'self' https:; frame-src https:; "
+                "media-src 'self' https:; object-src 'none'; base-uri 'none'; "
+                "frame-ancestors 'none'; form-action 'self'")
         if request.is_secure:
             response.headers['Strict-Transport-Security'] = 'max-age=31536000'
         if request.path.startswith(('/admin','/api/','/purchase')) or request.path in ('/', '/downloads', '/download.html', '/tools.config.json'):
