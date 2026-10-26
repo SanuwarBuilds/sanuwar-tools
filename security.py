@@ -158,6 +158,13 @@ def install(app):
                 "font-src 'self' https:; connect-src 'self' https:; frame-src https:; "
                 "media-src 'self' https:; object-src 'none'; base-uri 'none'; "
                 "frame-ancestors 'none'; form-action 'self'")
+        if request.path == '/photo-tools' and response.status_code == 200:
+            # Local editing and print previews only; no third-party processing.
+            response.headers['Content-Security-Policy'] = (
+                "default-src 'self'; script-src 'self'; style-src 'self' 'unsafe-inline'; "
+                "img-src 'self' data: blob:; font-src 'self'; connect-src 'self'; "
+                "object-src 'none'; base-uri 'self'; frame-ancestors 'none'; form-action 'self'")
+            response.headers['Cache-Control'] = 'no-store'
         if request.path == '/signin' and response.status_code == 200:
             response.headers['Content-Security-Policy'] = (
                 "default-src 'self'; script-src 'self' https://accounts.google.com/gsi/client; "

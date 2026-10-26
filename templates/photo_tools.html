@@ -1,0 +1,46 @@
+{% extends 'base.html' %}
+{% block title %}Photo Tools — Resize, Crop & Compress | SanuwarTools{% endblock %}
+{% block bodyclass %}photo-page{% endblock %}
+{% block page_styles %}<link rel="stylesheet" href="/assets/css/photo-tools.css?v=1">{% endblock %}
+{% block content %}
+<div class="photo-wrap">
+  <header class="photo-heading"><div><a href="/#tools" class="photo-back">← All tools</a><h1>A better fit.<br><span>For every photo.</span></h1><p>Crop, resize and compress. Ready for your next form.</p></div><span class="photo-private"><span aria-hidden="true">◈</span> Your photo stays on this device</span></header>
+  <noscript><p class="photo-notice">Enable JavaScript to edit photos on your device.</p></noscript>
+  <section id="photo-upload" class="photo-upload" aria-label="Choose a photo">
+    <span class="upload-glyph" aria-hidden="true">＋</span><h2>Start with your photo</h2><p>Drop an image here, or choose one from your device.</p>
+    <div class="photo-upload-actions"><button type="button" id="choose-photo" class="photo-primary">Choose photo <span aria-hidden="true">↗</span></button><button type="button" id="camera-photo" class="photo-secondary">Use camera</button></div>
+    <p class="photo-file-hint">JPG, PNG, WebP, BMP or GIF · Up to 16 MB<br>GIF uses one frame. For HEIC/TIFF, export as JPG first.</p>
+  </section>
+  <input type="file" id="photo-file" accept="image/jpeg,image/png,image/webp,image/bmp,image/gif" hidden>
+  <input type="file" id="photo-camera" accept="image/*" capture="user" hidden>
+  <p id="photo-status" class="photo-status" role="status" aria-live="polite"></p>
+  <div class="photo-workspace"><nav id="photo-mobile-nav" class="photo-mobile-nav" aria-label="Photo editor sections" hidden><a href="#photo-frame">01 · Frame photo</a><a href="#photo-export">02 · Size &amp; download ↓</a></nav>
+  <div id="photo-editor" class="photo-editor" hidden>
+    <section id="photo-frame" class="photo-preview-panel" aria-labelledby="preview-title">
+      <div class="photo-panel-heading"><div><span class="photo-step">01 / FRAME</span><h2 id="preview-title">Make it yours.</h2></div><div class="photo-inline"><button type="button" id="change-photo" class="photo-text">Change</button><button type="button" id="clear-photo" class="photo-text">Clear</button></div></div>
+      <div class="photo-stage"><canvas id="photo-canvas" width="360" height="450" tabindex="0" role="img" aria-label="Photo crop preview. Drag to reposition, or use the horizontal and vertical position sliders."></canvas></div>
+      <p class="photo-drag-hint">Drag the photo to frame it. The preview is your crop.</p>
+      <div class="photo-rotate"><button type="button" id="rotate-left" aria-label="Rotate left 90 degrees">↶ <span>Rotate left</span></button><button type="button" id="rotate-right" aria-label="Rotate right 90 degrees">↷ <span>Rotate right</span></button><button type="button" id="flip-photo">⇄ Flip</button><button type="button" id="reset-photo">Reset</button></div>
+      <div class="photo-slider"><label for="photo-zoom">Zoom <output id="zoom-value">100%</output></label><input id="photo-zoom" type="range" min="100" max="300" value="100"></div>
+      <details class="photo-adjustments"><summary>Position &amp; colour adjustments</summary><div class="photo-slider"><label for="photo-x">Horizontal position</label><input id="photo-x" type="range" min="0" max="100" value="50"></div><div class="photo-slider"><label for="photo-y">Vertical position</label><input id="photo-y" type="range" min="0" max="100" value="50"></div><div class="photo-slider"><label for="photo-brightness">Brightness <output id="brightness-value">100%</output></label><input id="photo-brightness" type="range" min="50" max="150" value="100"></div><div class="photo-slider"><label for="photo-contrast">Contrast <output id="contrast-value">100%</output></label><input id="photo-contrast" type="range" min="50" max="150" value="100"></div><label class="photo-colour">Canvas background <input id="photo-bg" type="color" value="#ffffff"></label><p class="photo-small">Fills transparent areas only. This does not remove an existing background.</p></details>
+    </section>
+    <section id="photo-export" class="photo-settings" aria-labelledby="settings-title">
+      <div class="photo-panel-heading"><div><span class="photo-step">02 / SIZE &amp; SAVE</span><h2 id="settings-title">Just the right size.</h2></div></div>
+      <label class="photo-field">Photo preset<select id="photo-preset"><option value="original">Original dimensions</option><option value="passport-print">Passport print · 35 × 45 mm</option><option value="passport-online">Passport mission upload · 630 × 810 px</option><option value="pan">PAN photo · Protean DSC</option><option value="pan-signature">PAN signature · Protean DSC</option><option value="voter-print">Voter ID Form 6 print · 35 × 45 mm</option><option value="square">Square · 600 × 600 px</option><option value="custom">Custom dimensions</option></select></label>
+      <p id="preset-description" class="photo-small"></p><a id="preset-source" class="photo-source" href="#" target="_blank" rel="noopener noreferrer" hidden>Read official guidance ↗</a>
+      <div class="photo-field-grid"><label class="photo-field">Width (px)<input id="photo-width" type="number" min="16" max="4096" step="1" value="600" inputmode="numeric"></label><label class="photo-field">Height (px)<input id="photo-height" type="number" min="16" max="4096" step="1" value="600" inputmode="numeric"></label><label class="photo-field">Print resolution (DPI)<input id="photo-dpi" type="number" min="72" max="1200" value="300" inputmode="numeric"></label><label class="photo-field">Maximum size (KB)<input id="photo-kb" type="number" min="1" max="20000" placeholder="No limit" inputmode="numeric"></label></div>
+      <div class="photo-field-grid"><label class="photo-field">File format<select id="photo-format"><option value="image/jpeg">JPG</option><option value="image/png">PNG</option></select></label><label class="photo-field">Print sheet<select id="photo-sheet"><option value="4x6">4 × 6 inches</option><option value="a4">A4</option></select></label></div>
+      <button type="button" id="save-preset" class="photo-text photo-save-preset">＋ Save these settings as a preset</button><button type="button" id="delete-preset" class="photo-text" hidden>Remove saved preset</button>
+      <div class="photo-result"><div><span>OUTPUT SIZE</span><strong id="output-dimensions">—</strong></div><div><span>PRINT SIZE</span><strong id="output-print">—</strong></div><div><span>FILE SIZE</span><strong id="output-bytes">Generate to check</strong></div></div>
+      <p id="photo-warning" class="photo-small"></p>
+      <p id="photo-export-status" class="photo-status" role="status" aria-live="polite"></p><div class="photo-downloads"><button type="button" id="download-photo" class="photo-primary">Download photo <span aria-hidden="true">↓</span></button><div class="photo-field-grid"><button type="button" id="download-sheet" class="photo-secondary">Save print sheet</button><button type="button" id="print-sheet" class="photo-secondary">Print sheet</button></div></div>
+      <p class="photo-small">Print at 100% / actual size with page margins off. Check the final measurements before submitting.</p>
+    </section>
+  </div>
+  </div>
+  <section class="photo-guidance"><h2>Small details. Better results.</h2><div><article><span>01</span><h3>Start sharp</h3><p>Use a clear, well-lit photo. Enlarging a small image cannot restore missing detail.</p></article><article><span>02</span><h3>Check your form</h3><p>Presets describe specific workflows, not guaranteed acceptance. Use your portal's latest dimensions and KB limit. Some exams require live capture on their own portal.</p></article><article><span>03</span><h3>Stay in control</h3><p>Editing happens in this browser. Photos aren't uploaded or saved to your account. Only custom preset settings are stored locally.</p></article></div></section>
+</div>
+<dialog id="preset-dialog" aria-labelledby="preset-dialog-title"><form id="preset-form"><h2 id="preset-dialog-title">Keep your settings.</h2><label class="photo-field">Preset name<input id="preset-name" maxlength="50" required autocomplete="off" placeholder="e.g. My application photo"></label><div class="photo-upload-actions"><button type="submit" class="photo-primary">Save preset</button><button type="button" id="cancel-preset" class="photo-secondary">Cancel</button></div></form></dialog>
+<div id="photo-print-area" aria-hidden="true"></div>
+{% endblock %}
+{% block scripts %}<script src="/assets/js/photo-core.js" defer></script><script src="/assets/js/photo-tools.js" defer></script>{% endblock %}

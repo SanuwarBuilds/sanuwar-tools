@@ -41,6 +41,7 @@
 <link rel="stylesheet" href="/assets/css/studio.css?v=1">
 <link rel="stylesheet" href="/assets/css/visitor-nav.css?v=1">
 {% if request.path in ('/', '/downloads', '/download.html') %}<link rel="stylesheet" href="/assets/css/catalogue.css?v=1">{% endif %}
+{% block page_styles %}{% endblock %}
 </head>
 <body class="studio-theme {% block bodyclass %}{% endblock %}">
 <a class="skip-link" href="#main">Skip to content</a>

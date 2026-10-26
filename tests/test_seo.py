@@ -66,7 +66,7 @@ class SearchDiscoveryTests(unittest.TestCase):
         root=fromstring(response.data)
         self.assertEqual([node.text for node in root.iter('{http://www.sitemaps.org/schemas/sitemap/0.9}loc')],
                          ['https://sanuwartools.online/','https://sanuwartools.online/downloads',
-                          'https://sanuwartools.online/about','https://sanuwartools.online/contact','https://sanuwartools.online/privacy'])
+                          'https://sanuwartools.online/photo-tools','https://sanuwartools.online/about','https://sanuwartools.online/contact','https://sanuwartools.online/privacy'])
         self.records[module.TOOLS_CONFIG_REL]['downloadPage']['enabled']=False
         self.assertNotIn(b'/downloads',self.client.get('/sitemap.xml').data)
         self.assertEqual(self.client.get('/downloads').status_code,404)

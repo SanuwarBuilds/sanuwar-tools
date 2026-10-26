@@ -26,6 +26,30 @@
   },
   "tools": [
     {
+      "id": "builtin-photo-tools",
+      "name": "Photo Tools",
+      "slug": "photo-tools",
+      "category": "Converter",
+      "description": "Crop, resize and compress photos. Set exact dimensions, DPI and KB limits, or make a printable photo sheet.",
+      "longDescription": "Edit photos privately in your browser: crop, rotate, flip, adjust brightness and contrast, export JPG or PNG with DPI metadata, save custom presets and create 4 \u00d7 6 inch or A4 print sheets.",
+      "siteUrl": "https://sanuwartools.online/photo-tools",
+      "thumbnail": "/assets/icons/photo.svg",
+      "tags": [
+        "photo",
+        "crop",
+        "resize",
+        "compress",
+        "passport",
+        "PAN",
+        "print"
+      ],
+      "visible": true,
+      "enabled": true,
+      "featured": true,
+      "downloadAvailable": false,
+      "addedDate": "2026-10-26"
+    },
+    {
       "addedDate": "2025-01-15",
       "category": "Generator",
       "description": "Generate passport-size photo sheets instantly from any image. Supports multiple formats and layouts.",

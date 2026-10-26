@@ -88,6 +88,13 @@ def site_touch_icon():
 def index():
     return render_template("index.html")
 
+@app.get('/photo-tools')
+def photo_tools():
+    config = safe_read(TOOLS_CONFIG_REL) or {}
+    if any(tool.get('id') == 'builtin-photo-tools' and not is_public(tool) for tool in config.get('tools', [])):
+        abort(404)
+    return render_template('photo_tools.html')
+
 @app.route("/payment-demo")
 def payment_demo():
     return render_template("payment_demo.html")

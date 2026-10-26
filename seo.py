@@ -7,6 +7,7 @@ ORIGIN = 'https://sanuwartools.online'
 PAGES = {
     '/': ('SanuwarTools — Web Tools, Android Apps & Downloads',
           'Explore SanuwarTools for useful web tools, passport photo tools, cricket scores, Android apps and downloadable files. Everything in one place.'),
+    '/photo-tools': ('Photo Tools — Resize, Crop & Compress | SanuwarTools', 'Crop, resize and compress photos in your browser. Set dimensions, DPI and KB limits, save custom presets and create printable photo sheets.'),
     '/privacy': ('Privacy Policy | SanuwarTools', 'How SanuwarTools uses cookies, local storage and advertising services, and how to contact us about your privacy.'),
     '/about': ('About | SanuwarTools', 'Learn about SanuwarTools, a collection of useful web tools, Android apps and downloadable files maintained by Sanuwar.'),
     '/contact': ('Contact & Support | SanuwarTools', 'Contact SanuwarTools for support, download issues, corrections, privacy requests or content concerns.'),
@@ -60,6 +61,8 @@ def install(app, load_config):
         config = load_config() or {}
         if config.get('downloadPage', {}).get('enabled', True) is True:
             paths.append('/downloads')
+        if not any(tool.get('id') == 'builtin-photo-tools' and not all(tool.get(flag, True) is True for flag in ('enabled', 'visible')) for tool in config.get('tools', [])):
+            paths.append('/photo-tools')
         paths.extend(['/about', '/contact', '/privacy'])
         root = Element('urlset', xmlns='http://www.sitemaps.org/schemas/sitemap/0.9')
         for path in paths:
