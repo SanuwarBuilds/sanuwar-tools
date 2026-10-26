@@ -92,7 +92,7 @@
           "Upload date available nahi hai",
         );
   };
-  function downloadLink(raw, title = "Download") {
+  function downloadLink(raw, title = "Download", analyticsItem = "") {
     const safe = url(raw);
     if (!safe) return el("span", { class: "tag" }, "Link unavailable");
     const parsed = new URL(safe);
@@ -109,6 +109,8 @@
       "a",
       {
         class: "button button-dark direct-download",
+        "data-analytics-kind": analyticsItem ? "download_click" : null,
+        "data-analytics-item": analyticsItem || null,
         href: parsed.href,
         target: "_blank",
         rel: "noopener noreferrer",
@@ -207,11 +209,13 @@
   }
   function fileAction(item, file = item, index = 0) {
     if (item.locked) return buyButton(item);
-    if (!file.private_delivery) return downloadLink(file.link);
+    if (!file.private_delivery) return downloadLink(file.link, "Download", item.id);
     const button = el(
       "button",
       {
         class: "button button-dark",
+        "data-analytics-kind": "download_click",
+        "data-analytics-item": item.id,
         onclick: async () => {
           button.disabled = true;
           try {
@@ -349,7 +353,7 @@
         "div",
         { class: "media-actions" },
         prev,
-        downloadLink(file.link),
+        downloadLink(file.link, "Download", file.analytics_item || file.id || ""),
         next,
       ),
     );
@@ -391,7 +395,7 @@
       );
       return;
     }
-    const files = item.album_files || [],
+    const files = (item.album_files || []).map(file => ({...file, analytics_item: item.id})),
       gallery = el("div", { class: "album-gallery" });
     const search = el("input", {
       type: "search",

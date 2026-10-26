@@ -15,6 +15,7 @@
       "Everything you need to keep your toolkit moving.",
       "Add a tool",
     ],
+    analytics: ["Visitor analytics", "YOUR PRIVATE TRAFFIC OVERVIEW", "See your audience grow.", "Visitors, page views aur useful clicks — sirf tumhare liye.", ""],
     tools: [
       "Tools",
       "THE EVERYDAY TOOLKIT",
@@ -349,8 +350,47 @@
         ),
       ),
       el("div", { class: "dashboard-columns" }, recentCard, quick),
+      card("Visitor analytics", el("div",{},el("p",{},"See visitors, page views and popular downloads in your private traffic report."),el("button",{class:"button button-light",onclick:()=>navigate("analytics")},"Open visitor analytics"))),
       card("A little workspace care", health),
     );
+  }
+  let analyticsDays = 30, analyticsRequest = 0;
+  const trafficNumber = value => new Intl.NumberFormat("en-IN").format(value || 0);
+  const trafficDate = value => new Intl.DateTimeFormat("en-IN", {day:"numeric",month:"short",year:"numeric",timeZone:"Asia/Kolkata"}).format(new Date(value * 1000));
+  function trafficTable(title, rows, label, unit = "Page views") {
+    return card(title, rows.length ? el("table", {class:"analytics-table"},
+      el("thead",{},el("tr",{},el("th",{scope:"col"},label),el("th",{scope:"col"},unit))),
+      el("tbody",{},...rows.map(row=>el("tr",{},el("th",{scope:"row"},row.label),el("td",{},trafficNumber(row.count)))))) : el("p",{class:"analytics-empty"},"No measurements in this period yet."));
+  }
+  function analyticsDashboard() {
+    const range=el("select",{"aria-label":"Analytics period"},...[7,30,90].map(days=>el("option",{value:days,selected:days===analyticsDays},`Last ${days} days`)));
+    const refresh=el("button",{class:"button button-light",type:"button"},"Refresh");
+    const status=el("p",{class:"analytics-description",role:"status"});
+    const output=el("div",{class:"analytics-content"});
+    root.replaceChildren(el("div",{class:"analytics-toolbar"},el("label",{},"Report period",range),refresh),status,output);
+    const load=async()=>{
+      const request=++analyticsRequest;refresh.disabled=true;status.textContent="Loading visitor measurements…";output.setAttribute("aria-busy","true");
+      try{
+        const data=await api(`/api/admin/analytics?days=${analyticsDays}`);
+        if(current!=="analytics"||request!==analyticsRequest)return;
+        status.textContent=`Tracking since ${trafficDate(data.started_at)} · India time (IST) · Figures are approximate browser counts, not identified people.`;
+        const stats=[[data.today_visitors,"Visitors today"],[data.today_views,"Page views today"],[data.week_visitors,"Visitors · last 7 days"],[data.total_visitors,"Visitors · all time"],[data.total_views,"Page views · all time"],[data.download_clicks,`Download clicks · ${data.days} days`]];
+        const cards=el("div",{class:"analytics-stats"},...stats.map(([number,label])=>el("article",{class:"analytics-stat"},el("span",{},label),el("strong",{},trafficNumber(number)))));
+        const chart=el("div",{class:"analytics-chart","aria-hidden":"true"});
+        const svg=document.createElementNS("http://www.w3.org/2000/svg","svg");svg.setAttribute("viewBox","0 0 700 180");svg.setAttribute("preserveAspectRatio","none");
+        const maximum=Math.max(1,...data.series.map(day=>day.visitors));
+        const points=data.series.map((day,i)=>`${15+i*670/13},${160-day.visitors/maximum*135}`).join(" ");
+        const axis=document.createElementNS(svg.namespaceURI,"line");for(const [key,value]of Object.entries({x1:15,y1:160,x2:685,y2:160,stroke:"var(--line)"}))axis.setAttribute(key,value);svg.append(axis);
+        const area=document.createElementNS(svg.namespaceURI,"polygon");area.setAttribute("points",`15,160 ${points} 685,160`);area.setAttribute("fill","#245de91a");svg.append(area);
+        const line=document.createElementNS(svg.namespaceURI,"polyline");for(const [key,value]of Object.entries({points,fill:"none",stroke:"var(--orange)","stroke-width":3,"vector-effect":"non-scaling-stroke","stroke-linecap":"round","stroke-linejoin":"round"}))line.setAttribute(key,value);svg.append(line);chart.append(svg);
+        chart.append(el("div",{class:"analytics-axis"},...data.series.map(day=>el("span",{},day.day.slice(8)))));
+        const dailyTable=el("details",{class:"analytics-daily"},el("summary",{},"Daily numbers · last 14 days"),el("table",{class:"analytics-table"},el("thead",{},el("tr",{},el("th",{scope:"col"},"Date (IST)"),el("th",{scope:"col"},"Visitors"),el("th",{scope:"col"},"Views"))),el("tbody",{},...data.series.map(day=>el("tr",{},el("th",{scope:"row"},day.day),el("td",{},trafficNumber(day.visitors)),el("td",{},trafficNumber(day.views)))))));
+        const trend=card("Visitors · last 14 days",el("div",{},chart,dailyTable),"One anonymous browser can produce several page views.");
+        output.replaceChildren(cards,trend,el("div",{class:"analytics-tables"},trafficTable("Popular pages",data.pages,"Page"),trafficTable("Traffic sources",data.sources,"Source"),trafficTable("Devices",data.devices,"Device"),trafficTable("Tool opens",data.tools,"Tool","Opens"),trafficTable("Download clicks",data.downloads,"Download","Clicks")),el("p",{class:"analytics-description"},`Tables cover the selected ${data.days} days. Tool opens and download clicks measure button/link clicks, not completed work, payments or completed file transfers. Private account/checkout pages, admin browsing, recognised bots and supported privacy opt-outs are excluded. Different browsers, cleared storage or the 180-day browser ID expiry can count a visitor again. Older history before setup cannot be recovered.`));
+      }catch(error){if(current==="analytics"&&request===analyticsRequest){status.textContent="Analytics is not ready.";empty(output,"Visitor analytics unavailable",error.message,load,"Try again");}}
+      finally{refresh.disabled=false;output.removeAttribute("aria-busy");}
+    };
+    range.addEventListener("change",()=>{analyticsDays=Number(range.value);load();});refresh.addEventListener("click",load);load();
   }
   const isEnabled = (item) =>
     ["enabled", "visible"].every((key) => item[key] === undefined || item[key] === true);
@@ -1840,6 +1880,7 @@
   function render() {
     ({
       dashboard,
+      analytics: analyticsDashboard,
       categories,
       settings,
       backup,

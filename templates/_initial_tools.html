@@ -1,6 +1,6 @@
 {% for tool in public_config.get('tools', []) %}
 <article class="tool-card catalogue-card">
   <div class="catalogue-card-top"><img class="catalogue-icon" src="{{ tool | tool_icon }}" alt="" width="48" height="48">{% if tool.get('featured') %}<span class="catalogue-badge">FEATURED</span>{% endif %}</div>
-  <div class="card-body"><span class="catalogue-type">WEB TOOL · {{ tool.get('category', 'Utility') }}</span><h3>{{ tool.name }}</h3><p>{{ tool.get('description', '') }}</p>{% if tool.get('siteUrl') | public_url %}<div class="card-bottom"><a href="{{ tool.siteUrl | public_url }}" target="_blank" rel="noopener noreferrer" class="text-link catalogue-open">Open tool <span aria-hidden="true">↗</span></a></div>{% endif %}</div>
+  <div class="card-body"><span class="catalogue-type">WEB TOOL · {{ tool.get('category', 'Utility') }}</span><h3>{{ tool.name }}</h3><p>{{ tool.get('description', '') }}</p>{% if tool.get('siteUrl') | public_url %}<div class="card-bottom"><a href="{{ tool.siteUrl | public_url }}" target="_blank" rel="noopener noreferrer" class="text-link catalogue-open" data-analytics-kind="tool_open" data-analytics-item="{{ tool.id }}">Open tool <span aria-hidden="true">↗</span></a></div>{% endif %}</div>
 </article>
 {% else %}<p class="empty-state">New tools will appear here when published.</p>{% endfor %}

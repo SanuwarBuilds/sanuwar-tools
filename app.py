@@ -17,6 +17,7 @@ import payments
 import seo
 import monetization
 import user_auth
+import visitor_analytics
 from cover_images import thumbnail_receipt
 from download_metadata import utc_now, upload_time, album_metadata
 import cloudinary
@@ -701,6 +702,7 @@ payments.register(app, public_downloads, login_required)
 seo.install(app, lambda: safe_read(TOOLS_CONFIG_REL))
 monetization.install(app)
 user_auth.install(app)
+visitor_analytics.install(app, login_required, lambda: safe_read(TOOLS_CONFIG_REL), lambda: safe_read(DOWNLOADS_REL) or [])
 
 if __name__ == "__main__":
     app.run(host="0.0.0.0", port=5002, debug=os.getenv('FLASK_DEBUG') == '1')

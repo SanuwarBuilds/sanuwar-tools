@@ -61,5 +61,6 @@
 <div class="toast" id="toast" role="status" aria-live="polite"></div>
 <dialog id="content-dialog" aria-labelledby="dialog-title"><div class="dialog-head"><div><span class="eyebrow" id="dialog-kicker">A closer look</span><h2 id="dialog-title"></h2></div><button class="icon-button" data-close-dialog aria-label="Close dialog">×</button></div><div id="dialog-body"></div></dialog>
 {% if adsense_client %}<script nonce="{{ csp_nonce }}" src="/assets/js/ad-privacy.js" defer></script>{% endif %}
+{% if analytics_tracking or request.path == '/privacy' %}<script nonce="{{ csp_nonce }}" id="visitor-metrics" data-track="{{ '1' if analytics_tracking else '0' }}" src="/assets/js/visitor-metrics.js" defer></script>{% endif %}
 {% block scripts %}{% endblock %}
 </body></html>

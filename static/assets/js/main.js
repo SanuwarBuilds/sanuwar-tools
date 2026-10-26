@@ -22,14 +22,16 @@
     grid.replaceChildren(...filtered.map((tool) => {
       const isTool = tool.kind === "tool";
       const label = isTool ? "WEB TOOL" : tool.kind === "album" ? "ALBUM" : "DOWNLOAD";
+      const measuredLink = link => { if (link.tagName === "A") { link.dataset.analyticsKind = "tool_open"; link.dataset.analyticsItem = tool.id; } return link; };
       const info = () => open(tool.name, [
         image(tool.thumbnail, tool.name, "dialog-preview"),
         el("p", {class: "dialog-description"}, tool.longDescription || tool.description || "Open this tool to get started."),
         el("div", {class: "dialog-meta"}, ...(tool.tags || []).map(tag => el("span", {class: "tag"}, tag))),
-        external(tool.siteUrl, "Open tool", "button button-orange"),
+        measuredLink(external(tool.siteUrl, "Open tool", "button button-orange")),
       ], tool.category || "WEB TOOL");
       const action = isTool ? external(tool.siteUrl, "Open tool", "text-link catalogue-open") :
         el("a", {href: `/downloads?item=${encodeURIComponent(tool.id)}`, class: "text-link catalogue-open", "data-google-vignette": "false"}, tool.kind === "album" ? "View album →" : "View download →");
+      measuredLink(action);
       return el("article", {class: "tool-card catalogue-card"},
         el("div", {class: "catalogue-card-top"},
           el("img", {class: "catalogue-icon", src: `/assets/icons/${iconFor(tool)}.svg`, alt: "", width: "48", height: "48"}),
