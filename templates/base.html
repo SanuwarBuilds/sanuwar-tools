@@ -1,6 +1,6 @@
 {% set public_ui = request.path in ('/', '/downloads', '/download.html', '/photo-tools', '/signin', '/account', '/privacy', '/about', '/contact') %}
 <!doctype html>
-<html lang="hi-Latn" data-theme="{{ 'dark' if public_ui else public_config.get('site', {}).get('defaultTheme', 'light') }}">
+<html lang="hi-Latn" data-theme="{{ 'light' if public_ui else public_config.get('site', {}).get('defaultTheme', 'light') }}">
 <head>
 <meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
 <meta name="csrf-token" content="{{ csrf_token }}">
@@ -43,7 +43,7 @@
 <link rel="stylesheet" href="/assets/css/visitor-nav.css?v=1">
 {% if request.path in ('/', '/downloads', '/download.html') %}<link rel="stylesheet" href="/assets/css/catalogue.css?v=1">{% endif %}
 {% block page_styles %}{% endblock %}
-{% if public_ui %}<link rel="stylesheet" href="/assets/css/pro-max.css?v=1"><script nonce="{{ csp_nonce }}" src="/assets/js/pro-ui.js" defer></script>{% endif %}
+{% if public_ui %}<link rel="stylesheet" href="/assets/css/pro-max.css?v=1"><link rel="stylesheet" href="/assets/css/hallmark/workspace.css?v=1"><script nonce="{{ csp_nonce }}" src="/assets/js/pro-ui.js" defer></script>{% endif %}
 </head>
 <body class="studio-theme {% if public_ui %}pro-theme {% endif %}{% block bodyclass %}{% endblock %}">
 <a class="skip-link" href="#main">Skip to content</a>
@@ -56,7 +56,7 @@
 {% endblock %}
 <main id="main">{% block content %}{% endblock %}</main>
 {% block footer %}
-<footer class="wrap site-footer"><div><a class="brand" href="/"><span class="brand-symbol" aria-hidden="true">s</span><span>SanuwarTools<span class="brand-dot">.</span></span></a><p>{{ public_config.get('site', {}).get('tagline', 'Chhote tools. Bade kaam.') }}</p></div><nav aria-label="Footer"><a href="/#tools">Tools</a>{% if public_config.get('downloadPage', {}).get('enabled', True) %}<a href="/downloads">Downloads</a>{% endif %}{% for label, link in public_config.get('socialLinks', {}).items() %}{% if link | public_url %}<a href="{{ link | public_url }}" target="_blank" rel="noopener noreferrer">{{ label | capitalize }} ↗</a>{% endif %}{% endfor %}<a href="/about">About</a><a href="/contact">Contact</a><a href="/privacy">Privacy</a>{% if adsense_client %}<a id="privacy-choices" href="/privacy" hidden>Privacy &amp; cookie settings</a>{% endif %}<a href="/admin">Admin ↗</a></nav><p class="copyright">Made with care by Sanuwar.<br>© {{ now_year }} SanuwarTools</p></footer>
+<footer class="wrap site-footer"><div><a class="brand" href="/"><span class="brand-symbol" aria-hidden="true">s</span><span>SanuwarTools<span class="brand-dot">.</span></span></a><p>{{ public_config.get('site', {}).get('tagline', 'Chhote tools. Bade kaam.') }}</p></div><nav aria-label="Footer"><a href="/#tools">Tools</a>{% if public_config.get('downloadPage', {}).get('enabled', True) %}<a href="/downloads">Downloads</a>{% endif %}{% for label, link in public_config.get('socialLinks', {}).items() %}{% if link | public_url %}<a href="{{ link | public_url }}" target="_blank" rel="noopener noreferrer">{{ label | capitalize }}</a>{% endif %}{% endfor %}<a href="/about">About</a><a href="/contact">Contact</a><a href="/privacy">Privacy</a>{% if adsense_client %}<a id="privacy-choices" href="/privacy" hidden>Privacy &amp; cookie settings</a>{% endif %}<a href="/admin">Admin</a></nav><p class="copyright">Made with care by Sanuwar.<br>© {{ now_year }} SanuwarTools</p></footer>
 {% endblock %}
 <div class="toast" id="toast" role="status" aria-live="polite"></div>
 <dialog id="content-dialog" aria-labelledby="dialog-title"><div class="dialog-head"><div><span class="eyebrow" id="dialog-kicker">A closer look</span><h2 id="dialog-title"></h2></div><button class="icon-button" data-close-dialog aria-label="Close dialog">×</button></div><div id="dialog-body"></div></dialog>

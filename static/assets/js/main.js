@@ -21,8 +21,8 @@
     });
     grid.replaceChildren(...filtered.map((tool) => {
       const isTool = tool.kind === "tool";
-      const label = isTool ? "WEB TOOL" : tool.kind === "album" ? "ALBUM" : "DOWNLOAD";
-      const measuredLink = link => { if (link.tagName === "A") { link.dataset.analyticsKind = "tool_open"; link.dataset.analyticsItem = tool.id; } return link; };
+      const label = isTool ? "Web tool" : tool.kind === "album" ? "Album" : "Download";
+      const measuredLink = link => { if (link.tagName === "A") { link.querySelectorAll("span").forEach(node => node.remove()); link.dataset.analyticsKind = "tool_open"; link.dataset.analyticsItem = tool.id; } return link; };
       const info = () => open(tool.name, [
         image(tool.thumbnail, tool.name, "dialog-preview"),
         el("p", {class: "dialog-description"}, tool.longDescription || tool.description || "Open this tool to get started."),
@@ -30,14 +30,14 @@
         measuredLink(external(tool.siteUrl, "Open tool", "button button-orange")),
       ], tool.category || "WEB TOOL");
       const action = isTool ? external(tool.siteUrl, "Open tool", "text-link catalogue-open") :
-        el("a", {href: `/downloads?item=${encodeURIComponent(tool.id)}`, class: "text-link catalogue-open", "data-google-vignette": "false"}, tool.kind === "album" ? "View album →" : "View download →");
+        el("a", {href: `/downloads?item=${encodeURIComponent(tool.id)}`, class: "text-link catalogue-open", "data-google-vignette": "false"}, tool.kind === "album" ? "View album" : "View download");
       measuredLink(action);
       return el("article", {class: "tool-card catalogue-card"},
         el("div", {class: "catalogue-card-top"},
           el("img", {class: "catalogue-icon", src: `/assets/icons/${iconFor(tool)}.svg`, alt: "", width: "48", height: "48"}),
-          ...(!isTool || tool.featured ? [el("span", {class: "catalogue-badge"}, isTool ? "FEATURED" : tool.locked ? `₹${tool.pricing.payable}` : "FREE")] : [])),
+          ...(!isTool || tool.featured ? [el("span", {class: "catalogue-badge"}, isTool ? "Featured" : tool.locked ? `₹${tool.pricing.payable}` : "Free")] : [])),
         el("div", {class: "card-body"},
-          el("span", {class: "catalogue-type"}, `${label} · ${tool.category || "Files"}`),
+          el("span", {class: "catalogue-type"}, tool.category || label),
           el("h3", {}, tool.name),
           el("p", {}, tool.description || (tool.kind === "album" ? "Explore the files inside this album." : "View details and choose what you need.")),
           el("div", {class: "card-bottom"}, action, ...(isTool ? [el("button", {class: "info-button", "aria-label": `Details about ${tool.name}`, onclick: info}, "i")] : []))));

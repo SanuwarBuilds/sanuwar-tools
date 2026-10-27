@@ -1,0 +1,11 @@
+/* Hallmark public base: the existing admin layout retains its own stylesheet. */
+html, body { overflow-x: clip; }
+.pro-theme, .pro-theme *, .pro-theme *::before, .pro-theme *::after { box-sizing: border-box; }
+.pro-theme :focus-visible { outline: 2px solid var(--color-focus); outline-offset: 3px; }
+.pro-theme :is(h1,h2,h3) { overflow-wrap: break-word; min-width: 0; text-wrap: balance; }
+.pro-theme [hidden] { display: none !important; }
+@media (prefers-reduced-motion: reduce) {
+ .pro-theme *, .pro-theme *::before, .pro-theme *::after { animation: none !important; transition: none !important; scroll-behavior: auto !important; }
+}
+html:has(.pro-theme) { scrollbar-color: var(--color-muted) var(--color-paper); }
+.pro-theme ::selection { background: var(--color-accent-wash); color: var(--color-ink); }

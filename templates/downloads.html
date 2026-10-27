@@ -4,8 +4,8 @@
 {% block content %}
 
 <section class="wrap download-intro">
-  <div><span class="catalogue-eyebrow">THE DOWNLOAD LIBRARY</span><h1>Find it. Download it.</h1><p>Apps, files and albums. All in one place.</p></div>
-  <div class="download-intro-side"><a href="/purchases" class="library-purchases">Your purchases <span>↗</span></a><div id="collection-stats" class="download-summary" aria-label="Collection summary"></div></div>
+  <div><h1>Downloads</h1><p>Apps, files and albums. All in one place.</p></div>
+  <div class="download-intro-side"><a href="/purchases" class="library-purchases">Your purchases</a><div id="collection-stats" class="download-summary" aria-label="Collection summary"></div></div>
 </section>
 <section class="wrap collection compact-collection" aria-label="Download collection">
   <div class="download-controls">
@@ -13,7 +13,7 @@
     <div class="download-filter-row"><div class="collection-types" role="group" aria-label="Collection type"><button class="filter-tab active" data-kind="all" aria-pressed="true">All</button><button class="filter-tab" data-kind="files" aria-pressed="false">Files</button><button class="filter-tab" data-kind="albums" aria-pressed="false">Albums</button></div>
     <select class="download-category-select" id="download-category" aria-label="Download category"><option value="All">Category</option></select></div>
   </div>
-  <div class="collection-info"><span id="download-count" role="status">{{ initial_downloads | length }} items</span><span>Dates shown in India time · IST</span></div>
+  <div class="collection-info"><span id="download-count" role="status">{{ initial_downloads | length }} items</span><span>Dates in India time (IST)</span></div>
   <div class="download-grid" id="downloads-grid" aria-live="polite">{% include '_initial_downloads.html' %}</div>
 </section>
 {% endblock %}
