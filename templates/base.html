@@ -43,7 +43,7 @@
 <link rel="stylesheet" href="/assets/css/visitor-nav.css?v=1">
 {% if request.path in ('/', '/downloads', '/download.html') %}<link rel="stylesheet" href="/assets/css/catalogue.css?v=1">{% endif %}
 {% block page_styles %}{% endblock %}
-{% if public_ui %}<link rel="stylesheet" href="/assets/css/pro-max.css?v=1"><link rel="stylesheet" href="/assets/css/hallmark/workspace.css?v=1"><script nonce="{{ csp_nonce }}" src="/assets/js/pro-ui.js" defer></script>{% endif %}
+{% if public_ui %}<link rel="stylesheet" href="/assets/css/pro-max.css?v=1"><link rel="stylesheet" href="/assets/css/hallmark/workspace.css?v=1">{% if request.path == '/' %}<link rel="stylesheet" href="/assets/css/hallmark/workbench.css?v=2">{% endif %}<script nonce="{{ csp_nonce }}" src="/assets/js/pro-ui.js" defer></script>{% endif %}
 </head>
 <body class="studio-theme {% if public_ui %}pro-theme {% endif %}{% block bodyclass %}{% endblock %}">
 <a class="skip-link" href="#main">Skip to content</a>

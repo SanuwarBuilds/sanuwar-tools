@@ -14,7 +14,7 @@
       (selected === "All" || t.category === selected) &&
       `${t.name} ${t.description || ""} ${t.category || ""} ${(t.tags || []).join(" ")}`.toLowerCase().includes(query));
     const cats = ["All", ...new Set(tools.map(t => t.category).filter(Boolean))];
-    tabs($("#categories"), cats, selected, (cat) => { selected = cat; render(); });
+    tabs($("#categories"), cats, selected, (cat) => { selected = cat; render(); }, Object.fromEntries(cats.map(cat => [cat, cat === "All" ? tools.length : tools.filter(tool => tool.category === cat).length])));
     $("#tool-total").textContent = filtered.length;
     if (!filtered.length) return empty(grid, "No matches found.", "Try another search or browse the full collection.", () => {
       $("#tool-search").value = ""; selected = "All"; render();

@@ -1,26 +1,31 @@
 {% extends 'base.html' %}
-{% block bodyclass %}home-page catalogue-theme{% endblock %}
+{% block bodyclass %}home-page catalogue-theme workbench-page{% endblock %}
 {% block content %}
 {% set photo_tools = public_config.get('tools', []) | selectattr('id', 'equalto', 'builtin-photo-tools') | list %}
-<section class="workspace-hero wrap" aria-labelledby="workspace-title">
-  <div><h1 id="workspace-title">Tools for everyday work.</h1><p>Find a tool. Get straight to work.</p></div>
-  <label class="workspace-search" for="tool-search"><svg aria-hidden="true" viewBox="0 0 24 24"><circle cx="10.5" cy="10.5" r="6.5"/><path d="m16 16 4 4"/></svg><input type="search" id="tool-search" placeholder="Search tools…" aria-label="Search tools"><kbd>/</kbd></label>
-</section>
-<section class="wrap catalogue-collection pro-collection" id="tools" aria-label="Web tools">
-  <div class="workspace-toolbar"><h2>All tools <span id="tool-total">{{ public_config.get('tools', []) | length }}</span></h2><div class="filter-tabs" id="categories" role="group" aria-label="Filter tools"></div></div>
-  <div class="tool-grid" id="tools-grid" aria-live="polite">{% include '_initial_tools.html' %}</div>
-  <div id="widgets" class="widget-grid"></div>
-</section>
-{% if photo_tools %}
-<section class="wrap workspace-photo" aria-labelledby="photo-feature-title">
-  <div><h2 id="photo-feature-title">Photo Tools</h2><p>Crop, resize, compress and make print sheets.</p><span>Your photo stays on your device.</span></div>
-  <a href="/photo-tools" data-analytics-kind="tool_open" data-analytics-item="builtin-photo-tools" class="button button-orange">Open Photo Tools</a>
-</section>
-{% endif %}
-<section class="wrap workspace-guide" id="how-it-works" aria-labelledby="guide-title">
-  <h2 id="guide-title">How it works</h2>
-  <div class="workspace-steps"><article><span>01</span><div><h3>Choose</h3><p>Search or browse a category.</p></div></article><article><span>02</span><div><h3>Work</h3><p>Open a tool and make your changes.</p></div></article><article><span>03</span><div><h3>Save</h3><p>Save your result. Prices appear before checkout.</p></div></article></div>
-</section>
-<section class="wrap workspace-support"><h2>Need a hand?</h2><a href="/contact">Get in touch</a></section>
+<div class="workbench-layout wrap">
+  <aside class="workbench-rail" aria-label="Workspace navigation">
+    <div class="workbench-category-nav"><h2>Categories</h2><div class="filter-tabs" id="categories" role="group" aria-label="Filter tools"></div></div>
+    <nav class="workbench-links" aria-label="Workspace shortcuts">
+      {% if public_config.get('downloadPage', {}).get('enabled', True) %}<a href="/downloads"><svg aria-hidden="true" viewBox="0 0 24 24"><path d="M12 3v12m-5-5 5 5 5-5M4 16v5h16v-5"/></svg>Downloads</a>{% endif %}
+      {% if photo_tools %}<a href="/photo-tools" data-analytics-kind="tool_open" data-analytics-item="builtin-photo-tools"><svg aria-hidden="true" viewBox="0 0 24 24"><rect x="3" y="3" width="18" height="18" rx="3"/><circle cx="8" cy="8" r="1.5"/><path d="m3 17 6-6 5 5 3-3 4 4"/></svg>Photo Tools</a>{% endif %}
+      <a href="{{ '/account' if visitor else '/signin' }}"><svg aria-hidden="true" viewBox="0 0 24 24"><circle cx="12" cy="8" r="4"/><path d="M4 22v-3a8 8 0 0 1 16 0v3"/></svg>{{ 'My account' if visitor else 'Sign in' }}</a>
+    </nav>
+    <div class="workbench-rail-foot">{% if photo_tools %}<p>Photo editing stays on your device.</p>{% endif %}<a href="/contact">Get in touch</a></div>
+  </aside>
+  <div class="workbench-canvas">
+    <section class="workspace-hero" aria-label="Search tools">
+      <label class="workspace-search" for="tool-search"><svg aria-hidden="true" viewBox="0 0 24 24"><circle cx="10.5" cy="10.5" r="6.5"/><path d="m16 16 4 4"/></svg><input type="search" id="tool-search" placeholder="Search tools…" aria-label="Search tools"><kbd>/</kbd></label>
+    </section>
+    <section class="catalogue-collection" id="tools" aria-label="Web tools">
+      <div class="workspace-toolbar"><h1>Tools</h1><span><b id="tool-total">{{ public_config.get('tools', []) | length }}</b> tools available</span></div>
+      <div class="tool-grid" id="tools-grid" aria-live="polite">{% include '_initial_tools.html' %}</div>
+      <div id="widgets" class="widget-grid"></div>
+    </section>
+    <details class="workbench-guide" id="how-it-works">
+      <summary>How it works</summary>
+      <div class="workspace-steps"><article><span>01</span><div><h3>Choose</h3><p>Search or browse a category.</p></div></article><article><span>02</span><div><h3>Work</h3><p>Open a tool and make your changes.</p></div></article><article><span>03</span><div><h3>Save</h3><p>Save your result. Prices appear before checkout.</p></div></article></div>
+    </details>
+  </div>
+</div>
 {% endblock %}
 {% block scripts %}<script nonce="{{ csp_nonce }}" src="/assets/js/main.js" defer></script>{% endblock %}
