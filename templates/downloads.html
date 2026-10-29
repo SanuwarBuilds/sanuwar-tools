@@ -1,4 +1,5 @@
 {% extends 'base.html' %}
+{% from '_ad_unit.html' import ad_unit with context %}
 {% block title %}Downloads — Android Apps &amp; Files | SanuwarTools{% endblock %}
 {% block bodyclass %}downloads-page catalogue-theme{% endblock %}
 {% block content %}
@@ -16,5 +17,6 @@
   <div class="collection-info"><span id="download-count" role="status">{{ initial_downloads | length }} items</span><span>Dates in India time (IST)</span></div>
   <div class="download-grid" id="downloads-grid" aria-live="polite">{% include '_initial_downloads.html' %}</div>
 </section>
+<div class="wrap">{{ ad_unit(adsense_slots.get('downloads', '')) }}</div>
 {% endblock %}
 {% block scripts %}<script nonce="{{ csp_nonce }}" src="/assets/js/downloads.js" defer></script>{% endblock %}
