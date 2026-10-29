@@ -1,4 +1,5 @@
 {% extends 'base.html' %}
+{% from '_ad_unit.html' import ad_unit with context %}
 {% block bodyclass %}home-page catalogue-theme workbench-page{% endblock %}
 {% block content %}
 {% set photo_tools = public_config.get('tools', []) | selectattr('id', 'equalto', 'builtin-photo-tools') | list %}
@@ -21,6 +22,7 @@
       <div class="tool-grid" id="tools-grid" aria-live="polite">{% include '_initial_tools.html' %}</div>
       <div id="widgets" class="widget-grid"></div>
     </section>
+    {{ ad_unit(adsense_slots.get('home', '')) }}
     <details class="workbench-guide" id="how-it-works">
       <summary>How it works</summary>
       <div class="workspace-steps"><article><span>01</span><div><h3>Choose</h3><p>Search or browse a category.</p></div></article><article><span>02</span><div><h3>Work</h3><p>Open a tool and make your changes.</p></div></article><article><span>03</span><div><h3>Save</h3><p>Save your result. Prices appear before checkout.</p></div></article></div>

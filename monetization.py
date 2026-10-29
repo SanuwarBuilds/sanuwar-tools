@@ -6,11 +6,17 @@ from flask import Response, abort, g, render_template, request
 
 DEFAULT_CLIENT = 'ca-pub-8814284684394847'
 AD_PATHS = frozenset(('/', '/downloads', '/download.html'))
+SLOT_NAMES = ('home', 'downloads')
 
 
 def client_id():
     value = os.getenv('ADSENSE_CLIENT', DEFAULT_CLIENT).strip()
     return value if re.fullmatch(r'ca-pub-[0-9]{16}', value) else ''
+
+
+def slot_id(name):
+    value = os.getenv('ADSENSE_SLOT_' + name.upper(), '').strip()
+    return value if re.fullmatch(r'[0-9]{10,20}', value) else ''
 
 
 def ads_enabled():
@@ -29,7 +35,12 @@ def nonce():
 def install(app):
     @app.context_processor
     def ads_context():
-        return {'adsense_client': client_id() if ads_enabled() else '', 'csp_nonce': nonce()}
+        enabled = ads_enabled()
+        return {
+            'adsense_client': client_id() if enabled else '',
+            'csp_nonce': nonce(),
+            'adsense_slots': {name: slot_id(name) for name in SLOT_NAMES} if enabled else {},
+        }
 
     @app.get('/ads.txt')
     def ads_txt():

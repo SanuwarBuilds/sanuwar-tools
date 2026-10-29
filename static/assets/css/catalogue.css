@@ -98,3 +98,9 @@ html[data-theme="dark"] .catalogue-theme .catalogue-open,html[data-theme="dark"]
 .catalogue-theme .catalogue-open{white-space:nowrap;gap:5px}
 @media(max-width:360px){.catalogue-theme .site-header{width:100%;padding:0 12px}.catalogue-theme .catalogue-card{padding:14px 11px}.catalogue-theme .catalogue-card .card-bottom{gap:0}.catalogue-theme .catalogue-open{font-size:9px}}
 html[data-theme="dark"] .catalogue-hero:before{opacity:.08}
+
+/* Manual AdSense units on public catalogue pages; reserved height limits layout shift. */
+.catalogue-theme .ad-slot{margin:24px 0 8px;padding:10px 12px 12px;border:1px solid var(--line);border-radius:12px;background:var(--surface);text-align:center}
+.catalogue-theme .ad-slot-label{display:block;margin:0 0 8px;font-size:9px;font-weight:750;letter-spacing:.14em;text-transform:uppercase;color:var(--muted)}
+.catalogue-theme .ad-slot .adsbygoogle{display:block;width:100%;min-height:100px}
+@media(max-width:760px){.catalogue-theme .ad-slot{margin:18px 0 6px;padding:8px}}

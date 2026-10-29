@@ -67,6 +67,23 @@ class AdSenseIsolationTests(unittest.TestCase):
             self.assertNotIn(b'adsbygoogle.js', self.get('/').data)
             self.assertIn("script-src 'self'", self.get('/').headers['Content-Security-Policy'])
 
+    def test_manual_units_render_only_for_valid_numeric_slots(self):
+        with patch.dict(os.environ, {'ADSENSE_SLOT_HOME': '1234567890', 'ADSENSE_SLOT_DOWNLOADS': '9876543210'}):
+            for path, slot in (('/', '1234567890'), ('/downloads', '9876543210'), ('/download.html', '9876543210')):
+                response = self.get(path)
+                text = response.get_data(as_text=True)
+                nonce = re.search(r"'nonce-([^']+)'", response.headers['Content-Security-Policy']).group(1)
+                self.assertIn('class="adsbygoogle"', text, path)
+                self.assertIn('data-ad-client="ca-pub-8814284684394847"', text, path)
+                self.assertIn('data-ad-slot="' + slot + '"', text, path)
+                self.assertIn('nonce="' + nonce + '"', text, path)
+                self.assertEqual(text.count('adsbygoogle = window.adsbygoogle'), 1, path)
+        with patch.dict(os.environ, {'ADSENSE_SLOT_HOME': '"><script>alert(1)</script>'}):
+            text = self.get('/').get_data(as_text=True)
+            self.assertNotIn('class="adsbygoogle"', text)
+            self.assertNotIn('<script>alert(1)</script>', text)
+        self.assertNotIn('class="adsbygoogle"', self.get('/').get_data(as_text=True))
+
     def test_seller_record_matches_publisher_and_privacy_stays_ad_free(self):
         response = self.get('/ads.txt')
         self.assertEqual(response.mimetype, 'text/plain')
