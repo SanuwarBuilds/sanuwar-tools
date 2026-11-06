@@ -32,7 +32,7 @@
     "created_at": "2026-10-24T02:46:08+00:00",
     "updated_at": "2026-11-03T02:14:11+00:00",
     "is_new": true,
-    "enabled": false,
+    "enabled": true,
     "pricing": {
       "mode": "free",
       "price": "0.00",
