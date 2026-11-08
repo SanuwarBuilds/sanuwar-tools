@@ -53,7 +53,7 @@ def validate_payload(data):
             for key, child in value.items():
                 if key in ('enabled', 'visible', 'is_album', 'featured') and type(child) is not bool:
                     raise ValueError(f'{key} must be true or false')
-                if key in ('url','siteUrl','link','image','thumbnail','favicon','github','instagram','youtube','twitter','photo_url','image_url') and not valid_url(child, key in ('image','thumbnail','favicon','photo_url','image_url')):
+                if key in ('url','siteUrl','link','image','thumbnail','favicon','github','instagram','telegram','youtube','twitter','photo_url','image_url') and not valid_url(child, key in ('image','thumbnail','favicon','photo_url','image_url')):
                     # Preserve the legacy local downloads route.
                     if not (key == 'url' and child in ('/downloads','/download.html')):
                         raise ValueError(f'Invalid {key}: use an HTTPS URL')

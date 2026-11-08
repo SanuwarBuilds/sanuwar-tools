@@ -138,6 +138,18 @@ class SearchDiscoveryTests(unittest.TestCase):
             self.assertIn('<title>'+expected+'</title>',text)
             self.assertIn('property="og:title" content="'+expected+'"',text)
 
+    def test_telegram_contact_link_is_public(self):
+        url='https://t.me/+dBcRFw3B1zcwMDg1'
+        self.records[module.TOOLS_CONFIG_REL]['socialLinks']={'telegram':url}
+        contact=self.client.get('/contact').get_data(as_text=True)
+        self.assertIn(url,contact)
+        self.assertIn('Telegram ↗',contact)
+        home=self.client.get('/').get_data(as_text=True)
+        self.assertIn(url,home)
+        data=json.loads(re.search(r'<script[^>]*type="application/ld\+json">(.*?)</script>',home,re.S).group(1))
+        organization=next(node for node in data['@graph'] if node.get('@type')=='Organization')
+        self.assertEqual(organization['contactPoint']['url'],url)
+
     def test_initial_html_escapes_text_and_drops_executable_urls(self):
         self.records[module.DOWNLOADS_REL]=[{'id':'x','title':'<script>alert(1)</script>','link':'javascript:alert(1)','image':'javascript:alert(2)'}]
         self.records[module.TOOLS_CONFIG_REL]['tools'][0]['siteUrl']='javascript:alert(3)'

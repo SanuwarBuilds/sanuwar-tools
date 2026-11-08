@@ -1454,7 +1454,7 @@
         config.site?.defaultTheme || "light",
       );
     const social = Object.fromEntries(
-      ["github", "instagram", "youtube", "twitter"].map((k) => [
+      ["github", "instagram", "telegram", "youtube", "twitter"].map((k) => [
         k,
         field(
           k[0].toUpperCase() + k.slice(1),

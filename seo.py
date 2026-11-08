@@ -7,6 +7,7 @@ import security
 ORIGIN = 'https://sanuwartools.online'
 SITE_UPDATED = '2026-11-08'
 OG_IMAGE = ORIGIN + '/assets/og/sanuwartools-og.png'
+TELEGRAM_URL = 'https://t.me/+dBcRFw3B1zcwMDg1'
 INDEXNOW_KEY = '9c3f7a1e5b8d4f2a6c0e9d7b3a5f1c8e'
 PAGES = {
     '/': ('SanuwarTools — Free Web Tools & Android Downloads',
@@ -77,6 +78,8 @@ def install(app, load_config):
                         'description': 'Free browser tools, Android apps and downloadable files.',
                         'logo': {'@type': 'ImageObject', 'url': ORIGIN + '/assets/favicon.png',
                                  'width': 256, 'height': 256},
+                        'contactPoint': {'@type': 'ContactPoint', 'contactType': 'customer support',
+                                         'url': TELEGRAM_URL},
                         'sameAs': ['https://github.com/SanuwarBuilds', 'https://www.instagram.com/iam.sanuwar/']}
         webpage = {'@type': PAGE_TYPES.get(path, 'WebPage'), '@id': canonical + '#webpage',
                    'url': canonical, 'name': title, 'description': description,
