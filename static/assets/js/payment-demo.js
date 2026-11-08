@@ -22,7 +22,7 @@
     $("#demo-price").disabled = $("#demo-discount").disabled = free;
     $("#demo-price-error").textContent = valid
       ? ""
-      : "Final price kam se kam ₹1 rakho, ya Free select karo.";
+      : "Keep the final price at least ₹1, or select Free.";
     $("#demo-total").replaceChildren(
       ...(free
         ? [el("span", {}, "Free")]
@@ -42,10 +42,10 @@
       : state === "paid"
         ? "✓ Simulated payment verified · Samples unlocked."
         : state === "pending"
-          ? "Demo checkout open hai. Neeche success ya failure simulate karo."
+          ? "Demo checkout is open. Simulate success or failure below."
           : state === "failed"
-            ? "Simulated payment failed · Files locked hain. Dobara checkout try karo."
-            : "Files locked hain. Checkout try karo.";
+            ? "Simulated payment failed · Files are locked. Try checkout again."
+            : "Files are locked. Try checkout.";
     $("#demo-status").classList.toggle("paid", unlocked);
     $("#demo-files").replaceChildren(
       ...["Welcome.txt", "Creative-checklist.txt"].map((name, index) =>

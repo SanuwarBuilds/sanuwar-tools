@@ -1,13 +1,41 @@
 # SanuwarTools public design
 
-Hallmark redesign, 27 October 2026. Applies to the public shell, tool directory and download library. Admin and checkout keep their existing layouts.
+**Current direction (v2, "Deep Studio"): dark-first, aurora-lit, editorial.**
+Applies to the public shell, homepage, download library, sign-in/account and information pages. Admin and the two utility pages (`/purchases`, `/purchase/<id>`, `/payment-demo`) keep their existing layouts.
 
-Use Cobalt's cool paper, blue accent and quiet borders. Preserve the existing SanuwarTools identity and locally hosted Manrope. All new colours and fonts live in `static/assets/css/hallmark/tokens.css` or the declared theme token blocks in `workspace.css`. Respect saved light/dark preference; light is the public default.
+## Where the styles live
 
-The homepage is a working directory. Its first region contains search only, with no slogan or subtitle. A dark category rail on desktop carries real category counts and workspace shortcuts. The main canvas places its plain Tools title above a compact two-column directory. Mobile moves search first, then category filters and the tools. No marketing-sized hero, gradients, decorative mock browser, duplicate navigation chips, invented proof or extra promotional copy. Mobile uses readable single-column tool rows and compact thumbnail download rows and 44px interactive targets. Desktop uses two columns. Search, disabled-content behavior, analytics attributes, Google sign-in and download/payment handlers retain their original wiring.
+| File | Role |
+| --- | --- |
+| `static/assets/css/style.css` | Global reset and legacy base. Always loaded. |
+| `static/assets/css/studio.css` | Legacy app theme. Loaded only on non-public routes and `/photo-tools`. |
+| `static/assets/css/sanuwar.css` | **The public design system.** Loaded last on public routes, scoped to `body.pro-theme.v2`. |
+| `static/assets/css/photo-tools.css` | The photo editor's own component styles. Unchanged. |
+| `static/assets/js/sanuwar.js` | Theme label/colour sync, card pointer spotlight, mobile nav dismissal. |
 
-`workspace.css` overrides the existing public styles after `pro-max.css`; homepage-only `workbench.css` then recomposes the directory. Tokens and the public-scoped scaffold base are imported locally; admin pages do not load them. Container: 1280px maximum on the homepage, 1160px on other public routes with 16px mobile gutters. Use `minmax(0,1fr)` tracks, immediate visible focus rings and reduced-motion fallbacks.
+Public routes are the ones listed in `public_ui` in `templates/base.html`. They get `pro-theme v2` on `<body>`, a dark `data-theme` default, the v2 header/footer, and `sanuwar.css` last in the cascade. Everything in `sanuwar.css` is prefixed with `body.pro-theme.v2` so it outranks the legacy sheets without `!important`.
 
-Copy changes: all promotional hero wording is removed, including “Tools for everyday work.” and “Find a tool. Get straight to work.” The hero contains the existing real search field only. Hero chips, repeated actions and reassurance dots are removed; their destinations remain in navigation and the catalogue. Collection heading becomes “All tools”. The duplicate Photo Tools promotion moves into a workspace shortcut; its privacy fact remains in the rail. The existing guide becomes a disclosure and contact is retained in the rail/footer. Download heading becomes “Downloads”. Featured labels use sentence case. Decorative link arrows are removed from tool actions and footer links.
+## Visual language
 
-No picture placeholders or missing brand assets. Real icons and uploaded covers remain the material.
+- **Canvas:** near-black ink (`#07080e`) with a slow aurora wash (blue → violet → teal) and a very light film grain.
+- **Type:** locally hosted Manrope. Display sizes use weight 800 with tight tracking; labels, counts and metadata use a system monospace with wide tracking.
+- **Surfaces:** 20–30px radii, hairline borders, inset top highlight, soft long shadows.
+- **Accent:** a single blue → violet gradient used for the brand mark, primary buttons, the hero gradient word and card hairlines.
+- **Signature:** a pointer-tracking spotlight plus a gradient hairline that appear when a tool card is hovered or focused. Reduced-motion users get none of it.
+- **Light mode:** the same system on a cool paper canvas (`#eff2f9`) with white cards and a strengthened shadow so cards separate from the page.
+
+## Structure
+
+- **Header:** sticky frosted bar (frost applied through `::before` so fixed children stay viewport-relative), pill navigation, theme toggle, sign-in pill. Below 900px the navigation becomes a sheet with a scrim and closes on Escape, outside click, focus loss or resize.
+- **Homepage:** centred hero (status pill, two-line headline, lede, search, real counts), a "Tools" section with wrapped category chips, tool cards, a featured Photo Tools panel, a three-step guide, then the footer. `#tools`, `#how-it-works`, `#tool-search`, `#categories`, `#tools-grid`, `#tool-total` and `#widgets` keep their original ids so `main.js` is untouched.
+- **Downloads:** page head with real collection counts, a glass filter panel, then the card grid. `downloads.js` renders the cards; `_initial_downloads.html` mirrors that markup for no-JS crawlers, including album file lists.
+- **Footer:** brand, tagline and social pills beside two labelled link columns, then copyright and a status mark.
+
+## Rules
+
+- No invented numbers, testimonials or proof. Counts come from `public_config`; "0 Install" and "Built for the browser" describe the site itself.
+- Tool icons and download covers are real uploaded material at their original colours. No placeholder art.
+- Interactive targets stay at least 44px. Focus rings are always visible on the accent colour.
+- `prefers-reduced-motion` disables the aurora, reveals, spotlight and transitions.
+- All interface copy is English. The headline keeps the brand promise: "Small tools. Big work." Tool and download descriptions come from the catalogue data.
+- Admin pages do not load `sanuwar.css`; the photo editor keeps `photo-tools.css` and only inherits the shell.

@@ -61,7 +61,7 @@ window.ST = (() => {
     try {
       data = await response.json();
     } catch {
-      throw new Error("Server se response nahi mila. Dobara try karo.");
+      throw new Error("No response from the server. Please try again.");
     }
     if (!response.ok) {
       if (response.status === 401 && location.pathname === "/admin") {

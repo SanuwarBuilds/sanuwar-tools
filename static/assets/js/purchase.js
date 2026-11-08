@@ -22,7 +22,7 @@
         el(
           "p",
           {},
-          "Purchase receipt nahi mili. Apni saved receipt restore karo, ya payment wale browser mein kholo.",
+          "Purchase receipt not found. Restore your saved receipt, or open this page in the browser you paid from.",
         ),
       );
       return;
@@ -112,7 +112,7 @@
           el(
             "p",
             { class: "payment-status" },
-            "Payment confirmation ka wait hai. Paise debit hue hain toh dobara pay mat karo.",
+            "Waiting for payment confirmation. If money was debited, do not pay again.",
           ),
         );
         if (order.status === "PENDING" && order.checkout_url)
@@ -141,7 +141,7 @@
             el(
               "p",
               {},
-              `Payment ${order.status.toLowerCase()}. Bank mein debit dikhe toh merchant se order ID ke saath contact karo.`,
+              `Payment ${order.status.toLowerCase()}. If the amount was debited, contact the merchant with your order ID.`,
             ),
           );
         if (order.status === "PENDING" && ++attempts < 150)
@@ -195,7 +195,7 @@
       el(
         "p",
         {},
-        "Apni purchase receipt file select karke downloads wapas kholo.",
+        "Select your purchase receipt file to reopen your downloads.",
       ),
     );
 })();
