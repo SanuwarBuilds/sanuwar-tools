@@ -1,19 +1,6 @@
 {
   "widgets": [
     {
-      "id": "77340c8c-c2f2-453c-a781-abb321ec2e5b",
-      "type": "winner",
-      "enabled": true,
-      "order": 0,
-      "data": {
-        "winner_name": "DR.ABDUL AL SAYED",
-        "event_name": "",
-        "photo_url": "",
-        "message": "First US muslim Senate in history"
-      },
-      "created_at": "2026-11-08T18:55:20.009070"
-    },
-    {
       "id": "a48213cb-c59c-4328-8de8-6b347ab9ee31",
       "type": "custom_html",
       "enabled": true,
