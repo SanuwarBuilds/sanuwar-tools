@@ -36,7 +36,7 @@ Public routes are the ones listed in `public_ui` in `templates/base.html`. They 
 ## Rules
 
 - No invented numbers, testimonials or proof. Counts come from `public_config`; "0 Install" and "Built for the browser" describe the site itself.
-- Tool icons and download covers are real uploaded material at their original colours. No placeholder art.
+- Download covers are real uploaded material at their original colours. Tool icons use the machined module-key set in `static/assets/icons/` (graphite key, bone glyph, one orange LED), with an optional per-tool `icon` field that overrides the name/tag mapping. No placeholder art.
 - Interactive targets stay at least 44px. Focus rings are always visible on the accent colour.
 - `prefers-reduced-motion` disables the LED blink, scanline, reveals and transitions.
 - All interface copy is English. The headline keeps the brand promise: "Small tools. Big work." Tool and download descriptions come from the catalogue data.

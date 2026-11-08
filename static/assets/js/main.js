@@ -3,10 +3,18 @@
   const { $, el, api, image, external, empty, tabs, open, toast } = ST;
   let config, tools = [], selected = "All";
   const grid = $("#tools-grid");
+  const ICON_NAMES = new Set(["photo", "passport", "score", "wallet", "tool", "download", "album"]);
+  const kindFor = (text) =>
+    text.includes("passport") ? "passport" :
+    text.includes("photo") ? "photo" :
+    text.includes("cricket") ? "score" :
+    text.includes("expense") || text.includes("budget") ? "wallet" : "";
   const iconFor = (tool) => {
     if (tool.kind !== "tool") return tool.kind === "album" ? "album" : "download";
+    if (ICON_NAMES.has(tool.icon)) return tool.icon;
     const name = tool.name.toLowerCase();
-    return name.includes("photo") ? "photo" : name.includes("cricket") ? "score" : name.includes("expense") ? "wallet" : "tool";
+    const tags = Array.isArray(tool.tags) ? tool.tags.join(" ").toLowerCase() : "";
+    return kindFor(name) || kindFor(tags) || "tool";
   };
   const render = () => {
     const query = $("#tool-search").value.trim().toLowerCase();
@@ -34,7 +42,7 @@
       measuredLink(action);
       return el("article", {class: "tool-card catalogue-card"},
         el("div", {class: "catalogue-card-top"},
-          el("img", {class: "catalogue-icon", src: `/assets/icons/${iconFor(tool)}.svg`, alt: "", width: "48", height: "48"}),
+          el("img", {class: "catalogue-icon", src: `/assets/icons/${iconFor(tool)}.svg?v=keys1`, alt: "", width: "48", height: "48"}),
           ...(!isTool || tool.featured ? [el("span", {class: "catalogue-badge"}, isTool ? "Featured" : tool.locked ? `₹${tool.pricing.payable}` : "Free")] : [])),
         el("div", {class: "card-body"},
           el("span", {class: "catalogue-type"}, tool.category || label),

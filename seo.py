@@ -52,11 +52,26 @@ PHOTO_FAQS = [
 ]
 
 
+TOOL_ICON_NAMES = ('photo', 'passport', 'score', 'wallet', 'tool', 'download', 'album')
+
+
 def install(app, load_config):
     def tool_icon(tool):
-        name = str(tool.get('name', '')).lower()
-        kind = 'photo' if 'photo' in name else 'score' if 'cricket' in name else 'wallet' if 'expense' in name else 'tool'
-        return '/assets/icons/' + kind + '.svg'
+        explicit = str(tool.get('icon', '')).strip().lower()
+        if explicit in TOOL_ICON_NAMES:
+            return '/assets/icons/' + explicit + '.svg?v=keys1'
+        tags = tool.get('tags')
+        tag_text = ' '.join(str(tag) for tag in tags).lower() if isinstance(tags, list) else ''
+
+        def kind_for(text):
+            return ('passport' if 'passport' in text else
+                    'photo' if 'photo' in text else
+                    'score' if 'cricket' in text else
+                    'wallet' if 'expense' in text or 'budget' in text else '')
+
+        kind = (kind_for(str(tool.get('name', '')).lower()) or
+                kind_for(tag_text) or 'tool')
+        return '/assets/icons/' + kind + '.svg?v=keys1'
     app.jinja_env.filters['tool_icon'] = tool_icon
     app.jinja_env.filters['public_url'] = lambda value: value if security.valid_url(value) else ''
     app.jinja_env.filters['public_image'] = lambda value: value if security.valid_url(value, image=True) else ''

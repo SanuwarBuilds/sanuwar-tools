@@ -1016,13 +1016,16 @@ body.pro-theme.bp .catalogue-icon {
   width: 44px;
   height: 44px;
   flex: none;
-  border-radius: 10px;
-  filter: drop-shadow(0 2px 4px #10141a1f);
-  transition: transform 0.3s var(--bp-ease);
+  border-radius: 12px;
+  filter: drop-shadow(0 2px 3px #10141a2e);
+  transition:
+    transform 0.3s var(--bp-ease),
+    filter 0.3s var(--bp-ease);
 }
 
 body.pro-theme.bp .catalogue-card:hover .catalogue-icon {
-  transform: translateY(-1px);
+  transform: translateY(-2px);
+  filter: drop-shadow(0 6px 10px #10141a38) drop-shadow(0 0 10px #d4542026);
 }
 
 body.pro-theme.bp .catalogue-badge {
