@@ -1,16 +1,5 @@
 {
-  "widgets": [
-    {
-      "id": "a48213cb-c59c-4328-8de8-6b347ab9ee31",
-      "type": "custom_html",
-      "enabled": true,
-      "order": 1,
-      "data": {
-        "html": "ABDUL"
-      },
-      "created_at": "2026-11-08T18:56:08.304989"
-    }
-  ],
+  "widgets": [],
   "admin": {
     "username": "admin",
     "password_hash": "$2b$12$cEeI9lFioQkZH1s.HXL/7.Po0JfpDNOhj7uUn5Zb668Bs7OL3c48e"
