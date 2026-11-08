@@ -47,9 +47,20 @@
 <link rel="stylesheet" href="/assets/css/hallmark/workspace.css?v=1">
 {% endif %}
 {% block page_styles %}{% endblock %}
-{% if public_ui %}<link rel="stylesheet" href="/assets/css/sanuwar.css?v=3"><script nonce="{{ csp_nonce }}" src="/assets/js/sanuwar.js?v=3" defer></script>{% endif %}
+{% if public_ui %}<script nonce="{{ csp_nonce }}" src="/assets/js/boot.js?v=1"></script><link rel="stylesheet" href="/assets/css/sanuwar.css?v=4"><script nonce="{{ csp_nonce }}" src="/assets/js/sanuwar.js?v=4" defer></script>{% endif %}
 </head>
 <body class="studio-theme {% if public_ui %}pro-theme v2 bp {% endif %}{% block bodyclass %}{% endblock %}">
+{% if public_ui %}
+<div class="bp-boot" id="bp-boot" aria-hidden="true">
+<div class="bp-boot-plate">
+<span class="bp-boot-leds" aria-hidden="true"><i></i><i></i><i></i></span>
+<span class="bp-boot-label">SanuwarTools · model ST-04</span>
+<span class="bp-boot-title">Booting toolkit</span>
+<span class="bp-boot-track"><i></i></span>
+<span class="bp-boot-status" id="bp-boot-status">Checking modules…</span>
+</div>
+</div>
+{% endif %}
 <a class="skip-link" href="#main">Skip to content</a>
 {% if public_ui %}<div class="bp-frame" aria-hidden="true"></div>{% endif %}
 {% block header %}

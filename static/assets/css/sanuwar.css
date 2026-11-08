@@ -2318,10 +2318,11 @@ html[data-theme="dark"] .bp-hero::before {
 
 /* Hero copy sits on the plaque */
 .bp-machine .bp-title {
-  font-size: clamp(44px, 7.2vw, 96px);
-  font-weight: 500;
-  line-height: 0.98;
-  letter-spacing: -0.045em;
+  font-size: clamp(28px, 3.3vw, 42px);
+  font-weight: 600;
+  line-height: 1.1;
+  letter-spacing: -0.03em;
+  white-space: nowrap;
 }
 
 .bp-machine .bp-hero-line {
@@ -2338,6 +2339,89 @@ html[data-theme="dark"] .bp-hero::before {
 .bp-machine .bp-hero-line b {
   color: var(--bp-ink-2);
   font-weight: 600;
+}
+
+/* Hero actions: one highlighted download plate, one quiet link */
+.bp-hero-actions {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: center;
+  gap: 8px 20px;
+  margin-top: 24px;
+}
+
+.bp-cta {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 9px;
+  min-height: 46px;
+  padding: 0 20px;
+  border: 1px solid color-mix(in oklab, var(--bp-accent) 80%, #000);
+  border-radius: 8px;
+  background: linear-gradient(180deg, var(--bp-accent-2), var(--bp-accent));
+  color: #fff;
+  font-family: var(--bp-mono);
+  font-size: 10.5px;
+  font-weight: 600;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  text-decoration: none;
+  box-shadow:
+    inset 0 1px 0 #ffffff59,
+    0 1px 0 #00000024,
+    0 14px 30px -18px color-mix(in oklab, var(--bp-accent) 78%, transparent),
+    0 0 0 4px var(--bp-accent-wash);
+  transition: transform 0.2s ease, filter 0.2s ease, box-shadow 0.2s ease;
+}
+
+.bp-cta svg {
+  width: 15px;
+  height: 15px;
+  flex: none;
+}
+
+.bp-cta:hover {
+  transform: translateY(-1px);
+  filter: brightness(1.05);
+  box-shadow:
+    inset 0 1px 0 #ffffff59,
+    0 1px 0 #00000024,
+    0 18px 34px -18px color-mix(in oklab, var(--bp-accent) 82%, transparent),
+    0 0 0 4px var(--bp-accent-wash);
+}
+
+.bp-cta:active {
+  transform: translateY(0);
+}
+
+.bp-cta-ghost {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 7px;
+  min-height: 46px;
+  padding: 0 4px;
+  border-bottom: 1px solid transparent;
+  color: var(--bp-muted);
+  font-family: var(--bp-mono);
+  font-size: 10px;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  text-decoration: none;
+  transition: color 0.2s ease, border-color 0.2s ease;
+}
+
+.bp-cta-ghost:hover {
+  color: var(--bp-ink);
+  border-color: var(--bp-line-3);
+}
+
+.bp-cta:focus-visible,
+.bp-cta-ghost:focus-visible {
+  outline: 2px solid var(--bp-accent);
+  outline-offset: 3px;
 }
 
 /* Inset screen block */
@@ -2632,6 +2716,118 @@ body.pro-theme.bp #content-dialog {
     var(--bp-shadow-lift);
 }
 
+/* Boot plate: first visit in a tab, dismissed once the page is ready */
+.bp-boot {
+  display: none;
+  position: fixed;
+  inset: 0;
+  z-index: 500;
+  place-items: center;
+  padding: 24px;
+  background-color: var(--bp-paper);
+  background-image:
+    linear-gradient(var(--bp-grid) 1px, transparent 1px),
+    linear-gradient(90deg, var(--bp-grid) 1px, transparent 1px);
+  background-size: 64px 64px;
+  color: var(--bp-ink);
+  transition: opacity 0.32s ease, visibility 0.32s ease;
+}
+
+html.bp-booting .bp-boot,
+.bp-boot.is-done {
+  display: grid;
+}
+
+.bp-boot.is-done {
+  opacity: 0;
+  visibility: hidden;
+}
+
+.bp-boot-plate {
+  width: min(390px, 100%);
+  padding: 28px 28px 24px;
+  border: 1px solid var(--bp-line-2);
+  border-radius: 16px;
+  background: linear-gradient(180deg, var(--bp-panel-3), var(--bp-panel) 70%);
+  box-shadow:
+    inset 0 1px 0 var(--bp-hi-soft),
+    0 1px 0 var(--bp-hi-soft),
+    var(--bp-shadow-lift);
+  text-align: left;
+}
+
+.bp-boot-leds {
+  display: flex;
+  gap: 4px;
+  margin-bottom: 20px;
+}
+
+.bp-boot-leds i {
+  width: 3px;
+  height: 14px;
+  border-radius: 1px;
+  background: var(--bp-accent);
+  box-shadow: 0 0 8px color-mix(in oklab, var(--bp-accent) 65%, transparent);
+  animation: bp-led-blink 1.6s steps(1, end) infinite;
+}
+
+.bp-boot-leds i:nth-child(2) { animation-delay: 0.35s; }
+.bp-boot-leds i:nth-child(3) { animation-delay: 0.7s; }
+
+.bp-boot-label {
+  display: block;
+  color: var(--bp-faint);
+  font-family: var(--bp-mono);
+  font-size: 8.5px;
+  letter-spacing: 0.24em;
+  text-transform: uppercase;
+}
+
+.bp-boot-title {
+  display: block;
+  margin-top: 10px;
+  font-size: 22px;
+  font-weight: 600;
+  letter-spacing: -0.02em;
+}
+
+.bp-boot-track {
+  display: block;
+  height: 5px;
+  margin-top: 18px;
+  overflow: hidden;
+  border-radius: 3px;
+  background: var(--bp-panel-3);
+  box-shadow: inset 0 1px 2px #0000001f;
+}
+
+.bp-boot-track i {
+  display: block;
+  width: 100%;
+  height: 100%;
+  border-radius: inherit;
+  background: linear-gradient(90deg, var(--bp-accent), var(--bp-accent-2));
+  box-shadow: 0 0 12px color-mix(in oklab, var(--bp-accent) 60%, transparent);
+  transform-origin: left;
+  animation: bp-boot-load 1.1s var(--bp-ease) both;
+}
+
+.bp-boot-status {
+  display: block;
+  margin-top: 10px;
+  color: var(--bp-muted);
+  font-family: var(--bp-mono);
+  font-size: 9px;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+}
+
+@keyframes bp-boot-load {
+  0% { transform: scaleX(0.04); }
+  55% { transform: scaleX(0.7); }
+  100% { transform: scaleX(1); }
+}
+
 /* ---------- 14h. Hardware at smaller sizes ------------------------------ */
 @media (max-width: 900px) {
   .bp-machine {
@@ -2680,12 +2876,29 @@ body.pro-theme.bp #content-dialog {
     display: none;
   }
   .bp-machine .bp-title {
-    font-size: clamp(36px, 11vw, 56px);
+    font-size: clamp(24px, 6.4vw, 30px);
   }
   .bp-machine .bp-hero-line {
     margin-top: 16px;
     font-size: 11px;
     line-height: 1.7;
+  }
+  .bp-hero-actions {
+    flex-direction: column;
+    align-items: stretch;
+    gap: 6px;
+    margin-top: 20px;
+  }
+  .bp-cta,
+  .bp-cta-ghost {
+    width: 100%;
+  }
+  .bp-cta {
+    min-height: 50px;
+    font-size: 11px;
+  }
+  .bp-cta-ghost {
+    min-height: 34px;
   }
   .bp-machine .bp-console {
     margin-top: 22px;
@@ -3017,8 +3230,9 @@ body.pro-theme.bp #content-dialog {
   body.pro-theme.bp .brand {
     font-size: 13px;
   }
-  .bp-title {
-    font-size: 36px;
+  .bp-machine .bp-title {
+    font-size: 21px;
+    letter-spacing: -0.035em;
   }
   body.pro-theme.bp .catalogue-card {
     padding: 14px;

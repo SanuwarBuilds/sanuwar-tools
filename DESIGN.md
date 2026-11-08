@@ -21,13 +21,14 @@ Public routes are the ones listed in `public_ui` in `templates/base.html`. They 
 - **Type:** locally hosted Manrope for display and body. System monospace for plaque labels, counts, screens and metadata. Section headings are uppercase and medium weight; the hero headline stays sentence case.
 - **Surfaces:** embossed hardware plates with a double bezel, 14–22px radii, hairline borders, recessed corner screws, vent slots and LED strips.
 - **Accent:** one oxidized orange (`#d45420` light, `#e2642e` dark) reserved for LEDs, eyebrows, status dots, links and hover traces. Everything else is greyscale.
-- **Signature:** the hero is a "toolkit computer" plaque — three blinking orange LEDs, a model label, an etched mark and a recessed search screen with a slow scanline. Tool cards read as modules with an LED strip and an etched icon socket. The footer is a dark charcoal board that closes the page.
-- **Motion:** LED blink, scanline sweep, hover lift and the section rise-in. All of it is decorative and disabled by `prefers-reduced-motion`.
+- **Signature:** the hero is a "toolkit computer" plaque — three blinking orange LEDs, a model label, an etched mark, a compact one-line headline, a highlighted download key, and a recessed search screen with a slow scanline. Tool cards read as modules with an LED strip and an etched icon socket. The footer is a dark charcoal board that closes the page.
+- **Motion:** LED blink, scanline sweep, hover lift, the section rise-in and a one-per-session boot plate on first load. All of it is decorative and disabled by `prefers-reduced-motion`.
 
 ## Structure
 
 - **Header:** sticky frosted bar with the brand chip, mono uppercase navigation, theme toggle and sign-in pill. Below 900px the navigation becomes a sheet with a scrim and closes on Escape, outside click, focus loss or resize.
-- **Homepage:** mono status rails, the hero machine plaque (headline, one-line lede, search screen and category keys), then "Tools" modules, the featured Photo Tools panel, "Downloads", "How it works" and the board footer. `#tools`, `#how-it-works`, `#tool-search`, `#categories`, `#tools-grid`, `#tool-total` and `#widgets` keep their original ids so `main.js` is untouched.
+- **Homepage:** mono status rails, the hero machine plaque (compact one-line headline, highlighted "Download apps & files" key, browse-all link, search screen and category keys), then "Tools" modules, the featured Photo Tools panel, "Downloads", "How it works" and the board footer. `#tools`, `#how-it-works`, `#tool-search`, `#categories`, `#tools-grid`, `#tool-total` and `#widgets` keep their original ids so `main.js` is untouched.
+- **Boot plate:** `boot.js` adds `bp-booting` on the first page of a tab session; the plaque shows a short progress fill, then `sanuwar.js` removes it once the page is ready (4.2s failsafe in `boot.js`).
 - **Downloads:** plaque page head with real collection counts, a hardware filter panel, then the card grid. `downloads.js` renders the cards; `_initial_downloads.html` mirrors that markup for no-JS crawlers, including album file lists.
 - **Footer:** a dark rounded board with brand, tagline and social pills beside two labelled link columns, then copyright and a status mark.
 - **Reading pages:** sign-in, account and information pages use the same embossed plate language at a smaller scale.

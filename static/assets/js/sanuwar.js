@@ -4,6 +4,39 @@
   const root = document.documentElement;
   const reduceMotion = matchMedia('(prefers-reduced-motion: reduce)');
 
+  /* Boot plate: dismissed once the page is ready. */
+  const boot = document.getElementById('bp-boot');
+  if (boot) {
+    if (root.classList.contains('bp-booting')) {
+      const status = document.getElementById('bp-boot-status');
+      const messages = ['Checking modules…', 'Loading archive…', 'Ready.'];
+      const started = performance.now();
+      let step = 0;
+      let done = false;
+      const cycle = window.setInterval(() => {
+        step = Math.min(step + 1, messages.length - 1);
+        if (status) status.textContent = messages[step];
+      }, 650);
+      const finish = () => {
+        if (done) return;
+        done = true;
+        window.clearInterval(cycle);
+        if (status) status.textContent = messages[messages.length - 1];
+        boot.classList.add('is-done');
+        root.classList.remove('bp-booting');
+        window.setTimeout(() => boot.remove(), 450);
+      };
+      const settle = () => window.setTimeout(finish, Math.max(0, 800 - (performance.now() - started)));
+      if (document.readyState === 'complete') settle();
+      else window.addEventListener('load', settle, { once: true });
+      window.setTimeout(finish, 3800);
+    } else {
+      boot.remove();
+    }
+  } else {
+    root.classList.remove('bp-booting');
+  }
+
   /* Theme button label mirrors the current theme. */
   const toggle = document.getElementById('theme-toggle');
   const themeColor = document.querySelector('meta[name="theme-color"]');
