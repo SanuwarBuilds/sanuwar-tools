@@ -1,7 +1,7 @@
 /* ==========================================================================
-   SanuwarTools · "Blue Console"
-   A light technical-blueprint interface: paper-grey boards, hairline frames,
-   mono micro-labels, embossed hardware panels and a copper-orange accent.
+   SanuwarTools · "Vector Machine"
+   A warm-grey hardware shell: embossed plates, mono plaque labels, orange
+   status LEDs and a blueprint grid. Retro computing, kept quiet.
    Loaded last on public routes only (admin keeps its own workspace styles).
    ========================================================================== */
 
@@ -12,8 +12,8 @@
 
   --bp-max: 1240px;
   --bp-header-h: 68px;
-  --bp-radius: 12px;
-  --bp-radius-sm: 8px;
+  --bp-radius: 14px;
+  --bp-radius-sm: 9px;
 
   --bp-ease: cubic-bezier(0.22, 1, 0.36, 1);
   --bp-hatch: repeating-linear-gradient(
@@ -26,70 +26,88 @@
 /* Light (default) */
 html[data-theme="light"] .pro-theme,
 .pro-theme {
-  --bp-paper: #e7e9eb;
-  --bp-paper-2: #dfe2e5;
-  --bp-panel: #f1f2f4;
-  --bp-panel-2: #f9fafb;
-  --bp-panel-3: #eceef0;
+  --bp-paper: #e3e4e5;
+  --bp-paper-2: #d8dadb;
+  --bp-panel: #edeef0;
+  --bp-panel-2: #f6f7f8;
+  --bp-panel-3: #e4e6e8;
 
-  --bp-ink: #17191c;
-  --bp-ink-2: #3b3f45;
-  --bp-muted: #686d74;
-  --bp-faint: #858b92;
+  --bp-ink: #22262a;
+  --bp-ink-2: #3e4449;
+  --bp-muted: #646c73;
+  --bp-faint: #858d94;
 
-  --bp-line: #cfd3d8;
+  --bp-line: #c8ccd0;
   --bp-line-2: #b4bac0;
-  --bp-line-3: #8f959c;
+  --bp-line-3: #8f979e;
 
-  --bp-accent: #d1501b;
-  --bp-accent-2: #ff6a3d;
-  --bp-accent-wash: #d1501b12;
+  --bp-accent: #d45420;
+  --bp-accent-2: #ef7a45;
+  --bp-accent-wash: #d4542014;
 
-  --bp-screen: #191b1f;
-  --bp-screen-2: #24272c;
-  --bp-screen-ink: #e9ebee;
-  --bp-screen-muted: #8f969d;
+  --bp-screen: #202428;
+  --bp-screen-2: #2b3034;
+  --bp-screen-ink: #eef0f2;
+  --bp-screen-muted: #8f979e;
 
-  --bp-grid: #0000000a;
-  --bp-grid-strong: #00000012;
+  --bp-grid: #10141a0a;
+  --bp-grid-strong: #10141a12;
+  --bp-hi: #ffffff;
+  --bp-hi-soft: #ffffffb3;
   --bp-emboss: inset 0 1px 0 #ffffff;
-  --bp-shadow: 0 1px 2px #10141a0a, 0 14px 30px -22px #10141a3d;
-  --bp-shadow-lift: 0 1px 2px #10141a0f, 0 26px 50px -30px #10141a52;
+  --bp-shadow: 0 1px 2px #14181b0d, 0 16px 34px -26px #14181b45;
+  --bp-shadow-lift: 0 1px 2px #14181b12, 0 28px 58px -34px #14181b5c;
+
+  --bp-board: #191c1f;
+  --bp-board-2: #121416;
+  --bp-board-ink: #e9ebed;
+  --bp-board-muted: #9aa1a8;
+  --bp-board-faint: #7d858c;
+  --bp-board-line: #ffffff1c;
 
   color-scheme: light;
 }
 
 /* Dark */
 html[data-theme="dark"] .pro-theme {
-  --bp-paper: #0e1012;
-  --bp-paper-2: #0a0c0e;
-  --bp-panel: #171a1d;
-  --bp-panel-2: #1d2024;
-  --bp-panel-3: #141719;
+  --bp-paper: #141618;
+  --bp-paper-2: #0f1112;
+  --bp-panel: #1d2023;
+  --bp-panel-2: #24272a;
+  --bp-panel-3: #191c1e;
 
-  --bp-ink: #eceef0;
-  --bp-ink-2: #c4c8cc;
-  --bp-muted: #92979d;
-  --bp-faint: #767b81;
+  --bp-ink: #edeff0;
+  --bp-ink-2: #c7cbce;
+  --bp-muted: #969ca2;
+  --bp-faint: #7a8188;
 
-  --bp-line: #2a2e32;
-  --bp-line-2: #3a3f45;
-  --bp-line-3: #4d535a;
+  --bp-line: #2c3134;
+  --bp-line-2: #3c4145;
+  --bp-line-3: #52585e;
 
-  --bp-accent: #ff6a3d;
-  --bp-accent-2: #ff8a63;
-  --bp-accent-wash: #ff6a3d14;
+  --bp-accent: #e2642e;
+  --bp-accent-2: #f08a58;
+  --bp-accent-wash: #e2642e1a;
 
-  --bp-screen: #070809;
-  --bp-screen-2: #14171a;
-  --bp-screen-ink: #e9ebee;
-  --bp-screen-muted: #848b92;
+  --bp-screen: #0a0c0d;
+  --bp-screen-2: #171a1c;
+  --bp-screen-ink: #eef0f1;
+  --bp-screen-muted: #8b9298;
 
-  --bp-grid: #ffffff07;
-  --bp-grid-strong: #ffffff0d;
-  --bp-emboss: inset 0 1px 0 #ffffff0d;
-  --bp-shadow: 0 1px 2px #00000040, 0 16px 34px -24px #000000b3;
-  --bp-shadow-lift: 0 1px 2px #00000059, 0 30px 60px -30px #000000d9;
+  --bp-grid: #ffffff08;
+  --bp-grid-strong: #ffffff10;
+  --bp-hi: #ffffff10;
+  --bp-hi-soft: #ffffff08;
+  --bp-emboss: inset 0 1px 0 #ffffff14;
+  --bp-shadow: 0 1px 2px #00000059, 0 20px 42px -26px #000000bf;
+  --bp-shadow-lift: 0 1px 2px #00000073, 0 32px 64px -32px #000000e6;
+
+  --bp-board: #0c0e10;
+  --bp-board-2: #08090a;
+  --bp-board-ink: #e9ebed;
+  --bp-board-muted: #939aa1;
+  --bp-board-faint: #6f777e;
+  --bp-board-line: #ffffff14;
 
   color-scheme: dark;
 }
@@ -2140,6 +2158,550 @@ body.pro-theme.bp .photo-wrap {
   }
 }
 
+/* ---------- 14b. Vector machine hardware -------------------------------- */
+/* Warm-grey module shells, etched labels, orange status LEDs and blueprint
+   traces. All decoration is decorative only; layout and hooks are unchanged. */
+
+/* Motherboard traces behind the hero plaque */
+.bp-hero {
+  isolation: isolate;
+}
+
+.bp-hero::before {
+  content: "";
+  position: absolute;
+  inset: 8px 0 0;
+  z-index: -1;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='1400' height='760' viewBox='0 0 1400 760'%3E%3Cg fill='none' stroke='%238f979e' stroke-width='1' opacity='.45'%3E%3Cpath d='M30 150h210v104h150M30 520h140v-96h180M1120 120v92h180v118M1120 640h190v-92h70'/%3E%3C/g%3E%3Cg fill='none' stroke='%23d45420' stroke-width='1.2' opacity='.5'%3E%3Cpath d='M0 300h250v-64h150M1180 330h220M1010 700h100v-88h180'/%3E%3C/g%3E%3Cg fill='%23d45420'%3E%3Ccircle cx='400' cy='236' r='2.4'/%3E%3Ccircle cx='250' cy='300' r='2.4'/%3E%3Ccircle cx='1180' cy='330' r='2.4'/%3E%3Ccircle cx='1110' cy='612' r='2.4'/%3E%3C/g%3E%3C/svg%3E");
+  background-repeat: no-repeat;
+  background-position: center 58%;
+  background-size: min(1360px, 100%) auto;
+  opacity: 0.55;
+  pointer-events: none;
+}
+
+html[data-theme="dark"] .bp-hero::before {
+  opacity: 0.35;
+}
+
+/* Live status dot */
+.bp-hero-nav i {
+  animation: bp-led-pulse 3.2s ease-in-out infinite;
+}
+
+@keyframes bp-led-pulse {
+  0%, 100% { opacity: 1; box-shadow: 0 0 0 2px var(--bp-accent-wash); }
+  50% { opacity: 0.55; box-shadow: 0 0 0 4px var(--bp-accent-wash), 0 0 10px var(--bp-accent); }
+}
+
+/* The hero module */
+.bp-machine {
+  position: relative;
+  width: min(100%, 920px);
+  margin: 0 auto;
+  padding: clamp(40px, 5vw, 64px) clamp(24px, 5.5vw, 76px) clamp(34px, 4vw, 52px);
+  border: 1px solid var(--bp-line-2);
+  border-radius: 22px;
+  background: linear-gradient(180deg, var(--bp-panel-3), var(--bp-panel) 60%);
+  box-shadow:
+    inset 0 1px 0 var(--bp-hi-soft),
+    0 1px 0 var(--bp-hi-soft),
+    var(--bp-shadow-lift);
+  isolation: isolate;
+  text-align: center;
+}
+
+.bp-machine::before {
+  content: "";
+  position: absolute;
+  inset: 9px;
+  z-index: -1;
+  border: 1px solid var(--bp-line);
+  border-radius: 16px;
+  background: linear-gradient(180deg, var(--bp-panel-2), var(--bp-panel) 70%);
+  box-shadow: inset 0 1px 0 var(--bp-hi);
+}
+
+/* Vent slots along the bottom edge */
+.bp-machine::after {
+  content: "";
+  position: absolute;
+  left: 50%;
+  bottom: 14px;
+  width: 116px;
+  height: 5px;
+  transform: translateX(-50%);
+  border-radius: 2px;
+  background: repeating-linear-gradient(90deg, var(--bp-line-3) 0 2px, transparent 2px 7px);
+  opacity: 0.5;
+  pointer-events: none;
+}
+
+/* Status LEDs, top-left */
+.bp-leds {
+  position: absolute;
+  top: 26px;
+  left: 30px;
+  display: flex;
+  gap: 4px;
+}
+
+.bp-leds i {
+  width: 3px;
+  height: 15px;
+  border-radius: 1px;
+  background: var(--bp-accent);
+  box-shadow: 0 0 7px color-mix(in oklab, var(--bp-accent) 65%, transparent);
+  animation: bp-led-blink 4.4s steps(1, end) infinite;
+}
+
+.bp-leds i:nth-child(2) { animation-delay: 0.5s; }
+.bp-leds i:nth-child(3) { animation-delay: 1s; }
+
+@keyframes bp-led-blink {
+  0%, 86%, 100% { opacity: 1; }
+  88%, 94% { opacity: 0.35; }
+}
+
+/* Plaque model label */
+.bp-machine-label {
+  position: absolute;
+  top: 23px;
+  left: 50%;
+  transform: translateX(-50%);
+  color: var(--bp-faint);
+  font-family: var(--bp-mono);
+  font-size: 8.5px;
+  letter-spacing: 0.24em;
+  text-transform: uppercase;
+  white-space: nowrap;
+}
+
+/* Recessed corner screws */
+.bp-screw {
+  position: absolute;
+  width: 9px;
+  height: 9px;
+  border-radius: 50%;
+  background:
+    linear-gradient(45deg, transparent 44%, var(--bp-line-3) 45% 55%, transparent 56%),
+    radial-gradient(circle at 35% 30%, var(--bp-panel-2), var(--bp-line-2) 72%);
+  box-shadow: inset 0 0 0 1px #00000021, 0 1px 0 var(--bp-hi);
+}
+
+.bp-screw.is-tl { top: 15px; left: 15px; }
+.bp-screw.is-tr { top: 15px; right: 15px; }
+.bp-screw.is-bl { bottom: 15px; left: 15px; }
+.bp-screw.is-br { bottom: 15px; right: 15px; }
+
+/* Etched chip mark, top-right */
+.bp-etched {
+  position: absolute;
+  top: clamp(30px, 4vw, 46px);
+  right: clamp(26px, 4.5vw, 54px);
+  display: grid;
+  place-items: center;
+  width: 40px;
+  height: 40px;
+  padding-bottom: 3px;
+  border: 1px solid var(--bp-line);
+  border-radius: 9px;
+  background: linear-gradient(150deg, var(--bp-panel-2), var(--bp-panel-3));
+  box-shadow: inset 0 1px 1px var(--bp-hi), 0 1px 2px #0000000f;
+  color: var(--bp-line-3);
+  font-size: 20px;
+  font-weight: 800;
+  line-height: 1;
+  opacity: 0.8;
+  pointer-events: none;
+}
+
+/* Hero copy sits on the plaque */
+.bp-machine .bp-title {
+  font-size: clamp(44px, 7.2vw, 96px);
+  font-weight: 500;
+  line-height: 0.98;
+  letter-spacing: -0.045em;
+}
+
+.bp-machine .bp-hero-line {
+  max-width: 54ch;
+  margin: 20px auto 0;
+  color: var(--bp-muted);
+  font-family: var(--bp-mono);
+  font-size: 12px;
+  line-height: 1.8;
+  letter-spacing: 0.015em;
+  text-wrap: pretty;
+}
+
+.bp-machine .bp-hero-line b {
+  color: var(--bp-ink-2);
+  font-weight: 600;
+}
+
+/* Inset screen block */
+.bp-machine .bp-console {
+  margin-top: 30px;
+  padding: 10px;
+  border: 1px solid var(--bp-line-3);
+  border-radius: 12px;
+  background: linear-gradient(180deg, var(--bp-panel-3), var(--bp-panel));
+  box-shadow:
+    inset 0 1px 0 var(--bp-hi),
+    0 1px 0 var(--bp-hi-soft),
+    0 18px 36px -28px #000000a6;
+}
+
+.bp-machine .bp-console-bar {
+  padding: 2px 10px 10px;
+}
+
+.bp-machine .bp-screen {
+  position: relative;
+  overflow: hidden;
+  border: 1px solid var(--bp-line-3);
+  box-shadow:
+    inset 0 2px 12px #000000b3,
+    inset 0 0 0 1px #ffffff0d;
+}
+
+.bp-machine .bp-screen::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(115deg, #ffffff12 0%, transparent 34%);
+  pointer-events: none;
+}
+
+.bp-machine .bp-screen::after {
+  content: "";
+  position: absolute;
+  left: 0;
+  right: 0;
+  top: -6%;
+  height: 1px;
+  background: linear-gradient(90deg, transparent, #e2642ecc, transparent);
+  opacity: 0;
+  animation: bp-scan 7.5s linear infinite;
+  pointer-events: none;
+}
+
+@keyframes bp-scan {
+  0% { top: -4%; opacity: 0; }
+  12% { opacity: 0.7; }
+  88% { opacity: 0.45; }
+  100% { top: 104%; opacity: 0; }
+}
+
+.bp-machine .filter-tab {
+  background: linear-gradient(180deg, var(--bp-panel-2), var(--bp-panel-3));
+}
+
+/* Section headings read like plaque titles */
+body.pro-theme.bp .bp-section-head h2 {
+  font-size: clamp(24px, 3vw, 32px);
+  font-weight: 500;
+  letter-spacing: 0.005em;
+  text-transform: uppercase;
+}
+
+/* ---------- 14c. Tool modules ------------------------------------------- */
+body.pro-theme.bp .catalogue-card {
+  border-radius: 16px;
+  background: linear-gradient(180deg, var(--bp-panel-2), var(--bp-panel));
+  box-shadow:
+    inset 0 1px 0 var(--bp-hi),
+    0 1px 0 var(--bp-hi-soft),
+    var(--bp-shadow);
+}
+
+/* LED strip replaces the hover-only top hairline */
+body.pro-theme.bp .catalogue-card::before {
+  top: 16px;
+  left: 24px;
+  right: auto;
+  width: 24px;
+  height: 4px;
+  background: repeating-linear-gradient(90deg, var(--bp-accent) 0 4px, transparent 4px 8px);
+  transform: none;
+  opacity: 0.9;
+  transition: opacity 0.2s, filter 0.2s;
+}
+
+body.pro-theme.bp .catalogue-card:hover::before,
+body.pro-theme.bp .catalogue-card:focus-within::before {
+  transform: none;
+  opacity: 1;
+  filter: drop-shadow(0 0 6px var(--bp-accent));
+}
+
+body.pro-theme.bp .catalogue-card:hover {
+  box-shadow:
+    inset 0 1px 0 var(--bp-hi),
+    0 0 0 1px var(--bp-accent-wash),
+    var(--bp-shadow-lift);
+}
+
+/* Icon sits in an etched socket */
+body.pro-theme.bp .catalogue-icon {
+  width: 52px;
+  height: 52px;
+  padding: 9px;
+  border: 1px solid var(--bp-line);
+  border-radius: 10px;
+  background: linear-gradient(160deg, var(--bp-panel-3), var(--bp-panel-2));
+  box-shadow: inset 0 1px 2px #00000014, 0 1px 0 var(--bp-hi);
+  object-fit: contain;
+  filter: none;
+}
+
+/* ---------- 14d. Archive hardware --------------------------------------- */
+body.pro-theme.bp .download-controls {
+  position: relative;
+  padding: 14px;
+  border-radius: 16px;
+  background: linear-gradient(180deg, var(--bp-panel-2), var(--bp-panel));
+  box-shadow:
+    inset 0 1px 0 var(--bp-hi),
+    0 1px 0 var(--bp-hi-soft),
+    var(--bp-shadow);
+}
+
+body.pro-theme.bp .download-controls::before {
+  content: "";
+  position: absolute;
+  top: 6px;
+  left: 18px;
+  width: 18px;
+  height: 3px;
+  border-radius: 1px;
+  background: repeating-linear-gradient(90deg, var(--bp-accent) 0 3px, transparent 3px 6px);
+  opacity: 0.8;
+}
+
+body.pro-theme.bp .download-card {
+  border-radius: 16px;
+  background: linear-gradient(180deg, var(--bp-panel-2), var(--bp-panel));
+  box-shadow:
+    inset 0 1px 0 var(--bp-hi),
+    0 1px 0 var(--bp-hi-soft),
+    var(--bp-shadow);
+}
+
+body.pro-theme.bp .download-card .card-visual {
+  border-radius: 10px;
+}
+
+/* ---------- 14e. Flow dock ---------------------------------------------- */
+.bp-flow {
+  border-radius: 16px;
+  background: linear-gradient(180deg, var(--bp-panel-2), var(--bp-panel));
+  box-shadow:
+    inset 0 1px 0 var(--bp-hi),
+    0 1px 0 var(--bp-hi-soft),
+    var(--bp-shadow);
+}
+
+.bp-flow article {
+  position: relative;
+}
+
+.bp-flow article::before {
+  content: "";
+  position: absolute;
+  top: 22px;
+  right: 22px;
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: var(--bp-accent);
+  box-shadow: 0 0 8px color-mix(in oklab, var(--bp-accent) 60%, transparent);
+  opacity: 0.7;
+}
+
+/* ---------- 14f. Board footer ------------------------------------------- */
+body.pro-theme.bp .site-footer {
+  position: relative;
+  margin-top: clamp(56px, 7vw, 96px);
+  margin-bottom: clamp(20px, 3vw, 40px);
+  padding: 0;
+  border: 1px solid var(--bp-line-2);
+  border-radius: 20px;
+  background:
+    radial-gradient(120% 90% at 50% 0%, #ffffff0d, transparent 55%),
+    linear-gradient(180deg, var(--bp-board), var(--bp-board-2));
+  box-shadow: var(--bp-shadow-lift);
+  color: var(--bp-board-ink);
+  overflow: hidden;
+}
+
+body.pro-theme.bp .site-footer::before {
+  content: "";
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 8px;
+  background-image: repeating-linear-gradient(90deg, var(--bp-board-line) 0 1px, transparent 1px 14px);
+  opacity: 0.8;
+  pointer-events: none;
+}
+
+body.pro-theme.bp .v2-footer-grid {
+  display: grid;
+  grid-template-columns: minmax(0, 1.2fr) minmax(0, 1fr);
+  gap: clamp(28px, 5vw, 72px);
+  align-items: start;
+  padding: 46px clamp(22px, 4vw, 44px) 30px;
+}
+
+body.pro-theme.bp .site-footer .brand {
+  color: var(--bp-board-ink);
+}
+
+body.pro-theme.bp .site-footer .brand-symbol {
+  background: var(--bp-board-2);
+  border: 1px solid var(--bp-board-line);
+  color: var(--bp-board-ink);
+  box-shadow: inset 0 1px 0 #ffffff1a;
+}
+
+body.pro-theme.bp .site-footer .brand-dot {
+  color: var(--bp-accent-2);
+}
+
+body.pro-theme.bp .site-footer .v2-footer-tag {
+  color: var(--bp-board-muted);
+}
+
+body.pro-theme.bp .site-footer .v2-footer-col h2 {
+  color: var(--bp-board-faint);
+}
+
+body.pro-theme.bp .site-footer .v2-footer-nav a {
+  color: var(--bp-board-muted);
+}
+
+body.pro-theme.bp .site-footer .v2-footer-nav a:hover {
+  color: var(--bp-board-ink);
+}
+
+body.pro-theme.bp .site-footer .v2-footer-social a {
+  border-color: var(--bp-board-line);
+  color: var(--bp-board-muted);
+}
+
+body.pro-theme.bp .site-footer .v2-footer-social a:hover {
+  border-color: #ffffff3d;
+  background: #ffffff0d;
+  color: var(--bp-board-ink);
+}
+
+body.pro-theme.bp .site-footer .v2-footer-bottom {
+  padding-inline: clamp(22px, 4vw, 44px);
+  border-top: 1px solid var(--bp-board-line);
+}
+
+body.pro-theme.bp .site-footer .copyright {
+  color: var(--bp-board-faint);
+}
+
+body.pro-theme.bp .site-footer .v2-footer-mark {
+  color: var(--bp-board-faint);
+}
+
+body.pro-theme.bp .site-footer .v2-footer-mark i {
+  background: var(--bp-accent-2);
+  box-shadow: 0 0 8px color-mix(in oklab, var(--bp-accent-2) 60%, transparent);
+}
+
+/* ---------- 14g. Reading surfaces --------------------------------------- */
+body.pro-theme.bp .visitor-card h1,
+body.pro-theme.bp .information-page h1,
+body.pro-theme.bp #content-dialog .dialog-head h2 {
+  font-weight: 500;
+}
+
+body.pro-theme.bp .visitor-card,
+body.pro-theme.bp #content-dialog {
+  background: linear-gradient(180deg, var(--bp-panel-2), var(--bp-panel));
+  box-shadow:
+    inset 0 1px 0 var(--bp-hi),
+    0 1px 0 var(--bp-hi-soft),
+    var(--bp-shadow-lift);
+}
+
+/* ---------- 14h. Hardware at smaller sizes ------------------------------ */
+@media (max-width: 900px) {
+  .bp-machine {
+    padding: clamp(34px, 6vw, 48px) clamp(20px, 5vw, 40px) 30px;
+    border-radius: 18px;
+  }
+  .bp-machine::before {
+    border-radius: 13px;
+  }
+  .bp-machine-label {
+    display: none;
+  }
+  .bp-etched {
+    top: 24px;
+    right: 24px;
+    width: 34px;
+    height: 34px;
+    font-size: 17px;
+  }
+  body.pro-theme.bp .v2-footer-grid {
+    grid-template-columns: 1fr;
+    gap: 28px;
+    padding-block: 38px 26px;
+  }
+}
+
+@media (max-width: 680px) {
+  .bp-machine {
+    padding: 32px 16px 26px;
+    border-radius: 16px;
+  }
+  .bp-machine::before {
+    inset: 7px;
+    border-radius: 11px;
+  }
+  .bp-leds {
+    top: 20px;
+    left: 20px;
+  }
+  .bp-leds i {
+    height: 11px;
+  }
+  .bp-etched,
+  .bp-screw.is-tr,
+  .bp-screw.is-br {
+    display: none;
+  }
+  .bp-machine .bp-title {
+    font-size: clamp(36px, 11vw, 56px);
+  }
+  .bp-machine .bp-hero-line {
+    margin-top: 16px;
+    font-size: 11px;
+    line-height: 1.7;
+  }
+  .bp-machine .bp-console {
+    margin-top: 22px;
+    padding: 8px;
+  }
+  body.pro-theme.bp .site-footer {
+    border-radius: 16px;
+  }
+  body.pro-theme.bp .v2-footer-grid {
+    padding: 32px 18px 22px;
+  }
+  body.pro-theme.bp .site-footer .v2-footer-bottom {
+    padding-inline: 18px;
+  }
+}
+
 /* ---------- 15. Responsive ---------------------------------------------- */
 @media (max-width: 1100px) {
   .bp-footer-grid {
@@ -2490,8 +3052,18 @@ body.pro-theme.bp .photo-wrap {
 /* ---------- 17. Print ---------------------------------------------------- */
 @media print {
   body.pro-theme.bp .site-header,
+  body.pro-theme.bp .site-footer,
   .bp-frame,
   .bp-console {
+    display: none !important;
+  }
+  .bp-machine::before,
+  .bp-machine::after,
+  .bp-hero::before,
+  .bp-leds,
+  .bp-machine-label,
+  .bp-screw,
+  .bp-etched {
     display: none !important;
   }
   body.pro-theme.bp {
