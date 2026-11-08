@@ -145,7 +145,7 @@
                         b.disabled = true;
                         b.textContent = `${result.options[i].text || result.options[i].label || "Option"} · ${result.options[i].votes || 0} votes`;
                       });
-                      toast("Vote save ho gaya. Thank you!");
+                      toast("Vote saved. Thank you!");
                     } catch (error) {
                       toast(error.message);
                       button.disabled = false;

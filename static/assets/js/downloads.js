@@ -89,7 +89,7 @@
       : el(
           "span",
           { class: "file-date unknown-date" },
-          "Upload date available nahi hai",
+          "Upload date not available",
         );
   };
   function downloadLink(raw, title = "Download", analyticsItem = "") {
@@ -117,7 +117,7 @@
         download: "",
         "data-google-vignette": "false",
         onclick: () =>
-          toast("Download link open hua. Browser mein download status dekho."),
+          toast("Download link opened. Check your browser for the download."),
       },
       title,
       el("span", {}, "↓"),
@@ -284,7 +284,7 @@
             el(
               "p",
               {},
-              "Preview load nahi hua. Original file open ya download karo.",
+              "Preview did not load. Open or download the original file.",
             ),
           ),
         { once: true },
@@ -388,7 +388,7 @@
           el(
             "p",
             { class: "form-note" },
-            "Payment verify hone ke baad sab files download kar sakte ho.",
+            "You can download every file once the payment is verified.",
           ),
         ],
         "PAID ALBUM",
@@ -425,7 +425,7 @@
               "aria-label": `Preview ${name}`,
               onclick: () =>
                 file.private_delivery
-                  ? toast("Private file ka preview download ke baad dekho.")
+                  ? toast("Preview this private file after downloading it.")
                   : showMedia(files, index),
             },
             ...(type.kind === "image"
@@ -457,8 +457,8 @@
       if (!visible.length)
         empty(
           gallery,
-          "Koi file nahi mili.",
-          "File name badal kar search karo.",
+          "No files found.",
+          "Try a different file name.",
         );
     };
     search.addEventListener("input", draw);
@@ -473,7 +473,7 @@
           el(
             "p",
             {},
-            "Photo par tap karke dekho, phir apni pasand ki file download karo.",
+            "Tap a photo to preview it, then download the file you need.",
           ),
         ),
         ...(files.length > 6
@@ -562,8 +562,8 @@
     if (!filtered.length)
       return empty(
         grid,
-        "Koi result nahi mila.",
-        "Search ya category badal kar dekho.",
+        "No results found.",
+        "Try another search or category.",
         () => {
           $("#download-search").value = "";
           selected = "All";

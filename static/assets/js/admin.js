@@ -27,14 +27,14 @@
       "Downloads",
       "THE GOOD STUFF",
       "A better place for every file.",
-      "Apps, albums aur files ko ek jagah manage karo.",
+      "Manage apps, albums and files in one place.",
       "Add a download",
     ],
     widgets: [
       "Home widgets",
       "MAKE IT YOURS",
       "Give your homepage a little life.",
-      "Announcements, links, polls aur updates ko publish karo.",
+      "Publish announcements, links, polls and updates.",
       "Add a widget",
     ],
     store: [
@@ -55,21 +55,21 @@
       "Site settings",
       "THE FINISHING TOUCHES",
       "Make it feel like you.",
-      "Brand, links aur default theme ko update karo.",
+      "Update your brand, links and default theme.",
       "",
     ],
     payments: [
       "Payments",
       "PRICES & PURCHASES",
       "Your downloads, your prices.",
-      "Downloads editor se Free/Paid, price aur discount set karo.",
+      "Set Free/Paid, price and discount from the downloads editor.",
       "",
     ],
     backup: [
       "Backup & restore",
       "A LITTLE PEACE OF MIND",
       "Keep a copy of the good work.",
-      "Tools configuration export karo ya saved backup restore karo.",
+      "Export your tools configuration or restore a saved backup.",
       "",
     ],
   };
@@ -439,7 +439,7 @@
             try {
               const result = await mutate(`/api/admin/content/${kind}/${encodeURIComponent(item.id)}/availability`, "PATCH", { enabled: !enabled });
               Object.assign(item, result.item);
-              toast(enabled ? "Disabled · Public website se hata diya." : "Enabled · Public website par available hai.");
+              toast(enabled ? "Disabled · Removed from the public website." : "Enabled · Available on the public website.");
               updateCounts();
               draw();
             } finally {
@@ -575,7 +575,7 @@
             el(
               "td",
               { colspan: "4" },
-              "Koi result nahi mila. Search badal kar dekho.",
+              "No results found. Try a different search.",
             ),
           ),
         );
@@ -634,7 +634,7 @@
             el(
               "p",
               { class: "form-note" },
-              "Multiple files ko upload karo. Individual downloads banao, ya ek album mein saath rakho.",
+              "Upload multiple files. Create individual downloads, or keep them together in one album.",
             ),
             el(
               "div",
@@ -705,12 +705,12 @@
       event.preventDefault();
       error.textContent = "";
       if (Number(form.dataset.pendingUploads || 0)) {
-        error.textContent = "Upload complete hone tak wait karo.";
+        error.textContent = "Wait for the upload to finish.";
         return;
       }
       if (form.querySelector("[data-upload-error]")) {
         error.textContent =
-          "Upload fail hua hai. Retry karo ya failed file selection clear karo.";
+          "Upload failed. Retry, or clear the failed file selection.";
         return;
       }
       submit.disabled = true;
@@ -753,7 +753,7 @@
       delete input.dataset.uploadError;
       if (file.size > 32 * 1024 * 1024) {
         input.dataset.uploadError = "1";
-        status.textContent = "File 32 MB se chhoti honi chahiye.";
+        status.textContent = "Each file must be smaller than 32 MB.";
         return;
       }
       const data = new FormData();
@@ -937,8 +937,8 @@
     function updatePrice() {
       price.input.disabled = discount.input.disabled = !isPaid();
       finalPrice.textContent = isPaid()
-        ? `Customer pays ₹${Math.max(0, Number(price.input.value) - Number(discount.input.value)).toFixed(2)} · Poore album ke sab files included. Paid files private upload se dobara upload karo; cover public preview rahega.`
-        : "Free download · Payment ki zarurat nahi.";
+        ? `Customer pays ₹${Math.max(0, Number(price.input.value) - Number(discount.input.value)).toFixed(2)} · Every file in the album is included. Upload paid files again through a private upload; the cover stays publicly previewable.`
+        : "Free download · No payment needed.";
       toggle();
     }
     [access.input, price.input, discount.input].forEach((input) =>
@@ -1092,7 +1092,7 @@
             : [],
         };
         if (payload.is_album && !payload.album_files.length)
-          throw new Error("Album mein kam se kam ek file add karo.");
+          throw new Error("Add at least one file to the album.");
         if (item) {
           const result = await mutate("/api/update_item", "PUT", payload);
           downloads = downloads.map((d) =>
@@ -1132,7 +1132,7 @@
         el(
           "p",
           { class: "dialog-description" },
-          `“${name}” ko catalogue se delete karoge. Uploaded file apne host par rahegi. Delete karne se pehle backup export kar sakte ho.`,
+          `“${name}” is about to be deleted from the catalogue. The uploaded file stays on your host. You can export a backup before deleting.`,
         ),
         error,
         el(
@@ -1294,7 +1294,7 @@
           if (!data.question.trim())
             throw new Error("Poll ke liye question likho.");
           if (optionRows.length < 2)
-            throw new Error("Poll ke liye kam se kam 2 options chahiye.");
+            throw new Error("A poll needs at least 2 options.");
           data.options = optionRows.map((o) => ({
             id: o.id,
             text: o.input.value,
@@ -1388,10 +1388,10 @@
                 onclick: () => {
                   if (config.tools.some((t) => t.category === c))
                     return toast(
-                      "Is category mein tools hain. Pehle unki category change karo.",
+                      "This category still has tools. Change their category first.",
                     );
                   if (config.categories.filter((c) => c !== "All").length < 2)
-                    return toast("Kam se kam ek category rehni chahiye.");
+                    return toast("At least one category must remain.");
                   confirmDelete(c, async () => {
                     const next = clone(config);
                     next.categories = next.categories.filter(
@@ -1423,7 +1423,7 @@
       const name = input.value.trim();
       if (!name) return;
       if (config.categories.some((c) => c.toLowerCase() === name.toLowerCase()))
-        return toast("Ye category pehle se hai.");
+        return toast("That category already exists.");
       try {
         const next = clone(config);
         next.categories.push(name);
@@ -1547,7 +1547,7 @@
       if (!file) return;
       try {
         if (file.size > 2 * 1024 * 1024)
-          throw new Error("Backup 2 MB se chhota hona chahiye.");
+          throw new Error("The backup must be smaller than 2 MB.");
         const next = JSON.parse(await file.text());
         if (
           !Array.isArray(next.tools) ||
@@ -1567,7 +1567,7 @@
             el(
               "p",
               { class: "form-note" },
-              "Restore karne se current tools configuration replace hoga. Downloads aur home widgets is backup ka hissa nahi hain.",
+              "Restoring replaces your current tools configuration. Downloads and home widgets are not part of this backup.",
             ),
             el(
               "div",
@@ -1607,7 +1607,7 @@
                         el(
                           "p",
                           { class: "dialog-description" },
-                          `${next.tools.length} tools se current catalogue replace hoga. Pehle current backup export kar lo.`,
+                          `${next.tools.length} tools will replace the current catalogue. Export a backup of the current setup first.`,
                         ),
                         el(
                           "div",
@@ -1646,7 +1646,7 @@
             el(
               "p",
               { class: "form-note" },
-              "Site settings, categories aur tools ki JSON copy download karo. Downloads, uploads, store apps aur widgets is file mein include nahi hote.",
+              "Download a JSON copy of site settings, categories and tools. Downloads, uploads, store apps and widgets are not included in this file.",
             ),
             el(
               "div",
@@ -1668,7 +1668,7 @@
             el(
               "p",
               { class: "form-note" },
-              "Apni exported JSON file choose karo. Replace karne se pehle preview aur confirmation milega.",
+              "Choose the JSON file you exported. You'll get a preview and a confirmation before anything is replaced.",
             ),
             el("div", { class: "upload-field" }, importFile),
             preview,
@@ -1719,9 +1719,9 @@
         list,
       ],
       async () => {
-        if (!files.files.length) throw new Error("Pehle files choose karo.");
+        if (!files.files.length) throw new Error("Choose files first.");
         if ([...files.files].some((f) => f.size > 32 * 1024 * 1024))
-          throw new Error("Har file 32 MB se chhoti honi chahiye.");
+          throw new Error("Each file must be smaller than 32 MB.");
         const keyOf = (f) => `${f.name}:${f.size}:${f.lastModified}`;
         for (const file of files.files) {
           const key = keyOf(file);
@@ -1780,7 +1780,7 @@
     );
   }
   async function paymentDashboard() {
-    root.replaceChildren(el("p", {}, "Payment setup check ho raha hai…"));
+    root.replaceChildren(el("p", {}, "Checking payment setup…"));
     try {
       const data = await api("/api/admin/payments");
       if (current !== "payments") return;
@@ -1853,7 +1853,7 @@
             el(
               "p",
               { class: "form-note" },
-              "YouPI ek alag server par chalega. Merchant dashboard mein apna receiving UPI account aur bank observer configure karo. Secrets sirf server environment mein set karo.",
+              "YouPI runs on a separate server. Configure your receiving UPI account and bank observer in the merchant dashboard. Set secrets only in the server environment.",
             ),
             ...(data.webhook_url
               ? [
@@ -1870,7 +1870,7 @@
           "Recent purchases",
           data.orders.length
             ? list
-            : el("p", {}, "Abhi koi purchase nahi hai."),
+            : el("p", {}, "No purchases yet."),
         ),
       );
     } catch (e) {

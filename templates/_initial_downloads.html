@@ -1,10 +1,19 @@
 {% for item in initial_downloads %}
+{% set file_count = item.album_files | length %}
 <article class="tool-card download-card">
-  <div class="card-visual tone-{{ loop.index0 % 4 }}">{% if item.get('image') | public_image %}<img src="{{ item.image | public_image }}" alt="{{ item.title }}" loading="lazy">{% else %}<span class="card-fallback" aria-hidden="true">s</span>{% endif %}<span class="card-badge">{{ item.get('category', 'File') }}</span></div>
-  <div class="card-body"><div class="card-topline"><span>{{ item.get('category', 'Files') }}</span><span>{{ item.get('version') or ('ALBUM' if item.get('is_album') else 'FILE') }}</span></div><h3>{{ item.title }}</h3><p class="download-description">{{ item.get('description', '') }}</p><p class="price-label">{% if item.locked %}₹{{ item.pricing.payable }}{% else %}Free{% endif %}</p>
-    {% if item.get('is_album') %}<details><summary>{{ item.album_files | length }} files in this album</summary><ul>{% for file in item.album_files %}<li>{{ file.name }}{% if file.get('link') | public_url %} · <a data-google-vignette="false" data-analytics-kind="download_click" data-analytics-item="{{ item.id }}" href="{{ file.link | public_url }}" target="_blank" rel="noopener noreferrer">Download</a>{% endif %}</li>{% endfor %}</ul></details>
-    {% elif item.get('link') | public_url %}<div class="card-bottom"><a data-google-vignette="false" data-analytics-kind="download_click" data-analytics-item="{{ item.id }}" class="button button-light" href="{{ item.link | public_url }}" target="_blank" rel="noopener noreferrer">Download ↓</a></div>{% endif %}
-    {% if item.locked or item.get('private_delivery') %}<noscript><p>Enable JavaScript for secure checkout and downloads.</p></noscript>{% endif %}
+  <div class="card-visual tone-{{ loop.index0 % 4 }}">{% if item.get('image') | public_image %}<img src="{{ item.image | public_image }}" alt="{{ item.title }}" loading="lazy">{% else %}<span class="card-fallback" aria-hidden="true">s</span>{% endif %}<span class="card-badge">{{ (file_count ~ ' file' ~ ('' if file_count == 1 else 's')) if item.get('is_album') else item.get('category', 'File') }}</span></div>
+  <div class="card-body">
+    <div class="card-topline"><span>{{ item.get('category', 'Files') }}</span><span>{{ item.get('version') or ('ALBUM' if item.get('is_album') else 'FILE') }}</span></div>
+    <h3>{{ item.title }}</h3>
+    <p class="download-description">{{ item.get('description', '') }}</p>
+    <p class="price-label">{% if item.locked %}₹{{ item.pricing.payable }}{% else %}Free{% endif %}</p>
+    {% if item.get('is_album') %}<details class="album-files"><summary>{{ file_count }} file{{ '' if file_count == 1 else 's' }} in this album</summary><ul>{% for file in item.album_files %}<li>{{ file.name }}{% if file.get('link') | public_url %} · <a data-google-vignette="false" data-analytics-kind="download_click" data-analytics-item="{{ item.id }}" href="{{ file.link | public_url }}" target="_blank" rel="noopener noreferrer">Download</a>{% endif %}</li>{% endfor %}</ul></details>{% endif %}
+    <div class="card-bottom">
+      {% if item.get('is_album') %}<span class="button button-light">View {{ file_count }} file{{ '' if file_count == 1 else 's' }}</span>
+      {% elif item.get('link') | public_url %}<a data-google-vignette="false" data-analytics-kind="download_click" data-analytics-item="{{ item.id }}" class="button button-dark direct-download" href="{{ item.link | public_url }}" target="_blank" rel="noopener noreferrer">Download <span aria-hidden="true">↓</span></a>
+      {% else %}<span class="button button-light">Unavailable</span>{% endif %}
+    </div>
+    {% if item.locked or item.get('private_delivery') %}<noscript><p class="file-date">Enable JavaScript for secure checkout and downloads.</p></noscript>{% endif %}
   </div>
 </article>
 {% else %}<p class="empty-state">New downloads will appear here when published.</p>{% endfor %}

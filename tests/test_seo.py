@@ -50,14 +50,15 @@ class SearchDiscoveryTests(unittest.TestCase):
         for text in ('Public album','Public guide.pdf','https://example.com/guide.pdf','Paid album','Premium file.zip'):self.assertIn(text,page)
         for secret in ('Secret download title','https://example.com/hidden.zip','private/secret','secret-original.zip'):self.assertNotIn(secret,page)
 
-    def test_home_tools_never_load_or_render_download_records(self):
-        with patch.object(module, 'public_downloads', side_effect=AssertionError('Tools page must not load downloads')):
-            response=self.client.get('/')
+    def test_homepage_renders_public_downloads_but_never_private_ones(self):
+        response=self.client.get('/')
         self.assertEqual(response.status_code,200)
         text=response.get_data(as_text=True)
         self.assertIn('Useful photo tool',text)
-        for download in ('Public album','Paid album','Secret download title','/downloads?item='):
-            self.assertNotIn(download,text)
+        for public in ('Public album','Paid album'):
+            self.assertIn(public,text)
+        for secret in ('Secret download title','https://example.com/hidden.zip','private/secret','secret-original.zip'):
+            self.assertNotIn(secret,text)
 
     def test_sitemap_only_includes_canonical_public_pages(self):
         response=self.client.get('/sitemap.xml')
