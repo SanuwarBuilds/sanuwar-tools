@@ -14,7 +14,7 @@ class PhotoToolsTests(unittest.TestCase):
         response=self.client.get('/photo-tools',base_url='https://sanuwartools.online')
         self.assertEqual(response.status_code,200)
         html=response.get_data(as_text=True)
-        for marker in ('/assets/css/photo-tools.css','/assets/js/photo-core.js','/assets/js/photo-tools.js','id="photo-file"','id="photo-canvas"','rel="canonical" href="https://sanuwartools.online/photo-tools"'):
+        for marker in ('/assets/css/photo-tools.css','/assets/js/photo-core.js','/assets/js/photo-tools.js','id="photo-file"','id="photo-canvas"','id="photo-undo"','id="photo-compare"','id="photo-grid"','data-look="vivid"','id="photo-auto"','id="photo-saturation"','id="photo-warmth"','id="photo-ratio"','id="photo-quality"','rel="canonical" href="https://sanuwartools.online/photo-tools"'):
             self.assertIn(marker,html)
         self.assertNotIn('adsbygoogle.js',html)
         self.assertIn("connect-src 'self'",response.headers['Content-Security-Policy'])

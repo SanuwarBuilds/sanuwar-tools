@@ -38,3 +38,9 @@ test('encoder enforces final KB limit including density metadata',async()=>{
  const pngCanvas={toBlob(callback,type){const minimal=Buffer.from('iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mP8/x8AAwMCAO+aGN8AAAAASUVORK5CYII=','base64');callback(new Blob([minimal,new Uint8Array(2000)],{type}));}};
  await assert.rejects(core.encode(pngCanvas,{...base,format:'image/png',kb:1}),/Choose JPG/);
 });
+test('encoder respects the requested quality ceiling without a KB limit',async()=>{
+ const canvas={toBlob(callback,type,quality){callback(new Blob([new Uint8Array([255,216]),new Uint8Array(Math.round(quality*6000+100))],{type}));}};
+ const high=await core.encode(canvas,{...base,kb:'',quality:100});
+ const low=await core.encode(canvas,{...base,kb:'',quality:60});
+ assert.ok(low.size<high.size);
+});

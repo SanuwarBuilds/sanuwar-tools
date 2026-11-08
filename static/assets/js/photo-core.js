@@ -46,13 +46,15 @@
   }
   async function encode(canvas, options) {
     const encodeAt=quality=>new Promise((resolve,reject)=>canvas.toBlob(blob=>blob?resolve(blob):reject(new Error('This browser could not create the image.')),options.format,quality));
+    const requested=Number(options.quality);
+    const ceiling=Number.isFinite(requested)?Math.max(.03,Math.min(1,requested/100)):.95;
     const limit=options.kb?Math.floor(options.kb*1000):Infinity;
-    let blob=await withDpi(await encodeAt(.95),options.dpi);
+    let blob=await withDpi(await encodeAt(ceiling),options.dpi);
     if(blob.size<=limit) return blob;
     if(options.format==='image/png') throw new Error('PNG is larger than your KB limit. Choose JPG or increase the limit.');
     let best=await withDpi(await encodeAt(.03),options.dpi);
     if(best.size>limit) throw new Error('This KB limit is too small for these dimensions. Increase the limit or reduce width and height.');
-    let low=.03,high=.95;
+    let low=.03,high=ceiling;
     for(let i=0;i<9;i++){const mid=(low+high)/2,candidate=await withDpi(await encodeAt(mid),options.dpi);if(candidate.size<=limit){best=candidate;low=mid;}else high=mid;}
     return best;
   }
