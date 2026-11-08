@@ -181,6 +181,11 @@
     const showing = $("#admin-sidebar").classList.toggle("open");
     $("#admin-menu").setAttribute("aria-expanded", String(showing));
   });
+  $("#admin-drawer-close").addEventListener("click", () => {
+    $("#admin-sidebar").classList.remove("open");
+    $("#admin-menu").setAttribute("aria-expanded", "false");
+    $("#admin-menu").focus();
+  });
   document.addEventListener("keydown", (event) => {
     if (
       event.key === "Escape" &&
@@ -1451,7 +1456,7 @@
       theme = select(
         "Default theme",
         ["light", "dark"],
-        config.site?.defaultTheme || "light",
+        config.site?.defaultTheme || "dark",
       );
     const social = Object.fromEntries(
       ["github", "instagram", "telegram", "youtube", "twitter"].map((k) => [

@@ -3268,6 +3268,40 @@ body.pro-theme.bp .bp-section-head h1,
   }
 }
 
+/* ---------- 15b. Scroll reveal + micro motion --------------------------- */
+body.pro-theme.bp {
+  transition:
+    background-color 0.35s var(--bp-ease),
+    color 0.35s var(--bp-ease);
+}
+
+html.bp-motion [data-bp-reveal] {
+  opacity: 0;
+  transform: translate3d(0, 18px, 0);
+  transition:
+    opacity 0.65s var(--bp-ease),
+    transform 0.65s var(--bp-ease);
+  transition-delay: var(--bp-delay, 0ms);
+}
+
+html.bp-motion [data-bp-reveal].is-revealed {
+  opacity: 1;
+  transform: none;
+}
+
+body.pro-theme.bp .bp-console {
+  transition:
+    border-color 0.3s var(--bp-ease),
+    box-shadow 0.3s var(--bp-ease);
+}
+
+@media (hover: hover) {
+  body.pro-theme.bp .bp-console:hover {
+    border-color: var(--bp-line-3);
+    box-shadow: var(--bp-shadow-lift);
+  }
+}
+
 /* ---------- 16. Motion preferences -------------------------------------- */
 @media (prefers-reduced-motion: reduce) {
   body.pro-theme.bp *,
@@ -3294,6 +3328,10 @@ body.pro-theme.bp .bp-section-head h1,
 
 /* ---------- 17. Print ---------------------------------------------------- */
 @media print {
+  html.bp-motion [data-bp-reveal] {
+    opacity: 1 !important;
+    transform: none !important;
+  }
   body.pro-theme.bp .site-header,
   body.pro-theme.bp .site-footer,
   .bp-frame,

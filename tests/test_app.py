@@ -43,6 +43,22 @@ class WorkspaceTests(unittest.TestCase):
         for path in ('/','/downloads','/download.html','/admin/login','/payment-demo','/purchases'):
             response=self.client.get(path);self.assertEqual(response.status_code,200,path)
             self.assertNotIn(b'cdn.tailwindcss.com',response.data)
+    def test_dark_theme_and_workspace_shell_assets(self):
+        home=self.client.get('/').get_data(as_text=True)
+        self.assertIn('data-theme="dark"',home)
+        self.assertIn('theme-init.js?v=1',home)
+        self.assertIn('sanuwar.css?v=6',home)
+        login=self.client.get('/admin/login').get_data(as_text=True)
+        self.assertIn('admin-pro.css?v=1',login)
+        self.assertIn('login-page',login)
+        self.assertIn('pro-theme bp',login)
+        self.login()
+        admin=self.client.get('/admin').get_data(as_text=True)
+        self.assertIn('admin-pro.css?v=1',admin)
+        self.assertIn('admin-body',admin)
+        self.assertIn('admin-drawer-close',admin)
+        self.assertIn('admin.js?v=2',admin)
+
     def test_admin_requires_authentication(self):
         self.assertEqual(self.client.get('/admin').status_code,302)
         for path in ('/api/admin/tools.config','/api/admin/widgets','/api/admin/store-apps'):

@@ -13,7 +13,7 @@
     "url": "/download.html"
   },
   "site": {
-    "defaultTheme": "light",
+    "defaultTheme": "dark",
     "favicon": "/assets/favicon.png",
     "name": "SanuwarTools",
     "tagline": "All my tools, one place."

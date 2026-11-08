@@ -80,4 +80,42 @@
   matchMedia('(min-width: 901px)').addEventListener('change', (event) => {
     if (event.matches) closeNav(false);
   });
+
+  /* Scroll reveal: only below-the-fold blocks, and only when motion is safe. */
+  const revealTargets = [
+    ...document.querySelectorAll(
+      'main .bp-section:not(.bp-hero), main .photo-guide, main .photo-guidance, main .visitor-card, main .information-page',
+    ),
+  ];
+  if (
+    !reduceMotion.matches &&
+    'IntersectionObserver' in window &&
+    revealTargets.length
+  ) {
+    root.classList.add('bp-motion');
+    const reveal = new IntersectionObserver(
+      (entries) => {
+        entries.forEach((entry) => {
+          if (!entry.isIntersecting) return;
+          entry.target.classList.add('is-revealed');
+          reveal.unobserve(entry.target);
+        });
+      },
+      { rootMargin: '0px 0px -8% 0px', threshold: 0.06 },
+    );
+    revealTargets.forEach((node) => {
+      node.dataset.bpReveal = '';
+      const box = node.getBoundingClientRect();
+      if (box.top < window.innerHeight * 0.92 && box.bottom > 0) {
+        node.classList.add('is-revealed');
+        return;
+      }
+      reveal.observe(node);
+    });
+    reduceMotion.addEventListener('change', (event) => {
+      if (!event.matches) return;
+      root.classList.remove('bp-motion');
+      reveal.disconnect();
+    });
+  }
 })();

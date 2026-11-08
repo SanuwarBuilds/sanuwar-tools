@@ -175,16 +175,33 @@ window.ST = (() => {
     document.body.classList.add("modal-open");
     dialog.showModal();
   };
+  const root = document.documentElement;
+  const syncTheme = () => {
+    const dark = root.dataset.theme === "dark";
+    const toggle = $("#theme-toggle");
+    if (toggle) {
+      const label = dark ? "Switch to light theme" : "Switch to dark theme";
+      toggle.setAttribute("aria-label", label);
+      toggle.setAttribute("title", label);
+    }
+    document
+      .querySelector('meta[name="theme-color"]')
+      ?.setAttribute("content", dark ? "#141618" : "#e3e4e5");
+  };
   try {
-    document.documentElement.dataset.theme =
+    root.dataset.theme =
       localStorage.getItem("sanuwartools-theme") ||
-      document.documentElement.dataset.theme ||
-      "light";
+      root.dataset.theme ||
+      "dark";
   } catch {}
+  syncTheme();
+  new MutationObserver(syncTheme).observe(root, {
+    attributes: true,
+    attributeFilter: ["data-theme"],
+  });
   $("#theme-toggle")?.addEventListener("click", () => {
-    const next =
-      document.documentElement.dataset.theme === "dark" ? "light" : "dark";
-    document.documentElement.dataset.theme = next;
+    const next = root.dataset.theme === "dark" ? "light" : "dark";
+    root.dataset.theme = next;
     try {
       localStorage.setItem("sanuwartools-theme", next);
     } catch {}
