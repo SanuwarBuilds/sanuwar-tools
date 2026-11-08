@@ -1,10 +1,9 @@
 {% extends 'base.html' %}
-{% block title %}Photo Tools — Resize, Crop & Compress | SanuwarTools{% endblock %}
 {% block bodyclass %}photo-page{% endblock %}
-{% block page_styles %}<link rel="stylesheet" href="/assets/css/photo-tools.css?v=2">{% endblock %}
+{% block page_styles %}<link rel="stylesheet" href="/assets/css/photo-tools.css?v=3">{% endblock %}
 {% block content %}
 <div class="photo-wrap">
-  <header class="photo-heading"><div><a href="/#tools" class="photo-back">← All tools</a><h1>A better fit.<br><span>For every photo.</span></h1><p>Crop, resize and compress. Ready for your next form.</p></div><span class="photo-private"><span aria-hidden="true">◈</span> Your photo stays on this device</span></header>
+  <header class="photo-heading"><div><nav class="photo-breadcrumb" aria-label="Breadcrumb"><a href="/">Home</a><span aria-hidden="true">/</span><a href="/#tools">Tools</a><span aria-hidden="true">/</span><span aria-current="page">Photo Tools</span></nav><h1>A better fit.<br><span>For every photo.</span></h1><p>Crop, resize and compress photos free in your browser. Set exact pixels, DPI and KB limits for passport, PAN, voter ID and exam forms — ready for your next upload.</p></div><span class="photo-private"><span aria-hidden="true">◈</span> Your photo stays on this device</span></header>
   <noscript><p class="photo-notice">Enable JavaScript to edit photos on your device.</p></noscript>
   <section id="photo-upload" class="photo-upload" aria-label="Choose a photo">
     <span class="upload-glyph" aria-hidden="true">＋</span><h2>Start with your photo</h2><p>Drop an image here, or choose one from your device.</p>
@@ -45,6 +44,22 @@
   </div>
   </div>
   <section class="photo-guidance"><h2>Small details. Better results.</h2><div><article><span>01</span><h3>Start sharp</h3><p>Use a clear, well-lit photo. Enlarging a small image cannot restore missing detail.</p></article><article><span>02</span><h3>Check your form</h3><p>Presets describe specific workflows, not guaranteed acceptance. Use your portal's latest dimensions and KB limit. Some exams require live capture on their own portal.</p></article><article><span>03</span><h3>Stay in control</h3><p>Editing happens in this browser. Photos aren't uploaded or saved to your account. Only custom preset settings are stored locally.</p></article></div></section>
+  <section class="photo-guide" aria-labelledby="photo-guide-title">
+    <span class="photo-step">PHOTO GUIDE</span>
+    <h2 id="photo-guide-title">Resize and compress photos for forms and printing</h2>
+    <p class="photo-guide-lede">SanuwarTools runs entirely in your browser, so your photo is never uploaded. Use it for passport and visa photos, PAN and voter ID forms, exam applications, profile pictures and everyday sharing.</p>
+    <div class="photo-guide-grid">
+      <article><h3>Exact pixel sizes</h3><p>Type the width and height your form asks for, or lock a 1:1, 3:4 or 4:3 ratio. The preview always shows the final crop.</p></article>
+      <article><h3>KB-limited uploads</h3><p>Set Maximum size in KB and export JPG. If the first encode is too large, the tool lowers quality only as much as needed to fit.</p></article>
+      <article><h3>Passport and print sheets</h3><p>35 × 45 mm presets cover common passport and visa sizes. Build a 4 × 6 inch or A4 sheet, then print at actual size.</p></article>
+    </div>
+    {% if seo.faqs %}
+    <h2 id="photo-faq-title" class="photo-faq-title">Common questions</h2>
+    <div class="photo-faq">
+      {% for item in seo.faqs %}<details{% if loop.first %} open{% endif %}><summary>{{ item.q }}</summary><p>{{ item.a }}</p></details>{% endfor %}
+    </div>
+    {% endif %}
+  </section>
 </div>
 <dialog id="preset-dialog" aria-labelledby="preset-dialog-title"><form id="preset-form"><h2 id="preset-dialog-title">Keep your settings.</h2><label class="photo-field">Preset name<input id="preset-name" maxlength="50" required autocomplete="off" placeholder="e.g. My application photo"></label><div class="photo-upload-actions"><button type="submit" class="photo-primary">Save preset</button><button type="button" id="cancel-preset" class="photo-secondary">Cancel</button></div></form></dialog>
 <div id="photo-print-area" aria-hidden="true"></div>

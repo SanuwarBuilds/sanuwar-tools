@@ -1,0 +1,14 @@
+{
+  "name": "SanuwarTools",
+  "short_name": "SanuwarTools",
+  "description": "Free browser tools, photo tools, Android apps and downloads.",
+  "start_url": "/",
+  "scope": "/",
+  "display": "standalone",
+  "background_color": "#e3e4e5",
+  "theme_color": "#e3e4e5",
+  "icons": [
+    {"src": "/assets/favicon.svg", "sizes": "any", "type": "image/svg+xml", "purpose": "any"},
+    {"src": "/assets/favicon.png", "sizes": "256x256", "type": "image/png", "purpose": "any"}
+  ]
+}

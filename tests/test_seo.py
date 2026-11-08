@@ -6,6 +6,7 @@ import unittest
 from unittest.mock import patch
 from xml.etree.ElementTree import fromstring
 import app as module
+import seo
 
 class SearchDiscoveryTests(unittest.TestCase):
     def setUp(self):
@@ -36,7 +37,7 @@ class SearchDiscoveryTests(unittest.TestCase):
     def test_structured_data_is_valid_and_site_logo_is_public(self):
         text=self.client.get('/').get_data(as_text=True)
         data=json.loads(re.search(r'<script[^>]*type="application/ld\+json">(.*?)</script>',text,re.S).group(1))
-        website, organization=data['@graph']
+        website, organization=data['@graph'][:2]
         self.assertEqual(website['name'],'SanuwarTools')
         self.assertEqual(website['alternateName'],'Sanuwar Tools')
         self.assertEqual(organization['logo']['url'],'https://sanuwartools.online/assets/favicon.png')
@@ -80,6 +81,62 @@ class SearchDiscoveryTests(unittest.TestCase):
         self.assertNotIn('Disallow: /api/\n',text)
         for path in ('/admin/login','/api/admin/downloads','/api/downloads_data','/payment-demo','/purchases','/not-a-page'):
             self.assertEqual(self.client.get(path).headers.get('X-Robots-Tag'),'noindex, nofollow',path)
+
+    def test_downloads_page_has_one_h1_and_descriptive_copy(self):
+        text=self.client.get('/downloads').get_data(as_text=True)
+        self.assertEqual(len(re.findall(r'<h1[ >]',text)),1)
+        self.assertIn('<h1 id="downloads-title">Downloads</h1>',text)
+        self.assertIn('Free Android apps, files and albums',text)
+
+    def test_home_and_photo_pages_expose_keyword_copy(self):
+        home=self.client.get('/').get_data(as_text=True)
+        self.assertIn('photo resizing and passport photos',home)
+        self.assertIn('photo resizer and compressor',home)
+        photo=self.client.get('/photo-tools').get_data(as_text=True)
+        self.assertIn('Resize and compress photos for forms and printing',photo)
+        self.assertIn('Common questions',photo)
+        for question,_ in seo.PHOTO_FAQS:self.assertIn(question,photo)
+
+    def test_photo_tools_structured_data_has_app_faq_and_breadcrumb(self):
+        text=self.client.get('/photo-tools').get_data(as_text=True)
+        data=json.loads(re.search(r'<script[^>]*type="application/ld\+json">(.*?)</script>',text,re.S).group(1))
+        types={node.get('@type') for node in data['@graph']}
+        self.assertTrue({'WebApplication','FAQPage','BreadcrumbList'} <= types)
+        faq=next(node for node in data['@graph'] if node.get('@type')=='FAQPage')
+        self.assertEqual(len(faq['mainEntity']),len(seo.PHOTO_FAQS))
+        self.assertEqual(faq['mainEntity'][0]['name'],seo.PHOTO_FAQS[0][0])
+
+    def test_social_preview_uses_large_card_and_absolute_png(self):
+        text=self.client.get('/').get_data(as_text=True)
+        self.assertIn('property="og:image" content="https://sanuwartools.online/assets/og/sanuwartools-og.png"',text)
+        self.assertIn('property="og:image:width" content="1200"',text)
+        self.assertIn('property="og:image:height" content="630"',text)
+        self.assertIn('name="twitter:card" content="summary_large_image"',text)
+        self.assertEqual(self.client.get('/assets/og/sanuwartools-og.png').status_code,200)
+
+    def test_verification_meta_comes_from_environment(self):
+        with patch.dict('os.environ',{'GOOGLE_SITE_VERIFICATION':'google-token','BING_SITE_VERIFICATION':'bing-token'}):
+            text=self.client.get('/').get_data(as_text=True)
+        self.assertIn('<meta name="google-site-verification" content="google-token">',text)
+        self.assertIn('<meta name="msvalidate.01" content="bing-token">',text)
+
+    def test_indexnow_key_and_sitemap_lastmod(self):
+        response=self.client.get('/'+seo.INDEXNOW_KEY+'.txt')
+        self.assertEqual(response.status_code,200)
+        self.assertEqual(response.get_data(as_text=True),seo.INDEXNOW_KEY)
+        sitemap=self.client.get('/sitemap.xml').data.decode()
+        self.assertEqual(sitemap.count('<lastmod>'+seo.SITE_UPDATED+'</lastmod>'),6)
+
+    def test_private_pages_send_noindex_header(self):
+        for path in ('/signin','/account'):
+            self.assertIn('noindex',self.client.get(path).headers.get('X-Robots-Tag',''),path)
+
+    def test_visible_title_matches_page_metadata(self):
+        for path in ('/','/downloads','/photo-tools'):
+            text=self.client.get(path).get_data(as_text=True)
+            expected=seo.PAGES[path][0].replace('&','&amp;')
+            self.assertIn('<title>'+expected+'</title>',text)
+            self.assertIn('property="og:title" content="'+expected+'"',text)
 
     def test_initial_html_escapes_text_and_drops_executable_urls(self):
         self.records[module.DOWNLOADS_REL]=[{'id':'x','title':'<script>alert(1)</script>','link':'javascript:alert(1)','image':'javascript:alert(2)'}]

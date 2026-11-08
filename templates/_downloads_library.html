@@ -2,7 +2,7 @@
   <div class="bp-section-head">
     <div>
       <span class="bp-eyebrow">{{ lib_eyebrow if lib_eyebrow is defined else '02 — Library' }}</span>
-      <h2 id="downloads-title">{{ lib_title if lib_title is defined else 'Downloads' }}</h2>
+      {% if lib_h1 is defined and lib_h1 %}<h1 id="downloads-title">{{ lib_title if lib_title is defined else 'Downloads' }}</h1>{% else %}<h2 id="downloads-title">{{ lib_title if lib_title is defined else 'Downloads' }}</h2>{% endif %}
       {% if lib_lede is defined and lib_lede %}<p class="bp-section-lede">{{ lib_lede }}</p>{% endif %}
     </div>
     <div class="bp-head-side">

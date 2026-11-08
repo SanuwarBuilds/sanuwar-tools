@@ -5,27 +5,34 @@
 <meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
 <meta name="csrf-token" content="{{ csrf_token }}">
 <meta name="description" content="{{ seo.description }}">
-{% if seo.indexable %}
+<meta name="author" content="Sanuwar">
+{% for meta_name, token in seo_verification %}<meta name="{{ meta_name }}" content="{{ token }}">
+{% endfor %}{% if seo.indexable %}
 <meta name="robots" content="index, follow, max-image-preview:large">
 <link rel="canonical" href="{{ seo.canonical }}">
 <meta property="og:type" content="website">
 <meta property="og:site_name" content="SanuwarTools">
+<meta property="og:locale" content="en_US">
 <meta property="og:title" content="{{ seo.title }}">
 <meta property="og:description" content="{{ seo.description }}">
 <meta property="og:url" content="{{ seo.canonical }}">
 <meta property="og:image" content="{{ seo.image }}">
-<meta property="og:image:alt" content="SanuwarTools logo">
-<meta name="twitter:card" content="summary">
+<meta property="og:image:type" content="image/png">
+<meta property="og:image:width" content="1200">
+<meta property="og:image:height" content="630">
+<meta property="og:image:alt" content="SanuwarTools — free browser tools, photo tools and downloads">
+<meta name="twitter:card" content="summary_large_image">
 <meta name="twitter:title" content="{{ seo.title }}">
 <meta name="twitter:description" content="{{ seo.description }}">
 <meta name="twitter:image" content="{{ seo.image }}">
+<meta name="twitter:image:alt" content="SanuwarTools — free browser tools, photo tools and downloads">
 <script nonce="{{ csp_nonce }}" type="application/ld+json">{{ seo.structured_data | tojson }}</script>
 {% else %}<meta name="robots" content="noindex, nofollow">{% endif %}
 {% if adsense_client %}
 <script nonce="{{ csp_nonce }}" async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client={{ adsense_client }}" crossorigin="anonymous"></script>
 {% endif %}
 <meta name="theme-color" content="{{ '#e3e4e5' if public_ui else '#ffffff' }}">
-<title>{% block title %}SanuwarTools — Web Tools, Android Apps &amp; Downloads{% endblock %}</title>
+<title>{% block title %}{{ seo.title if seo.indexable else 'SanuwarTools' }}{% endblock %}</title>
 {% set favicon = (public_config.get('site', {}).get('favicon') | public_image) or '/assets/favicon.png' %}
 {% if favicon == '/assets/favicon.png' %}
 <link rel="shortcut icon" type="image/x-icon" href="/favicon.ico?v=brand4">
@@ -35,6 +42,7 @@
 {% else %}
 <link rel="icon" href="{{ favicon }}">
 {% endif %}
+<link rel="manifest" href="/assets/site.webmanifest">
 <link rel="preload" href="/assets/fonts/Manrope-Variable.ttf" as="font" type="font/ttf" crossorigin>
 <link rel="stylesheet" href="/assets/css/style.css">
 <script nonce="{{ csp_nonce }}" src="/assets/js/shared.js" defer></script>
@@ -47,7 +55,7 @@
 <link rel="stylesheet" href="/assets/css/hallmark/workspace.css?v=1">
 {% endif %}
 {% block page_styles %}{% endblock %}
-{% if public_ui %}<script nonce="{{ csp_nonce }}" src="/assets/js/boot.js?v=1"></script><link rel="stylesheet" href="/assets/css/sanuwar.css?v=4"><script nonce="{{ csp_nonce }}" src="/assets/js/sanuwar.js?v=4" defer></script>{% endif %}
+{% if public_ui %}<script nonce="{{ csp_nonce }}" src="/assets/js/boot.js?v=1"></script><link rel="stylesheet" href="/assets/css/sanuwar.css?v=5"><script nonce="{{ csp_nonce }}" src="/assets/js/sanuwar.js?v=4" defer></script>{% endif %}
 </head>
 <body class="studio-theme {% if public_ui %}pro-theme v2 bp {% endif %}{% block bodyclass %}{% endblock %}">
 {% if public_ui %}

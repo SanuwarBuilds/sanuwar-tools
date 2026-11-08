@@ -1,11 +1,11 @@
 {% extends 'base.html' %}
 {% from '_ad_unit.html' import ad_unit with context %}
-{% block title %}Downloads — Android Apps &amp; Files | SanuwarTools{% endblock %}
 {% block bodyclass %}downloads-page{% endblock %}
 {% block content %}
 {% set lib_eyebrow = 'Archive' %}
 {% set lib_title = 'Downloads' %}
-{% set lib_lede = 'Apps, files and albums — all in one place. Preview first, then download.' %}
+{% set lib_h1 = true %}
+{% set lib_lede = 'Free Android apps, files and albums in one searchable library. Preview the contents and versions before you download.' %}
 {% include '_downloads_library.html' %}
 <div class="wrap">{{ ad_unit(adsense_slots.get('downloads', '')) }}</div>
 {% endblock %}

@@ -843,6 +843,7 @@ body.pro-theme.bp .filter-tab.active span {
   border-bottom: 1px solid var(--bp-line-2);
 }
 
+.bp-section-head h1,
 .bp-section-head h2 {
   margin-top: 8px;
   font-size: clamp(26px, 3.2vw, 38px);
@@ -867,6 +868,32 @@ body.pro-theme.bp .filter-tab.active span {
   color: var(--bp-muted);
   font-size: 13px;
   line-height: 1.6;
+}
+
+.bp-about-copy {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 22px 42px;
+  max-width: 960px;
+  color: var(--bp-muted);
+  font-size: 13px;
+  line-height: 1.8;
+}
+
+.bp-about-copy p {
+  margin: 0;
+}
+
+.bp-about-copy a {
+  color: var(--bp-ink-2);
+  text-decoration: underline;
+  text-underline-offset: 3px;
+}
+
+@media (max-width: 700px) {
+  .bp-about-copy {
+    grid-template-columns: 1fr;
+  }
 }
 
 body.pro-theme.bp .library-purchases {
@@ -3136,6 +3163,8 @@ html.bp-booting .bp-boot,
   body.pro-theme.bp .bp-section {
     padding-block: 26px 0;
   }
+body.pro-theme.bp .bp-section-head h1,
+  body.pro-theme.bp .bp-section-head h1,
   body.pro-theme.bp .bp-section-head h2 {
     font-size: 28px;
   }
