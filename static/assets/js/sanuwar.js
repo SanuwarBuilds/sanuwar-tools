@@ -13,7 +13,7 @@
     const label = dark ? 'Switch to light theme' : 'Switch to dark theme';
     toggle.setAttribute('aria-label', label);
     toggle.setAttribute('title', label);
-    themeColor?.setAttribute('content', dark ? '#0e1012' : '#e7e9eb');
+    themeColor?.setAttribute('content', dark ? '#141618' : '#e3e4e5');
   };
   syncThemeLabel();
   new MutationObserver(syncThemeLabel).observe(root, {
