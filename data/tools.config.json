@@ -98,7 +98,8 @@
       "slug": "room-expense-manager",
       "tags": [],
       "thumbnail": "/assets/thumbnails/room-expense-manager.jpg",
-      "visible": true
+      "visible": false,
+      "enabled": false
     }
   ]
 }
