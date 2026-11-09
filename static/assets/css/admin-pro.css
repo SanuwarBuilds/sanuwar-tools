@@ -1381,3 +1381,92 @@ body.admin-body #admin-drawer-close {
     display: none;
   }
 }
+
+/* ---------- Directory editor -------------------------------------------- */
+.admin-body .dir-groups-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  margin-top: 6px;
+}
+
+.admin-body .dir-groups-editor {
+  display: grid;
+  gap: 12px;
+}
+
+.admin-body .dir-group {
+  margin: 0;
+  padding: 12px;
+  border: 1px solid var(--admin-line);
+  border-radius: var(--admin-radius-sm);
+  background: color-mix(in oklab, var(--admin-panel-3) 60%, transparent);
+}
+
+.admin-body .dir-group legend {
+  padding: 0 6px;
+  color: var(--admin-muted);
+  font-family: var(--bp-mono, monospace);
+  font-size: 8px;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+}
+
+.admin-body .dir-group-head {
+  display: flex;
+  align-items: flex-end;
+  gap: 10px;
+  margin-bottom: 10px;
+}
+
+.admin-body .dir-group-head label {
+  flex: 1;
+}
+
+.admin-body .dir-site-list {
+  display: grid;
+  gap: 8px;
+}
+
+.admin-body .dir-site-row {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+  gap: 8px;
+  align-items: end;
+}
+
+.admin-body .dir-site-row > label:nth-child(3) {
+  grid-column: 1 / 2;
+}
+
+.admin-body .dir-site-row .row-button {
+  grid-column: 2 / 3;
+  justify-self: end;
+  min-height: 42px;
+  padding: 0 12px;
+}
+
+.admin-body .dir-add-site {
+  margin-top: 8px;
+  min-height: 32px;
+}
+
+@media (max-width: 800px) {
+  .admin-body .dir-group-head {
+    flex-wrap: wrap;
+  }
+}
+
+@media (max-width: 540px) {
+  .admin-body .dir-site-row {
+    grid-template-columns: minmax(0, 1fr);
+  }
+  .admin-body .dir-site-row > label:nth-child(3) {
+    grid-column: 1 / -1;
+  }
+  .admin-body .dir-site-row .row-button {
+    grid-column: 1 / -1;
+    justify-self: stretch;
+  }
+}

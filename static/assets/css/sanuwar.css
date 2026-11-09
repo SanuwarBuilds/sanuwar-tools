@@ -3044,7 +3044,8 @@ html.bp-booting .bp-boot,
     backdrop-filter: blur(3px);
   }
   body.pro-theme.bp .tool-grid {
-    grid-template-columns: minmax(0, 1fr);
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 10px;
   }
   .bp-flow {
     grid-template-columns: minmax(0, 1fr);
@@ -3100,54 +3101,59 @@ html.bp-booting .bp-boot,
     min-height: 38px;
   }
   .bp-hero {
-    padding-block: 16px 22px;
+    padding-block: 8px 14px;
   }
-  .bp-hero-nav {
-    padding-bottom: 12px;
-    font-size: 8px;
-  }
-  .bp-hero-nav span:first-child {
+  .bp-hero-nav,
+  .bp-hero-nav.is-foot {
     display: none;
   }
-  .bp-hero-nav.is-foot {
-  margin-top: 26px;
-  padding-top: 16px;
-  padding-bottom: 0;
-  border-top: 1px solid var(--bp-line);
-  border-bottom: 0;
-}
-
-.bp-hero-core {
-    padding-block: 26px 0;
+  .bp-hero-core {
+    padding-block: 0;
   }
-  .bp-kicker {
-    margin-bottom: 14px;
-    font-size: 8.5px;
-    letter-spacing: 0.22em;
-  }
-  .bp-title {
-    font-size: clamp(40px, 12.5vw, 62px);
-    line-height: 1;
-  }
-  .bp-hero-line {
-    margin-top: 14px;
-    font-size: 12.5px;
-  }
-  .bp-console {
-    margin-top: 26px;
-    padding: 6px;
+  .bp-machine {
+    padding: 14px 12px 12px;
     border-radius: 12px;
   }
+  .bp-machine::before {
+    inset: 5px;
+    border-radius: 8px;
+  }
+  .bp-machine::after {
+    display: none;
+  }
+  .bp-machine-label,
+  .bp-leds,
+  .bp-etched,
+  .bp-screw,
+  .bp-hero-line,
+  .bp-hero-actions {
+    display: none;
+  }
+  .bp-kicker {
+    margin-bottom: 6px;
+    font-size: 8px;
+    letter-spacing: 0.18em;
+  }
+  .bp-title,
+  .bp-machine .bp-title {
+    font-size: clamp(20px, 6.2vw, 26px);
+    line-height: 1.05;
+    white-space: normal;
+  }
+  .bp-console {
+    margin-top: 10px;
+    padding: 5px;
+    border-radius: 9px;
+  }
   .bp-console-bar {
-    font-size: 8.5px;
-    padding: 3px 6px 7px;
+    display: none;
   }
   .bp-screen {
-    height: 56px;
-    padding: 0 12px;
+    height: 42px;
+    padding: 0 10px;
   }
   .bp-screen input {
-    height: 52px;
+    height: 38px;
     font-size: 12px;
   }
   .bp-screen kbd {
@@ -3155,7 +3161,7 @@ html.bp-booting .bp-boot,
   }
   .bp-keys {
     gap: 4px;
-    padding: 7px 2px 2px;
+    padding: 5px 1px 0;
   }
   body.pro-theme.bp .filter-tab {
     min-height: 32px;
@@ -3164,65 +3170,165 @@ html.bp-booting .bp-boot,
     letter-spacing: 0.06em;
   }
   body.pro-theme.bp .bp-section {
-    padding-block: 26px 0;
+    padding-block: 20px 0;
   }
-body.pro-theme.bp .bp-section-head h1,
   body.pro-theme.bp .bp-section-head h1,
   body.pro-theme.bp .bp-section-head h2 {
-    font-size: 28px;
+    font-size: 22px;
+  }
+  body.pro-theme.bp .tool-grid,
+  body.pro-theme.bp .download-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 8px;
   }
   body.pro-theme.bp .catalogue-card {
-    padding: 16px;
+    min-height: 0;
+    padding: 10px;
     border-radius: 10px;
   }
   body.pro-theme.bp .catalogue-card-top {
-    margin-bottom: 14px;
+    margin-bottom: 8px;
   }
   body.pro-theme.bp .catalogue-icon {
-    width: 40px;
-    height: 40px;
+    width: 30px;
+    height: 30px;
+    border-radius: 8px;
+  }
+  body.pro-theme.bp .catalogue-badge {
+    min-height: 18px;
+    padding: 0 5px;
+    font-size: 7px;
+    letter-spacing: 0.08em;
+  }
+  body.pro-theme.bp .catalogue-type {
+    margin-bottom: 4px;
+    font-size: 8px;
+    letter-spacing: 0.1em;
   }
   body.pro-theme.bp .card-body h3 {
-    font-size: 18px;
+    font-size: 13px;
+    line-height: 1.25;
   }
   body.pro-theme.bp .catalogue-card .card-body > p {
-    font-size: 12.5px;
-    -webkit-line-clamp: 2;
+    display: none;
   }
   body.pro-theme.bp .card-bottom {
-    padding-top: 14px;
+    margin-top: 8px;
+    padding-top: 8px;
   }
   body.pro-theme.bp .catalogue-open {
-    min-height: 42px;
+    min-height: 30px;
     flex: 1;
     justify-content: center;
+    padding: 0 8px;
+    font-size: 8.5px;
   }
-  body.pro-theme.bp .download-grid {
-    grid-template-columns: minmax(0, 1fr);
-    gap: 12px;
+  body.pro-theme.bp .catalogue-card .info-button {
+    width: 30px;
+    height: 30px;
+    min-width: 30px;
+    font-size: 10px;
+  }
+  body.pro-theme.bp .download-card {
+    padding: 6px;
+    border-radius: 10px;
+  }
+  body.pro-theme.bp .download-card .card-visual {
+    aspect-ratio: 16 / 11;
+    margin-bottom: 6px;
+    border-radius: 6px;
+  }
+  body.pro-theme.bp .download-card .card-visual img {
+    padding: 4px;
+  }
+  body.pro-theme.bp .download-card .card-badge {
+    display: none;
+  }
+  body.pro-theme.bp .download-card .card-body {
+    padding: 0;
+  }
+  body.pro-theme.bp .download-card .card-topline {
+    margin-bottom: 3px;
+    font-size: 7.5px;
+    letter-spacing: 0.08em;
+  }
+  body.pro-theme.bp .download-card .card-topline > span:last-child {
+    display: none;
+  }
+  body.pro-theme.bp .download-card h3 {
+    font-size: 12px;
+    line-height: 1.3;
+  }
+  body.pro-theme.bp .download-card .download-description {
+    display: none;
+  }
+  body.pro-theme.bp .download-card .file-date {
+    margin-top: 4px;
+    font-size: 7.5px;
+  }
+  body.pro-theme.bp .download-card .price-label {
+    margin: 4px 0 6px;
+    font-size: 8.5px;
+    letter-spacing: 0.06em;
+  }
+  body.pro-theme.bp .download-card .card-bottom {
+    gap: 4px;
+    padding-top: 6px;
+  }
+  body.pro-theme.bp .download-card .card-bottom > .button {
+    min-height: 30px;
+    padding: 0 6px;
+    font-size: 8px;
+  }
+  body.pro-theme.bp .download-card .info-button {
+    width: 30px;
+    height: 30px;
+    min-width: 30px;
+    font-size: 9px;
+  }
+  body.pro-theme.bp .download-card .album-files {
+    margin-bottom: 6px;
+    padding-top: 6px;
+  }
+  body.pro-theme.bp .download-card .album-files summary {
+    min-height: 24px;
+    font-size: 8px;
   }
   body.pro-theme.bp .download-search-row {
-    grid-template-columns: minmax(0, 1fr);
+    grid-template-columns: minmax(0, 1fr) 104px;
     gap: 6px;
   }
   body.pro-theme.bp .download-search-row .search-box kbd {
     display: none;
   }
   body.pro-theme.bp .sort-label {
-    width: 100%;
+    width: auto;
   }
   body.pro-theme.bp .sort-label select {
     width: 100%;
     max-width: none;
     box-sizing: border-box;
-    font-size: 10.5px;
+    padding-inline: 8px 22px;
+    background-position: calc(100% - 13px) 19px, calc(100% - 9px) 19px;
+    font-size: 9px;
   }
   body.pro-theme.bp .download-filter-row {
-    flex-wrap: wrap;
-    gap: 8px;
+    flex-wrap: nowrap;
+    gap: 6px;
+  }
+  body.pro-theme.bp .download-filter-row .collection-types {
+    flex: 1 1 auto;
+  }
+  body.pro-theme.bp .download-filter-row .collection-types .filter-tab {
+    padding: 0 8px;
+    font-size: 8.5px;
   }
   body.pro-theme.bp .download-category-select {
-    width: 100%;
+    width: 104px;
+    flex: 0 0 104px;
+    padding-inline: 8px 22px;
+    background-position: calc(100% - 13px) 19px, calc(100% - 9px) 19px;
+    font-size: 9px;
   }
   body.pro-theme.bp .collection-info > span:last-child {
     display: none;
@@ -3263,11 +3369,15 @@ body.pro-theme.bp .bp-section-head h1,
     font-size: 13px;
   }
   .bp-machine .bp-title {
-    font-size: 21px;
+    font-size: 19px;
     letter-spacing: -0.035em;
   }
   body.pro-theme.bp .catalogue-card {
-    padding: 14px;
+    padding: 8px;
+  }
+  body.pro-theme.bp .card-body h3,
+  body.pro-theme.bp .download-card h3 {
+    font-size: 12px;
   }
 }
 

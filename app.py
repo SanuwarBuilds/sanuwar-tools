@@ -1,4 +1,5 @@
 import os
+import re
 import copy
 import base64
 import mimetypes
@@ -101,6 +102,72 @@ def load_directory():
     if not isinstance(data, dict) or not isinstance(data.get('categories'), list):
         return {'categories': []}
     return data
+
+DIRECTORY_SLUG = re.compile(r'^[a-z0-9]+(?:-[a-z0-9]+)*$')
+
+def validate_directory_document(data):
+    if not isinstance(data, dict) or not isinstance(data.get('categories'), list):
+        raise ValueError('Directories must include a categories array')
+    if not data['categories']:
+        raise ValueError('Keep at least one directory category')
+    if len(data['categories']) > 60:
+        raise ValueError('Too many directory categories')
+    for key in ('notice', 'updated'):
+        if key in data and not isinstance(data[key], str):
+            raise ValueError(f'{key} must be text')
+    seen = set()
+    for category in data['categories']:
+        if not isinstance(category, dict):
+            raise ValueError('Each directory category must be an object')
+        name = category.get('name')
+        slug = category.get('slug')
+        if not isinstance(name, str) or not name.strip() or len(name) > 80:
+            raise ValueError('Each directory needs a name up to 80 characters')
+        if not isinstance(slug, str) or not DIRECTORY_SLUG.match(slug):
+            raise ValueError('Directory URLs use lowercase letters, numbers and hyphens')
+        if slug in seen:
+            raise ValueError(f'Directory URL "{slug}" is used twice')
+        seen.add(slug)
+        for key in ('short', 'tagline', 'description', 'icon'):
+            if key in category and not isinstance(category[key], str):
+                raise ValueError(f'{key} must be text')
+        groups = category.get('groups')
+        if not isinstance(groups, list) or not groups:
+            raise ValueError('Each directory needs at least one group')
+        for group in groups:
+            if not isinstance(group, dict) or not isinstance(group.get('name'), str) or not group['name'].strip():
+                raise ValueError('Each group needs a name')
+            sites = group.get('sites')
+            if not isinstance(sites, list):
+                raise ValueError('Each group needs a sites array')
+            for site in sites:
+                if not isinstance(site, dict):
+                    raise ValueError('Each site must be an object')
+                if not isinstance(site.get('name'), str) or not site['name'].strip():
+                    raise ValueError('Each site needs a name')
+                if not security.valid_url(site.get('url')) or not site.get('url'):
+                    raise ValueError(f'Site "{site["name"]}" needs an HTTPS URL')
+                if 'note' in site and not isinstance(site['note'], str):
+                    raise ValueError('Site notes must be text')
+    return data
+
+@app.route('/api/admin/directories', methods=['GET'])
+@login_required
+def admin_directories():
+    return jsonify(load_directory())
+
+@app.route('/api/admin/directories', methods=['POST'])
+@login_required
+def save_admin_directories():
+    try:
+        data = validate_directory_document(request.get_json(silent=True))
+        safe_write(DIRECTORY_REL, data)
+        return jsonify(success=True, directories=data)
+    except ValueError as error:
+        return jsonify(error=str(error)), 400
+    except Exception:
+        app.logger.exception('Could not save directories')
+        return jsonify(error='Could not save directories. Check server configuration and try again.'), 500
 
 def directory_sites(category):
     groups = [group for group in category.get('groups', []) if isinstance(group, dict)]

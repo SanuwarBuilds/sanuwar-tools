@@ -6,6 +6,7 @@
     downloads = [],
     widgets = [],
     store = [],
+    directories = { categories: [] },
     current = "dashboard";
   const titles = {
     dashboard: [
@@ -29,6 +30,13 @@
       "A better place for every file.",
       "Manage apps, albums and files in one place.",
       "Add a download",
+    ],
+    directories: [
+      "Directories",
+      "YOUR LINK LIBRARY",
+      "Add directories.",
+      "Publish categories, groups and external sites on the public directory pages.",
+      "Add a directory",
     ],
     widgets: [
       "Home widgets",
@@ -143,6 +151,8 @@
   function updateCounts() {
     $("#nav-tools-count").textContent = config.tools.length;
     $("#nav-downloads-count").textContent = downloads.length;
+    $("#nav-directories-count").textContent =
+      directories.categories?.length || 0;
   }
   function navigate(view) {
     current = view;
@@ -168,6 +178,7 @@
       dashboard: () => editTool(),
       tools: () => editTool(),
       downloads: () => editDownload(),
+      directories: () => editDirectory(),
       widgets: () => editWidget(),
       store: () => editStore(),
     })[current]?.();
@@ -1441,6 +1452,362 @@
     });
     root.replaceChildren(card("Your categories", el("div", {}, list, form)));
   }
+  const saveDirectories = async (next) => {
+    const result = await mutate("/api/admin/directories", "POST", next);
+    directories = result.directories || next;
+  };
+  const directorySiteCount = (category) =>
+    (category.groups || []).reduce(
+      (total, group) => total + (Array.isArray(group.sites) ? group.sites.length : 0),
+      0,
+    );
+  function directoriesView() {
+    const categories = Array.isArray(directories.categories)
+      ? directories.categories
+      : [];
+    const rows = categories.map((category) =>
+      el(
+        "tr",
+        {},
+        el(
+          "td",
+          {},
+          el(
+            "div",
+            { class: "table-name" },
+            el(
+              "div",
+              {},
+              el("strong", {}, category.name || "Untitled"),
+              el(
+                "small",
+                {},
+                `/directory/${category.slug || ""} · ${(category.groups || []).length} group${(category.groups || []).length === 1 ? "" : "s"}`,
+              ),
+            ),
+          ),
+        ),
+        el("td", {}, `${directorySiteCount(category)} sites`),
+        el("td", {}, pill(true)),
+        el(
+          "td",
+          {},
+          el(
+            "div",
+            { class: "row-actions" },
+            rowButton("Edit", () => editDirectory(category), false, `Edit ${category.name || "directory"}`),
+            rowButton(
+              "×",
+              () =>
+                confirmDelete(category.name || "this directory", async () => {
+                  if (categories.length < 2)
+                    throw new Error("Keep at least one directory category.");
+                  const next = clone(directories);
+                  next.categories = categories.filter((item) => item !== category);
+                  await saveDirectories(next);
+                  render();
+                }),
+              true,
+              `Delete ${category.name || "directory"}`,
+            ),
+          ),
+        ),
+      ),
+    );
+    const notice = el("textarea", { rows: "3", maxlength: "20000" });
+    notice.value = directories.notice || "";
+    const noticeForm = el(
+      "form",
+      { class: "settings-form" },
+      el("label", {}, "Public safety notice", notice),
+      el(
+        "button",
+        { class: "button button-light", type: "submit" },
+        "Save notice",
+        el("span", {}, "✓"),
+      ),
+    );
+    noticeForm.addEventListener("submit", async (event) => {
+      event.preventDefault();
+      try {
+        const next = clone(directories);
+        next.notice = notice.value.trim();
+        await saveDirectories(next);
+        toast("Directory notice saved.");
+      } catch (error) {
+        toast(error.message);
+      }
+    });
+    root.replaceChildren(
+      card(
+        "Directories",
+        el(
+          "div",
+          {},
+          el(
+            "p",
+            { class: "form-note" },
+            "Categories, groups and sites shown on /directory. Every site needs an HTTPS link; adult listings are not allowed.",
+          ),
+          el(
+            "div",
+            { class: "backup-actions" },
+            el(
+              "button",
+              { class: "button button-light", onclick: () => editDirectory() },
+              "Add a directory",
+              el("span", {}, "+"),
+            ),
+            el(
+              "a",
+              { class: "text-link", href: "/directory", target: "_blank", rel: "noopener" },
+              "View live ↗",
+            ),
+          ),
+        ),
+      ),
+      el(
+        "section",
+        { class: "admin-card" },
+        el(
+          "div",
+          { class: "table-wrap" },
+          el(
+            "table",
+            { class: "admin-table" },
+            el(
+              "thead",
+              {},
+              el(
+                "tr",
+                {},
+                ...["DIRECTORY", "SITES", "STATUS", "ACTIONS"].map((label) =>
+                  el("th", {}, label),
+                ),
+              ),
+            ),
+            el(
+              "tbody",
+              {},
+              ...(rows.length
+                ? rows
+                : [
+                    el(
+                      "tr",
+                      {},
+                      el("td", { colspan: "4" }, "No directories yet. Add your first one."),
+                    ),
+                  ]),
+            ),
+          ),
+        ),
+      ),
+      card("Directory notice", noticeForm, "Shown on every public directory page."),
+    );
+  }
+  const DIRECTORY_ICONS = [
+    "film", "anime", "manga", "sports", "tv", "torrent", "game",
+    "music", "ebook", "comics", "drama", "vpn", "shield", "download", "tool",
+  ];
+  function editDirectory(category) {
+    const draft = category
+      ? clone(category)
+      : {
+          id: uid("dir"),
+          name: "",
+          short: "",
+          slug: "",
+          icon: "tool",
+          tagline: "",
+          description: "",
+          groups: [{ name: "All sites", sites: [{ name: "", url: "", note: "" }] }],
+        };
+    const name = field("Name", draft.name || "", "text", true);
+    const short = field("Short name", draft.short || "");
+    const slug = field("URL slug", draft.slug || "", "text", true);
+    const icon = select(
+      "Icon",
+      DIRECTORY_ICONS,
+      DIRECTORY_ICONS.includes(draft.icon) ? draft.icon : "tool",
+    );
+    const tagline = field("Tagline", draft.tagline || "");
+    const description = field("Description", draft.description || "", "textarea");
+    const groups = (
+      Array.isArray(draft.groups) && draft.groups.length
+        ? clone(draft.groups)
+        : [{ name: "All sites", sites: [] }]
+    ).map((group) => ({
+      ...group,
+      sites: Array.isArray(group.sites) ? clone(group.sites) : [],
+    }));
+    const groupsWrap = el("div", { class: "dir-groups-editor" });
+    const drawGroups = () => {
+      groupsWrap.replaceChildren(
+        ...groups.map((group, groupIndex) => {
+          const groupName = field("Group name", group.name || "");
+          groupName.input.addEventListener("input", () => {
+            group.name = groupName.input.value;
+          });
+          const siteRows = group.sites.map((site, siteIndex) => {
+            const siteName = field("Site name", site.name || "");
+            siteName.input.addEventListener("input", () => {
+              site.name = siteName.input.value;
+            });
+            const siteUrl = field("HTTPS URL", site.url || "", "url");
+            siteUrl.input.addEventListener("input", () => {
+              site.url = siteUrl.input.value;
+            });
+            const siteNote = field("Note (optional)", site.note || "");
+            siteNote.input.addEventListener("input", () => {
+              site.note = siteNote.input.value;
+            });
+            return el(
+              "div",
+              { class: "dir-site-row" },
+              siteName.node,
+              siteUrl.node,
+              siteNote.node,
+              rowButton(
+                "×",
+                () => {
+                  group.sites.splice(siteIndex, 1);
+                  drawGroups();
+                },
+                true,
+                `Remove ${site.name || "site"}`,
+              ),
+            );
+          });
+          return el(
+            "fieldset",
+            { class: "dir-group" },
+            el("legend", {}, `Group ${groupIndex + 1}`),
+            el(
+              "div",
+              { class: "dir-group-head" },
+              groupName.node,
+              rowButton(
+                "Remove group",
+                () => {
+                  if (groups.length < 2)
+                    return toast("Keep at least one group.");
+                  groups.splice(groupIndex, 1);
+                  drawGroups();
+                },
+                true,
+                `Remove group ${groupIndex + 1}`,
+              ),
+            ),
+            el("div", { class: "dir-site-list" }, ...siteRows),
+            el(
+              "button",
+              {
+                type: "button",
+                class: "row-button dir-add-site",
+                onclick: () => {
+                  group.sites.push({ name: "", url: "", note: "" });
+                  drawGroups();
+                },
+              },
+              "+ Add site",
+            ),
+          );
+        }),
+      );
+    };
+    drawGroups();
+    if (!category) {
+      name.input.addEventListener("input", () => {
+        slug.input.value = name.input.value
+          .toLowerCase()
+          .replace(/[^a-z0-9]+/g, "-")
+          .replace(/^-|-$/g, "");
+      });
+    }
+    editor(
+      category ? "Edit directory" : "Add a directory",
+      [
+        el("div", { class: "form-grid" }, name.node, short.node),
+        el("div", { class: "form-grid" }, slug.node, icon.node),
+        tagline.node,
+        description.node,
+        el(
+          "div",
+          { class: "dir-groups-head" },
+          el("span", { class: "form-note" }, "Groups and sites"),
+          el(
+            "button",
+            {
+              type: "button",
+              class: "row-button",
+              onclick: () => {
+                groups.push({
+                  name: `Group ${groups.length + 1}`,
+                  sites: [{ name: "", url: "", note: "" }],
+                });
+                drawGroups();
+              },
+            },
+            "+ Add group",
+          ),
+        ),
+        groupsWrap,
+      ],
+      async () => {
+        const nameValue = name.input.value.trim();
+        const nextSlug = slug.input.value.trim().toLowerCase();
+        if (!nameValue) throw new Error("Directory name required.");
+        if (!/^[a-z0-9]+(?:-[a-z0-9]+)*$/.test(nextSlug))
+          throw new Error("Use lowercase letters, numbers and hyphens for the URL.");
+        const cleanedGroups = groups
+          .map((group) => ({
+            name: (group.name || "").trim(),
+            sites: (group.sites || [])
+              .filter(
+                (site) =>
+                  (site.name || "").trim() ||
+                  (site.url || "").trim() ||
+                  (site.note || "").trim(),
+              )
+              .map((site) => ({
+                name: (site.name || "").trim(),
+                url: (site.url || "").trim(),
+                ...((site.note || "").trim() ? { note: site.note.trim() } : {}),
+              })),
+          }))
+          .filter((group) => group.name && group.sites.length);
+        if (!cleanedGroups.length)
+          throw new Error("Add at least one group with one site.");
+        const updated = {
+          ...draft,
+          id: draft.id || uid("dir"),
+          name: nameValue,
+          short: short.input.value.trim() || nameValue,
+          slug: nextSlug,
+          icon: icon.input.value,
+          tagline: tagline.input.value.trim(),
+          description: description.input.value.trim(),
+          groups: cleanedGroups,
+        };
+        const categories = Array.isArray(directories.categories)
+          ? directories.categories
+          : [];
+        const originalSlug = category ? category.slug : null;
+        if (
+          categories.some(
+            (item) => item.slug === nextSlug && item.slug !== originalSlug,
+          )
+        )
+          throw new Error("That URL slug is already in use.");
+        const next = clone(directories);
+        next.categories = category
+          ? categories.map((item) => (item === category ? updated : item))
+          : [...categories, updated];
+        next.updated = new Date().toISOString().slice(0, 10);
+        await saveDirectories(next);
+      },
+    );
+  }
   function settings() {
     const name = field(
         "Site name",
@@ -1892,17 +2259,19 @@
       payments: paymentDashboard,
       tools: () => listing(config.tools, "tools"),
       downloads: () => listing(downloads, "downloads"),
+      directories: directoriesView,
       widgets: () => listing(widgets, "widgets"),
       store: () => listing(store, "store"),
     })[current]();
   }
   async function load() {
     try {
-      [config, downloads, widgets, store] = await Promise.all([
+      [config, downloads, widgets, store, directories] = await Promise.all([
         api("/api/admin/tools.config"),
         api("/api/admin/downloads"),
         api("/api/admin/widgets"),
         api("/api/admin/store-apps"),
+        api("/api/admin/directories"),
       ]);
       navigate("dashboard");
     } catch (error) {

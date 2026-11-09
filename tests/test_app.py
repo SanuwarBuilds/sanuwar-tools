@@ -17,6 +17,7 @@ class WorkspaceTests(unittest.TestCase):
             module.TOOLS_CONFIG_REL: {'tools':[{'id':'visible','name':'Visible','siteUrl':'https://example.com','visible':True},{'id':'hidden','name':'Hidden','visible':False}], 'categories':['All','Utility'], 'site':{}, 'downloadPage':{'enabled':True}},
             module.DOWNLOADS_REL: [],
             'data/config.json': {'widgets':[], 'store_apps':[]},
+            module.DIRECTORY_REL: {'notice':'Test notice','categories':[]},
         }
         self.read = patch.object(module,'safe_read',side_effect=lambda path:copy.deepcopy(self.records.get(path)))
         self.write = patch.object(module,'safe_write',side_effect=lambda path,data:self.records.__setitem__(path,copy.deepcopy(data)))
@@ -47,24 +48,24 @@ class WorkspaceTests(unittest.TestCase):
         home=self.client.get('/').get_data(as_text=True)
         self.assertIn('data-theme="dark"',home)
         self.assertIn('theme-init.js?v=1',home)
-        self.assertIn('sanuwar.css?v=6',home)
+        self.assertIn('sanuwar.css?v=8',home)
         login=self.client.get('/admin/login').get_data(as_text=True)
-        self.assertIn('admin-pro.css?v=1',login)
+        self.assertIn('admin-pro.css?v=3',login)
         self.assertIn('login-page',login)
         self.assertIn('pro-theme bp',login)
         self.login()
         admin=self.client.get('/admin').get_data(as_text=True)
-        self.assertIn('admin-pro.css?v=1',admin)
+        self.assertIn('admin-pro.css?v=3',admin)
         self.assertIn('admin-body',admin)
         self.assertIn('admin-drawer-close',admin)
-        self.assertIn('admin.js?v=2',admin)
+        self.assertIn('admin.js?v=4',admin)
 
     def test_admin_requires_authentication(self):
         self.assertEqual(self.client.get('/admin').status_code,302)
-        for path in ('/api/admin/tools.config','/api/admin/widgets','/api/admin/store-apps'):
+        for path in ('/api/admin/tools.config','/api/admin/widgets','/api/admin/store-apps','/api/admin/directories'):
             self.assertEqual(self.client.get(path).status_code,401)
     def test_all_management_writes_require_auth(self):
-        for path,method,payload in [('/api/tools.config','POST',{'tools':[],'categories':[]}),('/api/add_item','POST',{'title':'Test'}),('/api/update_item','PUT',{'id':'test','title':'Test'}),('/api/delete_item/test','DELETE',{}),('/api/admin/store-apps','POST',{}),('/api/admin/widgets','POST',{'type':'notice'})]:
+        for path,method,payload in [('/api/tools.config','POST',{'tools':[],'categories':[]}),('/api/add_item','POST',{'title':'Test'}),('/api/update_item','PUT',{'id':'test','title':'Test'}),('/api/delete_item/test','DELETE',{}),('/api/admin/store-apps','POST',{}),('/api/admin/widgets','POST',{'type':'notice'}),('/api/admin/directories','POST',{})]:
             self.assertEqual(self.request(path,method,payload).status_code,401,path)
     def test_csrf_required_for_login(self):
         self.assertEqual(self.client.post('/admin/login',json={'username':'admin','password':'admin'}).status_code,403)
@@ -88,6 +89,30 @@ class WorkspaceTests(unittest.TestCase):
         response=self.client.get('/admin/login');self.assertIn('no-store',response.headers['Cache-Control']);self.assertTrue(app.config['SESSION_COOKIE_HTTPONLY']);self.assertEqual(app.config['SESSION_COOKIE_SAMESITE'],'Lax')
     def test_hidden_tools_only_visible_to_admin(self):
         self.assertEqual(len(self.client.get('/tools.config.json').json['tools']),1);self.login();self.assertEqual(len(self.client.get('/api/admin/tools.config').json['tools']),2)
+    def test_directory_save_and_public_page(self):
+        self.login()
+        document = {'notice':'Be careful out there.','updated':'2026-11-09','categories':[
+            {'id':'movies','slug':'movies','name':'Movies','short':'Movies','icon':'film','tagline':'Films','description':'Streaming links.',
+             'groups':[{'name':'All sites','sites':[{'name':'Example','url':'https://example.com/','note':'Mirror'}]}]}]}
+        response = self.request('/api/admin/directories', data=document)
+        self.assertEqual(response.status_code, 200, response.json)
+        self.assertEqual(self.records[module.DIRECTORY_REL]['categories'][0]['slug'], 'movies')
+        page = self.client.get('/directory/movies')
+        self.assertEqual(page.status_code, 200)
+        self.assertIn(b'Example', page.data)
+        self.assertIn(b'Be careful out there.', self.client.get('/directory').data)
+
+    def test_directory_rejects_invalid_documents(self):
+        self.login()
+        for document in (
+            {'categories': []},
+            {'categories': [{'name':'No slug','groups':[{'name':'All','sites':[]}]}]},
+            {'categories': [{'name':'Bad','slug':'bad-slug','groups':[{'name':'All','sites':[{'name':'X','url':'javascript:alert(1)'}]}]}]},
+            {'categories': [{'name':'Same','slug':'same','groups':[{'name':'All','sites':[{'name':'X','url':'https://example.com/'}]}]},
+                            {'name':'Same again','slug':'same','groups':[{'name':'All','sites':[{'name':'Y','url':'https://example.org/'}]}]}]},
+        ):
+            self.assertEqual(self.request('/api/admin/directories', data=document).status_code, 400, document)
+
     def test_invalid_config_schema(self):
         self.login()
         for payload in ([1],{'tools':'bad','categories':[]},{'tools':[{'name':'No ID'}],'categories':[]}):

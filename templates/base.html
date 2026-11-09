@@ -58,9 +58,9 @@
 {% endif %}
 {% block page_styles %}{% endblock %}
 {% if public_ui %}<script nonce="{{ csp_nonce }}" src="/assets/js/boot.js?v=1"></script>{% endif %}
-{% if public_ui or request.path.startswith('/admin') %}<link rel="stylesheet" href="/assets/css/sanuwar.css?v=6">{% endif %}
+{% if public_ui or request.path.startswith('/admin') %}<link rel="stylesheet" href="/assets/css/sanuwar.css?v=8">{% endif %}
 {% if public_ui %}<script nonce="{{ csp_nonce }}" src="/assets/js/sanuwar.js?v=5" defer></script>{% endif %}
-{% if request.path.startswith('/admin') %}<link rel="stylesheet" href="/assets/css/admin-pro.css?v=1">{% endif %}
+{% if request.path.startswith('/admin') %}<link rel="stylesheet" href="/assets/css/admin-pro.css?v=3">{% endif %}
 </head>
 <body class="studio-theme {% if public_ui %}pro-theme v2 bp {% elif request.path.startswith('/admin') %}pro-theme bp {% endif %}{% block bodyclass %}{% endblock %}">
 {% if public_ui %}
