@@ -84,7 +84,8 @@
       "slug": "instant-cricket-score",
       "tags": [],
       "thumbnail": "/assets/thumbnails/instant-cricket-score.jpg",
-      "visible": true
+      "visible": false,
+      "enabled": false
     },
     {
       "addedDate": "2026-04-21",
@@ -113,7 +114,14 @@
       "route": "/directory/movies-tv",
       "thumbnail": "/assets/icons/film.svg",
       "icon": "film",
-      "tags": ["movies", "tv", "shows", "streaming", "films", "series"],
+      "tags": [
+        "movies",
+        "tv",
+        "shows",
+        "streaming",
+        "films",
+        "series"
+      ],
       "visible": true,
       "enabled": true,
       "featured": true,
@@ -131,7 +139,14 @@
       "route": "/directory/anime",
       "thumbnail": "/assets/icons/anime.svg",
       "icon": "anime",
-      "tags": ["anime", "streaming", "sub", "dub", "episodes", "directory"],
+      "tags": [
+        "anime",
+        "streaming",
+        "sub",
+        "dub",
+        "episodes",
+        "directory"
+      ],
       "visible": true,
       "enabled": true,
       "featured": true,
@@ -149,7 +164,13 @@
       "route": "/directory/manga",
       "thumbnail": "/assets/icons/manga.svg",
       "icon": "manga",
-      "tags": ["manga", "reader", "comics", "chapters", "directory"],
+      "tags": [
+        "manga",
+        "reader",
+        "comics",
+        "chapters",
+        "directory"
+      ],
       "visible": true,
       "enabled": true,
       "featured": false,
@@ -167,7 +188,14 @@
       "route": "/directory/live-sports",
       "thumbnail": "/assets/icons/sports.svg",
       "icon": "sports",
-      "tags": ["sports", "live", "cricket", "football", "hockey", "streaming"],
+      "tags": [
+        "sports",
+        "live",
+        "cricket",
+        "football",
+        "hockey",
+        "streaming"
+      ],
       "visible": true,
       "enabled": true,
       "featured": true,
@@ -185,7 +213,13 @@
       "route": "/directory/live-tv",
       "thumbnail": "/assets/icons/tv.svg",
       "icon": "tv",
-      "tags": ["live tv", "iptv", "channels", "news", "streaming"],
+      "tags": [
+        "live tv",
+        "iptv",
+        "channels",
+        "news",
+        "streaming"
+      ],
       "visible": true,
       "enabled": true,
       "featured": false,
@@ -203,7 +237,13 @@
       "route": "/directory/torrents",
       "thumbnail": "/assets/icons/torrent.svg",
       "icon": "torrent",
-      "tags": ["torrent", "magnet", "index", "downloads", "directory"],
+      "tags": [
+        "torrent",
+        "magnet",
+        "index",
+        "downloads",
+        "directory"
+      ],
       "visible": true,
       "enabled": true,
       "featured": false,
@@ -221,7 +261,13 @@
       "route": "/directory/games",
       "thumbnail": "/assets/icons/game.svg",
       "icon": "game",
-      "tags": ["games", "repacks", "pc", "downloads", "directory"],
+      "tags": [
+        "games",
+        "repacks",
+        "pc",
+        "downloads",
+        "directory"
+      ],
       "visible": true,
       "enabled": true,
       "featured": false,
@@ -239,7 +285,13 @@
       "route": "/directory/music",
       "thumbnail": "/assets/icons/music.svg",
       "icon": "music",
-      "tags": ["music", "spotify", "youtube", "mp3", "downloads"],
+      "tags": [
+        "music",
+        "spotify",
+        "youtube",
+        "mp3",
+        "downloads"
+      ],
       "visible": true,
       "enabled": true,
       "featured": false,
@@ -257,7 +309,13 @@
       "route": "/directory/ebooks",
       "thumbnail": "/assets/icons/ebook.svg",
       "icon": "ebook",
-      "tags": ["ebooks", "books", "audiobooks", "pdf", "library"],
+      "tags": [
+        "ebooks",
+        "books",
+        "audiobooks",
+        "pdf",
+        "library"
+      ],
       "visible": true,
       "enabled": true,
       "featured": false,
@@ -275,7 +333,13 @@
       "route": "/directory/comics",
       "thumbnail": "/assets/icons/comics.svg",
       "icon": "comics",
-      "tags": ["comics", "issues", "readers", "cbz", "directory"],
+      "tags": [
+        "comics",
+        "issues",
+        "readers",
+        "cbz",
+        "directory"
+      ],
       "visible": true,
       "enabled": true,
       "featured": false,
@@ -293,7 +357,14 @@
       "route": "/directory/asian-drama",
       "thumbnail": "/assets/icons/drama.svg",
       "icon": "drama",
-      "tags": ["asian drama", "kdrama", "jdrama", "cdrama", "subtitles", "streaming"],
+      "tags": [
+        "asian drama",
+        "kdrama",
+        "jdrama",
+        "cdrama",
+        "subtitles",
+        "streaming"
+      ],
       "visible": true,
       "enabled": true,
       "featured": false,
@@ -311,7 +382,13 @@
       "route": "/directory/vpn",
       "thumbnail": "/assets/icons/vpn.svg",
       "icon": "vpn",
-      "tags": ["vpn", "privacy", "security", "network", "directory"],
+      "tags": [
+        "vpn",
+        "privacy",
+        "security",
+        "network",
+        "directory"
+      ],
       "visible": true,
       "enabled": true,
       "featured": false,
@@ -329,7 +406,13 @@
       "route": "/directory/adblockers",
       "thumbnail": "/assets/icons/shield.svg",
       "icon": "shield",
-      "tags": ["adblock", "privacy", "extensions", "trackers", "browser"],
+      "tags": [
+        "adblock",
+        "privacy",
+        "extensions",
+        "trackers",
+        "browser"
+      ],
       "visible": true,
       "enabled": true,
       "featured": false,
