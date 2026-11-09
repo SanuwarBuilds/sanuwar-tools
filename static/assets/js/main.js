@@ -3,18 +3,40 @@
   const { $, el, api, image, external, empty, tabs, open, toast } = ST;
   let config, tools = [], selected = "All";
   const grid = $("#tools-grid");
-  const ICON_NAMES = new Set(["photo", "passport", "score", "wallet", "tool", "download", "album"]);
+  const ICON_NAMES = new Set(["photo", "passport", "score", "wallet", "tool", "download", "album", "film", "anime", "manga", "sports", "tv", "torrent", "game", "music", "ebook", "comics", "drama", "vpn", "shield"]);
   const kindFor = (text) =>
     text.includes("passport") ? "passport" :
     text.includes("photo") ? "photo" :
     text.includes("cricket") ? "score" :
-    text.includes("expense") || text.includes("budget") ? "wallet" : "";
+    text.includes("expense") || text.includes("budget") ? "wallet" :
+    text.includes("movie") || text.includes("tv show") ? "film" :
+    text.includes("anime") ? "anime" :
+    text.includes("manga") ? "manga" :
+    text.includes("sport") ? "sports" :
+    text.includes("live tv") ? "tv" :
+    text.includes("torrent") ? "torrent" :
+    text.includes("game") ? "game" :
+    text.includes("music") ? "music" :
+    text.includes("ebook") ? "ebook" :
+    text.includes("comic") ? "comics" :
+    text.includes("drama") ? "drama" :
+    text.includes("vpn") ? "vpn" :
+    text.includes("adblock") ? "shield" : "";
   const iconFor = (tool) => {
     if (tool.kind !== "tool") return tool.kind === "album" ? "album" : "download";
     if (ICON_NAMES.has(tool.icon)) return tool.icon;
     const name = tool.name.toLowerCase();
     const tags = Array.isArray(tool.tags) ? tool.tags.join(" ").toLowerCase() : "";
     return kindFor(name) || kindFor(tags) || "tool";
+  };
+  const routeFor = (tool) =>
+    typeof tool.route === "string" && tool.route.startsWith("/") &&
+    !tool.route.startsWith("//") && !/[\\\r\n]/.test(tool.route) ? tool.route : "";
+  const toolLink = (tool, text, className = "text-link catalogue-open") => {
+    const path = routeFor(tool);
+    return path
+      ? el("a", { href: path, class: className }, text, el("span", {}, "→"))
+      : external(tool.siteUrl, text, className);
   };
   const render = () => {
     const query = $("#tool-search").value.trim().toLowerCase();
@@ -35,9 +57,9 @@
         image(tool.thumbnail, tool.name, "dialog-preview"),
         el("p", {class: "dialog-description"}, tool.longDescription || tool.description || "Open this tool to get started."),
         el("div", {class: "dialog-meta"}, ...(tool.tags || []).map(tag => el("span", {class: "tag"}, tag))),
-        measuredLink(external(tool.siteUrl, "Open tool", "button button-orange")),
+        measuredLink(toolLink(tool, "Open tool", "button button-orange")),
       ], tool.category || "WEB TOOL");
-      const action = isTool ? external(tool.siteUrl, "Open tool", "text-link catalogue-open") :
+      const action = isTool ? toolLink(tool, "Open tool", "text-link catalogue-open") :
         el("a", {href: `/downloads?item=${encodeURIComponent(tool.id)}`, class: "text-link catalogue-open", "data-google-vignette": "false"}, tool.kind === "album" ? "View album" : "View download");
       measuredLink(action);
       return el("article", {class: "tool-card catalogue-card"},

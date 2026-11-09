@@ -1,0 +1,109 @@
+{% extends 'base.html' %}
+{% block bodyclass %}directory-page dir-detail{% endblock %}
+{% block page_styles %}<link rel="stylesheet" href="/assets/css/directory.css?v=1">{% endblock %}
+{% block content %}
+<section class="bp-hero wrap dir-hero" aria-labelledby="dir-title">
+  <div class="bp-hero-nav">
+    <span><i aria-hidden="true"></i>Open directories · external sources</span>
+    <span>{{ total_sites }} sources · use a VPN where legal</span>
+  </div>
+  <div class="bp-hero-core">
+    <div class="bp-machine">
+      <span class="bp-leds" aria-hidden="true"><i></i><i></i><i></i></span>
+      <span class="bp-machine-label" aria-hidden="true">Signal board · module {{ category.slug }}</span>
+      <span class="bp-screw is-tl" aria-hidden="true"></span>
+      <span class="bp-screw is-tr" aria-hidden="true"></span>
+      <span class="bp-screw is-bl" aria-hidden="true"></span>
+      <span class="bp-screw is-br" aria-hidden="true"></span>
+      <span class="bp-etched" aria-hidden="true">s</span>
+      <span class="bp-kicker">{{ category.short }} directory</span>
+      <h1 id="dir-title" class="bp-title">{{ category.name }}</h1>
+      <p class="bp-hero-line">{{ category.description }}</p>
+      <div class="bp-hero-actions">
+        <a class="bp-cta" href="#sites">Browse {{ total_sites }} sources</a>
+        <a class="bp-cta-ghost" href="/directory">All directories <span aria-hidden="true">→</span></a>
+      </div>
+      <div class="bp-console">
+        <div class="bp-console-bar">
+          <span>Signal scan · live</span>
+          <span><b id="directory-total">{{ total_sites }}</b> sources</span>
+        </div>
+        <label class="bp-screen" for="directory-search">
+          <svg aria-hidden="true" viewBox="0 0 24 24"><circle cx="10.5" cy="10.5" r="6.5"/><path d="m16 16 4.5 4.5"/></svg>
+          <input type="search" id="directory-search" placeholder="Search {{ category.short | lower }} sites…" aria-label="Search {{ category.name }} sites">
+          <kbd>/</kbd>
+        </label>
+        {% if groups | length > 1 %}
+        <div class="bp-keys dir-groups" id="directory-groups" role="group" aria-label="Filter by section">
+          <button type="button" class="filter-tab active" data-group="all" aria-pressed="true">All <span>{{ total_sites }}</span></button>
+          {% for group in groups %}
+          <button type="button" class="filter-tab" data-group="{{ loop.index0 }}" aria-pressed="false">{{ group.name }} <span>{{ group.sites | length }}</span></button>
+          {% endfor %}
+        </div>
+        {% endif %}
+      </div>
+    </div>
+  </div>
+  <div class="bp-hero-nav is-foot">
+    <span>Third-party links · no files hosted</span>
+    <span>sanuwartools.online</span>
+  </div>
+</section>
+
+<section class="bp-section wrap" aria-labelledby="dir-notice-title">
+  <div class="dir-notice">
+    <span class="dir-notice-led" aria-hidden="true"></span>
+    <div>
+      <span class="bp-eyebrow">Safety note</span>
+      <h2 id="dir-notice-title">Before you open a source</h2>
+      <p>{{ notice }}</p>
+      <p class="dir-notice-extra">Adult listings are intentionally excluded from every directory on this site.</p>
+    </div>
+  </div>
+</section>
+
+<section class="bp-section wrap dir-section" id="sites" aria-labelledby="sites-title">
+  <div class="bp-section-head">
+    <div><span class="bp-eyebrow">01 — Sources</span><h2 id="sites-title">{{ category.name }} sites</h2></div>
+    <p class="bp-count"><b id="directory-visible">{{ total_sites }}</b> of {{ total_sites }}</p>
+  </div>
+  <div class="dir-grid" id="directory-grid" aria-live="polite">
+    {% set counter = namespace(value=0) %}
+    {% for group in groups %}
+    {% set group_index = loop.index0 %}
+    {% for site in group.sites %}
+    {% if site.url | public_url %}
+    {% set counter.value = counter.value + 1 %}
+    <article class="dir-site" data-group="{{ group_index }}" data-search="{{ (site.name ~ ' ' ~ (site.note or '') ~ ' ' ~ (site.url | site_domain)) | lower }}">
+      <span class="dir-site-no" aria-hidden="true">{{ '%02d' | format(counter.value) }}</span>
+      <span class="dir-site-led" aria-hidden="true"></span>
+      <span class="dir-site-mark" aria-hidden="true">{{ site.name[0] | upper }}</span>
+      <div class="dir-site-body">
+        <h3><a href="{{ site.url | public_url }}" target="_blank" rel="noopener noreferrer">{{ site.name }}<span class="dir-site-arrow" aria-hidden="true">↗</span></a></h3>
+        <p class="dir-site-meta"><span>{{ site.url | site_domain }}</span>{% if site.note %}<span class="dir-site-note">{{ site.note }}</span>{% endif %}</p>
+      </div>
+    </article>
+    {% endif %}
+    {% endfor %}
+    {% endfor %}
+  </div>
+  <div class="dir-empty" id="directory-empty" hidden>
+    <h3>No signal found.</h3>
+    <p>Try another word or clear the current filter.</p>
+    <button type="button" class="filter-tab" id="directory-clear">Clear filters</button>
+  </div>
+</section>
+
+<section class="bp-section wrap" aria-labelledby="more-dirs-title">
+  <div class="bp-section-head">
+    <div><span class="bp-eyebrow">02 — More modules</span><h2 id="more-dirs-title">Other directories</h2></div>
+    <p class="bp-count"><b>{{ others | length }}</b> more</p>
+  </div>
+  <div class="dir-quicknav">
+    {% for other in others %}
+    <a class="dir-quicklink" href="/directory/{{ other.slug }}"><span>{{ other.name }}</span><b>{{ other.site_count }}</b></a>
+    {% endfor %}
+  </div>
+</section>
+{% endblock %}
+{% block scripts %}<script nonce="{{ csp_nonce }}" src="/assets/js/directory.js?v=1" defer></script>{% endblock %}

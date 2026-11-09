@@ -1,11 +1,12 @@
 """Canonical public discovery metadata; private workflows stay out of search."""
 import os
+import re
 from xml.etree.ElementTree import Element, SubElement, tostring
 from flask import Response, request
 import security
 
 ORIGIN = 'https://sanuwartools.online'
-SITE_UPDATED = '2026-11-08'
+SITE_UPDATED = '2026-11-09'
 OG_IMAGE = ORIGIN + '/assets/og/sanuwartools-og.png'
 TELEGRAM_URL = 'https://t.me/+dBcRFw3B1zcwMDg1'
 INDEXNOW_KEY = '9c3f7a1e5b8d4f2a6c0e9d7b3a5f1c8e'
@@ -22,6 +23,8 @@ PAGES = {
                  'Contact SanuwarTools for support, download issues, corrections, privacy requests or content concerns.'),
     '/downloads': ('Downloads — Android Apps & Files | SanuwarTools',
                    'Browse Android apps, files and albums on SanuwarTools. Preview available downloads, check versions and choose the files you need.'),
+    '/directory': ('Open Directories — Movies, Anime, Manga & More | SanuwarTools',
+                   'Browse hand-checked directories for movies, TV shows, anime, manga, live sports, live TV, torrents, games, music, eBooks, comics, Asian drama, VPNs and ad blockers.'),
 }
 PAGE_TYPES = {
     '/': 'WebPage',
@@ -30,6 +33,7 @@ PAGE_TYPES = {
     '/about': 'AboutPage',
     '/contact': 'ContactPage',
     '/downloads': 'CollectionPage',
+    '/directory': 'CollectionPage',
 }
 BREADCRUMBS = {
     '/photo-tools': 'Photo Tools',
@@ -37,6 +41,7 @@ BREADCRUMBS = {
     '/about': 'About',
     '/contact': 'Contact',
     '/privacy': 'Privacy',
+    '/directory': 'Directories',
 }
 PHOTO_FAQS = [
     ('How do I resize a photo to exact pixels?',
@@ -52,10 +57,19 @@ PHOTO_FAQS = [
 ]
 
 
-TOOL_ICON_NAMES = ('photo', 'passport', 'score', 'wallet', 'tool', 'download', 'album')
+TOOL_ICON_NAMES = ('photo', 'passport', 'score', 'wallet', 'tool', 'download', 'album',
+                   'film', 'anime', 'manga', 'sports', 'tv', 'torrent', 'game', 'music',
+                   'ebook', 'comics', 'drama', 'vpn', 'shield')
 
 
-def install(app, load_config):
+def install(app, load_config, load_directory=None):
+    def directory_categories():
+        data = load_directory() if load_directory else None
+        if not isinstance(data, dict):
+            return []
+        return [category for category in data.get('categories', [])
+                if isinstance(category, dict) and category.get('slug') and category.get('name')]
+
     def tool_icon(tool):
         explicit = str(tool.get('icon', '')).strip().lower()
         if explicit in TOOL_ICON_NAMES:
@@ -67,7 +81,20 @@ def install(app, load_config):
             return ('passport' if 'passport' in text else
                     'photo' if 'photo' in text else
                     'score' if 'cricket' in text else
-                    'wallet' if 'expense' in text or 'budget' in text else '')
+                    'wallet' if 'expense' in text or 'budget' in text else
+                    'film' if 'movie' in text or 'tv show' in text else
+                    'anime' if 'anime' in text else
+                    'manga' if 'manga' in text else
+                    'sports' if 'sport' in text else
+                    'tv' if 'live tv' in text else
+                    'torrent' if 'torrent' in text else
+                    'game' if 'game' in text else
+                    'music' if 'music' in text else
+                    'ebook' if 'ebook' in text else
+                    'comics' if 'comic' in text else
+                    'drama' if 'drama' in text else
+                    'vpn' if 'vpn' in text else
+                    'shield' if 'adblock' in text else '')
 
         kind = (kind_for(str(tool.get('name', '')).lower()) or
                 kind_for(tag_text) or 'tool')
@@ -79,7 +106,18 @@ def install(app, load_config):
     @app.context_processor
     def search_metadata():
         path = '/downloads' if request.path == '/download.html' else request.path
+        category = None
         page = PAGES.get(path)
+        if page is None and path.startswith('/directory/'):
+            slug = path[len('/directory/'):]
+            if '/' not in slug:
+                category = next((item for item in directory_categories() if item.get('slug') == slug), None)
+            if category is not None:
+                total = sum(len([site for site in group.get('sites', []) if isinstance(site, dict)])
+                            for group in category.get('groups', []) if isinstance(group, dict))
+                name = str(category.get('name'))
+                page = (f'{name} — {total} Sites & Mirrors | SanuwarTools',
+                        (str(category.get('description') or f'Browse {total} {name} sites and mirrors.'))[:300])
         if page is None:
             return {'seo': {'indexable': False, 'description': ''}, 'seo_verification': []}
         title, description = page
@@ -96,7 +134,8 @@ def install(app, load_config):
                         'contactPoint': {'@type': 'ContactPoint', 'contactType': 'customer support',
                                          'url': TELEGRAM_URL},
                         'sameAs': ['https://github.com/SanuwarBuilds', 'https://www.instagram.com/iam.sanuwar/']}
-        webpage = {'@type': PAGE_TYPES.get(path, 'WebPage'), '@id': canonical + '#webpage',
+        page_type = 'CollectionPage' if path.startswith('/directory') else PAGE_TYPES.get(path, 'WebPage')
+        webpage = {'@type': page_type, '@id': canonical + '#webpage',
                    'url': canonical, 'name': title, 'description': description,
                    'isPartOf': {'@id': ORIGIN + '/#website'}, 'inLanguage': 'en',
                    'primaryImageOfPage': {'@type': 'ImageObject', 'url': OG_IMAGE,
@@ -104,12 +143,31 @@ def install(app, load_config):
                    'publisher': publisher}
         graph = [website, organization, webpage] if path == '/' else [organization, webpage]
         if path != '/':
+            crumb_name = str(category.get('name')) if category is not None else BREADCRUMBS.get(path, title.split(' | ')[0].split(' — ')[0])
             graph.append({'@type': 'BreadcrumbList', '@id': canonical + '#breadcrumb',
                           'itemListElement': [
                               {'@type': 'ListItem', 'position': 1, 'name': 'Home', 'item': ORIGIN + '/'},
                               {'@type': 'ListItem', 'position': 2,
-                               'name': BREADCRUMBS.get(path, title.split(' | ')[0].split(' — ')[0]),
-                               'item': canonical}]})
+                               'name': 'Directories' if category is not None else crumb_name,
+                               'item': ORIGIN + '/directory' if category is not None else canonical}] +
+                              ([{'@type': 'ListItem', 'position': 3, 'name': crumb_name, 'item': canonical}]
+                               if category is not None else [])})
+        if category is not None:
+            site_items = []
+            position = 0
+            for group in category.get('groups', []):
+                if not isinstance(group, dict):
+                    continue
+                for site in group.get('sites', []):
+                    if not isinstance(site, dict) or not site.get('url'):
+                        continue
+                    position += 1
+                    site_items.append({'@type': 'ListItem', 'position': position,
+                                       'name': str(site.get('name') or site['url']),
+                                       'url': str(site['url'])})
+            graph.append({'@type': 'ItemList', '@id': canonical + '#sites',
+                          'name': title, 'numberOfItems': position,
+                          'itemListElement': site_items})
         if path == '/photo-tools':
             graph.append({'@type': 'WebApplication', '@id': canonical + '#app',
                           'name': 'Photo Resizer & Compressor', 'url': canonical,
@@ -153,7 +211,11 @@ def install(app, load_config):
             paths.append('/downloads')
         if not any(tool.get('id') == 'builtin-photo-tools' and not all(tool.get(flag, True) is True for flag in ('enabled', 'visible')) for tool in config.get('tools', [])):
             paths.append('/photo-tools')
-        paths.extend(['/about', '/contact', '/privacy'])
+        paths.extend(['/about', '/contact', '/privacy', '/directory'])
+        for category in directory_categories():
+            slug = category.get('slug')
+            if isinstance(slug, str) and re.fullmatch(r'[a-z0-9-]{1,80}', slug):
+                paths.append('/directory/' + slug)
         root = Element('urlset', xmlns='http://www.sitemaps.org/schemas/sitemap/0.9')
         for path in paths:
             url = SubElement(root, 'url')

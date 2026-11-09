@@ -17,7 +17,10 @@ class SearchDiscoveryTests(unittest.TestCase):
             {'id':'free','title':'Public album','is_album':True,'album_files':[{'name':'Public guide.pdf','link':'https://example.com/guide.pdf'}]},
             {'id':'hidden','title':'Secret download title','enabled':False,'link':'https://example.com/hidden.zip'},
             {'id':'paid','title':'Paid album','is_album':True,'pricing':{'mode':'paid','price':'99','discount':'0'},
-             'album_files':[{'name':'Premium file.zip','asset':{'public_id':'private/secret','type':'authenticated','resource_type':'raw','format':'zip'},'link':'https://example.com/secret-original.zip'}]}]}
+             'album_files':[{'name':'Premium file.zip','asset':{'public_id':'private/secret','type':'authenticated','resource_type':'raw','format':'zip'},'link':'https://example.com/secret-original.zip'}]}],
+            module.DIRECTORY_REL:{'notice':'Test notice.','categories':[
+                {'slug':'anime','name':'Anime','short':'Anime','icon':'anime','description':'Test anime directory.',
+                 'groups':[{'name':'All sites','sites':[{'name':'anime.example','url':'https://anime.example/'}]}]}]}}
         patch.object(module,'safe_read',side_effect=lambda p:copy.deepcopy(self.records.get(p))).start()
         self.client=module.app.test_client()
 
@@ -68,7 +71,8 @@ class SearchDiscoveryTests(unittest.TestCase):
         root=fromstring(response.data)
         self.assertEqual([node.text for node in root.iter('{http://www.sitemaps.org/schemas/sitemap/0.9}loc')],
                          ['https://sanuwartools.online/','https://sanuwartools.online/downloads',
-                          'https://sanuwartools.online/photo-tools','https://sanuwartools.online/about','https://sanuwartools.online/contact','https://sanuwartools.online/privacy'])
+                          'https://sanuwartools.online/photo-tools','https://sanuwartools.online/about','https://sanuwartools.online/contact','https://sanuwartools.online/privacy',
+                          'https://sanuwartools.online/directory','https://sanuwartools.online/directory/anime'])
         self.records[module.TOOLS_CONFIG_REL]['downloadPage']['enabled']=False
         self.assertNotIn(b'/downloads',self.client.get('/sitemap.xml').data)
         self.assertEqual(self.client.get('/downloads').status_code,404)
@@ -125,7 +129,22 @@ class SearchDiscoveryTests(unittest.TestCase):
         self.assertEqual(response.status_code,200)
         self.assertEqual(response.get_data(as_text=True),seo.INDEXNOW_KEY)
         sitemap=self.client.get('/sitemap.xml').data.decode()
-        self.assertEqual(sitemap.count('<lastmod>'+seo.SITE_UPDATED+'</lastmod>'),6)
+        self.assertEqual(sitemap.count('<lastmod>'+seo.SITE_UPDATED+'</lastmod>'),8)
+
+    def test_directory_hub_and_category_pages_are_indexable(self):
+        hub=self.client.get('/directory')
+        self.assertEqual(hub.status_code,200)
+        self.assertIn('Anime',hub.get_data(as_text=True))
+        self.assertNotIn('noindex',hub.headers.get('X-Robots-Tag',''))
+        detail=self.client.get('/directory/anime')
+        self.assertEqual(detail.status_code,200)
+        text=detail.get_data(as_text=True)
+        self.assertIn('https://anime.example/',text)
+        self.assertIn('Search anime sites',text)
+        data=json.loads(re.search(r'<script[^>]*type="application/ld\+json">(.*?)</script>',text,re.S).group(1))
+        types={node.get('@type') for node in data['@graph']}
+        self.assertTrue({'CollectionPage','BreadcrumbList','ItemList'} <= types)
+        self.assertEqual(self.client.get('/directory/missing').status_code,404)
 
     def test_private_pages_send_noindex_header(self):
         for path in ('/signin','/account'):

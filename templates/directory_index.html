@@ -1,0 +1,85 @@
+{% extends 'base.html' %}
+{% block bodyclass %}directory-page dir-hub{% endblock %}
+{% block page_styles %}<link rel="stylesheet" href="/assets/css/directory.css?v=1">{% endblock %}
+{% block content %}
+<section class="bp-hero wrap dir-hero" aria-labelledby="dir-hub-title">
+  <div class="bp-hero-nav">
+    <span><i aria-hidden="true"></i>Open directories · external sources</span>
+    <span>{{ directories | length }} modules · {{ total_sites }} sources</span>
+  </div>
+  <div class="bp-hero-core">
+    <div class="bp-machine">
+      <span class="bp-leds" aria-hidden="true"><i></i><i></i><i></i></span>
+      <span class="bp-machine-label" aria-hidden="true">Signal board · directory index</span>
+      <span class="bp-screw is-tl" aria-hidden="true"></span>
+      <span class="bp-screw is-tr" aria-hidden="true"></span>
+      <span class="bp-screw is-bl" aria-hidden="true"></span>
+      <span class="bp-screw is-br" aria-hidden="true"></span>
+      <span class="bp-etched" aria-hidden="true">s</span>
+      <span class="bp-kicker">Directories · indexed links</span>
+      <h1 id="dir-hub-title" class="bp-title">Open directories</h1>
+      <p class="bp-hero-line">A station guide for movies, anime, manga, sports, TV, torrents, games, music, books, comics, drama, VPNs and ad blockers. Adult sources are not listed.</p>
+      <div class="bp-hero-actions">
+        <a class="bp-cta" href="#directories">Browse {{ directories | length }} directories</a>
+        <a class="bp-cta-ghost" href="#dir-hub-notice">Read the notice <span aria-hidden="true">→</span></a>
+      </div>
+      <div class="bp-console">
+        <div class="bp-console-bar">
+          <span>Module scan · live</span>
+          <span><b id="directory-total">{{ directories | length }}</b> directories</span>
+        </div>
+        <label class="bp-screen" for="directory-search">
+          <svg aria-hidden="true" viewBox="0 0 24 24"><circle cx="10.5" cy="10.5" r="6.5"/><path d="m16 16 4.5 4.5"/></svg>
+          <input type="search" id="directory-search" placeholder="Search directories…" aria-label="Search directories">
+          <kbd>/</kbd>
+        </label>
+      </div>
+    </div>
+  </div>
+  <div class="bp-hero-nav is-foot">
+    <span>Third-party links · no files hosted</span>
+    <span>sanuwartools.online</span>
+  </div>
+</section>
+
+<section class="bp-section wrap" id="directories" aria-labelledby="dir-list-title">
+  <div class="bp-section-head">
+    <div><span class="bp-eyebrow">01 — Modules</span><h2 id="dir-list-title">All directories</h2></div>
+    <p class="bp-count"><b id="directory-visible">{{ directories | length }}</b> of {{ directories | length }}</p>
+  </div>
+  <div class="dir-hub-grid">
+    {% for directory in directories %}
+    <article class="catalogue-card dir-hub-card" data-search="{{ (directory.name ~ ' ' ~ (directory.short or '') ~ ' ' ~ (directory.tagline or '') ~ ' ' ~ (directory.description or '')) | lower }}">
+      <div class="catalogue-card-top">
+        <img class="catalogue-icon" src="/assets/icons/{{ directory.icon or 'tool' }}.svg?v=dir1" alt="" width="48" height="48">
+        <span class="catalogue-badge">{{ directory.site_count }} sites</span>
+      </div>
+      <div class="card-body">
+        <span class="catalogue-type">{{ directory.short or directory.name }}</span>
+        <h3>{{ directory.name }}</h3>
+        <p>{{ directory.description }}</p>
+        <div class="card-bottom"><a class="catalogue-open" href="/directory/{{ directory.slug }}">Open directory</a></div>
+      </div>
+    </article>
+    {% endfor %}
+  </div>
+  <div class="dir-empty" id="directory-empty" hidden>
+    <h3>No signal found.</h3>
+    <p>Try another word or clear the search.</p>
+    <button type="button" class="filter-tab" id="directory-clear">Clear filters</button>
+  </div>
+</section>
+
+<section class="bp-section wrap" id="dir-hub-notice" aria-labelledby="dir-hub-notice-title">
+  <div class="dir-notice">
+    <span class="dir-notice-led" aria-hidden="true"></span>
+    <div>
+      <span class="bp-eyebrow">Safety note</span>
+      <h2 id="dir-hub-notice-title">Before you open a source</h2>
+      <p>{{ notice }}</p>
+      <p class="dir-notice-extra">Adult listings are intentionally excluded from every directory on this site.</p>
+    </div>
+  </div>
+</section>
+{% endblock %}
+{% block scripts %}<script nonce="{{ csp_nonce }}" src="/assets/js/directory.js?v=1" defer></script>{% endblock %}

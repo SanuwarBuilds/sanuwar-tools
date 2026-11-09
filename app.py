@@ -96,6 +96,59 @@ def photo_tools():
         abort(404)
     return render_template('photo_tools.html')
 
+def load_directory():
+    data = safe_read(DIRECTORY_REL)
+    if not isinstance(data, dict) or not isinstance(data.get('categories'), list):
+        return {'categories': []}
+    return data
+
+def directory_sites(category):
+    groups = [group for group in category.get('groups', []) if isinstance(group, dict)]
+    total = 0
+    for group in groups:
+        total += len([site for site in group.get('sites', [])
+                      if isinstance(site, dict) and security.valid_url(site.get('url'))])
+    return groups, total
+
+@app.get('/directory')
+def directory_index():
+    data = load_directory()
+    directories = []
+    for category in data.get('categories', []):
+        if not isinstance(category, dict) or not category.get('slug') or not category.get('name'):
+            continue
+        _, total = directory_sites(category)
+        directories.append({**category, 'site_count': total})
+    if not directories:
+        abort(404)
+    return render_template('directory_index.html', directories=directories,
+                           total_sites=sum(item['site_count'] for item in directories),
+                           notice=data.get('notice', ''))
+
+@app.get('/directory/<slug>')
+def directory_page(slug):
+    data = load_directory()
+    category = next((item for item in data.get('categories', [])
+                     if isinstance(item, dict) and item.get('slug') == slug), None)
+    if category is None:
+        abort(404)
+    groups, total = directory_sites(category)
+    others = [{**item, 'site_count': directory_sites(item)[1]} for item in data.get('categories', [])
+              if isinstance(item, dict) and item.get('slug') and item.get('slug') != slug]
+    return render_template('directory.html', category=category, groups=groups,
+                           total_sites=total, others=others, notice=data.get('notice', ''))
+
+@app.template_filter('site_domain')
+def site_domain(value):
+    if not isinstance(value, str):
+        return ''
+    try:
+        from urllib.parse import urlsplit
+        host = urlsplit(value).hostname or ''
+    except ValueError:
+        return ''
+    return host[4:] if host.startswith('www.') else host
+
 @app.route("/payment-demo")
 def payment_demo():
     return render_template("payment_demo.html")
@@ -249,6 +302,7 @@ utils.safe_writer = safe_write
 
 TOOLS_CONFIG_REL = "data/tools.config.json"
 DOWNLOADS_REL    = "data/downloads.json"
+DIRECTORY_REL    = "data/directory.json"
 
 @app.route("/tools.config.json")
 def serve_config():
@@ -699,7 +753,7 @@ def api_widget_vote(widget_id):
         return jsonify({"error": "Could not save or upload. Check server configuration and try again."}), 500
 
 payments.register(app, public_downloads, login_required)
-seo.install(app, lambda: safe_read(TOOLS_CONFIG_REL))
+seo.install(app, lambda: safe_read(TOOLS_CONFIG_REL), lambda: safe_read(DIRECTORY_REL))
 monetization.install(app)
 user_auth.install(app)
 visitor_analytics.install(app, login_required, lambda: safe_read(TOOLS_CONFIG_REL), lambda: safe_read(DOWNLOADS_REL) or [])

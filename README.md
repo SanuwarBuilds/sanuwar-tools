@@ -37,6 +37,7 @@ Open `http://127.0.0.1:5002` and `/admin`. Debug mode is off; opt in locally wit
 
 - Homepage: tool search/categories, tool details, featured cards, responsive navigation, light/dark theme, workflow animation, FAQ and enabled home widgets.
 - Downloads: compact phone rows, sticky search/category filters, apps/files versus album filters, direct download buttons, sorting, app/file details, version/source information, album thumbnail galleries, full-size image/media previews and individual download links. The browser streams external downloads directly; the UI does not buffer large APKs or claim that a file finished downloading.
+- Directories: 13 non-adult source directories (movies and TV, anime, manga, live sports, live TV, torrents, games, music, eBooks, comics, Asian drama, VPN and ad blockers) with live search, group filters, a safety notice and tool cards on the homepage. Adult listings are deliberately excluded.
 - Workspace: real counts, tool CRUD/reordering, download/album CRUD, sequential bulk uploads with retry tracking, widget CRUD/reordering and poll voting, store app management, categories, branding/social links/theme, and tools configuration import/export with a review step.
 - Existing tools, download URLs and album entries are retained. A missing election-tool thumbnail has an original local SVG replacement.
 - Security: environment-based secrets/credentials, password hash support, login throttling, two-hour sessions, HttpOnly/SameSite cookies, secure cookies on Vercel, CSRF and origin checks on mutations, authenticated management APIs, hidden tools excluded from public JSON, request/upload limits, image verification and file allowlists, HTTPS URL validation, DOM-safe rendering, restrictive script CSP and response headers. Logout requires POST. Save failures return errors rather than false success.
@@ -70,6 +71,7 @@ python -m unittest discover -s tests -v
 node --check static/assets/js/shared.js
 node --check static/assets/js/main.js
 node --check static/assets/js/downloads.js
+node --check static/assets/js/directory.js
 node --check static/assets/js/admin.js
 node --check static/assets/js/login.js
 pip install pip-audit
@@ -81,9 +83,10 @@ Integration tests isolate data and mock uploads/writes, so they never modify the
 ## Files
 
 - `app.py`, `security.py`, `utils.py`: Flask routes, request protections, persistence.
-- `templates/`: shared layout, homepage, downloads, admin and login.
+- `templates/`: shared layout, homepage, downloads, directories, admin and login.
 - `static/assets/css/`, `static/assets/js/`: local UI assets.
 - `data/tools.config.json`: catalogue, categories and public settings.
+- `data/directory.json`: directory categories, groups and external source links.
 - `data/downloads.json`: download items and album links.
 - `data/config.json`: home widgets and store apps; no administrator credentials.
 - `tests/test_app.py`: integration and security regression tests.

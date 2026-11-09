@@ -1,0 +1,406 @@
+{
+  "updated": "2026-11-09",
+  "notice": "SanuwarTools lists third-party websites for reference only. We do not host, stream or upload any content. Some links may be blocked in your region. Use an ad blocker and a VPN only where it is legal to do so, and follow the laws of your country.",
+  "categories": [
+    {
+      "id": "movies-tv",
+      "slug": "movies-tv",
+      "name": "Movies & TV Shows",
+      "short": "Movies & TV",
+      "icon": "film",
+      "tagline": "A channel guide for films and series.",
+      "description": "Streaming and download directories for movies and TV shows. Browse the list, pick a source and use an ad blocker before you press play.",
+      "groups": [
+        {
+          "name": "All sites",
+          "sites": [
+            { "name": "ramoflix.net", "url": "https://ramoflix.net/" },
+            { "name": "doraby.com", "url": "https://doraby.com/" },
+            { "name": "wmovies.nl", "url": "https://wmovies.nl/" },
+            { "name": "hydrahd.gd", "url": "https://hydrahd.gd/" },
+            { "name": "goojara.to", "url": "https://ww1.goojara.to/" },
+            { "name": "7movies.ac", "url": "https://7movies.ac/" },
+            { "name": "aether.ist", "url": "https://aether.ist/" },
+            { "name": "movy.sx", "url": "https://www.movy.sx/" },
+            { "name": "flixer.su", "url": "https://flixer.su/" },
+            { "name": "moviebite.org", "url": "https://moviebite.org/" },
+            { "name": "primeshows.org", "url": "https://primeshows.org/" },
+            { "name": "67movies.st", "url": "https://67movies.st/" },
+            { "name": "shuttletv.su", "url": "https://shuttletv.su/" },
+            { "name": "popcornmovies.ac", "url": "https://popcornmovies.ac/" },
+            { "name": "rivestream.app", "url": "https://www.rivestream.app/" },
+            { "name": "stellar.rip", "url": "https://stellar.rip/" },
+            { "name": "onionplay.ae", "url": "https://onionplay.ae/" },
+            { "name": "lookmovie2.to", "url": "https://www.lookmovie2.to/" },
+            { "name": "pressplayz.top", "url": "https://pressplayz.top/" },
+            { "name": "nepu.io", "url": "https://nepu.io/" },
+            { "name": "fmoviess.org", "url": "https://fmoviess.org/" },
+            { "name": "soap2dayhd.net", "url": "https://soap2dayhd.net/home/" },
+            { "name": "azmovies.to", "url": "https://azmovies.to/" },
+            { "name": "mapple.fun", "url": "https://mapple.fun/" },
+            { "name": "streamex.hn", "url": "https://streamex.hn/" },
+            { "name": "opstream.fun", "url": "https://opstream.fun/" },
+            { "name": "latestmovies.net", "url": "https://latestmovies.net/" },
+            { "name": "officialmoviebox.com", "url": "https://officialmoviebox.com/" },
+            { "name": "hdtoday24.at", "url": "https://hdtoday24.at/" },
+            { "name": "cinebytv.com", "url": "https://cinebytv.com/" },
+            { "name": "ridomovie.to", "url": "https://ridomovie.to/rd1" },
+            { "name": "123moviesfree.net", "url": "https://ww7.123moviesfree.net/home/" },
+            { "name": "willowmovies.com", "url": "https://willowmovies.com/" },
+            { "name": "vidplay.top", "url": "https://vidplay.top/" },
+            { "name": "cinemaos.live", "url": "https://cinemaos.live/" },
+            { "name": "yesmovies.ag", "url": "https://ww.yesmovies.ag/" },
+            { "name": "anixtv.us.cc", "url": "https://anixtv.us.cc/" },
+            { "name": "primewire.mov", "url": "https://www.primewire.mov/home" },
+            { "name": "moviepire.ru", "url": "https://moviepire.ru/" },
+            { "name": "flicker-mini.pages.dev", "url": "https://flicker-mini.pages.dev/" },
+            { "name": "m4uhd.page", "url": "https://ww1.m4uhd.page/" }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "anime",
+      "slug": "anime",
+      "name": "Anime",
+      "short": "Anime",
+      "icon": "anime",
+      "tagline": "Sub, dub and everything between.",
+      "description": "Anime streaming directories with subbed and dubbed catalogues, season tracking and weekly episodes. Keep an ad blocker on before opening any player.",
+      "groups": [
+        {
+          "name": "All sites",
+          "sites": [
+            { "name": "anime.nexus", "url": "https://anime.nexus/" },
+            { "name": "anisuge.tv", "url": "https://anisuge.tv/home" },
+            { "name": "anizone.to", "url": "https://anizone.to/" },
+            { "name": "miruro.to", "url": "https://www.miruro.to/" },
+            { "name": "anitaku.io", "url": "https://anitaku.io/" },
+            { "name": "animepahe.pw", "url": "https://animepahe.pw/" },
+            { "name": "anify.to", "url": "https://anify.to/" },
+            { "name": "yenime.net", "url": "https://yenime.net/" },
+            { "name": "kickass-anime.ro", "url": "https://kickass-anime.ro/" },
+            { "name": "animex.one", "url": "https://animex.one/home" },
+            { "name": "animegg.org", "url": "https://www.animegg.org/" },
+            { "name": "animestream.net", "url": "https://anime.uniquestream.net/" },
+            { "name": "kissanime.com.ru", "url": "https://kissanime.com.ru/" },
+            { "name": "allmanga.to", "url": "https://allmanga.to/" },
+            { "name": "aniworld.to", "url": "https://aniworld.to/" },
+            { "name": "wcostream.tv", "url": "https://www.wcostream.tv/" },
+            { "name": "justanime.to", "url": "https://justanime.to/" },
+            { "name": "123animes.ru", "url": "https://w1.123animes.ru/" }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "manga",
+      "slug": "manga",
+      "name": "Manga",
+      "short": "Manga",
+      "icon": "manga",
+      "tagline": "Read the page before the episode.",
+      "description": "Manga readers and scanlation archives with searchable libraries, chapter lists and reading progress.",
+      "groups": [
+        {
+          "name": "All sites",
+          "sites": [
+            { "name": "comix.to", "url": "https://comix.to/" },
+            { "name": "mangafire.to", "url": "https://mangafire.to/home" },
+            { "name": "mangahaven.net", "url": "https://mangahaven.net/" },
+            { "name": "mangataro.org", "url": "https://mangataro.org/" },
+            { "name": "mangadex.org", "url": "https://mangadex.org/" },
+            { "name": "allmanga.to", "url": "https://allmanga.to/manga" },
+            { "name": "mangago.me", "url": "https://mangago.me/" },
+            { "name": "weebcentral.com", "url": "https://weebcentral.com/" },
+            { "name": "manganato.gg", "url": "https://www.manganato.gg/" },
+            { "name": "kagane.org", "url": "https://kagane.org/" }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "live-sports",
+      "slug": "live-sports",
+      "name": "Live Sports",
+      "short": "Live Sports",
+      "icon": "sports",
+      "tagline": "Match day, every day.",
+      "description": "Live sports stream directories for cricket, football, hockey and more. Schedules and mirror links change often; refresh the source if a feed drops.",
+      "groups": [
+        {
+          "name": "All sites",
+          "sites": [
+            { "name": "livetv.sx", "url": "https://livetv.sx/enx/" },
+            { "name": "sportsbite.org", "url": "https://sportsbite.org/" },
+            { "name": "thedaddy.pk", "url": "https://thedaddy.pk/" },
+            { "name": "ntv.cx", "url": "https://ntv.cx/" },
+            { "name": "streameast.ga", "url": "https://v2.streameast.ga/" },
+            { "name": "fctv33go.boats", "url": "https://www.fctv33go.boats/" },
+            { "name": "streamcorner.st", "url": "https://streamcorner.st/" },
+            { "name": "streamfree.top", "url": "https://streamfree.top/" },
+            { "name": "bintv.cc", "url": "https://www.bintv.cc/" },
+            { "name": "sportyhunter.xyz", "url": "https://sportyhunter.xyz/" },
+            { "name": "roxiestreams.su", "url": "https://roxiestreams.su/" },
+            { "name": "onhockey.tv", "url": "https://onhockey.tv/" },
+            { "name": "crackstreams.io", "url": "https://crackstreams.io/" },
+            { "name": "score808hd.tv", "url": "https://a1.score808hd.tv/" },
+            { "name": "tim-streams.com", "url": "https://tim-streams.com/" },
+            { "name": "strikeout.im", "url": "https://strikeout.im/" },
+            { "name": "streameast.fi", "url": "https://v2.streameast.fi/" },
+            { "name": "sportsurge.net", "url": "https://v2.sportsurge.net/" }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "live-tv",
+      "slug": "live-tv",
+      "name": "Live TV",
+      "short": "Live TV",
+      "icon": "tv",
+      "tagline": "Channels without the set-top box.",
+      "description": "Live TV and IPTV web players with news, entertainment and 24/7 channel lists. Availability depends on your region.",
+      "groups": [
+        {
+          "name": "All sites",
+          "sites": [
+            { "name": "famelack.com", "url": "https://famelack.com/", "note": "Blocked in some countries" },
+            { "name": "streamsports99.su", "url": "https://streamsports99.su/live-tv" },
+            { "name": "globetv.app", "url": "https://globetv.app/" },
+            { "name": "daddylive.st", "url": "https://dlhd.st/24-7-channels.php" },
+            { "name": "tv247us.live", "url": "https://tv247us.live/" },
+            { "name": "ntv.cx", "url": "https://ntv.cx/" },
+            { "name": "iptv-web.app", "url": "https://iptv-web.app/" },
+            { "name": "publiciptv.com", "url": "https://publiciptv.com/" }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "torrents",
+      "slug": "torrents",
+      "name": "Torrents",
+      "short": "Torrents",
+      "icon": "torrent",
+      "tagline": "Magnets, trackers and public indexes.",
+      "description": "Public torrent indexes for movies, TV, software and more. Use a client you trust and check what you download.",
+      "groups": [
+        {
+          "name": "All sites",
+          "sites": [
+            { "name": "1337x.to", "url": "https://1337x.to/" },
+            { "name": "rutracker.org", "url": "https://rutracker.org/forum/index.php" },
+            { "name": "limetorrents.fun", "url": "https://www.limetorrents.fun/" },
+            { "name": "yts.bz", "url": "https://yts.bz/", "note": "Movies" },
+            { "name": "eztvx.to", "url": "https://eztvx.to/home", "note": "TV shows" },
+            { "name": "torrentgalaxy.one", "url": "https://torrentgalaxy.one/" },
+            { "name": "extratorrent.st", "url": "https://extratorrent.st/" },
+            { "name": "ext.to", "url": "https://ext.to/" },
+            { "name": "rargb.to", "url": "https://rargb.to/" },
+            { "name": "thepiratebay.org", "url": "https://thepiratebay.org/index.html", "note": "Use at your own risk" }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "games",
+      "slug": "games",
+      "name": "Games",
+      "short": "Games",
+      "icon": "game",
+      "tagline": "Repacks, patches and installers.",
+      "description": "PC game download and repack directories. Read the installer notes and scan files before running anything.",
+      "groups": [
+        {
+          "name": "All sites",
+          "sites": [
+            { "name": "fitgirl-repacks.site", "url": "https://fitgirl-repacks.site/" },
+            { "name": "dodi-repacks.site", "url": "https://dodi-repacks.site/" },
+            { "name": "ankergames.net", "url": "https://ankergames.net/" },
+            { "name": "g4u.to", "url": "https://g4u.to/" },
+            { "name": "steamrip.com", "url": "https://steamrip.com/" },
+            { "name": "steamgg.net", "url": "https://steamgg.net/" },
+            { "name": "m4ckd0ge-repacks.site", "url": "https://m4ckd0ge-repacks.site/" },
+            { "name": "gload.to", "url": "https://gload.to/" }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "music",
+      "slug": "music",
+      "name": "Music",
+      "short": "Music",
+      "icon": "music",
+      "tagline": "Spotify rips, YouTube MP3 and lossless.",
+      "description": "Downloaders and tools grouped by source: Spotify, YouTube, multi-service downloaders and desktop software.",
+      "groups": [
+        {
+          "name": "Spotify",
+          "sites": [
+            { "name": "spotdownloader.com", "url": "https://spotdownloader.com/" },
+            { "name": "spotifymate.com", "url": "https://spotifymate.com/en" },
+            { "name": "spotmate.online", "url": "https://spotmate.online/" }
+          ]
+        },
+        {
+          "name": "YouTube",
+          "sites": [
+            { "name": "y2mate.nu", "url": "https://v1.y2mate.nu/" },
+            { "name": "azmp3.cc", "url": "https://azmp3.cc/" },
+            { "name": "ytmp3.cc", "url": "https://ytmp3.cc/" }
+          ]
+        },
+        {
+          "name": "Multiple",
+          "sites": [
+            { "name": "racoon", "url": "https://shailendramaurya.github.io/racoon/" },
+            { "name": "ytiz.xyz", "url": "https://ytiz.xyz/" },
+            { "name": "lucida.to", "url": "https://lucida.to/" },
+            { "name": "cobalt.tools", "url": "https://cobalt.tools/" }
+          ]
+        },
+        {
+          "name": "Software",
+          "sites": [
+            { "name": "slsknet.org", "url": "https://www.slsknet.org/" },
+            { "name": "spotube.dev", "url": "https://spotube.krtirtho.dev/" },
+            { "name": "downline", "url": "https://stefnotch.github.io/downline/" }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "ebooks",
+      "slug": "ebooks",
+      "name": "eBooks",
+      "short": "eBooks",
+      "icon": "ebook",
+      "tagline": "Books, audiobooks and readers.",
+      "description": "eBook libraries, audiobook archives and desktop readers. Search the catalogue first, then download a format your reader supports.",
+      "groups": [
+        {
+          "name": "eBook libraries",
+          "sites": [
+            { "name": "z-lib.gd", "url": "https://z-lib.gd/" },
+            { "name": "annas-archive.gl", "url": "https://annas-archive.gl/" },
+            { "name": "libgen.li", "url": "https://libgen.li/" },
+            { "name": "ebook-hunter.org", "url": "https://ebook-hunter.org/" }
+          ]
+        },
+        {
+          "name": "Audiobooks",
+          "sites": [
+            { "name": "fulllengthaudiobooks.com", "url": "https://fulllengthaudiobooks.com/" },
+            { "name": "audiobookbay.lu", "url": "https://audiobookbay.lu/" },
+            { "name": "nepu.to", "url": "https://nepu.to/ebooks" }
+          ]
+        },
+        {
+          "name": "eBook readers",
+          "sites": [
+            { "name": "foxit.com", "url": "https://www.foxit.com/pdf-reader/", "note": "PDF reader" },
+            { "name": "flowoss.com", "url": "https://www.flowoss.com/", "note": "Browser reader" }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "comics",
+      "slug": "comics",
+      "name": "Comics",
+      "short": "Comics",
+      "icon": "comics",
+      "tagline": "Panels, issues and complete runs.",
+      "description": "Comic readers, digital shops and issue archives. Check the format before downloading a full run.",
+      "groups": [
+        {
+          "name": "All sites",
+          "sites": [
+            { "name": "globalcomix.com", "url": "https://globalcomix.com/" },
+            { "name": "xoxocomic.com", "url": "https://xoxocomic.com/" },
+            { "name": "comicbookplus.com", "url": "https://comicbookplus.com/" },
+            { "name": "batcave.biz", "url": "https://batcave.biz/" },
+            { "name": "getcomics.org", "url": "https://getcomics.org/" }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "asian-drama",
+      "slug": "asian-drama",
+      "name": "Asian Drama",
+      "short": "Asian Drama",
+      "icon": "drama",
+      "tagline": "K, J and C dramas with subtitles.",
+      "description": "Asian drama streaming directories with Korean, Japanese, Chinese and Thai series, often with same-day subtitles.",
+      "groups": [
+        {
+          "name": "All sites",
+          "sites": [
+            { "name": "asiaflix.net", "url": "https://asiaflix.net/home" },
+            { "name": "kisskh.id", "url": "https://kisskh.id/" },
+            { "name": "goplay.su", "url": "https://goplay.su/" },
+            { "name": "kissasian.com.lv", "url": "https://ww14.kissasian.com.lv/" },
+            { "name": "dramacool.com.tr", "url": "https://dramacool.com.tr/" },
+            { "name": "asianctv.cc", "url": "https://asianctv.cc/" },
+            { "name": "myasiantv.com.bz", "url": "https://myasiantv.com.bz/" },
+            { "name": "kisskh.club", "url": "https://kisskh.club/" }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "vpn",
+      "slug": "vpn",
+      "name": "VPN",
+      "short": "VPN",
+      "icon": "vpn",
+      "tagline": "Privacy tunnels for public networks.",
+      "description": "Virtual private network services with apps for phones, desktops and browsers. Compare logging policies, speeds and the price of a yearly plan before subscribing.",
+      "groups": [
+        {
+          "name": "Official sites",
+          "sites": [
+            { "name": "Proton VPN", "url": "https://protonvpn.com/", "note": "Free tier available" },
+            { "name": "Mullvad VPN", "url": "https://mullvad.net/", "note": "No account email" },
+            { "name": "IVPN", "url": "https://www.ivpn.net/", "note": "Audited no-logs" },
+            { "name": "Surfshark", "url": "https://surfshark.com/" },
+            { "name": "ExpressVPN", "url": "https://www.expressvpn.com/" },
+            { "name": "CyberGhost", "url": "https://www.cyberghostvpn.com/" },
+            { "name": "Private Internet Access", "url": "https://www.privateinternetaccess.com/" },
+            { "name": "Windscribe", "url": "https://windscribe.com/", "note": "Free tier available" }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "adblockers",
+      "slug": "adblockers",
+      "name": "AdBlockers",
+      "short": "AdBlockers",
+      "icon": "shield",
+      "tagline": "Quiet the noise before you browse.",
+      "description": "Browser extensions and privacy browsers that block intrusive ads, trackers and popunders. Install one before opening any streaming or download directory.",
+      "groups": [
+        {
+          "name": "Browser extensions",
+          "sites": [
+            { "name": "uBlock Origin", "url": "https://ublockorigin.com/", "note": "Open source" },
+            { "name": "AdBlock Plus", "url": "https://adblockplus.org/" },
+            { "name": "AdGuard", "url": "https://adguard.com/" },
+            { "name": "AdBlock", "url": "https://getadblock.com/en/" },
+            { "name": "Poper Blocker", "url": "https://poperblocker.com/", "note": "Popup blocker" }
+          ]
+        },
+        {
+          "name": "Browsers",
+          "sites": [
+            { "name": "Opera", "url": "https://www.opera.com/", "note": "Built-in ad blocker" }
+          ]
+        }
+      ]
+    }
+  ]
+}
