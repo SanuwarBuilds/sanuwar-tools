@@ -1,0 +1,54 @@
+{% extends 'base.html' %}
+{% set vendor_files = {'js-yaml': 'js-yaml.js', 'marked': 'marked.js', 'fflate': 'fflate.js', 'pdf-lib': 'pdf-lib.js', 'pdfjs': 'pdf.min.js', 'jspdf': 'jspdf.umd.min.js', 'bcryptjs': 'bcrypt.min.js'} %}
+{% block bodyclass %}tool-page tool-page-{{ tool.bundle }}{% endblock %}
+{% block page_styles %}<link rel="stylesheet" href="/assets/css/tools.css?v=1">{% endblock %}
+{% block content %}
+<section class="tp-shell wrap" data-tool-page data-tool-slug="{{ tool.slug }}">
+  <nav class="tp-crumb" aria-label="Breadcrumb"><a href="/">Home</a><span aria-hidden="true">/</span><a href="/tools">All tools</a><span aria-hidden="true">/</span><span>{{ tool.category }}</span></nav>
+  <header class="tp-head">
+    <span class="tp-glyph" aria-hidden="true">{{ tool.icon }}</span>
+    <div>
+      <span class="tp-badge">{{ tool.category }}</span>
+      <h1>{{ tool.name }}</h1>
+      <p>{{ tool.description }}</p>
+      <div class="tp-meta"><span><i aria-hidden="true"></i>Runs locally</span><span>No uploads</span><span>No sign-up</span><span>Free</span></div>
+    </div>
+  </header>
+
+  <div class="tp-layout">
+    <div class="tp-workspace" id="tool-root">
+      <div class="tp-loading"><span></span>Loading tool…</div>
+    </div>
+    <aside class="tp-aside">
+      <section class="tp-aside-card">
+        <h2>How it works</h2>
+        <ol class="tp-steps">
+          <li><span>01</span><p>Add your input — paste text, choose a file, or fill the fields.</p></li>
+          <li><span>02</span><p>Adjust the options. The result updates in this browser tab.</p></li>
+          <li><span>03</span><p>Copy the result or download it. Nothing is sent to a server.</p></li>
+        </ol>
+      </section>
+      <section class="tp-aside-card tp-privacy">
+        <span class="tp-glyph" aria-hidden="true">▮</span>
+        <h2>Private by design</h2>
+        <p>This tool uses browser APIs only. Your files and text stay on your device.</p>
+      </section>
+      {% if related %}
+      <section class="tp-aside-card">
+        <h2>More {{ tool.category | lower }}</h2>
+        <ul class="tp-related">
+          {% for item in related %}<li><a href="/tools/{{ item.slug }}"><span aria-hidden="true">{{ item.icon }}</span>{{ item.name }}</a></li>{% endfor %}
+        </ul>
+        <a class="tp-more" href="/tools">See all {{ catalog.tools | length }} tools →</a>
+      </section>
+      {% endif %}
+    </aside>
+  </div>
+</section>
+{% endblock %}
+{% block scripts %}
+<script nonce="{{ csp_nonce }}" src="/assets/js/tools/core.js?v=1" defer></script>
+{% for vendor in tool.vendor or [] %}{% if vendor in vendor_files %}<script nonce="{{ csp_nonce }}" src="/assets/vendor/{{ vendor_files[vendor] }}?v=1" defer></script>{% endif %}{% endfor %}
+<script nonce="{{ csp_nonce }}" src="/assets/js/tools/{{ tool.bundle }}.js?v=1" defer></script>
+<script nonce="{{ csp_nonce }}" src="/assets/js/tools/boot.js?v=1" defer></script>
+{% endblock %}

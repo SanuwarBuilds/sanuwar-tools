@@ -62,13 +62,22 @@ TOOL_ICON_NAMES = ('photo', 'passport', 'score', 'wallet', 'tool', 'download', '
                    'ebook', 'comics', 'drama', 'vpn', 'shield')
 
 
-def install(app, load_config, load_directory=None):
+def install(app, load_config, load_directory=None, load_tool_catalog=None):
     def directory_categories():
         data = load_directory() if load_directory else None
         if not isinstance(data, dict):
             return []
         return [category for category in data.get('categories', [])
                 if isinstance(category, dict) and category.get('slug') and category.get('name')]
+
+    def tool_catalog():
+        data = load_tool_catalog() if load_tool_catalog else None
+        if not isinstance(data, dict):
+            return []
+        return [tool for tool in data.get('tools', [])
+                if isinstance(tool, dict) and isinstance(tool.get('slug'), str)
+                and isinstance(tool.get('name'), str) and isinstance(tool.get('description'), str)
+                and isinstance(tool.get('category'), str)]
 
     def tool_icon(tool):
         explicit = str(tool.get('icon', '')).strip().lower()
@@ -107,7 +116,20 @@ def install(app, load_config, load_directory=None):
     def search_metadata():
         path = '/downloads' if request.path == '/download.html' else request.path
         category = None
+        tool_page = None
         page = PAGES.get(path)
+        tools = tool_catalog()
+        if page is None and path in ('/tools', '/tools/'):
+            if tools:
+                page = (f'All Tools — {len(tools)} Free Browser Utilities | SanuwarTools',
+                        f'Browse {len(tools)} free browser tools for text, hashes, images, PDFs, networking, time and security. Every tool runs locally — no uploads, no account.')
+        if page is None and path.startswith('/tools/'):
+            slug = path[len('/tools/'):]
+            if '/' not in slug:
+                tool_page = next((item for item in tools if item.get('slug') == slug), None)
+            if tool_page is not None:
+                page = (f"{tool_page['name']} — Free Online Tool | SanuwarTools",
+                        str(tool_page.get('description') or '')[:300])
         if page is None and path.startswith('/directory/'):
             slug = path[len('/directory/'):]
             if '/' not in slug:
@@ -121,7 +143,7 @@ def install(app, load_config, load_directory=None):
         if page is None:
             return {'seo': {'indexable': False, 'description': ''}, 'seo_verification': []}
         title, description = page
-        canonical = ORIGIN + path
+        canonical = ORIGIN + ('/tools' if path in ('/tools', '/tools/') else path)
         publisher = {'@id': ORIGIN + '/#organization'}
         website = {'@type': 'WebSite', '@id': ORIGIN + '/#website', 'url': ORIGIN + '/',
                    'name': 'SanuwarTools', 'alternateName': 'Sanuwar Tools', 'inLanguage': 'en',
@@ -134,7 +156,7 @@ def install(app, load_config, load_directory=None):
                         'contactPoint': {'@type': 'ContactPoint', 'contactType': 'customer support',
                                          'url': TELEGRAM_URL},
                         'sameAs': ['https://github.com/SanuwarBuilds', 'https://www.instagram.com/iam.sanuwar/']}
-        page_type = 'CollectionPage' if path.startswith('/directory') else PAGE_TYPES.get(path, 'WebPage')
+        page_type = 'CollectionPage' if path.startswith('/directory') or path in ('/tools', '/tools/') else PAGE_TYPES.get(path, 'WebPage')
         webpage = {'@type': page_type, '@id': canonical + '#webpage',
                    'url': canonical, 'name': title, 'description': description,
                    'isPartOf': {'@id': ORIGIN + '/#website'}, 'inLanguage': 'en',
@@ -182,6 +204,17 @@ def install(app, load_config, load_directory=None):
                           'mainEntity': [{'@type': 'Question', 'name': question,
                                           'acceptedAnswer': {'@type': 'Answer', 'text': answer}}
                                          for question, answer in PHOTO_FAQS]})
+        if tool_page is not None:
+            graph.append({'@type': 'WebApplication', '@id': canonical + '#app',
+                          'name': tool_page['name'], 'url': canonical,
+                          'description': description,
+                          'applicationCategory': 'UtilitiesApplication',
+                          'operatingSystem': 'Any (browser-based)',
+                          'browserRequirements': 'Requires JavaScript',
+                          'offers': {'@type': 'Offer', 'price': '0', 'priceCurrency': 'USD'},
+                          'featureList': ['Runs locally in the browser', 'No account required',
+                                          'No file uploads'],
+                          'isPartOf': {'@id': ORIGIN + '/#website'}, 'publisher': publisher})
         verification = []
         for env_name, meta_name in (('GOOGLE_SITE_VERIFICATION', 'google-site-verification'),
                                     ('BING_SITE_VERIFICATION', 'msvalidate.01'),
@@ -216,6 +249,13 @@ def install(app, load_config, load_directory=None):
             slug = category.get('slug')
             if isinstance(slug, str) and re.fullmatch(r'[a-z0-9-]{1,80}', slug):
                 paths.append('/directory/' + slug)
+        tools = tool_catalog()
+        if tools:
+            paths.append('/tools')
+            for tool in tools:
+                slug = tool.get('slug')
+                if isinstance(slug, str) and re.fullmatch(r'[a-z0-9-]{1,80}', slug):
+                    paths.append('/tools/' + slug)
         root = Element('urlset', xmlns='http://www.sitemaps.org/schemas/sitemap/0.9')
         for path in paths:
             url = SubElement(root, 'url')

@@ -165,6 +165,13 @@ def install(app):
                 "img-src 'self' data: blob:; font-src 'self'; connect-src 'self'; "
                 "object-src 'none'; base-uri 'self'; frame-ancestors 'none'; form-action 'self'")
             response.headers['Cache-Control'] = 'no-store'
+        if (request.path == '/tools' or request.path.startswith('/tools/')) and response.status_code == 200 and response.mimetype == 'text/html':
+            response.headers['Content-Security-Policy'] = (
+                "default-src 'self'; script-src 'self'; style-src 'self' 'unsafe-inline'; "
+                "img-src 'self' https: data: blob:; font-src 'self'; "
+                "connect-src 'self' https://api.frankfurter.app https://api.frankfurter.dev; "
+                "worker-src 'self' blob:; media-src 'self' https: data: blob:; "
+                "object-src 'none'; base-uri 'self'; frame-ancestors 'none'; form-action 'self'")
         if request.path == '/signin' and response.status_code == 200:
             response.headers['Content-Security-Policy'] = (
                 "default-src 'self'; script-src 'self' https://accounts.google.com/gsi/client; "

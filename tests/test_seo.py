@@ -3,10 +3,13 @@ import copy
 import json
 import re
 import unittest
+from pathlib import Path
 from unittest.mock import patch
 from xml.etree.ElementTree import fromstring
 import app as module
 import seo
+
+ROOT = Path(__file__).resolve().parents[1]
 
 class SearchDiscoveryTests(unittest.TestCase):
     def setUp(self):
@@ -176,3 +179,77 @@ class SearchDiscoveryTests(unittest.TestCase):
         self.assertIn('&lt;script&gt;alert(1)&lt;/script&gt;',text)
         self.assertNotIn('javascript:',text)
         self.assertNotIn('javascript:',self.client.get('/').get_data(as_text=True))
+
+
+class ToolHubTests(unittest.TestCase):
+    def setUp(self):
+        self.catalog=json.loads((ROOT/'data/tools.catalog.json').read_text())
+        self.records={
+            module.TOOLS_CONFIG_REL:{'site':{},'tools':[],'categories':['All'],'downloadPage':{'enabled':True}},
+            module.DOWNLOADS_REL:[],
+            module.DIRECTORY_REL:{'notice':'Test notice.','categories':[]},
+            module.TOOL_CATALOG_REL:self.catalog,
+        }
+        patch.object(module,'safe_read',side_effect=lambda path:copy.deepcopy(self.records.get(path))).start()
+        self.client=module.app.test_client()
+
+    def tearDown(self):patch.stopall()
+
+    def test_hub_and_tool_pages_are_indexable(self):
+        hub=self.client.get('/tools',base_url='https://untrusted.example')
+        self.assertEqual(hub.status_code,200)
+        text=hub.get_data(as_text=True)
+        self.assertIn(f'All Tools — {len(self.catalog["tools"])} Free Browser Utilities',text)
+        self.assertIn('rel="canonical" href="https://sanuwartools.online/tools"',text)
+        self.assertNotIn('noindex',hub.headers.get('X-Robots-Tag',''))
+        self.assertEqual(text.count('href="/tools/'),len(self.catalog['tools']))
+        self.assertEqual(self.client.get('/tools/').status_code,200)
+        self.assertIn('href="/tools"',self.client.get('/').get_data(as_text=True))
+
+        tool=self.client.get('/tools/ip-calculator')
+        self.assertEqual(tool.status_code,200)
+        body=tool.get_data(as_text=True)
+        self.assertIn('<h1>IP Calculator</h1>',body)
+        self.assertIn('rel="canonical" href="https://sanuwartools.online/tools/ip-calculator"',body)
+        data=json.loads(re.search(r'<script[^>]*type="application/ld\+json">(.*?)</script>',body,re.S).group(1))
+        app_node=next(node for node in data['@graph'] if node.get('@type')=='WebApplication')
+        self.assertEqual(app_node['name'],'IP Calculator')
+        self.assertEqual(app_node['url'],'https://sanuwartools.online/tools/ip-calculator')
+        self.assertEqual(self.client.get('/tools/missing-tool').status_code,404)
+
+    def test_tool_pages_use_self_hosted_csp(self):
+        for path in ('/tools','/tools/ip-calculator'):
+            response=self.client.get(path)
+            self.assertEqual(response.status_code,200)
+            csp=response.headers['Content-Security-Policy']
+            self.assertIn("script-src 'self'",csp)
+            self.assertNotIn("'unsafe-eval'",csp)
+            self.assertIn('https://api.frankfurter.dev',csp)
+            self.assertIn("worker-src 'self' blob:",csp)
+            self.assertIn('blob:',csp.split('img-src')[1].split(';')[0])
+
+    def test_sitemap_includes_hub_and_every_tool(self):
+        root=fromstring(self.client.get('/sitemap.xml').data)
+        locs=[node.text for node in root.iter('{http://www.sitemaps.org/schemas/sitemap/0.9}loc')]
+        self.assertIn('https://sanuwartools.online/tools',locs)
+        for tool in self.catalog['tools']:
+            self.assertIn('https://sanuwartools.online/tools/'+tool['slug'],locs)
+        self.assertEqual(sum(1 for loc in locs if loc.startswith('https://sanuwartools.online/tools/')),len(self.catalog['tools']))
+
+    def test_catalog_and_javascript_bundles_are_consistent(self):
+        tools=self.catalog['tools']
+        slugs=[tool['slug'] for tool in tools]
+        self.assertEqual(len(slugs),67)
+        self.assertEqual(len(slugs),len(set(slugs)))
+        categories=set(self.catalog['categories'])
+        registered={}
+        for bundle in ('text','media','network','misc'):
+            source=(ROOT/'static/assets/js/tools'/f'{bundle}.js').read_text()
+            for slug in re.findall(r'(?:T\.register|codeTool|singleHashTool)\("([a-z0-9-]+)"',source):
+                registered.setdefault(slug,bundle)
+        self.assertEqual(set(registered),set(slugs))
+        for tool in tools:
+            self.assertIn(tool['category'],categories)
+            self.assertEqual(registered[tool['slug']],tool['bundle'])
+            self.assertTrue(tool['description'].strip())
+            self.assertIn(tool['bundle'],module.TOOL_BUNDLES)

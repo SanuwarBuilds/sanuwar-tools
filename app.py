@@ -370,6 +370,72 @@ utils.safe_writer = safe_write
 TOOLS_CONFIG_REL = "data/tools.config.json"
 DOWNLOADS_REL    = "data/downloads.json"
 DIRECTORY_REL    = "data/directory.json"
+TOOL_CATALOG_REL = "data/tools.catalog.json"
+TOOL_BUNDLES = {"text", "media", "network", "misc"}
+TOOL_VENDORS = {"js-yaml", "marked", "fflate", "pdf-lib", "pdfjs", "jspdf", "bcryptjs"}
+
+def load_tool_catalog():
+    data = safe_read(TOOL_CATALOG_REL)
+    if not isinstance(data, dict) or not isinstance(data.get('tools'), list):
+        return {'updated': '', 'categories': [], 'tools': []}
+    categories = []
+    for category in data.get('categories', []):
+        if isinstance(category, str) and category.strip() and category not in categories:
+            categories.append(category.strip())
+    tools = []
+    seen = set()
+    for item in data['tools']:
+        if not isinstance(item, dict):
+            continue
+        slug = item.get('slug')
+        name = item.get('name')
+        description = item.get('description')
+        bundle = item.get('bundle')
+        category = item.get('category')
+        if not isinstance(slug, str) or not DIRECTORY_SLUG.match(slug) or slug in seen:
+            continue
+        if not isinstance(name, str) or not name.strip() or len(name) > 80:
+            continue
+        if not isinstance(description, str) or not description.strip():
+            continue
+        if bundle not in TOOL_BUNDLES or not isinstance(category, str) or not category.strip():
+            continue
+        vendors = [vendor for vendor in item.get('vendor', []) if vendor in TOOL_VENDORS] if isinstance(item.get('vendor'), list) else []
+        icon = item.get('icon') if isinstance(item.get('icon'), str) else '•'
+        seen.add(slug)
+        tools.append({
+            'slug': slug,
+            'name': name.strip(),
+            'category': category.strip(),
+            'description': description.strip(),
+            'icon': icon[:4],
+            'bundle': bundle,
+            'vendor': vendors,
+            'popular': item.get('popular') is True,
+        })
+        if category.strip() not in categories:
+            categories.append(category.strip())
+    return {'updated': data.get('updated', ''), 'categories': categories, 'tools': tools}
+
+@app.get('/tools')
+@app.get('/tools/')
+def tools_hub():
+    catalog = load_tool_catalog()
+    if not catalog['tools']:
+        abort(404)
+    return render_template('tools/hub.html', catalog=catalog)
+
+@app.get('/tools/<slug>')
+def tool_page(slug):
+    if not DIRECTORY_SLUG.match(slug):
+        abort(404)
+    catalog = load_tool_catalog()
+    tool = next((item for item in catalog['tools'] if item['slug'] == slug), None)
+    if tool is None:
+        abort(404)
+    related = [item for item in catalog['tools']
+               if item['category'] == tool['category'] and item['slug'] != slug][:4]
+    return render_template('tools/tool.html', tool=tool, related=related, catalog=catalog)
 
 @app.route("/tools.config.json")
 def serve_config():
@@ -820,7 +886,7 @@ def api_widget_vote(widget_id):
         return jsonify({"error": "Could not save or upload. Check server configuration and try again."}), 500
 
 payments.register(app, public_downloads, login_required)
-seo.install(app, lambda: safe_read(TOOLS_CONFIG_REL), lambda: safe_read(DIRECTORY_REL))
+seo.install(app, lambda: safe_read(TOOLS_CONFIG_REL), lambda: safe_read(DIRECTORY_REL), load_tool_catalog)
 monetization.install(app)
 user_auth.install(app)
 visitor_analytics.install(app, login_required, lambda: safe_read(TOOLS_CONFIG_REL), lambda: safe_read(DOWNLOADS_REL) or [])
