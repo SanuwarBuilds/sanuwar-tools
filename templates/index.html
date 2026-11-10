@@ -1,12 +1,13 @@
 {% extends 'base.html' %}
 {% from '_ad_unit.html' import ad_unit with context %}
 {% block bodyclass %}home-page{% endblock %}
+{% block page_styles %}<link rel="stylesheet" href="/assets/css/tools-shelf.css?v=1">{% endblock %}
 {% block content %}
 {% set tools = public_config.get('tools', []) %}
 <section class="bp-hero wrap" aria-labelledby="hero-title">
   <div class="bp-hero-nav">
     <span><i aria-hidden="true"></i>SanuwarTools · web toolkit</span>
-    <span>{{ tools | length }} tools · {{ 'no install' }}</span>
+    <span>{{ (tools | length) + (catalog.tools | length) }} tools · no install</span>
   </div>
   <div class="bp-hero-core">
     <div class="bp-machine">
@@ -18,24 +19,24 @@
       <span class="bp-screw is-br" aria-hidden="true"></span>
       <span class="bp-etched" aria-hidden="true">s</span>
       <h1 id="hero-title" class="bp-title">Small tools. Big work.</h1>
-      <p class="bp-hero-line">Free browser tools for <b>photo resizing and passport photos</b>, cricket scores, expenses and Android downloads. No install — open, work, done.</p>
+      <p class="bp-hero-line">{{ catalog.tools | length }} free browser tools for text, encoding, images, PDFs, networking and security — plus <b>photo resizing and passport photos</b> and Android downloads. No install — open, work, done.</p>
       <div class="bp-hero-actions">
-        {% if public_config.get('downloadPage', {}).get('enabled', True) %}
-        <a class="bp-cta" href="#downloads">
-          <svg aria-hidden="true" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3.5v10.5"/><path d="m7.5 9.5 4.5 4.5 4.5-4.5"/><path d="M4.5 20h15"/></svg>
-          <span>Download apps &amp; files</span>
+        <a class="bp-cta" href="#browser-tools">
+          <svg aria-hidden="true" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M4 4h6v6H4zM14 4h6v6h-6zM4 14h6v6H4zM14 14h6v6h-6z"/></svg>
+          <span>Browse {{ catalog.tools | length }} browser tools</span>
         </a>
+        {% if public_config.get('downloadPage', {}).get('enabled', True) %}
+        <a class="bp-cta-ghost" href="#downloads">Download apps &amp; files <span aria-hidden="true">→</span></a>
         {% endif %}
-        <a class="bp-cta-ghost" href="/tools">Browse all tools <span aria-hidden="true">→</span></a>
       </div>
       <div class="bp-console">
         <div class="bp-console-bar">
-          <span>Toolkit · live</span>
-          <span><b id="tool-total">{{ tools | length }}</b> ready</span>
+          <span>Catalogue · live</span>
+          <span><b id="tool-total">{{ tools | length }}</b> links</span>
         </div>
         <label class="bp-screen" for="tool-search">
           <svg aria-hidden="true" viewBox="0 0 24 24"><circle cx="10.5" cy="10.5" r="6.5"/><path d="m16 16 4.5 4.5"/></svg>
-          <input type="search" id="tool-search" placeholder="Search tools…" aria-label="Search tools">
+          <input type="search" id="tool-search" placeholder="Search apps & directories…" aria-label="Search apps and directories">
           <kbd>/</kbd>
         </label>
         <div class="bp-keys"><div class="filter-tabs" id="categories" role="group" aria-label="Filter tools"></div></div>
@@ -50,22 +51,24 @@
 
 <section class="bp-section wrap" id="tools" aria-labelledby="tools-title">
   <div class="bp-section-head">
-    <div><span class="bp-eyebrow">01 — Modules</span><h2 id="tools-title">Tools</h2></div>
-    <p class="bp-count"><b>{{ tools | length }}</b> on the bench</p>
+    <div><span class="bp-eyebrow">01 — Modules</span><h2 id="tools-title">Apps &amp; directories</h2></div>
+    <p class="bp-count"><b>{{ tools | length }}</b> apps &amp; links</p>
   </div>
   <div class="tool-grid" id="tools-grid" aria-live="polite">{% include '_initial_tools.html' %}</div>
   <div id="widgets" class="widget-grid"></div>
 </section>
 
+{% include '_browser_tools.html' %}
+
 {% if public_config.get('downloadPage', {}).get('enabled', True) %}
-{% set lib_eyebrow = '02 — Library' %}
+{% set lib_eyebrow = '03 — Library' %}
 {% set lib_title = 'Downloads' %}
 {% include '_downloads_library.html' %}
 {% endif %}
 
 <section class="bp-section wrap" id="how-it-works" aria-labelledby="flow-title">
   <div class="bp-section-head">
-    <div><span class="bp-eyebrow">03 — Flow</span><h2 id="flow-title">How it works</h2></div>
+    <div><span class="bp-eyebrow">04 — Flow</span><h2 id="flow-title">How it works</h2></div>
   </div>
   <div class="bp-flow">
     <article><span>01</span><h3>Choose</h3><p>Search, or browse by category.</p></article>
@@ -76,14 +79,14 @@
 
 <section class="bp-section wrap" id="about-toolkit" aria-labelledby="about-toolkit-title">
   <div class="bp-section-head">
-    <div><span class="bp-eyebrow">04 — About</span><h2 id="about-toolkit-title">A small toolkit for everyday work</h2></div>
+    <div><span class="bp-eyebrow">05 — About</span><h2 id="about-toolkit-title">A small toolkit for everyday work</h2></div>
   </div>
   <div class="bp-about-copy">
-    <p>SanuwarTools is a free, browser-based toolkit maintained by Sanuwar. The <a href="/photo-tools">photo resizer and compressor</a> crops images to exact pixels, DPI and KB limits for passport, PAN, voter ID and exam forms — entirely on your device.</p>
-    <p>Explore the <a href="/downloads">downloads library</a> for Android apps, files and albums, or open the other web tools in the collection. New modules are added as they are ready; no account is needed for public tools.</p>
+    <p>SanuwarTools is a free, browser-based toolkit maintained by Sanuwar. The collection now includes {{ catalog.tools | length }} browser tools for text, encoding, hashes, images, PDFs, networking, security and everyday maths, plus the <a href="/photo-tools">photo resizer and compressor</a> that crops images to exact pixels, DPI and KB limits for passport, PAN, voter ID and exam forms — entirely on your device.</p>
+    <p>Explore the <a href="#browser-tools">browser tool shelf</a> or the <a href="/tools">full tool page</a>, browse the <a href="/downloads">downloads library</a> for Android apps, files and albums, and open the source <a href="/directory">directories</a> for movies, anime, music and more. New modules are added as they are ready; no account is needed for public tools.</p>
   </div>
 </section>
 
 <div class="wrap">{{ ad_unit(adsense_slots.get('home', '')) }}</div>
 {% endblock %}
-{% block scripts %}<script nonce="{{ csp_nonce }}" src="/assets/js/main.js" defer></script>{% if public_config.get('downloadPage', {}).get('enabled', True) %}<script nonce="{{ csp_nonce }}" src="/assets/js/downloads.js" defer></script>{% endif %}{% endblock %}
+{% block scripts %}<script nonce="{{ csp_nonce }}" src="/assets/js/tools-shelf.js?v=1" defer></script><script nonce="{{ csp_nonce }}" src="/assets/js/main.js" defer></script>{% if public_config.get('downloadPage', {}).get('enabled', True) %}<script nonce="{{ csp_nonce }}" src="/assets/js/downloads.js" defer></script>{% endif %}{% endblock %}

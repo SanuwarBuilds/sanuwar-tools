@@ -217,6 +217,14 @@ class ToolHubTests(unittest.TestCase):
         self.assertEqual(app_node['url'],'https://sanuwartools.online/tools/ip-calculator')
         self.assertEqual(self.client.get('/tools/missing-tool').status_code,404)
 
+    def test_homepage_lists_every_browser_tool_in_its_category(self):
+        home=self.client.get('/').get_data(as_text=True)
+        self.assertIn('id="browser-tools"',home)
+        for tool in self.catalog['tools']:
+            self.assertIn(f'href="/tools/{tool["slug"]}"',home)
+        for category in self.catalog['categories']:
+            self.assertIn(category.replace('&','&amp;'),home)
+
     def test_tool_pages_use_self_hosted_csp(self):
         for path in ('/tools','/tools/ip-calculator'):
             response=self.client.get(path)
