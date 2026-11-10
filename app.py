@@ -90,7 +90,11 @@ def site_touch_icon():
 
 @app.route("/")
 def index():
-    return render_template("index.html", catalog=load_tool_catalog(),
+    raw = safe_read(TOOLS_CONFIG_REL)
+    config = public_config(raw if isinstance(raw, dict) else {})
+    catalog = load_tool_catalog()
+    config['tools'] = [*config.get('tools', []), *browser_tool_cards(catalog)]
+    return render_template("index.html", catalog=catalog, public_config=config,
                            initial_downloads=[payments.public_item(item) for item in public_downloads()])
 
 @app.get('/photo-tools')
@@ -420,6 +424,35 @@ def load_tool_catalog():
             categories.append(category.strip())
     return {'updated': data.get('updated', ''), 'categories': categories, 'tools': tools}
 
+BROWSER_TOOL_ICONS = {
+    'Images & Media': 'photo',
+    'Networking': 'vpn',
+    'Security & Privacy': 'shield',
+}
+
+def browser_tool_cards(catalog):
+    """Homepage catalogue cards for the self-hosted browser tools."""
+    cards = []
+    for tool in catalog.get('tools', []):
+        icon = BROWSER_TOOL_ICONS.get(tool['category'], 'tool')
+        cards.append({
+            'id': 'browser-' + tool['slug'],
+            'name': tool['name'],
+            'category': tool['category'],
+            'description': tool['description'],
+            'longDescription': tool['description'],
+            'route': '/tools/' + tool['slug'],
+            'tags': [tool['category'], 'browser tool', 'free'],
+            'icon': icon,
+            'thumbnail': '/assets/icons/%s.svg?v=keys1' % icon,
+            'featured': False,
+            'popular': bool(tool.get('popular')),
+            'visible': True,
+            'enabled': True,
+            'downloadAvailable': False,
+        })
+    return cards
+
 @app.get('/tools')
 @app.get('/tools/')
 def tools_hub():
@@ -427,6 +460,12 @@ def tools_hub():
     if not catalog['tools']:
         abort(404)
     return render_template('tools/hub.html', catalog=catalog)
+
+@app.get('/api/browser-tools.json')
+def browser_tools_feed():
+    response = jsonify({'tools': browser_tool_cards(load_tool_catalog())})
+    response.headers['Cache-Control'] = 'public, max-age=300'
+    return response
 
 @app.get('/tools/<slug>')
 def tool_page(slug):

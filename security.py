@@ -186,7 +186,8 @@ def install(app):
             response.headers['Cross-Origin-Opener-Policy'] = 'same-origin-allow-popups'
         if request.is_secure:
             response.headers['Strict-Transport-Security'] = 'max-age=31536000'
-        if request.path.startswith(('/admin','/api/','/purchase')) or request.path in ('/', '/downloads', '/download.html', '/tools.config.json', '/privacy', '/about', '/contact'):
+        cacheable_feed = request.path == '/api/browser-tools.json'
+        if not cacheable_feed and (request.path.startswith(('/admin','/api/','/purchase')) or request.path in ('/', '/downloads', '/download.html', '/tools.config.json', '/privacy', '/about', '/contact')):
             response.headers['Cache-Control'] = 'no-store'
         return response
     @app.errorhandler(HTTPException)

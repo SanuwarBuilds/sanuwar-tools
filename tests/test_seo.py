@@ -217,13 +217,26 @@ class ToolHubTests(unittest.TestCase):
         self.assertEqual(app_node['url'],'https://sanuwartools.online/tools/ip-calculator')
         self.assertEqual(self.client.get('/tools/missing-tool').status_code,404)
 
-    def test_homepage_lists_every_browser_tool_in_its_category(self):
+    def test_homepage_merges_every_browser_tool_into_the_catalogue(self):
         home=self.client.get('/').get_data(as_text=True)
         self.assertIn('id="browser-tools"',home)
+        self.assertIn('class="home-download-strip"',home)
         for tool in self.catalog['tools']:
             self.assertIn(f'href="/tools/{tool["slug"]}"',home)
         for category in self.catalog['categories']:
             self.assertIn(category.replace('&','&amp;'),home)
+
+    def test_browser_tools_feed_exposes_only_card_fields(self):
+        response=self.client.get('/api/browser-tools.json')
+        self.assertEqual(response.status_code,200)
+        self.assertIn('max-age=300',response.headers['Cache-Control'])
+        cards=response.get_json()['tools']
+        self.assertEqual(len(cards),len(self.catalog['tools']))
+        fields={'id','name','category','description','longDescription','route','tags','icon','thumbnail','featured','popular','visible','enabled','downloadAvailable'}
+        for card in cards:
+            self.assertEqual(set(card),fields)
+            self.assertTrue(card['route'].startswith('/tools/'))
+            self.assertTrue(card['thumbnail'].startswith('/assets/icons/'))
 
     def test_tool_pages_use_self_hosted_csp(self):
         for path in ('/tools','/tools/ip-calculator'):

@@ -1,7 +1,7 @@
 "use strict";
 (async () => {
   const { $, el, api, image, external, empty, tabs, open, toast } = ST;
-  let config, tools = [], selected = "All";
+  let tools = [], selected = "All";
   const grid = $("#tools-grid");
   const ICON_NAMES = new Set(["photo", "passport", "score", "wallet", "tool", "download", "album", "film", "anime", "manga", "sports", "tv", "torrent", "game", "music", "ebook", "comics", "drama", "vpn", "shield"]);
   const kindFor = (text) =>
@@ -45,6 +45,14 @@
       `${t.name} ${t.description || ""} ${t.category || ""} ${(t.tags || []).join(" ")}`.toLowerCase().includes(query));
     const cats = ["All", ...new Set(tools.map(t => t.category).filter(Boolean))];
     tabs($("#categories"), cats, selected, (cat) => { selected = cat; render(); }, Object.fromEntries(cats.map(cat => [cat, cat === "All" ? tools.length : tools.filter(tool => tool.category === cat).length])));
+    const tabRow = $("#categories");
+    const activeTab = tabRow?.querySelector(".filter-tab.active");
+    if (tabRow && activeTab) {
+      const rowBox = tabRow.getBoundingClientRect();
+      const tabBox = activeTab.getBoundingClientRect();
+      if (tabBox.left < rowBox.left) tabRow.scrollLeft -= rowBox.left - tabBox.left + 8;
+      else if (tabBox.right > rowBox.right) tabRow.scrollLeft += tabBox.right - rowBox.right + 8;
+    }
     $("#tool-total").textContent = filtered.length;
     if (!filtered.length) return empty(grid, "No matches found.", "Try another search or browse the full collection.", () => {
       $("#tool-search").value = ""; selected = "All"; render();
@@ -62,10 +70,17 @@
       const action = isTool ? toolLink(tool, "Open tool", "text-link catalogue-open") :
         el("a", {href: `/downloads?item=${encodeURIComponent(tool.id)}`, class: "text-link catalogue-open", "data-google-vignette": "false"}, tool.kind === "album" ? "View album" : "View download");
       measuredLink(action);
+      const badge = isTool
+        ? tool.popular
+          ? el("span", {class: "catalogue-badge"}, "Popular")
+          : tool.featured
+            ? el("span", {class: "catalogue-badge"}, "Featured")
+            : null
+        : el("span", {class: "catalogue-badge"}, tool.locked ? `₹${tool.pricing.payable}` : "Free");
       return el("article", {class: "tool-card catalogue-card"},
         el("div", {class: "catalogue-card-top"},
           el("img", {class: "catalogue-icon", src: `/assets/icons/${iconFor(tool)}.svg?v=keys1`, alt: "", width: "48", height: "48"}),
-          ...(!isTool || tool.featured ? [el("span", {class: "catalogue-badge"}, isTool ? "Featured" : tool.locked ? `₹${tool.pricing.payable}` : "Free")] : [])),
+          ...(badge ? [badge] : [])),
         el("div", {class: "card-body"},
           el("span", {class: "catalogue-type"}, tool.category || label),
           el("h3", {}, tool.name),
@@ -197,8 +212,13 @@
   $("#tool-search").addEventListener("input", render);
   async function load() {
     try {
-      config = await api("/tools.config.json");
-      tools = (config.tools || []).filter((t) => t.visible !== false).map(t => ({...t, kind: "tool"}));
+      const [config, browserFeed] = await Promise.all([
+        api("/tools.config.json"),
+        api("/api/browser-tools.json").catch(() => ({ tools: [] })),
+      ]);
+      const curated = (config.tools || []).filter((t) => t.visible !== false);
+      const browserTools = (browserFeed.tools || []).filter((t) => t.visible !== false);
+      tools = [...curated, ...browserTools].map(t => ({...t, kind: "tool"}));
       render();
       await widgets();
     } catch (error) {
