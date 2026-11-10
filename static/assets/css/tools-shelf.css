@@ -12,26 +12,6 @@ body.pro-theme.bp.home-page .filter-tabs {
   flex-wrap: wrap;
 }
 
-@media (max-width: 900px) {
-  body.pro-theme.bp.home-page .filter-tabs {
-    flex-wrap: nowrap;
-    overflow-x: auto;
-    overscroll-behavior-x: contain;
-    -webkit-overflow-scrolling: touch;
-    scrollbar-width: none;
-    padding-right: 18px;
-    mask-image: linear-gradient(90deg, #000 calc(100% - 22px), transparent);
-  }
-
-  body.pro-theme.bp.home-page .filter-tabs::-webkit-scrollbar {
-    display: none;
-  }
-
-  body.pro-theme.bp.home-page .filter-tabs .filter-tab {
-    flex: 0 0 auto;
-  }
-}
-
 @media (min-width: 1180px) {
   body.pro-theme.bp.home-page .tool-grid {
     grid-template-columns: repeat(3, minmax(0, 1fr));
