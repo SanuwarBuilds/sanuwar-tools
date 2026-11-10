@@ -100,6 +100,10 @@ def install(app):
             return None
         if request.method in ('POST','PUT','PATCH','DELETE'):
             token = request.headers.get('X-CSRF-Token', '')
+            # The password gate is a plain HTML form (works without JavaScript);
+            # it carries the same session-bound token in a hidden field.
+            if not token and request.method == 'POST' and request.path == '/bypass':
+                token = request.form.get('csrf_token', '')
             if not token or not hmac.compare_digest(token, session.get('csrf_token', '')):
                 return jsonify(error='Session expired. Refresh this page and try again.'), 403
             origin = request.headers.get('Origin')

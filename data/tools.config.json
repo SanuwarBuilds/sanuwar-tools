@@ -52,6 +52,28 @@
       "visible": true
     },
     {
+      "addedDate": "2026-11-10",
+      "category": "Utility",
+      "description": "Insert invisible Unicode marks into lyrics so the text reads the same but no longer matches the stored copy. Password-protected module.",
+      "downloadAvailable": false,
+      "enabled": true,
+      "featured": false,
+      "icon": "tool",
+      "id": "builtin-lyrics-bypass",
+      "longDescription": "A private JP Digital India utility for adding invisible ZWNJ, ZWJ and word-joiner characters to lyrics. Grapheme-safe so Hindi and Bangla matras, conjuncts and emoji stay intact.",
+      "name": "Lyrics Bypass",
+      "route": "/bypass",
+      "tags": [
+        "lyrics",
+        "unicode",
+        "invisible",
+        "bypass",
+        "text"
+      ],
+      "thumbnail": "/assets/icons/tool.svg",
+      "visible": true
+    },
+    {
       "addedDate": "2025-01-15",
       "category": "Generator",
       "description": "Generate passport-size photo sheets instantly from any image. Supports multiple formats and layouts.",

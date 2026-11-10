@@ -1,0 +1,99 @@
+{% extends 'base.html' %}
+{% block title %}Lyrics Bypass — private utility · SanuwarTools{% endblock %}
+{% block bodyclass %}bypass-page{% endblock %}
+{% block page_styles %}<link rel="stylesheet" href="/assets/css/bypass.css?v=1">{% endblock %}
+
+{% block content %}
+<section class="by-shell">
+  <nav class="by-crumb" aria-label="Breadcrumb">
+    <a href="/">Home</a><span aria-hidden="true">/</span><a href="/#tools">Tools</a><span aria-hidden="true">/</span><span aria-current="page">Lyrics Bypass</span>
+  </nav>
+
+  <header class="by-head">
+    <div class="by-head-copy">
+      <p class="by-kicker"><span class="by-led" aria-hidden="true"></span><span>JP DIGITAL INDIA</span><span class="by-kicker-sep" aria-hidden="true">/</span><span data-i18n="privateModule">निजी मॉड्यूल</span></p>
+      <h1>Lyrics Bypass</h1>
+      <p class="by-lede" data-i18n="lede">गाने के बोल में अदृश्य यूनिकोड मार्क जोड़ें। टेक्स्ट वैसा ही दिखता रहता है, लेकिन स्टोर किए गए टेक्स्ट से मेल नहीं खाता।</p>
+    </div>
+    <div class="by-lang" role="group" aria-label="Language">
+      <button type="button" class="by-lang-btn" data-lang="hi" aria-pressed="true" lang="hi">हिंदी</button>
+      <button type="button" class="by-lang-btn" data-lang="bn" aria-pressed="false" lang="bn">বাংলা</button>
+      <button type="button" class="by-lang-btn" data-lang="en" aria-pressed="false" lang="en">English</button>
+    </div>
+  </header>
+
+  {% if expired %}
+  <section class="by-panel by-panel-gate" aria-labelledby="by-gate-title">
+    <div class="by-plate"><span class="by-leds by-leds-alert" aria-hidden="true"><i></i><i></i><i></i></span><span>SECURITY SYSTEM</span><span class="by-plate-meta">EXPIRED</span></div>
+    <div class="by-panel-body by-gate-body">
+      <h2 id="by-gate-title" data-i18n="expiredTitle">मॉड्यूल की अवधि खत्म</h2>
+      <p class="by-error" data-i18n="expiredBody">यह फ़ाइल एक्सपायर हो चुकी है! कृपया ओनर से संपर्क करें।</p>
+      <p class="by-hint"><span data-i18n="contactLabel">संपर्क</span>: <a href="tel:+917277254855">+91 72772 54855</a></p>
+    </div>
+  </section>
+  {% elif not unlocked %}
+  <section class="by-panel by-panel-gate" aria-labelledby="by-gate-title">
+    <div class="by-plate"><span class="by-leds" aria-hidden="true"><i></i><i></i><i></i></span><span>SECURITY SYSTEM</span><span class="by-plate-meta">ACCESS CONTROL</span></div>
+    <div class="by-panel-body by-gate-body">
+      <div class="by-gate-copy">
+        <h2 id="by-gate-title" data-i18n="gateTitle">एक्सेस कंट्रोल</h2>
+        <p class="by-gate-sub" data-i18n="gateSub">यह टूल पासवर्ड से सुरक्षित है। जारी रखने के लिए पासवर्ड डालें।</p>
+      </div>
+      <form method="post" action="{{ url_for('bypass') }}" class="by-gate-form">
+        <input type="hidden" name="csrf_token" value="{{ csrf_token }}">
+        <label for="bypass-password" data-i18n="passwordLabel">&gt; एक्सेस पासवर्ड डालें:</label>
+        <div class="by-pw-row">
+          <input id="bypass-password" name="password" type="password" inputmode="numeric" autocomplete="current-password" maxlength="16" placeholder="•••••" required autofocus aria-describedby="by-gate-note{% if error %} by-gate-error{% endif %}">
+          <button type="submit" class="by-btn by-btn-primary" data-i18n="enter">प्रवेश करें</button>
+        </div>
+        {% if error %}
+        <p class="by-error" id="by-gate-error" role="alert" data-error="{{ error }}">{% if error == 'limited' %}बहुत ज़्यादा कोशिशें। 15 मिनट बाद दोबारा कोशिश करें।{% else %}गलत पासवर्ड! कृपया दोबारा कोशिश करें।{% endif %}</p>
+        {% endif %}
+        <p class="by-hint" id="by-gate-note" data-i18n="gateNote">सुरक्षा के लिए 15 मिनट में सीमित कोशिशें।</p>
+      </form>
+    </div>
+  </section>
+  {% else %}
+  <p class="by-granted"><span class="by-led by-led-green" aria-hidden="true"></span><span>&gt; ACCESS GRANTED · CORE READY</span><span class="by-granted-meta" data-i18n="sessionNote">इस डिवाइस पर 6 घंटे तक अनलॉक रहेगा।</span></p>
+
+  <section class="by-work" aria-label="Lyrics bypass workspace">
+    <div class="by-panel">
+      <div class="by-plate"><span class="by-leds" aria-hidden="true"><i></i><i></i><i></i></span><span>INPUT // LYRICS</span><span class="by-plate-meta">UTF-8</span></div>
+      <div class="by-panel-body">
+        <label class="by-label" for="bypass-input" data-i18n="inputLabel">&gt; यहाँ लिरिक्स डालें:</label>
+        <textarea id="bypass-input" class="by-textarea" spellcheck="false" autocapitalize="off" data-i18n-placeholder="inputPlaceholder" placeholder="यहाँ अपने गाने के बोल लिखें..."></textarea>
+        <div class="by-row">
+          <p class="by-count" id="bypass-count" aria-live="polite"></p>
+          <div class="by-actions">
+            <button type="button" class="by-btn by-btn-ghost" id="bypass-clear" data-i18n="clear">साफ करें</button>
+            <button type="button" class="by-btn by-btn-primary" id="bypass-generate" data-i18n="generate">नया बाइपास बनाएं</button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="by-panel">
+      <div class="by-plate"><span class="by-leds by-leds-ready" aria-hidden="true"><i></i><i></i><i></i></span><span>OUTPUT // BYPASS GENERATED</span><span class="by-plate-meta" id="bypass-state">IDLE</span></div>
+      <div class="by-panel-body">
+        <label class="by-label" for="bypass-output" data-i18n="outputLabel">&gt; बदला हुआ टेक्स्ट:</label>
+        <textarea id="bypass-output" class="by-textarea" readonly spellcheck="false" data-i18n-placeholder="outputPlaceholder" placeholder="बदले हुए लिरिक्स यहाँ दिखेंगे..."></textarea>
+        <div class="by-row">
+          <p class="by-status" id="bypass-status" role="status" aria-live="polite"></p>
+          <button type="button" class="by-btn by-btn-primary" id="bypass-copy" data-i18n="copy">एन्क्रिप्टेड पैकेट कॉपी करें</button>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <p class="by-tech">ZWNJ · ZWJ · WORD JOINER — <span data-i18n="techNote">अदृश्य यूनिकोड मार्क जोड़े जाते हैं, मूल टेक्स्ट नहीं बदला जाता।</span></p>
+  {% endif %}
+
+  <footer class="by-foot">
+    <p class="by-contact"><span data-i18n="contactLabel">संपर्क</span>: <a href="tel:+917277254855">+91 72772 54855</a></p>
+    <p class="by-credit">JP DIGITAL INDIA · <span data-i18n="credit">पावर्ड बाय DJ ज्योति प्रकाश</span></p>
+    <p class="by-expiry-chip" data-i18n="expiryNote">सक्रिय: 3 मई 2027 तक</p>
+  </footer>
+</section>
+{% endblock %}
+
+{% block scripts %}<script nonce="{{ csp_nonce }}" src="/assets/js/bypass.js?v=1" defer></script>{% endblock %}

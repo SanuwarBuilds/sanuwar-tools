@@ -231,6 +231,7 @@ def install(app, load_config, load_directory=None, load_tool_catalog=None):
     @app.get('/robots.txt')
     def robots():
         body = '\n'.join(['User-agent: *', 'Allow: /', 'Disallow: /admin',
+                          'Disallow: /bypass',
                           'Disallow: /purchase', 'Disallow: /payment-demo',
                           'Disallow: /api/admin/', 'Disallow: /api/payments/',
                           'Disallow: /api/license/', 'Sitemap: ' + ORIGIN + '/sitemap.xml', ''])
@@ -272,6 +273,6 @@ def install(app, load_config, load_directory=None, load_tool_catalog=None):
     def search_headers(response):
         path = request.path
         if (response.status_code >= 400 or path.startswith(('/admin', '/api/', '/purchase'))
-                or path in ('/payment-demo', '/tools.config.json', '/signin', '/account')):
+                or path in ('/payment-demo', '/tools.config.json', '/signin', '/account', '/bypass')):
             response.headers['X-Robots-Tag'] = 'noindex, nofollow'
         return response

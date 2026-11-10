@@ -8,7 +8,9 @@ import uuid
 import datetime
 import secrets
 import hmac
+import hashlib
 import tempfile
+import time
 from PIL import Image, UnidentifiedImageError
 from werkzeug.security import check_password_hash
 from werkzeug.utils import secure_filename
@@ -23,7 +25,7 @@ from cover_images import thumbnail_receipt
 from download_metadata import utc_now, upload_time, album_metadata
 import cloudinary
 import cloudinary.uploader
-from flask import Flask, request, render_template, session, redirect, jsonify, url_for, send_file, send_from_directory, abort, g, has_request_context
+from flask import Flask, request, render_template, session, redirect, jsonify, url_for, send_file, send_from_directory, abort, g, has_request_context, make_response
 from dotenv import load_dotenv
 import utils
 
@@ -437,6 +439,44 @@ def tool_page(slug):
     related = [item for item in catalog['tools']
                if item['category'] == tool['category'] and item['slug'] != slug][:4]
     return render_template('tools/tool.html', tool=tool, related=related, catalog=catalog)
+
+BYPASS_PASSWORD_SALT = 'sanuwar-tools::bypass::jpd::v1'
+BYPASS_PASSWORD_HASH = '2c04d2f0c3db543e3965959bc8968c693ec3db1276077f88f9e3ee8de4e190ed'
+BYPASS_UNLOCK_SECONDS = 6 * 60 * 60
+BYPASS_EXPIRY = datetime.datetime(2027, 5, 3, 23, 59, 59)
+
+def bypass_password_ok(value):
+    if not isinstance(value, str) or not value or len(value) > 64:
+        return False
+    expected = os.getenv('BYPASS_PASSWORD', '')
+    if expected:
+        return hmac.compare_digest(value, expected)
+    digest = hashlib.sha256((BYPASS_PASSWORD_SALT + value).encode('utf-8')).hexdigest()
+    return hmac.compare_digest(digest, BYPASS_PASSWORD_HASH)
+
+def render_bypass(unlocked, expired, error=None, status=200):
+    response = make_response(render_template('bypass.html', unlocked=unlocked,
+                                             expired=expired, error=error), status)
+    response.headers['Cache-Control'] = 'no-store'
+    return response
+
+@app.route('/bypass', methods=['GET', 'POST'])
+def bypass():
+    expired = datetime.datetime.now() > BYPASS_EXPIRY
+    if request.method == 'POST':
+        if expired:
+            return render_bypass(False, True)
+        if security.limited(('bypass', request.remote_addr), maximum=8, window=900):
+            return render_bypass(False, False, 'limited', 429)
+        if bypass_password_ok(request.form.get('password', '')):
+            session['bypass_unlocked_at'] = int(time.time())
+            response = redirect(url_for('bypass'))
+            response.headers['Cache-Control'] = 'no-store'
+            return response
+        return render_bypass(False, False, 'invalid', 401)
+    unlocked_at = session.get('bypass_unlocked_at', 0)
+    unlocked = isinstance(unlocked_at, int) and (time.time() - unlocked_at) < BYPASS_UNLOCK_SECONDS
+    return render_bypass(unlocked, expired)
 
 @app.route("/tools.config.json")
 def serve_config():
