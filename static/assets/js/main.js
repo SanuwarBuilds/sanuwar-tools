@@ -3,7 +3,7 @@
   const { $, el, api, image, external, empty, tabs, open, toast } = ST;
   let tools = [], selected = "All";
   const grid = $("#tools-grid");
-  const ICON_NAMES = new Set(["photo", "passport", "score", "wallet", "tool", "download", "album", "film", "anime", "manga", "sports", "tv", "torrent", "game", "music", "ebook", "comics", "drama", "vpn", "shield"]);
+  const ICON_NAMES = new Set(["photo", "passport", "score", "wallet", "tool", "download", "album", "film", "anime", "manga", "sports", "tv", "torrent", "game", "music", "ebook", "comics", "drama", "vpn", "shield", "calculator", "key", "text", "convert", "document", "clock", "heart", "archive"]);
   const kindFor = (text) =>
     text.includes("passport") ? "passport" :
     text.includes("photo") ? "photo" :

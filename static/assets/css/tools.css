@@ -983,6 +983,22 @@ html[data-theme="dark"]:has(body.tool-page) {
   font-weight: 600;
 }
 
+:is(.tools-hub-page, .tool-page) .tp-glyph-art {
+  overflow: hidden;
+  padding: 4px;
+}
+
+:is(.tools-hub-page, .tool-page) .tp-glyph-art img {
+  display: block;
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+}
+
+:is(.tools-hub-page, .tool-page) .tp-head .tp-glyph-art {
+  padding: 7px;
+}
+
 :is(.tools-hub-page, .tool-page) .tp-hub-head > p {
   color: var(--neu-text);
 }

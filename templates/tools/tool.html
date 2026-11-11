@@ -1,12 +1,12 @@
 {% extends 'base.html' %}
 {% set vendor_files = {'js-yaml': 'js-yaml.js', 'marked': 'marked.js', 'fflate': 'fflate.js', 'pdf-lib': 'pdf-lib.js', 'pdfjs': 'pdf.min.js', 'jspdf': 'jspdf.umd.min.js', 'bcryptjs': 'bcrypt.min.js'} %}
 {% block bodyclass %}tool-page tool-page-{{ tool.bundle }}{% endblock %}
-{% block page_styles %}<link rel="stylesheet" href="/assets/css/tools.css?v=1">{% endblock %}
+{% block page_styles %}<link rel="stylesheet" href="/assets/css/tools.css?v=2">{% endblock %}
 {% block content %}
 <section class="tp-shell wrap" data-tool-page data-tool-slug="{{ tool.slug }}">
   <nav class="tp-crumb" aria-label="Breadcrumb"><a href="/">Home</a><span aria-hidden="true">/</span><a href="/tools">All tools</a><span aria-hidden="true">/</span><span>{{ tool.category }}</span></nav>
   <header class="tp-head">
-    <span class="tp-glyph" aria-hidden="true">{{ tool.icon }}</span>
+    <span class="tp-glyph tp-glyph-art" aria-hidden="true"><img src="/assets/icons/{{ tool.icon_file }}.svg?v=soft1" alt="" width="50" height="50"></span>
     <div>
       <span class="tp-badge">{{ tool.category }}</span>
       <h1>{{ tool.name }}</h1>

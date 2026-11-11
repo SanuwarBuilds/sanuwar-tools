@@ -59,7 +59,8 @@ PHOTO_FAQS = [
 
 TOOL_ICON_NAMES = ('photo', 'passport', 'score', 'wallet', 'tool', 'download', 'album',
                    'film', 'anime', 'manga', 'sports', 'tv', 'torrent', 'game', 'music',
-                   'ebook', 'comics', 'drama', 'vpn', 'shield')
+                   'ebook', 'comics', 'drama', 'vpn', 'shield', 'calculator', 'key',
+                   'text', 'convert', 'document', 'clock', 'heart', 'archive')
 
 
 def install(app, load_config, load_directory=None, load_tool_catalog=None):

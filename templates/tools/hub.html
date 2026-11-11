@@ -1,6 +1,6 @@
 {% extends 'base.html' %}
 {% block bodyclass %}tools-hub-page{% endblock %}
-{% block page_styles %}<link rel="stylesheet" href="/assets/css/tools.css?v=1">{% endblock %}
+{% block page_styles %}<link rel="stylesheet" href="/assets/css/tools.css?v=2">{% endblock %}
 {% block content %}
 <section class="tp-hub wrap">
   <header class="tp-hub-head">
@@ -24,7 +24,7 @@
   <div class="tp-hub-grid" id="tp-grid">
     {% for tool in catalog.tools %}
     <a class="tp-card{% if tool.popular %} is-popular{% endif %}" href="/tools/{{ tool.slug }}" data-category="{{ tool.category }}" data-search="{{ (tool.name ~ ' ' ~ tool.description ~ ' ' ~ tool.category) | lower }}">
-      <span class="tp-card-top"><span class="tp-glyph" aria-hidden="true">{{ tool.icon }}</span>{% if tool.popular %}<span class="tp-popular">Popular</span>{% endif %}</span>
+      <span class="tp-card-top"><span class="tp-glyph tp-glyph-art" aria-hidden="true"><img src="/assets/icons/{{ tool.icon_file }}.svg?v=soft1" alt="" width="30" height="30"></span>{% if tool.popular %}<span class="tp-popular">Popular</span>{% endif %}</span>
       <span class="tp-card-cat">{{ tool.category }}</span>
       <strong>{{ tool.name }}</strong>
       <span class="tp-card-desc">{{ tool.description }}</span>

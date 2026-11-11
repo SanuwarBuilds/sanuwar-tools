@@ -96,4 +96,4 @@
 
 <div class="wrap">{{ ad_unit(adsense_slots.get('home', '')) }}</div>
 {% endblock %}
-{% block scripts %}<script nonce="{{ csp_nonce }}" src="/assets/js/main.js?v=2" defer></script>{% if public_config.get('downloadPage', {}).get('enabled', True) %}<script nonce="{{ csp_nonce }}" src="/assets/js/downloads.js" defer></script>{% endif %}{% endblock %}
+{% block scripts %}<script nonce="{{ csp_nonce }}" src="/assets/js/main.js?v=3" defer></script>{% if public_config.get('downloadPage', {}).get('enabled', True) %}<script nonce="{{ csp_nonce }}" src="/assets/js/downloads.js" defer></script>{% endif %}{% endblock %}

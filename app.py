@@ -380,6 +380,22 @@ DIRECTORY_REL    = "data/directory.json"
 TOOL_CATALOG_REL = "data/tools.catalog.json"
 TOOL_BUNDLES = {"text", "media", "network", "misc", "calculators", "dls"}
 TOOL_VENDORS = {"js-yaml", "marked", "fflate", "pdf-lib", "pdfjs", "jspdf", "bcryptjs"}
+TOOL_CATEGORY_ICONS = {
+    'Calculators': 'calculator',
+    'Encoding & Hashing': 'key',
+    'Developer Tools': 'tool',
+    'Text Tools': 'text',
+    'Networking': 'vpn',
+    'Unit Converters': 'convert',
+    'Images & Media': 'photo',
+    'Financial Calculators': 'wallet',
+    'PDF & Documents': 'document',
+    'Time & Date': 'clock',
+    'Health & Fitness': 'heart',
+    'Compression & Archives': 'archive',
+    'Security & Privacy': 'shield',
+    'Sports & Games': 'score',
+}
 
 def load_tool_catalog():
     data = safe_read(TOOL_CATALOG_REL)
@@ -416,6 +432,7 @@ def load_tool_catalog():
             'category': category.strip(),
             'description': description.strip(),
             'icon': icon[:4],
+            'icon_file': TOOL_CATEGORY_ICONS.get(category.strip(), 'tool'),
             'bundle': bundle,
             'vendor': vendors,
             'popular': item.get('popular') is True,
@@ -424,21 +441,11 @@ def load_tool_catalog():
             categories.append(category.strip())
     return {'updated': data.get('updated', ''), 'categories': categories, 'tools': tools}
 
-BROWSER_TOOL_ICONS = {
-    'Images & Media': 'photo',
-    'Networking': 'vpn',
-    'Security & Privacy': 'shield',
-    'Financial Calculators': 'wallet',
-    'Health & Fitness': 'shield',
-    'Sports & Games': 'score',
-    'Unit Converters': 'tool',
-}
-
 def browser_tool_cards(catalog):
     """Homepage catalogue cards for the self-hosted browser tools."""
     cards = []
     for tool in catalog.get('tools', []):
-        icon = BROWSER_TOOL_ICONS.get(tool['category'], 'tool')
+        icon = tool.get('icon_file') or 'tool'
         cards.append({
             'id': 'browser-' + tool['slug'],
             'name': tool['name'],
