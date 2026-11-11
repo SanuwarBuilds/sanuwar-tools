@@ -79,7 +79,7 @@
         : el("span", {class: "catalogue-badge"}, tool.locked ? `₹${tool.pricing.payable}` : "Free");
       return el("article", {class: "tool-card catalogue-card"},
         el("div", {class: "catalogue-card-top"},
-          el("img", {class: "catalogue-icon", src: `/assets/icons/${iconFor(tool)}.svg?v=keys1`, alt: "", width: "48", height: "48"}),
+          el("img", {class: "catalogue-icon", src: `/assets/icons/${iconFor(tool)}.svg?v=soft1`, alt: "", width: "48", height: "48"}),
           ...(badge ? [badge] : [])),
         el("div", {class: "card-body"},
           el("span", {class: "catalogue-type"}, tool.category || label),

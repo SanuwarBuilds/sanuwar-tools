@@ -10,7 +10,7 @@
   if (meta) {
     meta.setAttribute(
       'content',
-      document.documentElement.dataset.theme === 'light' ? '#e3e4e5' : '#141618',
+      document.documentElement.dataset.theme === 'light' ? '#e8e8e8' : '#2b2e32',
     );
   }
 })();

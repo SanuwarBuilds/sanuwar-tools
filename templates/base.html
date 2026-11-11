@@ -32,7 +32,7 @@
 {% if adsense_client %}
 <script nonce="{{ csp_nonce }}" async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client={{ adsense_client }}" crossorigin="anonymous"></script>
 {% endif %}
-<meta name="theme-color" id="theme-color" content="{{ '#141618' if default_theme == 'dark' else '#e3e4e5' }}">
+<meta name="theme-color" id="theme-color" content="{{ '#2b2e32' if default_theme == 'dark' else '#e8e8e8' }}">
 <script nonce="{{ csp_nonce }}" src="/assets/js/theme-init.js?v=1"></script>
 <title>{% block title %}{{ seo.title if seo.indexable else 'SanuwarTools' }}{% endblock %}</title>
 {% set favicon = (public_config.get('site', {}).get('favicon') | public_image) or '/assets/favicon.png' %}
@@ -59,6 +59,7 @@
 {% block page_styles %}{% endblock %}
 {% if public_ui %}<script nonce="{{ csp_nonce }}" src="/assets/js/boot.js?v=1"></script>{% endif %}
 {% if public_ui or request.path.startswith('/admin') %}<link rel="stylesheet" href="/assets/css/sanuwar.css?v=8">{% endif %}
+{% if public_ui and request.path != '/photo-tools' %}<link rel="stylesheet" href="/assets/css/neumorphism.css?v=1">{% endif %}
 {% if public_ui %}<script nonce="{{ csp_nonce }}" src="/assets/js/sanuwar.js?v=5" defer></script>{% endif %}
 {% if request.path.startswith('/admin') %}<link rel="stylesheet" href="/assets/css/admin-pro.css?v=3">{% endif %}
 </head>

@@ -448,7 +448,7 @@ def browser_tool_cards(catalog):
             'route': '/tools/' + tool['slug'],
             'tags': [tool['category'], 'browser tool', 'free'],
             'icon': icon,
-            'thumbnail': '/assets/icons/%s.svg?v=keys1' % icon,
+            'thumbnail': '/assets/icons/%s.svg?v=soft1' % icon,
             'featured': False,
             'popular': bool(tool.get('popular')),
             'visible': True,

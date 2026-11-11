@@ -82,7 +82,7 @@ def install(app, load_config, load_directory=None, load_tool_catalog=None):
     def tool_icon(tool):
         explicit = str(tool.get('icon', '')).strip().lower()
         if explicit in TOOL_ICON_NAMES:
-            return '/assets/icons/' + explicit + '.svg?v=keys1'
+            return '/assets/icons/' + explicit + '.svg?v=soft1'
         tags = tool.get('tags')
         tag_text = ' '.join(str(tag) for tag in tags).lower() if isinstance(tags, list) else ''
 
@@ -107,7 +107,7 @@ def install(app, load_config, load_directory=None, load_tool_catalog=None):
 
         kind = (kind_for(str(tool.get('name', '')).lower()) or
                 kind_for(tag_text) or 'tool')
-        return '/assets/icons/' + kind + '.svg?v=keys1'
+        return '/assets/icons/' + kind + '.svg?v=soft1'
     app.jinja_env.filters['tool_icon'] = tool_icon
     app.jinja_env.filters['public_url'] = lambda value: value if security.valid_url(value) else ''
     app.jinja_env.filters['public_image'] = lambda value: value if security.valid_url(value, image=True) else ''

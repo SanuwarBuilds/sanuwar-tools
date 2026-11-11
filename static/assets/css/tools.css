@@ -556,3 +556,1635 @@
   .calc-interruption { grid-template-columns: repeat(2, minmax(0, 1fr)); }
   .calc-interruption .tp-btn { grid-column: 2; justify-self: end; }
 }
+
+:is(body.tools-hub-page, body.tool-page).pro-theme.bp {
+  --neu-base: #e8e8e8;
+  --neu-blue: #c8e0f4;
+  --neu-pink: #f5e0e8;
+  --neu-light: #ffffff;
+  --neu-dark: #d0d0d0;
+  --neu-accent: #7b68ee;
+  --neu-accent-ink: #5a46c8;
+  --neu-accent-2: #7b68ee;
+  --neu-primary: #5a46c8;
+  --neu-primary-hover: #4d3ab8;
+  --neu-heading: #3f3f46;
+  --neu-text: #52525b;
+  --neu-muted: #5b5b64;
+  --neu-faint: #64646d;
+  --neu-on-accent: #ffffff;
+  --neu-ok-bg: #dff3e6;
+  --neu-ok-ink: #226b43;
+  --neu-bad-bg: #f9e1e2;
+  --neu-bad-ink: #9f2f27;
+  --neu-mono: ui-monospace, "SF Mono", SFMono-Regular, Menlo, Consolas, monospace;
+  --neu-raised: -8px -8px 20px var(--neu-light), 8px 8px 20px var(--neu-dark);
+  --neu-raised-sm: -4px -4px 10px var(--neu-light), 4px 4px 10px var(--neu-dark);
+  --neu-inset: inset -5px -5px 15px var(--neu-light), inset 5px 5px 15px var(--neu-dark);
+  --neu-inset-sm: inset -3px -3px 7px var(--neu-light), inset 3px 3px 7px var(--neu-dark);
+
+  --bp-font: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+  --bp-mono: var(--bp-font);
+  --tp-mono: var(--bp-font);
+  --tp-radius: 1.5rem;
+
+  --bp-paper: var(--neu-base);
+  --bp-paper-2: var(--neu-base);
+  --bp-panel: var(--neu-base);
+  --bp-panel-2: var(--neu-base);
+  --bp-panel-3: var(--neu-base);
+
+  --bp-ink: var(--neu-heading);
+  --bp-ink-2: var(--neu-text);
+  --bp-muted: var(--neu-muted);
+  --bp-faint: var(--neu-faint);
+
+  --bp-line: transparent;
+  --bp-line-2: transparent;
+  --bp-line-3: transparent;
+
+  --bp-accent: var(--neu-accent-ink);
+  --bp-accent-2: var(--neu-accent);
+  --bp-accent-wash: rgba(123, 104, 238, 0.14);
+
+  --bp-screen: var(--neu-base);
+  --bp-screen-2: var(--neu-base);
+  --bp-screen-ink: var(--neu-heading);
+  --bp-screen-muted: var(--neu-muted);
+
+  --bp-grid: transparent;
+  --bp-grid-strong: transparent;
+  --bp-hi: var(--neu-light);
+  --bp-hi-soft: var(--neu-light);
+  --bp-emboss: 0 0 0 0 transparent;
+  --bp-shadow: var(--neu-raised);
+  --bp-shadow-lift: -10px -10px 28px var(--neu-light), 12px 12px 30px var(--neu-dark);
+
+  --bp-board: var(--neu-base);
+  --bp-board-2: var(--neu-base);
+  --bp-board-ink: var(--neu-heading);
+  --bp-board-muted: var(--neu-muted);
+  --bp-board-faint: var(--neu-faint);
+  --bp-board-line: transparent;
+
+  color-scheme: light;
+}
+
+html[data-theme="dark"] :is(body.tools-hub-page, body.tool-page).pro-theme.bp {
+  --neu-base: #2b2e32;
+  --neu-blue: #374a5c;
+  --neu-pink: #4b3540;
+  --neu-light: #35393e;
+  --neu-dark: #1c1e21;
+  --neu-accent: #9b8cff;
+  --neu-accent-ink: #c6bdff;
+  --neu-accent-2: #d6d0ff;
+  --neu-primary: #c6bdff;
+  --neu-primary-hover: #d6d0ff;
+  --neu-heading: #f2f2f4;
+  --neu-text: #c4c4cc;
+  --neu-muted: #a8a8b1;
+  --neu-faint: #9b9ba4;
+  --neu-on-accent: #1b1d20;
+  --neu-ok-bg: #1f3a2b;
+  --neu-ok-ink: #a7e3c0;
+  --neu-bad-bg: #472a2c;
+  --neu-bad-ink: #ffb4ac;
+  --bp-accent-wash: rgba(155, 140, 255, 0.16);
+  color-scheme: dark;
+}
+
+html:has(body.tools-hub-page),
+html:has(body.tool-page) {
+  background-color: #e8e8e8;
+  scrollbar-color: #c6c6c6 #e8e8e8;
+}
+
+html[data-theme="dark"]:has(body.tools-hub-page),
+html[data-theme="dark"]:has(body.tool-page) {
+  background-color: #2b2e32;
+  scrollbar-color: #1c1e21 #2b2e32;
+}
+
+:is(body.tools-hub-page, body.tool-page).pro-theme.bp {
+  background-color: var(--neu-base);
+  background-image: none;
+  color: var(--neu-text);
+}
+
+:is(body.tools-hub-page, body.tool-page).pro-theme.bp ::selection {
+  background: var(--neu-accent);
+  color: var(--neu-on-accent);
+}
+
+:is(body.tools-hub-page, body.tool-page).pro-theme.bp .bp-frame {
+  display: none;
+}
+
+:is(body.tools-hub-page, body.tool-page).pro-theme.bp :is(h1, h2, h3, h4) {
+  color: var(--neu-heading);
+  font-weight: 600;
+  letter-spacing: -0.025em;
+}
+
+:is(body.tools-hub-page, body.tool-page).pro-theme.bp .tp-hub-head h1 {
+  font-size: clamp(2.4rem, 5vw, 3.5rem);
+  line-height: 1.04;
+  letter-spacing: -0.035em;
+}
+
+:is(body.tools-hub-page, body.tool-page).pro-theme.bp .tp-head h1 {
+  font-size: clamp(2rem, 4vw, 2.75rem);
+  line-height: 1.06;
+  letter-spacing: -0.03em;
+}
+
+:is(body.tools-hub-page, body.tool-page).pro-theme.bp .site-header.wrap {
+  border-bottom: 0;
+  background: var(--neu-base);
+  box-shadow: inset 0 1px 0 var(--neu-light), 0 10px 22px -16px var(--neu-dark);
+  backdrop-filter: none;
+  -webkit-backdrop-filter: none;
+}
+
+:is(body.tools-hub-page, body.tool-page).pro-theme.bp .site-header .brand {
+  color: var(--neu-heading);
+  font-weight: 600;
+}
+
+:is(body.tools-hub-page, body.tool-page).pro-theme.bp .brand-symbol {
+  border: 0;
+  border-radius: 0.65rem;
+  background: var(--neu-blue);
+  color: var(--neu-heading);
+  box-shadow: var(--neu-raised-sm);
+}
+
+:is(body.tools-hub-page, body.tool-page).pro-theme.bp .brand-dot {
+  color: var(--neu-accent-ink);
+}
+
+:is(body.tools-hub-page, body.tool-page).pro-theme.bp .site-header nav a {
+  border: 0;
+  border-radius: 999px;
+  color: var(--neu-muted);
+  font-family: var(--bp-font);
+  font-size: 12px;
+  font-weight: 600;
+  letter-spacing: 0.01em;
+  text-transform: none;
+  transition: color 150ms ease, background-color 150ms ease, box-shadow 150ms ease;
+}
+
+:is(body.tools-hub-page, body.tool-page).pro-theme.bp .site-header nav a:hover {
+  background: var(--neu-base);
+  color: var(--neu-heading);
+  box-shadow: var(--neu-raised-sm);
+}
+
+:is(body.tools-hub-page, body.tool-page).pro-theme.bp .site-header nav a.active {
+  background: var(--neu-base);
+  color: var(--neu-accent-ink);
+  box-shadow: var(--neu-inset-sm);
+}
+
+:is(body.tools-hub-page, body.tool-page).pro-theme.bp .icon-button {
+  border: 0;
+  border-radius: 50%;
+  background: var(--neu-base);
+  color: var(--neu-heading);
+  box-shadow: var(--neu-raised-sm);
+  transition: background-color 150ms ease, color 150ms ease, box-shadow 150ms ease;
+}
+
+:is(body.tools-hub-page, body.tool-page).pro-theme.bp .icon-button:hover {
+  background: var(--neu-base);
+  color: var(--neu-accent-ink);
+  box-shadow: var(--neu-raised);
+}
+
+:is(body.tools-hub-page, body.tool-page).pro-theme.bp .icon-button:active {
+  box-shadow: var(--neu-inset-sm);
+}
+
+:is(body.tools-hub-page, body.tool-page).pro-theme.bp .icon-button svg {
+  width: 18px;
+  height: 18px;
+}
+
+:is(body.tools-hub-page, body.tool-page).pro-theme.bp .button {
+  border: 0;
+  border-radius: 999px;
+  background: var(--neu-base);
+  color: var(--neu-heading);
+  font-family: var(--bp-font);
+  font-size: 12px;
+  font-weight: 600;
+  letter-spacing: 0;
+  text-transform: none;
+  box-shadow: var(--neu-raised-sm);
+  transition: background-color 150ms ease, color 150ms ease, box-shadow 150ms ease;
+}
+
+:is(body.tools-hub-page, body.tool-page).pro-theme.bp .button:hover {
+  background: var(--neu-base);
+  color: var(--neu-accent-ink);
+  box-shadow: var(--neu-raised);
+}
+
+:is(body.tools-hub-page, body.tool-page).pro-theme.bp .button:active {
+  transform: none;
+  box-shadow: var(--neu-inset-sm);
+}
+
+:is(body.tools-hub-page, body.tool-page).pro-theme.bp .nav-actions .visitor-nav {
+  border: 0;
+  background: var(--neu-blue);
+  color: var(--neu-heading);
+  font-family: var(--bp-font);
+  font-size: 12px;
+  font-weight: 600;
+  letter-spacing: 0;
+  text-transform: none;
+  box-shadow: var(--neu-raised-sm);
+}
+
+:is(body.tools-hub-page, body.tool-page).pro-theme.bp .nav-actions .visitor-nav:hover {
+  background: var(--neu-pink);
+  color: var(--neu-heading);
+  box-shadow: var(--neu-raised);
+}
+
+:is(body.tools-hub-page, body.tool-page).pro-theme.bp .skip-link {
+  border: 0;
+  border-radius: 999px;
+  background: var(--neu-base);
+  color: var(--neu-heading);
+  font-family: var(--bp-font);
+  box-shadow: var(--neu-raised);
+}
+
+:is(body.tools-hub-page, body.tool-page).pro-theme.bp .site-footer {
+  margin-bottom: clamp(20px, 3vw, 40px);
+  border: 0;
+  border-radius: 1.75rem;
+  background: var(--neu-base);
+  box-shadow: var(--neu-raised);
+}
+
+:is(body.tools-hub-page, body.tool-page).pro-theme.bp .site-footer::before {
+  display: none;
+}
+
+:is(body.tools-hub-page, body.tool-page).pro-theme.bp .site-footer .brand-symbol {
+  border: 0;
+  background: var(--neu-blue);
+  color: var(--neu-heading);
+  box-shadow: var(--neu-raised-sm);
+}
+
+:is(body.tools-hub-page, body.tool-page).pro-theme.bp .site-footer .brand-dot {
+  color: var(--neu-accent-ink);
+}
+
+:is(body.tools-hub-page, body.tool-page).pro-theme.bp .site-footer .v2-footer-social a {
+  border: 0;
+  border-radius: 999px;
+  background: var(--neu-base);
+  color: var(--neu-text);
+  font-family: var(--bp-font);
+  font-size: 11px;
+  letter-spacing: 0;
+  text-transform: none;
+  box-shadow: var(--neu-raised-sm);
+}
+
+:is(body.tools-hub-page, body.tool-page).pro-theme.bp .site-footer .v2-footer-social a:hover {
+  border: 0;
+  background: var(--neu-blue);
+  color: var(--neu-heading);
+  box-shadow: var(--neu-raised);
+}
+
+:is(body.tools-hub-page, body.tool-page).pro-theme.bp .site-footer .v2-footer-col h2 {
+  color: var(--neu-faint);
+  font-family: var(--bp-font);
+  font-size: 10px;
+  font-weight: 600;
+  letter-spacing: 0.12em;
+}
+
+:is(body.tools-hub-page, body.tool-page).pro-theme.bp .site-footer .v2-footer-nav a {
+  color: var(--neu-muted);
+  font-family: var(--bp-font);
+}
+
+:is(body.tools-hub-page, body.tool-page).pro-theme.bp .site-footer .v2-footer-nav a:hover {
+  color: var(--neu-accent-ink);
+}
+
+:is(body.tools-hub-page, body.tool-page).pro-theme.bp .site-footer .v2-footer-bottom {
+  border-top: 0;
+  box-shadow: inset 0 1px 0 var(--neu-light), inset 0 -1px 0 var(--neu-dark);
+}
+
+:is(body.tools-hub-page, body.tool-page).pro-theme.bp .site-footer :is(.copyright, .v2-footer-mark) {
+  color: var(--neu-faint);
+  font-family: var(--bp-font);
+  letter-spacing: 0.02em;
+}
+
+:is(body.tools-hub-page, body.tool-page).pro-theme.bp .site-footer .v2-footer-mark i {
+  background: var(--neu-accent);
+  box-shadow: none;
+}
+
+:is(body.tools-hub-page, body.tool-page).pro-theme.bp .bp-boot {
+  background-color: var(--neu-base);
+  background-image: none;
+  transition: opacity 200ms ease, visibility 200ms ease;
+}
+
+:is(body.tools-hub-page, body.tool-page).pro-theme.bp .bp-boot-plate {
+  border: 0;
+  border-radius: 2rem;
+  background: var(--neu-base);
+  box-shadow: var(--neu-raised);
+}
+
+:is(body.tools-hub-page, body.tool-page).pro-theme.bp .bp-boot-leds i {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: var(--neu-blue);
+  box-shadow: var(--neu-raised-sm);
+  animation: none;
+}
+
+:is(body.tools-hub-page, body.tool-page).pro-theme.bp .bp-boot-leds i:nth-child(2) {
+  background: var(--neu-pink);
+}
+
+:is(body.tools-hub-page, body.tool-page).pro-theme.bp .bp-boot-leds i:nth-child(3) {
+  background: var(--neu-base);
+}
+
+:is(body.tools-hub-page, body.tool-page).pro-theme.bp :is(.bp-boot-label, .bp-boot-status) {
+  color: var(--neu-faint);
+  font-family: var(--bp-font);
+  letter-spacing: 0.1em;
+}
+
+:is(body.tools-hub-page, body.tool-page).pro-theme.bp .bp-boot-title {
+  color: var(--neu-heading);
+  font-weight: 600;
+}
+
+:is(body.tools-hub-page, body.tool-page).pro-theme.bp .bp-boot-track {
+  border-radius: 999px;
+  background: var(--neu-base);
+  box-shadow: var(--neu-inset-sm);
+}
+
+:is(body.tools-hub-page, body.tool-page).pro-theme.bp .bp-boot-track i {
+  background: linear-gradient(90deg, var(--neu-accent), var(--neu-accent-2));
+  box-shadow: none;
+}
+
+:is(body.tools-hub-page, body.tool-page).pro-theme.bp .toast {
+  border: 0;
+  border-radius: 1rem;
+  background: var(--neu-base);
+  color: var(--neu-heading);
+  font-family: var(--bp-font);
+  font-size: 13px;
+  box-shadow: var(--neu-raised);
+}
+
+:is(.tools-hub-page, .tool-page) .tp-badge {
+  border: 0;
+  border-radius: 999px;
+  background: var(--neu-pink);
+  color: var(--neu-heading);
+  box-shadow: var(--neu-raised-sm);
+  font-family: var(--bp-font);
+  font-size: 10px;
+  font-weight: 600;
+  letter-spacing: 0.08em;
+}
+
+:is(.tools-hub-page, .tool-page) .tp-glyph {
+  border: 0;
+  border-radius: 1rem;
+  background: var(--neu-base);
+  box-shadow: var(--neu-raised-sm);
+  color: var(--neu-accent-ink);
+  font-family: var(--bp-font);
+  font-weight: 600;
+}
+
+:is(.tools-hub-page, .tool-page) .tp-hub-head > p {
+  color: var(--neu-text);
+}
+
+:is(.tools-hub-page, .tool-page) .tp-search {
+  border: 0;
+  border-radius: 999px;
+  background: var(--neu-base);
+  box-shadow: var(--neu-inset);
+  padding-inline: 18px;
+}
+
+:is(.tools-hub-page, .tool-page) .tp-search:focus-within {
+  border: 0;
+  box-shadow: var(--neu-inset-sm);
+  outline: 3px solid var(--neu-accent);
+  outline-offset: 3px;
+}
+
+:is(.tools-hub-page, .tool-page) .tp-search > span {
+  color: var(--neu-faint);
+  font-family: var(--bp-font);
+}
+
+:is(.tools-hub-page, .tool-page) .tp-search input {
+  color: var(--neu-heading);
+  font-family: var(--bp-font);
+}
+
+:is(.tools-hub-page, .tool-page) .tp-search input::placeholder {
+  color: var(--neu-faint);
+}
+
+:is(.tools-hub-page, .tool-page) .tp-search kbd {
+  border: 0;
+  border-radius: 0.5rem;
+  background: var(--neu-base);
+  color: var(--neu-muted);
+  box-shadow: var(--neu-raised-sm);
+  font-family: var(--bp-font);
+}
+
+:is(.tools-hub-page, .tool-page) .tp-hub-count {
+  color: var(--neu-muted);
+  font-family: var(--bp-font);
+  font-size: 12px;
+  font-weight: 600;
+}
+
+:is(.tools-hub-page, .tool-page) .tp-hub-count b {
+  color: var(--neu-accent-ink);
+}
+
+:is(.tools-hub-page, .tool-page) .tp-chips {
+  gap: 10px;
+}
+
+:is(.tools-hub-page, .tool-page) .tp-chip {
+  border: 0;
+  border-radius: 999px;
+  background: var(--neu-base);
+  color: var(--neu-muted);
+  box-shadow: var(--neu-raised-sm);
+  font: 600 12px/1 var(--bp-font);
+  letter-spacing: 0;
+  transition: background-color 150ms ease, color 150ms ease, box-shadow 150ms ease;
+}
+
+:is(.tools-hub-page, .tool-page) .tp-chip:hover {
+  color: var(--neu-heading);
+  box-shadow: var(--neu-raised);
+}
+
+:is(.tools-hub-page, .tool-page) .tp-chip.is-active {
+  background: var(--neu-blue);
+  color: var(--neu-heading);
+  box-shadow: var(--neu-inset-sm);
+}
+
+:is(.tools-hub-page, .tool-page) .tp-chip span {
+  color: var(--neu-faint);
+  font-weight: 500;
+}
+
+:is(.tools-hub-page, .tool-page) .tp-chip.is-active span {
+  color: var(--neu-heading);
+}
+
+:is(.tools-hub-page, .tool-page) .tp-hub-grid {
+  gap: 18px;
+}
+
+:is(.tools-hub-page, .tool-page) .tp-card {
+  gap: 8px;
+  min-height: 188px;
+  padding: 20px;
+  border: 0;
+  border-radius: 1.5rem;
+  background: var(--neu-base);
+  box-shadow: var(--neu-raised);
+  color: var(--neu-heading);
+  transition: transform 150ms ease, box-shadow 150ms ease;
+}
+
+:is(.tools-hub-page, .tool-page) .tp-card::after {
+  display: none;
+}
+
+:is(.tools-hub-page, .tool-page) .tp-card:hover {
+  border: 0;
+  transform: translateY(-2px);
+  box-shadow: -10px -10px 28px var(--neu-light), 12px 12px 30px var(--neu-dark);
+}
+
+:is(.tools-hub-page, .tool-page) .tp-card:active {
+  transform: translateY(0) scale(0.995);
+  box-shadow: var(--neu-inset-sm);
+}
+
+:is(.tools-hub-page, .tool-page) .tp-card .tp-glyph {
+  width: 38px;
+  height: 38px;
+  border-radius: 0.85rem;
+  font-size: 12px;
+}
+
+:is(.tools-hub-page, .tool-page) .tp-card:nth-child(odd) .tp-glyph {
+  background: var(--neu-blue);
+}
+
+:is(.tools-hub-page, .tool-page) .tp-card:nth-child(even) .tp-glyph {
+  background: var(--neu-pink);
+}
+
+:is(.tools-hub-page, .tool-page) .tp-popular {
+  padding: 4px 8px;
+  border-radius: 999px;
+  background: var(--neu-pink);
+  color: var(--neu-accent-ink);
+  box-shadow: var(--neu-raised-sm);
+  font-family: var(--bp-font);
+  font-size: 9px;
+  font-weight: 600;
+  letter-spacing: 0.04em;
+}
+
+:is(.tools-hub-page, .tool-page) .tp-card-cat {
+  color: var(--neu-faint);
+  font-family: var(--bp-font);
+  font-size: 10px;
+  font-weight: 500;
+  letter-spacing: 0.08em;
+}
+
+:is(.tools-hub-page, .tool-page) .tp-card strong {
+  color: var(--neu-heading);
+  font-size: 17px;
+  font-weight: 600;
+  letter-spacing: -0.01em;
+}
+
+:is(.tools-hub-page, .tool-page) .tp-card-desc {
+  color: var(--neu-text);
+  font-size: 13px;
+}
+
+:is(.tools-hub-page, .tool-page) .tp-card-open {
+  color: var(--neu-accent-ink);
+  font-family: var(--bp-font);
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 0;
+  text-transform: none;
+}
+
+:is(.tools-hub-page, .tool-page) .tp-empty {
+  color: var(--neu-muted);
+}
+
+:is(.tools-hub-page, .tool-page) .tp-hub-note {
+  padding: 24px;
+  border: 0;
+  border-radius: 1.5rem;
+  background: var(--neu-base);
+  box-shadow: var(--neu-inset);
+}
+
+:is(.tools-hub-page, .tool-page) .tp-hub-note .tp-glyph {
+  background: var(--neu-blue);
+}
+
+:is(.tools-hub-page, .tool-page) .tp-hub-note strong {
+  color: var(--neu-heading);
+  font-size: 14px;
+}
+
+:is(.tools-hub-page, .tool-page) .tp-hub-note p {
+  color: var(--neu-muted);
+  font-size: 13px;
+}
+
+:is(.tools-hub-page, .tool-page) .tp-crumb {
+  color: var(--neu-faint);
+  font-size: 12px;
+}
+
+:is(.tools-hub-page, .tool-page) .tp-crumb a {
+  color: var(--neu-muted);
+  font-weight: 600;
+}
+
+:is(.tools-hub-page, .tool-page) .tp-crumb a:hover {
+  color: var(--neu-accent-ink);
+}
+
+:is(.tools-hub-page, .tool-page) .tp-head .tp-glyph {
+  width: 64px;
+  height: 64px;
+  border-radius: 1.25rem;
+  background: var(--neu-blue);
+  font-size: 18px;
+  box-shadow: var(--neu-raised);
+}
+
+:is(body.tool-page-dls).pro-theme.bp .tp-head .tp-glyph {
+  background: var(--neu-pink);
+}
+
+:is(.tools-hub-page, .tool-page) .tp-head p {
+  color: var(--neu-text);
+  font-size: 15px;
+}
+
+:is(.tools-hub-page, .tool-page) .tp-meta {
+  color: var(--neu-faint);
+  font-family: var(--bp-font);
+  font-size: 10px;
+  font-weight: 500;
+  letter-spacing: 0.06em;
+}
+
+:is(.tools-hub-page, .tool-page) .tp-meta i {
+  background: var(--neu-accent);
+  box-shadow: none;
+}
+
+:is(.tools-hub-page, .tool-page) .tp-layout {
+  gap: 22px;
+}
+
+:is(.tools-hub-page, .tool-page) .tp-workspace {
+  padding: 24px;
+  border: 0;
+  border-radius: 1.5rem;
+  background: var(--neu-base);
+  box-shadow: var(--neu-raised);
+}
+
+:is(.tools-hub-page, .tool-page) .tp-loading {
+  color: var(--neu-muted);
+  font-family: var(--bp-font);
+  font-size: 13px;
+}
+
+:is(.tools-hub-page, .tool-page) .tp-loading span {
+  border: 2px solid var(--neu-dark);
+  border-top-color: var(--neu-accent);
+}
+
+:is(.tools-hub-page, .tool-page) .tp-panel + .tp-panel {
+  border-top: 0;
+  box-shadow: inset 0 10px 10px -12px var(--neu-dark), inset 0 -10px 10px -12px var(--neu-light);
+}
+
+:is(.tools-hub-page, .tool-page) .tp-panel-title {
+  color: var(--neu-faint);
+  font-family: var(--bp-font);
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 0.1em;
+}
+
+:is(.tools-hub-page, .tool-page) .tp-label {
+  color: var(--neu-heading);
+  font-size: 13px;
+  font-weight: 600;
+}
+
+:is(.tools-hub-page, .tool-page) .tp-hint {
+  color: var(--neu-faint);
+  font-size: 12px;
+}
+
+:is(.tools-hub-page, .tool-page) :is(.tp-input, .tp-select, .tp-textarea) {
+  border: 0;
+  border-radius: 1rem;
+  background: var(--neu-base);
+  color: var(--neu-heading);
+  font: 14px/1.55 var(--bp-font);
+  box-shadow: var(--neu-inset);
+  transition: box-shadow 150ms ease;
+}
+
+:is(.tools-hub-page, .tool-page) :is(.tp-input, .tp-select) {
+  padding: 12px 14px;
+}
+
+:is(.tools-hub-page, .tool-page) .tp-textarea {
+  padding: 14px;
+}
+
+:is(body.tools-hub-page, body.tool-page).pro-theme.bp :is(.tp-input, .tp-select, .tp-textarea):focus {
+  border: 0;
+  border-radius: 1rem;
+  outline: 3px solid var(--neu-accent);
+  outline-offset: 3px;
+  box-shadow: var(--neu-inset-sm);
+}
+
+:is(.tools-hub-page, .tool-page) .tp-input::placeholder,
+:is(.tools-hub-page, .tool-page) .tp-textarea::placeholder {
+  color: var(--neu-faint);
+}
+
+:is(.tools-hub-page, .tool-page) .tp-textarea.is-output {
+  border: 0;
+  background: var(--neu-base);
+  color: var(--neu-heading);
+  box-shadow: var(--neu-inset);
+}
+
+:is(.tools-hub-page, .tool-page) :is(input[type="checkbox"], input[type="radio"], input[type="range"], progress) {
+  accent-color: var(--neu-accent-ink);
+}
+
+:is(.tools-hub-page, .tool-page) .tp-actions {
+  gap: 10px;
+}
+
+:is(.tools-hub-page, .tool-page) .tp-btn {
+  min-height: 44px;
+  padding: 11px 20px;
+  border: 0;
+  border-radius: 999px;
+  background: var(--neu-base);
+  color: var(--neu-heading);
+  font: 600 13px/1 var(--bp-font);
+  box-shadow: var(--neu-raised-sm);
+  transition: background-color 150ms ease, color 150ms ease, box-shadow 150ms ease;
+}
+
+:is(.tools-hub-page, .tool-page) .tp-btn:hover {
+  border: 0;
+  background: var(--neu-base);
+  color: var(--neu-accent-ink);
+  box-shadow: var(--neu-raised);
+  transform: none;
+}
+
+:is(.tools-hub-page, .tool-page) .tp-btn:active {
+  transform: none;
+  box-shadow: var(--neu-inset-sm);
+}
+
+:is(.tools-hub-page, .tool-page) .tp-btn:disabled {
+  box-shadow: none;
+  opacity: 0.5;
+}
+
+:is(.tools-hub-page, .tool-page) .tp-btn-primary {
+  min-height: 48px;
+  padding: 12px 24px;
+  background: var(--neu-primary);
+  color: var(--neu-on-accent);
+  box-shadow: var(--neu-raised-sm);
+}
+
+:is(.tools-hub-page, .tool-page) .tp-btn-primary:hover {
+  background: var(--neu-primary-hover);
+  color: var(--neu-on-accent);
+}
+
+:is(.tools-hub-page, .tool-page) .tp-btn-primary:active {
+  box-shadow: var(--neu-inset-sm);
+}
+
+:is(.tools-hub-page, .tool-page) .tp-btn-dark {
+  border: 0;
+  background: var(--neu-base);
+  color: var(--neu-heading);
+}
+
+:is(.tools-hub-page, .tool-page) .tp-btn-ghost {
+  background: var(--neu-base);
+  color: var(--neu-muted);
+  box-shadow: var(--neu-inset-sm);
+}
+
+:is(.tools-hub-page, .tool-page) .tp-btn-ghost:hover {
+  color: var(--neu-accent-ink);
+  box-shadow: var(--neu-raised-sm);
+}
+
+:is(.tools-hub-page, .tool-page) .tp-btn-danger {
+  border: 0;
+  background: var(--neu-pink);
+  color: var(--neu-bad-ink);
+  box-shadow: var(--neu-raised-sm);
+}
+
+:is(.tools-hub-page, .tool-page) .tp-btn-sm {
+  min-height: 34px;
+  padding: 8px 14px;
+  font-size: 11px;
+}
+
+:is(.tools-hub-page, .tool-page) .tp-drop {
+  border: 0;
+  border-radius: 1.5rem;
+  background: var(--neu-base);
+  box-shadow: var(--neu-inset);
+  transition: box-shadow 150ms ease;
+}
+
+:is(.tools-hub-page, .tool-page) .tp-drop:hover,
+:is(.tools-hub-page, .tool-page) .tp-drop.is-over {
+  border: 0;
+  background: var(--neu-base);
+  box-shadow: var(--neu-inset-sm), 0 0 0 3px var(--bp-accent-wash);
+}
+
+:is(.tools-hub-page, .tool-page) .tp-drop-icon {
+  color: var(--neu-accent-ink);
+  font-family: var(--bp-font);
+}
+
+:is(.tools-hub-page, .tool-page) .tp-drop strong {
+  color: var(--neu-heading);
+  font-size: 14px;
+}
+
+:is(.tools-hub-page, .tool-page) .tp-drop-name {
+  color: var(--neu-accent-ink);
+  font-family: var(--bp-font);
+}
+
+:is(.tools-hub-page, .tool-page) .tp-status {
+  border: 0;
+  border-radius: 1rem;
+  font-size: 12px;
+}
+
+:is(.tools-hub-page, .tool-page) .tp-status.is-ok {
+  border: 0;
+  background: var(--neu-ok-bg);
+  color: var(--neu-ok-ink);
+  box-shadow: var(--neu-inset-sm);
+}
+
+:is(.tools-hub-page, .tool-page) .tp-status.is-error {
+  border: 0;
+  background: var(--neu-bad-bg);
+  color: var(--neu-bad-ink);
+  box-shadow: var(--neu-inset-sm);
+}
+
+:is(.tools-hub-page, .tool-page) .tp-status.is-info {
+  border: 0;
+  background: var(--neu-blue);
+  color: var(--neu-heading);
+  box-shadow: var(--neu-inset-sm);
+}
+
+:is(.tools-hub-page, .tool-page) .tp-output {
+  border: 0;
+  border-radius: 1.25rem;
+  background: var(--neu-base);
+  color: var(--neu-heading);
+  font: 12.5px/1.6 var(--neu-mono);
+  box-shadow: var(--neu-inset);
+}
+
+:is(.tools-hub-page, .tool-page) .tp-output:empty::before {
+  color: var(--neu-faint);
+}
+
+:is(.tools-hub-page, .tool-page) .tp-kv {
+  gap: 10px;
+}
+
+:is(.tools-hub-page, .tool-page) .tp-kv div {
+  padding: 12px;
+  border: 0;
+  border-radius: 1rem;
+  background: var(--neu-base);
+  box-shadow: var(--neu-raised-sm);
+}
+
+:is(.tools-hub-page, .tool-page) .tp-kv span {
+  color: var(--neu-faint);
+  font-family: var(--bp-font);
+  font-size: 10px;
+}
+
+:is(.tools-hub-page, .tool-page) .tp-kv strong {
+  color: var(--neu-heading);
+  font-family: var(--neu-mono);
+  font-size: 12px;
+}
+
+:is(.tools-hub-page, .tool-page) .tp-table-wrap {
+  border: 0;
+  border-radius: 1.25rem;
+  background: var(--neu-base);
+  box-shadow: var(--neu-inset);
+}
+
+:is(.tools-hub-page, .tool-page) .tp-table {
+  font: 12px/1.5 var(--neu-mono);
+}
+
+:is(.tools-hub-page, .tool-page) .tp-table :is(th, td) {
+  padding: 10px 12px;
+  border-bottom: 0;
+}
+
+:is(.tools-hub-page, .tool-page) .tp-table th {
+  background: var(--neu-base);
+  box-shadow: inset 0 1px 0 var(--neu-light), inset 0 -1px 0 var(--neu-dark);
+  color: var(--neu-muted);
+  font-family: var(--bp-font);
+  font-size: 10px;
+}
+
+:is(.tools-hub-page, .tool-page) .tp-table tr:hover td {
+  background: var(--neu-blue);
+}
+
+:is(.tools-hub-page, .tool-page) .tp-table .is-muted {
+  color: var(--neu-faint);
+}
+
+:is(.tools-hub-page, .tool-page) :is(.tp-file-row, .tp-preview figure, .tp-result, .tp-emoji-picked, .tp-emoji-detail, .tp-currency-result) {
+  border: 0;
+  background: var(--neu-base);
+  box-shadow: var(--neu-raised-sm);
+}
+
+:is(.tools-hub-page, .tool-page) .tp-file-list {
+  gap: 8px;
+}
+
+:is(.tools-hub-page, .tool-page) .tp-file-row strong {
+  font-family: var(--neu-mono);
+}
+
+:is(.tools-hub-page, .tool-page) .tp-file-row span {
+  color: var(--neu-faint);
+  font-family: var(--bp-font);
+}
+
+:is(.tools-hub-page, .tool-page) .tp-preview {
+  gap: 12px;
+}
+
+:is(.tools-hub-page, .tool-page) .tp-preview img {
+  background: var(--neu-base);
+}
+
+:is(.tools-hub-page, .tool-page) .tp-preview figcaption {
+  color: var(--neu-muted);
+  font-family: var(--bp-font);
+}
+
+:is(.tools-hub-page, .tool-page) .tp-pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  border: 0;
+  border-radius: 999px;
+  background: var(--neu-base);
+  color: var(--neu-muted);
+  box-shadow: var(--neu-raised-sm);
+  font-family: var(--bp-font);
+  font-size: 11px;
+}
+
+:is(.tools-hub-page, .tool-page) .tp-pill:has(input:checked) {
+  background: var(--neu-blue);
+  color: var(--neu-heading);
+  box-shadow: var(--neu-inset-sm);
+}
+
+:is(.tools-hub-page, .tool-page) .tp-pill:has(input:focus-visible) {
+  outline: 3px solid var(--neu-accent);
+  outline-offset: 2px;
+}
+
+:is(.tools-hub-page, .tool-page) .tp-pill.is-good {
+  border: 0;
+  background: var(--neu-ok-bg);
+  color: var(--neu-ok-ink);
+}
+
+:is(.tools-hub-page, .tool-page) .tp-pill.is-bad {
+  border: 0;
+  background: var(--neu-bad-bg);
+  color: var(--neu-bad-ink);
+}
+
+:is(.tools-hub-page, .tool-page) .tp-error {
+  color: var(--neu-muted);
+}
+
+:is(.tools-hub-page, .tool-page) .tp-error strong {
+  color: var(--neu-heading);
+}
+
+:is(.tools-hub-page, .tool-page) .tp-aside {
+  gap: 16px;
+}
+
+:is(.tools-hub-page, .tool-page) .tp-aside-card {
+  padding: 20px;
+  border: 0;
+  border-radius: 1.5rem;
+  background: var(--neu-base);
+  box-shadow: var(--neu-raised-sm);
+}
+
+:is(.tools-hub-page, .tool-page) .tp-aside-card h2 {
+  color: var(--neu-faint);
+  font-family: var(--bp-font);
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 0.1em;
+}
+
+:is(.tools-hub-page, .tool-page) .tp-aside-card p {
+  color: var(--neu-muted);
+  font-size: 13px;
+}
+
+:is(.tools-hub-page, .tool-page) .tp-steps span {
+  color: var(--neu-accent-ink);
+  font-family: var(--bp-font);
+  font-weight: 600;
+}
+
+:is(.tools-hub-page, .tool-page) .tp-privacy .tp-glyph {
+  background: var(--neu-blue);
+}
+
+:is(.tools-hub-page, .tool-page) .tp-related a {
+  padding: 8px 10px;
+  border-radius: 999px;
+  color: var(--neu-text);
+}
+
+:is(.tools-hub-page, .tool-page) .tp-related a:hover {
+  background: var(--neu-blue);
+  color: var(--neu-heading);
+  box-shadow: var(--neu-inset-sm);
+}
+
+:is(.tools-hub-page, .tool-page) .tp-related a span {
+  color: var(--neu-faint);
+  font-family: var(--bp-font);
+}
+
+:is(.tools-hub-page, .tool-page) .tp-more {
+  color: var(--neu-accent-ink);
+  font: 600 12px var(--bp-font);
+}
+
+:is(.tools-hub-page, .tool-page) .tp-calc {
+  max-width: 440px;
+}
+
+:is(.tools-hub-page, .tool-page) .tp-calc-screen {
+  padding: 20px;
+  border: 0;
+  border-radius: 1.5rem;
+  background: var(--neu-base);
+  color: var(--neu-heading);
+  box-shadow: var(--neu-inset);
+}
+
+:is(.tools-hub-page, .tool-page) .tp-calc-screen small {
+  color: var(--neu-faint);
+  font-family: var(--bp-font);
+}
+
+:is(.tools-hub-page, .tool-page) .tp-calc-screen strong {
+  color: var(--neu-heading);
+  font-family: var(--bp-font);
+  font-weight: 600;
+}
+
+:is(.tools-hub-page, .tool-page) .tp-calc-input {
+  color: var(--neu-muted);
+  font-family: var(--bp-font);
+}
+
+:is(.tools-hub-page, .tool-page) .tp-calc-result {
+  color: var(--neu-heading);
+  font-family: var(--bp-font);
+  font-weight: 600;
+}
+
+:is(.tools-hub-page, .tool-page) .tp-calc-result.is-error {
+  color: var(--neu-bad-ink);
+}
+
+:is(.tools-hub-page, .tool-page) .tp-calc-keys {
+  gap: 10px;
+  margin-top: 14px;
+}
+
+:is(.tools-hub-page, .tool-page) .tp-calc-keys button {
+  min-height: 48px;
+  border: 0;
+  border-radius: 1rem;
+  background: var(--neu-base);
+  color: var(--neu-heading);
+  font: 600 16px var(--bp-font);
+  box-shadow: var(--neu-raised-sm);
+  transition: background-color 150ms ease, color 150ms ease, box-shadow 150ms ease;
+}
+
+:is(.tools-hub-page, .tool-page) .tp-calc-keys button:hover {
+  border: 0;
+  color: var(--neu-accent-ink);
+  box-shadow: var(--neu-raised);
+}
+
+:is(.tools-hub-page, .tool-page) .tp-calc-keys button:active {
+  box-shadow: var(--neu-inset-sm);
+}
+
+:is(.tools-hub-page, .tool-page) .tp-calc-keys .is-op {
+  color: var(--neu-accent-ink);
+}
+
+:is(.tools-hub-page, .tool-page) .tp-calc-keys .is-eq {
+  background: var(--neu-blue);
+  color: var(--neu-heading);
+  box-shadow: var(--neu-raised-sm);
+}
+
+:is(.tools-hub-page, .tool-page) .tp-calc-keys .is-eq:active {
+  box-shadow: var(--neu-inset-sm);
+}
+
+:is(.tools-hub-page, .tool-page) .tp-clock {
+  border: 0;
+  border-radius: 1.5rem;
+  background: var(--neu-base);
+  color: var(--neu-heading);
+  box-shadow: var(--neu-inset);
+}
+
+:is(.tools-hub-page, .tool-page) .tp-clock strong {
+  font-family: var(--bp-font);
+  font-weight: 600;
+}
+
+:is(.tools-hub-page, .tool-page) .tp-clock span {
+  color: var(--neu-faint);
+  font-family: var(--bp-font);
+}
+
+:is(.tools-hub-page, .tool-page) .tp-countdown {
+  gap: 10px;
+}
+
+:is(.tools-hub-page, .tool-page) .tp-countdown div {
+  border: 0;
+  border-radius: 1.25rem;
+  background: var(--neu-base);
+  color: var(--neu-heading);
+  box-shadow: var(--neu-raised-sm);
+}
+
+:is(.tools-hub-page, .tool-page) .tp-countdown strong {
+  font-family: var(--bp-font);
+  font-weight: 600;
+}
+
+:is(.tools-hub-page, .tool-page) .tp-countdown span {
+  color: var(--neu-faint);
+  font-family: var(--bp-font);
+}
+
+:is(.tools-hub-page, .tool-page) .tp-countdown.is-finished div {
+  border: 0;
+  background: var(--neu-bad-bg);
+  box-shadow: var(--neu-inset-sm);
+}
+
+:is(.tools-hub-page, .tool-page) .tp-countdown.is-finished strong {
+  color: var(--neu-bad-ink);
+}
+
+:is(.tools-hub-page, .tool-page) .tp-countdown-note {
+  color: var(--neu-muted);
+  font-family: var(--bp-font);
+}
+
+:is(.tools-hub-page, .tool-page) .tp-emoji-grid {
+  gap: 6px;
+  padding: 8px;
+  border: 0;
+  border-radius: 1.25rem;
+  background: var(--neu-base);
+  box-shadow: var(--neu-inset);
+}
+
+:is(.tools-hub-page, .tool-page) .tp-emoji-grid button {
+  border: 0;
+  border-radius: 0.75rem;
+  transition: background-color 150ms ease, box-shadow 150ms ease;
+}
+
+:is(.tools-hub-page, .tool-page) .tp-emoji-grid button:hover {
+  border: 0;
+  background: var(--neu-blue);
+  box-shadow: var(--neu-raised-sm);
+}
+
+:is(.tools-hub-page, .tool-page) .tp-emoji-grid button:focus-visible {
+  border: 0;
+  background: var(--neu-blue);
+  outline: 3px solid var(--neu-accent);
+  outline-offset: 1px;
+}
+
+:is(.tools-hub-page, .tool-page) .tp-result b {
+  color: var(--neu-accent-ink);
+}
+
+:is(.tools-hub-page, .tool-page) .tp-diff-line {
+  padding: 3px 8px;
+  border-radius: 0.5rem;
+  font: 12px/1.6 var(--neu-mono);
+}
+
+:is(.tools-hub-page, .tool-page) .tp-diff-mark {
+  color: var(--neu-faint);
+}
+
+:is(.tools-hub-page, .tool-page) .tp-diff-line.is-add {
+  background: var(--neu-ok-bg);
+  color: var(--neu-ok-ink);
+}
+
+:is(.tools-hub-page, .tool-page) .tp-diff-line.is-del {
+  background: var(--neu-bad-bg);
+  color: var(--neu-bad-ink);
+}
+
+:is(.tools-hub-page, .tool-page) .tp-viewer {
+  border: 0;
+  border-radius: 1.25rem;
+  background: var(--neu-base);
+  box-shadow: var(--neu-inset);
+}
+
+:is(.tools-hub-page, .tool-page) .tp-viewer canvas {
+  box-shadow: 0 12px 26px -18px rgba(0, 0, 0, 0.45);
+}
+
+:is(.tools-hub-page, .tool-page) .tp-clock-hero {
+  border: 0;
+  border-radius: 1.5rem;
+  background: var(--neu-base);
+  color: var(--neu-heading);
+  box-shadow: var(--neu-inset);
+}
+
+:is(.tools-hub-page, .tool-page) .tp-clock-hero > span {
+  color: var(--neu-faint);
+  font-family: var(--bp-font);
+}
+
+:is(.tools-hub-page, .tool-page) .tp-clock-hero strong {
+  font-family: var(--bp-font);
+  font-weight: 600;
+}
+
+:is(.tools-hub-page, .tool-page) .tp-currency-result {
+  padding: 24px;
+  border: 0;
+  border-radius: 1.5rem;
+  background: var(--neu-base);
+  box-shadow: var(--neu-raised);
+}
+
+:is(.tools-hub-page, .tool-page) .tp-currency-result span {
+  color: var(--neu-accent-ink);
+  font-family: var(--bp-font);
+  font-weight: 600;
+}
+
+:is(.tools-hub-page, .tool-page) .tp-currency-result small {
+  color: var(--neu-muted);
+}
+
+:is(.tools-hub-page, .tool-page) .tp-emoji-detail strong {
+  color: var(--neu-heading);
+}
+
+:is(.tools-hub-page, .tool-page) .tp-emoji-detail p {
+  color: var(--neu-muted);
+  font-family: var(--bp-font);
+}
+
+:is(.tools-hub-page, .tool-page) .calc-progress {
+  gap: 8px;
+  margin-bottom: 20px;
+}
+
+:is(.tools-hub-page, .tool-page) .calc-progress-step {
+  padding: 6px 12px 6px 8px;
+  border: 0;
+  border-radius: 999px;
+  background: var(--neu-base);
+  color: var(--neu-faint);
+  box-shadow: var(--neu-raised-sm);
+  font: 600 10px/1 var(--bp-font);
+  letter-spacing: 0.04em;
+}
+
+:is(.tools-hub-page, .tool-page) .calc-progress-step.is-done {
+  color: var(--neu-text);
+  box-shadow: var(--neu-raised-sm);
+}
+
+:is(.tools-hub-page, .tool-page) .calc-progress-step.is-active {
+  background: var(--neu-blue);
+  color: var(--neu-heading);
+  box-shadow: var(--neu-inset-sm);
+}
+
+:is(.tools-hub-page, .tool-page) .calc-progress-dot {
+  background: var(--neu-base);
+  color: var(--neu-muted);
+  box-shadow: var(--neu-inset-sm);
+  font-family: var(--bp-font);
+}
+
+:is(.tools-hub-page, .tool-page) .calc-progress-step.is-done .calc-progress-dot {
+  color: var(--neu-accent-ink);
+}
+
+:is(.tools-hub-page, .tool-page) .calc-progress-step.is-active .calc-progress-dot {
+  background: var(--neu-primary);
+  color: var(--neu-on-accent);
+  box-shadow: none;
+}
+
+:is(.tools-hub-page, .tool-page) .calc-step-title {
+  font-size: 18px;
+  font-weight: 600;
+}
+
+:is(.tools-hub-page, .tool-page) .calc-step-desc {
+  color: var(--neu-text);
+  font-size: 13px;
+}
+
+:is(.tools-hub-page, .tool-page) .calc-result-hero {
+  padding: 28px 24px;
+  border: 0;
+  border-radius: 1.5rem;
+  background: var(--neu-base);
+  box-shadow: var(--neu-raised);
+}
+
+:is(.tools-hub-page, .tool-page) .calc-result-label {
+  color: var(--neu-faint);
+  font-family: var(--bp-font);
+}
+
+:is(.tools-hub-page, .tool-page) .calc-result-value {
+  color: var(--neu-accent-ink);
+  font-family: var(--bp-font);
+  font-size: clamp(2rem, 5vw, 3rem);
+  font-weight: 600;
+}
+
+:is(.tools-hub-page, .tool-page) .calc-result-sub {
+  color: var(--neu-muted);
+  font-size: 13px;
+}
+
+:is(.tools-hub-page, .tool-page) .calc-working {
+  gap: 8px;
+}
+
+:is(.tools-hub-page, .tool-page) .calc-working li {
+  padding: 12px;
+  border: 0;
+  border-radius: 1rem;
+  background: var(--neu-base);
+  color: var(--neu-text);
+  box-shadow: var(--neu-raised-sm);
+  font: 12px/1.6 var(--neu-mono);
+}
+
+:is(.tools-hub-page, .tool-page) .calc-working li::before {
+  color: var(--neu-accent-ink);
+  font-family: var(--bp-font);
+}
+
+:is(.tools-hub-page, .tool-page) .calc-note {
+  padding: 12px 14px;
+  border-left: 3px solid var(--neu-accent);
+  border-radius: 0 1rem 1rem 0;
+  background: var(--neu-base);
+  color: var(--neu-muted);
+  box-shadow: var(--neu-inset-sm);
+}
+
+:is(.tools-hub-page, .tool-page) .calc-interruptions {
+  padding: 16px;
+  border: 0;
+  border-radius: 1.25rem;
+  background: var(--neu-base);
+  box-shadow: var(--neu-inset);
+}
+
+:is(.tools-hub-page, .tool-page) .calc-interruption {
+  padding: 14px;
+  border: 0;
+  border-radius: 1rem;
+  background: var(--neu-base);
+  box-shadow: var(--neu-raised-sm);
+}
+
+:is(body.tools-hub-page, body.tool-page).pro-theme.bp :is(.tp-btn, .button, .tp-chip, .site-header nav a, .tp-related a):focus-visible {
+  border-radius: 999px;
+  outline: 3px solid var(--neu-accent);
+  outline-offset: 4px;
+}
+
+:is(body.tools-hub-page, body.tool-page).pro-theme.bp .icon-button:focus-visible {
+  border-radius: 50%;
+  outline: 3px solid var(--neu-accent);
+  outline-offset: 4px;
+}
+
+:is(body.tools-hub-page, body.tool-page).pro-theme.bp .tp-card:focus-visible {
+  border-radius: 1.5rem;
+  outline: 3px solid var(--neu-accent);
+  outline-offset: 4px;
+}
+
+@media (max-width: 900px) {
+  :is(body.tools-hub-page, body.tool-page).pro-theme.bp .site-header nav {
+    padding: 12px;
+    border: 0;
+    border-radius: 1.5rem;
+    background: var(--neu-base);
+    box-shadow: var(--neu-raised);
+  }
+
+  :is(body.tools-hub-page, body.tool-page).pro-theme.bp .site-header nav a {
+    box-shadow: none;
+  }
+
+  :is(body.tools-hub-page, body.tool-page).pro-theme.bp .site-header nav a:hover {
+    box-shadow: var(--neu-raised-sm);
+  }
+
+  :is(body.tools-hub-page, body.tool-page).pro-theme.bp .site-header nav a.active {
+    background: var(--neu-blue);
+    color: var(--neu-heading);
+    box-shadow: var(--neu-inset-sm);
+  }
+
+  :is(body.tools-hub-page, body.tool-page).pro-theme.bp .site-header nav .pro-mobile-account {
+    border-top: 0;
+    color: var(--neu-accent-ink) !important;
+  }
+
+  :is(body.tools-hub-page, body.tool-page).pro-theme.bp .site-header nav.open::before {
+    background: rgba(63, 63, 70, 0.28);
+    backdrop-filter: blur(4px);
+  }
+
+  html[data-theme="dark"] :is(body.tools-hub-page, body.tool-page).pro-theme.bp .site-header nav.open::before {
+    background: rgba(0, 0, 0, 0.55);
+  }
+
+  :is(.tools-hub-page, .tool-page) .tp-layout {
+    gap: 18px;
+  }
+}
+
+@media (max-width: 680px) {
+  :is(body.tools-hub-page, body.tool-page).pro-theme.bp .tp-hub-head h1 {
+    font-size: 2rem;
+  }
+
+  :is(body.tools-hub-page, body.tool-page).pro-theme.bp .tp-head h1 {
+    font-size: 1.75rem;
+  }
+
+  :is(.tools-hub-page, .tool-page) .tp-hub-grid {
+    gap: 12px;
+  }
+
+  :is(.tools-hub-page, .tool-page) .tp-card {
+    min-height: 0;
+    padding: 14px;
+    gap: 6px;
+    border-radius: 1.25rem;
+  }
+
+  :is(.tools-hub-page, .tool-page) .tp-card .tp-glyph {
+    width: 32px;
+    height: 32px;
+    border-radius: 0.75rem;
+    font-size: 11px;
+  }
+
+  :is(.tools-hub-page, .tool-page) .tp-card strong {
+    font-size: 13px;
+  }
+
+  :is(.tools-hub-page, .tool-page) .tp-card-cat {
+    font-size: 9px;
+  }
+
+  :is(.tools-hub-page, .tool-page) .tp-card-open {
+    font-size: 10px;
+  }
+
+  :is(.tools-hub-page, .tool-page) .tp-popular {
+    padding: 3px 6px;
+    font-size: 8px;
+  }
+
+  :is(.tools-hub-page, .tool-page) .tp-chip {
+    padding: 8px 12px;
+    font-size: 11px;
+  }
+
+  :is(.tools-hub-page, .tool-page) .tp-head .tp-glyph {
+    width: 50px;
+    height: 50px;
+    border-radius: 1rem;
+    font-size: 14px;
+  }
+
+  :is(.tools-hub-page, .tool-page) .tp-workspace {
+    padding: 16px;
+    border-radius: 1.25rem;
+  }
+
+  :is(.tools-hub-page, .tool-page) .tp-btn {
+    min-height: 42px;
+    padding: 10px 16px;
+  }
+
+  :is(.tools-hub-page, .tool-page) .tp-btn-primary {
+    min-height: 46px;
+  }
+
+  :is(.tools-hub-page, .tool-page) .calc-result-value {
+    font-size: 1.75rem;
+  }
+
+  :is(body.tools-hub-page, body.tool-page).pro-theme.bp .site-footer {
+    border-radius: 1.25rem;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  :is(.tools-hub-page, .tool-page) *,
+  :is(.tools-hub-page, .tool-page) *::before,
+  :is(.tools-hub-page, .tool-page) *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+
+  :is(.tools-hub-page, .tool-page) .tp-card:hover,
+  :is(.tools-hub-page, .tool-page) .tp-card:active {
+    transform: none;
+  }
+}
+
+@media print {
+  :is(.tools-hub-page, .tool-page) .tp-viewer {
+    background: #fff;
+    box-shadow: none;
+  }
+
+  :is(.tools-hub-page, .tool-page) .tp-viewer canvas {
+    box-shadow: none;
+  }
+}
