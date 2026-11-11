@@ -260,13 +260,17 @@ class ToolHubTests(unittest.TestCase):
     def test_catalog_and_javascript_bundles_are_consistent(self):
         tools=self.catalog['tools']
         slugs=[tool['slug'] for tool in tools]
-        self.assertEqual(len(slugs),67)
+        self.assertEqual(len(slugs),118)
         self.assertEqual(len(slugs),len(set(slugs)))
         categories=set(self.catalog['categories'])
         registered={}
-        for bundle in ('text','media','network','misc'):
+        for bundle in sorted(module.TOOL_BUNDLES):
             source=(ROOT/'static/assets/js/tools'/f'{bundle}.js').read_text()
-            for slug in re.findall(r'(?:T\.register|codeTool|singleHashTool)\("([a-z0-9-]+)"',source):
+            if bundle=='calculators':
+                found=re.findall(r'slug:\s*"([a-z0-9-]+)"',source)
+            else:
+                found=re.findall(r'(?:T\.register|codeTool|singleHashTool)\("([a-z0-9-]+)"',source)
+            for slug in found:
                 registered.setdefault(slug,bundle)
         self.assertEqual(set(registered),set(slugs))
         for tool in tools:

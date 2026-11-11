@@ -1,6 +1,6 @@
 /* ==========================================================================
    SanuwarTools · browser tool shelf
-   Shared shell for the 67 local-first tools.
+   Shared shell for the local-first tools.
    ========================================================================== */
 .tools-hub-page,
 .tool-page {
@@ -451,3 +451,108 @@
 .tp-clock-hero > span { display: block; color: var(--bp-screen-muted); font: 10px var(--tp-mono); letter-spacing: 0.12em; text-transform: uppercase; }
 .tp-clock-hero strong { display: block; margin: 8px 0; font: 500 clamp(38px, 10vw, 76px)/1 var(--tp-mono); letter-spacing: 0.02em; }
 .tp-clock-hero .js-utc-date { margin-top: 7px; font-size: 12px; letter-spacing: 0; text-transform: none; }
+
+/* ---------- Step-by-step calculators ------------------------------------ */
+.calc-progress { display: flex; flex-wrap: wrap; gap: 6px; margin: 0 0 16px; padding: 0; list-style: none; }
+.calc-progress-step {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 5px 9px 5px 6px;
+  border: 1px solid var(--bp-line);
+  border-radius: 999px;
+  background: var(--bp-panel-2);
+  color: var(--bp-faint);
+  font: 600 9px/1 var(--tp-mono);
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+}
+.calc-progress-step.is-done { color: var(--bp-ink-2); border-color: var(--bp-line-2); }
+.calc-progress-step.is-active { color: var(--bp-accent); border-color: var(--bp-accent); background: var(--bp-accent-wash); }
+.calc-progress-dot {
+  display: grid;
+  place-items: center;
+  width: 18px;
+  height: 18px;
+  border-radius: 50%;
+  background: var(--bp-panel-3);
+  color: inherit;
+  font-size: 8px;
+}
+.calc-progress-step.is-active .calc-progress-dot { background: var(--bp-accent); color: #fff; }
+.calc-step-title { margin: 0 0 6px; font-size: 15px; letter-spacing: -0.01em; }
+.calc-step-desc { margin: 0 0 14px; color: var(--bp-muted); font-size: 12px; line-height: 1.6; }
+.calc-fields { align-items: start; }
+.calc-field-wide { grid-column: 1 / -1; }
+.calc-actions { margin-top: 16px; }
+.calc-result-hero {
+  padding: 22px 18px;
+  border: 1px solid var(--bp-line-2);
+  border-radius: 12px;
+  background:
+    linear-gradient(135deg, var(--bp-accent-wash), transparent 65%),
+    var(--bp-panel-2);
+}
+.calc-result-label { display: block; color: var(--bp-faint); font: 600 10px var(--tp-mono); letter-spacing: 0.1em; text-transform: uppercase; }
+.calc-result-value { display: block; margin-top: 9px; color: var(--bp-accent); font: 500 clamp(26px, 5vw, 42px)/1.12 var(--tp-mono); word-break: break-word; }
+.calc-result-sub { display: block; margin-top: 9px; color: var(--bp-muted); font-size: 12px; line-height: 1.55; }
+.calc-details { margin-top: 16px; }
+.calc-working { counter-reset: calc-step; display: flex; flex-direction: column; gap: 6px; margin: 12px 0 0; padding: 0; list-style: none; }
+.calc-working li {
+  counter-increment: calc-step;
+  display: flex;
+  gap: 9px;
+  padding: 9px 10px;
+  border: 1px solid var(--bp-line);
+  border-radius: 8px;
+  background: var(--bp-panel-2);
+  color: var(--bp-ink-2);
+  font: 11px/1.6 var(--tp-mono);
+  word-break: break-word;
+}
+.calc-working li::before {
+  content: counter(calc-step, decimal-leading-zero);
+  flex: 0 0 auto;
+  color: var(--bp-accent);
+  font-weight: 700;
+}
+.calc-note {
+  margin: 10px 0 0;
+  padding: 8px 11px;
+  border-left: 2px solid var(--bp-accent);
+  background: var(--bp-accent-wash);
+  color: var(--bp-muted);
+  font-size: 11px;
+  line-height: 1.55;
+}
+.calc-interruptions {
+  grid-column: 1 / -1;
+  margin-top: 6px;
+  padding: 12px;
+  border: 1px dashed var(--bp-line-2);
+  border-radius: 10px;
+  background: var(--bp-panel-2);
+}
+.calc-interruptions > .tp-label { display: block; margin-bottom: 8px; }
+.calc-interruption {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr)) auto;
+  gap: 10px;
+  align-items: end;
+  margin-top: 8px;
+  padding: 10px;
+  border: 1px solid var(--bp-line);
+  border-radius: 9px;
+  background: var(--bp-panel);
+}
+.calc-interruption .tp-field { min-width: 0; }
+.calc-interruption .tp-btn { align-self: end; }
+
+@media (max-width: 680px) {
+  .calc-progress-label { display: none; }
+  .calc-progress-step { padding: 4px 6px; }
+  .calc-progress-dot { width: 16px; height: 16px; font-size: 7px; }
+  .calc-result-value { font-size: 24px; }
+  .calc-interruption { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  .calc-interruption .tp-btn { grid-column: 2; justify-self: end; }
+}

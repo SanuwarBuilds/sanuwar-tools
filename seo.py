@@ -122,7 +122,7 @@ def install(app, load_config, load_directory=None, load_tool_catalog=None):
         if page is None and path in ('/tools', '/tools/'):
             if tools:
                 page = (f'All Tools — {len(tools)} Free Browser Utilities | SanuwarTools',
-                        f'Browse {len(tools)} free browser tools for text, hashes, images, PDFs, networking, time and security. Every tool runs locally — no uploads, no account.')
+                        f'Browse {len(tools)} free browser tools for text, hashes, images, PDFs, networking, calculators, unit converters, time and security. Every tool runs locally — no uploads, no account.')
         if page is None and path.startswith('/tools/'):
             slug = path[len('/tools/'):]
             if '/' not in slug:

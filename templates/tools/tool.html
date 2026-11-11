@@ -49,6 +49,10 @@
 {% block scripts %}
 <script nonce="{{ csp_nonce }}" src="/assets/js/tools/core.js?v=1" defer></script>
 {% for vendor in tool.vendor or [] %}{% if vendor in vendor_files %}<script nonce="{{ csp_nonce }}" src="/assets/vendor/{{ vendor_files[vendor] }}?v=1" defer></script>{% endif %}{% endfor %}
+{% if tool.bundle == 'dls' %}
+<script nonce="{{ csp_nonce }}" src="/assets/js/tools/dls-tables.js?v=1" defer></script>
+<script nonce="{{ csp_nonce }}" src="/assets/js/tools/dls-core.js?v=1" defer></script>
+{% endif %}
 <script nonce="{{ csp_nonce }}" src="/assets/js/tools/{{ tool.bundle }}.js?v=1" defer></script>
 <script nonce="{{ csp_nonce }}" src="/assets/js/tools/boot.js?v=1" defer></script>
 {% endblock %}

@@ -378,7 +378,7 @@ TOOLS_CONFIG_REL = "data/tools.config.json"
 DOWNLOADS_REL    = "data/downloads.json"
 DIRECTORY_REL    = "data/directory.json"
 TOOL_CATALOG_REL = "data/tools.catalog.json"
-TOOL_BUNDLES = {"text", "media", "network", "misc"}
+TOOL_BUNDLES = {"text", "media", "network", "misc", "calculators", "dls"}
 TOOL_VENDORS = {"js-yaml", "marked", "fflate", "pdf-lib", "pdfjs", "jspdf", "bcryptjs"}
 
 def load_tool_catalog():
@@ -428,6 +428,10 @@ BROWSER_TOOL_ICONS = {
     'Images & Media': 'photo',
     'Networking': 'vpn',
     'Security & Privacy': 'shield',
+    'Financial Calculators': 'wallet',
+    'Health & Fitness': 'shield',
+    'Sports & Games': 'score',
+    'Unit Converters': 'tool',
 }
 
 def browser_tool_cards(catalog):
