@@ -1,9 +1,15 @@
 {% extends 'base.html' %}
 {% block bodyclass %}tool-page tool-page-land{% endblock %}
-{% block page_styles %}<link rel="stylesheet" href="/assets/css/tools.css?v=2"><link rel="stylesheet" href="/assets/css/land.css?v=1">{% endblock %}
+{% block page_styles %}<link rel="stylesheet" href="/assets/css/tools.css?v=2"><link rel="stylesheet" href="/assets/css/land.css?v=2">{% endblock %}
 {% block content %}
 <section class="tp-shell wrap lm-shell" data-tool-page data-tool-slug="land-measurement-calculator">
-  <nav class="tp-crumb" aria-label="Breadcrumb"><a href="/">Home</a><span aria-hidden="true">/</span><a href="/tools">All tools</a><span aria-hidden="true">/</span><span>Land &amp; Property</span></nav>
+  <div class="lm-print-only" aria-hidden="true">
+    <div class="lm-print-brand">SanuwarTools · Land &amp; Property</div>
+    <p class="lm-print-title" data-print-title>Land measurement sheet</p>
+    <p class="lm-print-meta"><span data-print-scope>India · State reference</span> · <span data-print-prepared>Prepared</span> <span data-print-date></span> · <span data-print-badge>Reference data · Updated 12 Nov 2026</span></p>
+    <p class="lm-print-note" data-print-note>Reference conversion only. Confirm with official land records or a licensed surveyor.</p>
+  </div>
+  <nav class="tp-crumb" aria-label="Breadcrumb"><a href="/">Home</a><span aria-hidden="true">/</span><a href="/tools">All tools</a><span aria-hidden="true">/</span><span aria-current="page">Land Measurement Calculator</span></nav>
 
   <header class="lm-hero">
     <div>
@@ -35,8 +41,44 @@
       <h2>Why the same unit changes size</h2>
       <p>Customary units were defined by local revenue practice. A Bihar Bigha is commonly cited between 27,225 and 65,340 sq ft depending on the district. Punjab and Haryana use Killa, Kanal, Marla and Sarsahi, where 1 Killa = 8 Kanal and 1 Kanal = 20 Marla. Gujarat has both 16-Guntha and 24-Guntha Vigha references. The calculator shows the selected standard, its source value, and a warning whenever the value is a regional reference rather than a universal rule.</p>
 
+      <h2 id="state-reference">State-wise Bigha and local unit reference</h2>
+      <p>These are the reference values used by the calculator. They are starting points for a state or region, not a substitute for the standard written in your own land record. Open a row to load that state and standard in the calculator.</p>
+      <div class="lm-table-wrap">
+        <table class="lm-seo-table">
+          <thead><tr><th scope="col">State or region</th><th scope="col">Local relationship</th><th scope="col">Reference value</th><th scope="col">Load</th></tr></thead>
+          <tbody>
+            <tr><th scope="row">Assam — Brahmaputra Valley</th><td>1 Bigha = 5 Katha; 1 Katha = 20 Lessa</td><td>14,400 sq ft</td><td><a href="/tools/land-measurement-calculator?state=assam&amp;standard=assam-brahmaputra" aria-label="Open Assam Brahmaputra Valley reference">Open</a></td></tr>
+            <tr><th scope="row">Assam — Barak Valley / Cachar</th><td>1 Bigha = 20 Katha; 1 Katha = 16 Chatak</td><td>14,400 sq ft</td><td><a href="/tools/land-measurement-calculator?state=assam&amp;standard=assam-barak" aria-label="Open Assam Barak Valley reference">Open</a></td></tr>
+            <tr><th scope="row">West Bengal</th><td>1 Bigha = 20 Katha; 1 Katha = 16 Chatak</td><td>14,400 sq ft</td><td><a href="/tools/land-measurement-calculator?state=west-bengal&amp;standard=west-bengal-bigha" aria-label="Open West Bengal reference">Open</a></td></tr>
+            <tr><th scope="row">Bihar — Patna reference</th><td>1 Bigha = 20 Katha; 1 Katha = 20 Dhur</td><td>27,225 sq ft</td><td><a href="/tools/land-measurement-calculator?state=bihar&amp;standard=bihar-patna" aria-label="Open Bihar Patna reference">Open</a></td></tr>
+            <tr><th scope="row">Uttar Pradesh — Pucca</th><td>1 Bigha = 20 Biswa; 1 Biswa = 20 Biswansi</td><td>27,225 sq ft</td><td><a href="/tools/land-measurement-calculator?state=uttar-pradesh&amp;standard=up-pucca" aria-label="Open Uttar Pradesh pucca reference">Open</a></td></tr>
+            <tr><th scope="row">Uttar Pradesh — Kachha</th><td>1 Kachha Bigha = 6⅔ Biswa</td><td>9,075 sq ft</td><td><a href="/tools/land-measurement-calculator?state=uttar-pradesh&amp;standard=up-kachha-two-third" aria-label="Open Uttar Pradesh kachha reference">Open</a></td></tr>
+            <tr><th scope="row">Punjab — Killa</th><td>1 Killa = 8 Kanal; 1 Kanal = 20 Marla</td><td>43,560 sq ft</td><td><a href="/tools/land-measurement-calculator?state=punjab&amp;standard=punjab-killa" aria-label="Open Punjab killa reference">Open</a></td></tr>
+            <tr><th scope="row">Haryana — Killa</th><td>1 Killa = 8 Kanal; 1 Kanal = 20 Marla</td><td>43,560 sq ft</td><td><a href="/tools/land-measurement-calculator?state=haryana&amp;standard=haryana-killa" aria-label="Open Haryana killa reference">Open</a></td></tr>
+            <tr><th scope="row">Rajasthan — Pucca</th><td>1 Bigha = 20 Biswa; 1 Biswa = 20 Biswansi</td><td>27,225 sq ft</td><td><a href="/tools/land-measurement-calculator?state=rajasthan&amp;standard=rajasthan-pucca" aria-label="Open Rajasthan pucca reference">Open</a></td></tr>
+            <tr><th scope="row">Rajasthan — Kachha</th><td>Kachha Bigha reference</td><td>17,424 sq ft</td><td><a href="/tools/land-measurement-calculator?state=rajasthan&amp;standard=rajasthan-kachha" aria-label="Open Rajasthan kachha reference">Open</a></td></tr>
+            <tr><th scope="row">Gujarat — Saurashtra</th><td>1 Vigha = 16 Guntha</td><td>17,424 sq ft</td><td><a href="/tools/land-measurement-calculator?state=gujarat&amp;standard=gujarat-saurashtra" aria-label="Open Gujarat Saurashtra reference">Open</a></td></tr>
+            <tr><th scope="row">Madhya Pradesh</th><td>1 Bigha = 20 Katha</td><td>12,000 sq ft</td><td><a href="/tools/land-measurement-calculator?state=madhya-pradesh&amp;standard=mp-bigha" aria-label="Open Madhya Pradesh reference">Open</a></td></tr>
+            <tr><th scope="row">Himachal Pradesh</th><td>1 Bigha = 20 Biswa; 1 Kanal = 20 Marla</td><td>8,712 sq ft</td><td><a href="/tools/land-measurement-calculator?state=himachal-pradesh&amp;standard=himachal-bigha" aria-label="Open Himachal Pradesh reference">Open</a></td></tr>
+            <tr><th scope="row">Uttarakhand — Hill</th><td>1 Bigha = 20 Biswa; 1 Nali = 2,160 sq ft</td><td>6,804 sq ft</td><td><a href="/tools/land-measurement-calculator?state=uttarakhand&amp;standard=uttarakhand-hill" aria-label="Open Uttarakhand hill reference">Open</a></td></tr>
+            <tr><th scope="row">Delhi</th><td>1 Bigha = 20 Biswa; 1 Biswa = 20 Biswansi</td><td>9,075 sq ft</td><td><a href="/tools/land-measurement-calculator?state=delhi&amp;standard=delhi-bigha" aria-label="Open Delhi reference">Open</a></td></tr>
+            <tr><th scope="row">Tamil Nadu — Ground</th><td>1 Ground ≈ 5.51 Cent; 1 Cent = 435.6 sq ft</td><td>2,400 sq ft</td><td><a href="/tools/land-measurement-calculator?state=tamil-nadu&amp;standard=tn-ground" aria-label="Open Tamil Nadu Ground reference">Open</a></td></tr>
+          </tbody>
+        </table>
+      </div>
+
       <h2>How this calculator works</h2>
       <p>Enter the area, choose the unit you have and the unit you want. The result appears immediately with an exact secondary line in square feet, square metres and acres, plus a local breakdown such as <strong>2 Bigha · 2 Katha · 10 Lessa</strong>. Language, state, standard, units, area and precision are stored in the page URL, so you can bookmark or share a conversion.</p>
+
+      <h2 id="methodology">Methodology and sources</h2>
+      <p>The calculator keeps a small, auditable registry instead of assuming one national value for each local unit. Every standard records its unit relationships, square-foot value and a plain-language note about where it applies.</p>
+      <ul class="lm-method-list">
+        <li><strong>State revenue practice:</strong> entries follow the customary relationships used in state or regional land records, such as Bigha–Katha–Lessa in Assam or Killa–Kanal–Marla in Punjab and Haryana.</li>
+        <li><strong>Common public references:</strong> values are cross-checked against multiple commonly cited sources. Where those sources disagree, the note gives the range and the calculator uses one clearly stated value.</li>
+        <li><strong>Local variation:</strong> district, tehsil and village practice can differ. Selecting a state narrows the reference; it cannot certify the area of a particular plot.</li>
+        <li><strong>Corrections:</strong> if a local standard differs, send the district, unit relationship and a public record or source through the contact page. Corrections are reviewed before the registry changes.</li>
+      </ul>
+      <p class="lm-method-meta"><span>Data updated <time datetime="{{ seo.updated }}">{{ seo.updated_display }}</time></span><a href="/contact">Report a correction</a></p>
 
       <h2 id="faq">Common questions</h2>
       <div class="lm-faq" data-land-faq>
@@ -56,7 +98,7 @@
       <section class="lm-card">
         <h2>Accuracy note</h2>
         <p>Values are reference conversions compiled from state revenue practice and commonly cited local standards. Where sources disagree, the calculator shows the range in the standard note and uses one clearly stated value.</p>
-        <p>Revenue offices, registered deeds and licensed surveyors always take precedence over any online conversion.</p>
+        <p>Revenue offices, registered deeds and licensed surveyors always take precedence over any online conversion. <a href="#methodology">Read the methodology and sources.</a></p>
       </section>
       <section class="lm-card lm-disclaimer">
         <h2 data-land-disclaimer-title>Important</h2>
@@ -74,7 +116,7 @@
 <script nonce="{{ csp_nonce }}" src="/assets/js/tools/core.js?v=1" defer></script>
 <script nonce="{{ csp_nonce }}" src="/assets/js/tools/land-data.js?v=1" defer></script>
 <script nonce="{{ csp_nonce }}" src="/assets/js/tools/land-engine.js?v=1" defer></script>
-<script nonce="{{ csp_nonce }}" src="/assets/js/tools/land-i18n.js?v=1" defer></script>
-<script nonce="{{ csp_nonce }}" src="/assets/js/tools/land.js?v=1" defer></script>
+<script nonce="{{ csp_nonce }}" src="/assets/js/tools/land-i18n.js?v=2" defer></script>
+<script nonce="{{ csp_nonce }}" src="/assets/js/tools/land.js?v=2" defer></script>
 <script nonce="{{ csp_nonce }}" src="/assets/js/tools/boot.js?v=1" defer></script>
 {% endblock %}

@@ -14,6 +14,7 @@
   const { createLandEngine, parseArea } = ENGINE;
   const engine = createLandEngine(DATA);
   const STORAGE_KEY = "land-lang";
+  const DATE_LOCALES = { en: "en-IN", hi: "hi-IN", as: "as-IN" };
 
   const state = {
     lang: "en",
@@ -133,22 +134,56 @@
     return `${primary} = ${secondary} (${t("resultBasedOn").replace("{standard}", standard)})`;
   }
 
-  async function copyText(value) {
+  async function copyText(value, successKey = "copied") {
     try {
       await navigator.clipboard.writeText(value);
-      toast(t("copied"));
+      toast(t(successKey));
     } catch {
       const proxy = el("textarea", { class: "lm-copy-proxy", value });
       document.body.append(proxy);
       proxy.select();
       try {
         document.execCommand("copy");
-        toast(t("copied"));
+        toast(t(successKey));
       } catch {
         toast(t("errorInvalid"));
       }
       proxy.remove();
     }
+  }
+
+  function currentScope() {
+    const region = engine.getRegion(state.regionId);
+    const standard = engine.getStandard(state.regionId, state.standardId);
+    return [region ? engine.label(region, state.lang) : "", standard ? engine.label(standard, state.lang) : t("commonStandard")]
+      .filter(Boolean)
+      .join(" · ");
+  }
+
+  function formatDate(value) {
+    const date = value ? new Date(value + "T00:00:00") : new Date();
+    try {
+      return new Intl.DateTimeFormat(DATE_LOCALES[state.lang] || "en-IN", {
+        day: "numeric", month: "short", year: "numeric",
+      }).format(date);
+    } catch {
+      return value || "";
+    }
+  }
+
+  function referenceBadge() {
+    const updated = DATA.meta && DATA.meta.updated ? DATA.meta.updated : "";
+    return `${t("shareBadge")}${updated ? " · " + t("shareUpdated").replace("{date}", formatDate(updated)) : ""}`;
+  }
+
+  function updatePrintMeta() {
+    const scope = currentScope();
+    document.querySelectorAll("[data-print-scope]").forEach((node) => { node.textContent = scope; });
+    document.querySelectorAll("[data-print-date]").forEach((node) => { node.textContent = formatDate(); });
+    document.querySelectorAll("[data-print-title]").forEach((node) => { node.textContent = t("printTitle"); });
+    document.querySelectorAll("[data-print-prepared]").forEach((node) => { node.textContent = t("printPrepared"); });
+    document.querySelectorAll("[data-print-note]").forEach((node) => { node.textContent = t("printNote"); });
+    document.querySelectorAll("[data-print-badge]").forEach((node) => { node.textContent = referenceBadge(); });
   }
 
   function renderFaqs() {
@@ -177,6 +212,8 @@
     render();
     renderFaqs();
     renderDisclaimer();
+    const active = rootEl && rootEl.querySelector(".lm-lang-btn.is-active");
+    if (active) active.focus();
   }
 
   function render() {
@@ -186,9 +223,10 @@
     rootEl.replaceChildren(
       buildToolbar(),
       el("div", { class: "lm-grid" },
-        buildConvertPanel(),
+        el("div", { class: "lm-main" }, buildConvertPanel(), buildShare(result)),
         el("div", { class: "lm-side" }, buildResult(result), buildQuick(result))),
       buildReference());
+    updatePrintMeta();
     writeUrl();
   }
 
@@ -197,9 +235,11 @@
     const result = compute();
     const currentResult = rootEl.querySelector("#lm-result");
     const currentQuick = rootEl.querySelector("#lm-quick");
+    const currentShare = rootEl.querySelector("#lm-share");
     const error = rootEl.querySelector("#lm-area-error");
     if (currentResult) currentResult.replaceWith(buildResult(result));
     if (currentQuick) currentQuick.replaceWith(buildQuick(result));
+    if (currentShare) currentShare.replaceWith(buildShare(result));
     if (error) {
       if (result.status === "error") {
         error.textContent = t(errorKey(result.code));
@@ -211,6 +251,7 @@
     }
     const input = rootEl.querySelector(".lm-area-input");
     if (input) input.setAttribute("aria-invalid", String(result.status === "error"));
+    updatePrintMeta();
     writeUrl();
   }
 
@@ -261,6 +302,8 @@
       state.fromId = defaults.from.id;
       state.toId = defaults.to.id;
       render();
+      const next = rootEl && rootEl.querySelector(".lm-select");
+      if (next) next.focus();
     });
 
     const standards = engine.getStandardOptions(state.regionId);
@@ -284,6 +327,8 @@
       state.fromId = defaults.from.id;
       state.toId = defaults.to.id;
       render();
+      const next = rootEl && rootEl.querySelectorAll(".lm-select")[1];
+      if (next) next.focus();
     });
 
     const areaInput = el("input", {
@@ -299,6 +344,13 @@
     areaInput.addEventListener("input", () => {
       state.area = areaInput.value;
       recalc();
+    });
+    areaInput.addEventListener("keydown", (event) => {
+      if (event.key === "Enter") {
+        event.preventDefault();
+        recalc();
+        areaInput.blur();
+      }
     });
 
     const initial = compute();
@@ -318,6 +370,8 @@
         state.fromId = state.toId;
         state.toId = from;
         render();
+        const nextSwap = rootEl && rootEl.querySelector(".lm-swap");
+        if (nextSwap) nextSwap.focus();
       },
     }, el("span", { "aria-hidden": "true", text: "⇅" }), t("swap"));
 
@@ -326,6 +380,17 @@
       class: "lm-convert-btn",
       onclick: () => recalc(),
     }, t("convert"));
+
+    const clearButton = el("button", {
+      type: "button",
+      class: "lm-clear-btn",
+      onclick: () => {
+        state.area = "";
+        areaInput.value = "";
+        areaInput.focus();
+        recalc();
+      },
+    }, t("clear"));
 
     const standard = engine.getStandard(state.regionId, state.standardId);
     const note = standard && standard.note ? el("p", { class: "lm-note", text: localized(standard.note) }) : null;
@@ -346,7 +411,7 @@
       error,
       note,
       warning,
-      el("div", { class: "lm-actions" }, convertButton));
+      el("div", { class: "lm-actions lm-actions-split" }, clearButton, convertButton));
   }
 
   function buildCombo(kind, labelText) {
@@ -441,6 +506,9 @@
       state[kind + "Id"] = unit.id;
       setOpen(false);
       render();
+      const triggers = rootEl ? rootEl.querySelectorAll(".lm-combo-trigger") : [];
+      const target = triggers[kind === "from" ? 0 : 1];
+      if (target) target.focus();
     }
 
     function setOpen(next) {
@@ -498,11 +566,7 @@
   }
 
   function buildResult(result) {
-    const region = engine.getRegion(state.regionId);
-    const standard = engine.getStandard(state.regionId, state.standardId);
-    const scope = [region ? engine.label(region, state.lang) : "", standard ? engine.label(standard, state.lang) : t("commonStandard")]
-      .filter(Boolean)
-      .join(" · ");
+    const scope = currentScope();
     const section = el("section", { class: "lm-deed" + (result.status === "ok" ? "" : " is-empty"), id: "lm-result", "aria-live": "polite" });
     section.append(el("span", { class: "lm-stamp", "aria-hidden": "true", text: t("stamp") }));
     section.append(el("div", { class: "lm-deed-head" },
@@ -544,6 +608,8 @@
           onclick: () => {
             state.mode = mode;
             render();
+            const active = rootEl && rootEl.querySelector(".lm-seg-btn.is-active");
+            if (active) active.focus();
           },
         }, label));
       });
@@ -553,6 +619,44 @@
         el("strong", { text: result.status === "empty" ? t("resultEmptyTitle") : t(errorKey(result.code)) }),
         el("p", { text: result.status === "empty" ? t("resultEmptyBody") : t("panelConvertHint") })));
     }
+    return section;
+  }
+
+  function buildShare(result) {
+    const relations = engine.relationRows(state.regionId, state.standardId);
+    const section = el("section", { class: "lm-panel lm-share", id: "lm-share", "aria-labelledby": "lm-share-title" });
+    section.append(
+      el("div", { class: "lm-panel-head" },
+        el("h2", { id: "lm-share-title", text: t("shareTitle") }),
+        el("p", { class: "lm-hint", text: t("shareHint") })));
+    if (relations.length) {
+      section.append(el("p", {
+        class: "lm-relations lm-share-relations",
+        text: relations.map((relation) => `1 ${engine.label(relation.from, state.lang)} = ${engine.formatNumber(relation.factor, state.lang).text} ${engine.label(relation.to, state.lang)}`).join(" · "),
+      }));
+    }
+    section.append(el("div", { class: "lm-share-actions" },
+      el("button", {
+        type: "button",
+        class: "lm-share-btn",
+        onclick: () => copyText(location.href, "linkCopied"),
+      }, t("shareCopyLink")),
+      el("button", {
+        type: "button",
+        class: "lm-share-btn lm-share-wa",
+        onclick: () => {
+          const text = result.status === "ok" ? `${resultCopyText(result)} ${location.href}` : `${t("shareHint")} ${location.href}`;
+          window.open("https://wa.me/?text=" + encodeURIComponent(text), "_blank", "noopener,noreferrer");
+        },
+      }, t("shareWhatsapp")),
+      el("button", {
+        type: "button",
+        class: "lm-share-btn",
+        onclick: () => window.print(),
+      }, t("sharePrint"))));
+    section.append(el("div", { class: "lm-share-foot" },
+      el("span", { class: "lm-share-badge", text: referenceBadge() }),
+      el("a", { class: "lm-share-method", href: "#methodology", text: t("methodologyLink") })));
     return section;
   }
 
@@ -635,6 +739,7 @@
     rootEl = root;
     hydrate(new URLSearchParams(location.search));
     ensureUnits();
+    document.documentElement.lang = state.lang;
     render();
     renderFaqs();
     renderDisclaimer();

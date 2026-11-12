@@ -1,0 +1,36 @@
+name: Tests
+
+"on":
+  push:
+    branches: [main]
+  pull_request:
+
+permissions:
+  contents: read
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+          cache: pip
+      - name: Install Python dependencies
+        run: pip install -r requirements.txt
+      - name: Run Python tests
+        run: python -m unittest discover -s tests -v
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+      - name: Check land JavaScript syntax
+        run: |
+          node --check static/assets/js/tools/land-data.js
+          node --check static/assets/js/tools/land-engine.js
+          node --check static/assets/js/tools/land-i18n.js
+          node --check static/assets/js/tools/land.js
+      - name: Run land engine tests
+        run: node tests/land_engine.test.cjs
+      - name: Run i18n parity tests
+        run: node tests/land_i18n.test.cjs

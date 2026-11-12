@@ -30,17 +30,32 @@ class LandCalculatorTests(unittest.TestCase):
         self.assertEqual(len(re.findall(r'<h1[ >]', self.html)), 1)
         self.assertIn('<h1>Indian Land Measurement Calculator</h1>', self.html)
         for asset in ('core.js?v=1', 'land-data.js?v=1', 'land-engine.js?v=1',
-                      'land-i18n.js?v=1', 'land.js?v=1', 'land.css?v=1', 'tools.css?v=2'):
+                      'land-i18n.js?v=2', 'land.js?v=2', 'land.css?v=2', 'tools.css?v=2'):
             self.assertIn(asset, self.html)
         self.assertIn('data-tool-slug="land-measurement-calculator"', self.html)
         self.assertIn('id="tool-root"', self.html)
         self.assertIn('Brahmaputra Valley', self.html)
         self.assertIn('Lessa', self.html)
+        self.assertIn('class="lm-print-only"', self.html)
+        self.assertIn('data-print-title', self.html)
+        self.assertIn('data-print-date', self.html)
+        self.assertIn('data-print-badge', self.html)
+        self.assertIn('<span aria-current="page">Land Measurement Calculator</span>', self.html)
 
     def test_static_content_and_disclaimers(self):
         self.assertIn('Land measurement in India', self.html)
         self.assertIn('not a legal survey', self.html)
         self.assertIn('Common questions', self.html)
+        self.assertIn('State-wise Bigha and local unit reference', self.html)
+        self.assertIn('Methodology and sources', self.html)
+        self.assertIn('Report a correction', self.html)
+        self.assertIn('href="/contact"', self.html)
+        self.assertIn('<time datetime="2026-11-12">12 November 2026</time>', self.html)
+        self.assertIn('1 Ground ≈ 5.51 Cent', self.html)
+        for state, standard in (('assam', 'assam-brahmaputra'), ('west-bengal', 'west-bengal-bigha'),
+                                ('uttar-pradesh', 'up-kachha-two-third'), ('punjab', 'punjab-killa'),
+                                ('gujarat', 'gujarat-saurashtra'), ('tamil-nadu', 'tn-ground')):
+            self.assertIn(f'state={state}&amp;standard={standard}', self.html)
         i18n = self.client.get('/assets/js/tools/land-i18n.js').get_data(as_text=True)
         self.assertIn('ज़रूरी सूचना', i18n)
         self.assertIn('গুৰুত্বপূৰ্ণ', i18n)
@@ -58,6 +73,7 @@ class LandCalculatorTests(unittest.TestCase):
         self.assertIn('BreadcrumbList', nodes)
         app_node = nodes['WebApplication']
         self.assertEqual(app_node['applicationCategory'], 'BusinessApplication')
+        self.assertEqual(nodes['WebPage']['dateModified'], seo.SITE_UPDATED)
         self.assertEqual(app_node['name'], 'Indian Land Measurement Calculator')
         self.assertTrue(any('Bigha' in feature for feature in app_node['featureList']))
         self.assertEqual(len(nodes['FAQPage']['mainEntity']), len(seo.LAND_FAQS))
@@ -67,7 +83,10 @@ class LandCalculatorTests(unittest.TestCase):
             self.assertIn(question, self.html)
             self.assertIn(answer, self.html)
         crumbs = nodes['BreadcrumbList']['itemListElement']
-        self.assertEqual(crumbs[-1]['name'], 'Land Measurement Calculator')
+        self.assertEqual([crumb['name'] for crumb in crumbs],
+                         ['Home', 'All tools', 'Land Measurement Calculator'])
+        self.assertEqual(crumbs[1]['item'], 'https://sanuwartools.online/tools')
+        self.assertEqual(crumbs[-1]['item'], 'https://sanuwartools.online/tools/land-measurement-calculator')
 
     def test_assets_are_served(self):
         for path in ('/assets/js/tools/land-data.js', '/assets/js/tools/land-engine.js',

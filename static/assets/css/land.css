@@ -162,6 +162,7 @@ html[data-theme="dark"] body.tool-page-land {
   align-items: start;
 }
 .lm-side { display: grid; gap: 18px; }
+.lm-main { display: grid; gap: 18px; align-content: start; min-width: 0; }
 .lm-panel {
   padding: 20px;
   border-radius: 18px;
@@ -218,6 +219,22 @@ html[data-theme="dark"] body.tool-page-land {
   line-height: 1.45;
 }
 .lm-actions { margin-top: 4px; }
+.lm-actions-split { display: flex; gap: 10px; align-items: stretch; }
+.lm-actions-split .lm-convert-btn { flex: 1 1 auto; }
+.lm-clear-btn {
+  padding: 14px 18px;
+  border: 1px solid var(--lm-line);
+  border-radius: 14px;
+  background: transparent;
+  color: var(--neu-muted);
+  font: inherit;
+  font-size: 12px;
+  font-weight: 800;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  cursor: pointer;
+}
+.lm-clear-btn:hover { color: var(--neu-heading); background: var(--lm-green-soft); }
 .lm-convert-btn {
   width: 100%;
   padding: 14px 18px;
@@ -555,6 +572,49 @@ html[data-theme="dark"] body.tool-page-land {
   line-height: 1.55;
 }
 
+
+.lm-share { display: grid; gap: 12px; }
+.lm-share .lm-panel-head { margin-bottom: 0; }
+.lm-share-relations { margin: 0; }
+.lm-share-actions { display: flex; flex-wrap: wrap; gap: 8px; }
+.lm-share-btn {
+  flex: 1 1 130px;
+  padding: 10px 12px;
+  border: 1px solid var(--lm-line);
+  border-radius: 10px;
+  background: var(--neu-base);
+  box-shadow: var(--neu-raised-sm);
+  color: var(--neu-heading);
+  font: inherit;
+  font-size: 11px;
+  font-weight: 700;
+  cursor: pointer;
+}
+.lm-share-btn:hover { box-shadow: var(--neu-raised); color: var(--lm-green); }
+.lm-share-foot {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  padding-top: 10px;
+  border-top: 1px solid var(--lm-line);
+}
+.lm-share-badge {
+  color: var(--neu-muted);
+  font-family: var(--tp-mono, ui-monospace, monospace);
+  font-size: 9px;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+.lm-share-method {
+  color: var(--lm-green);
+  font-size: 10.5px;
+  font-weight: 700;
+  text-underline-offset: 3px;
+}
+
 .lm-reference { margin-top: 18px; }
 .lm-content {
   display: grid;
@@ -562,7 +622,9 @@ html[data-theme="dark"] body.tool-page-land {
   gap: 18px;
   margin-top: 22px;
 }
+.lm-content > * { min-width: 0; }
 .lm-copy {
+  min-width: 0;
   padding: 26px;
   border-radius: 18px;
   background: var(--neu-base);
@@ -575,6 +637,49 @@ html[data-theme="dark"] body.tool-page-land {
 .lm-copy p { margin: 0 0 10px; }
 .lm-copy ul { margin: 0 0 12px; padding-left: 18px; }
 .lm-copy strong { color: var(--neu-heading); }
+.lm-copy a { color: var(--lm-green); }
+.lm-copy h2[id] { scroll-margin-top: 92px; }
+.lm-table-wrap {
+  max-width: 100%;
+  margin: 12px 0 16px;
+  overflow-x: auto;
+  border-radius: 12px;
+  box-shadow: var(--neu-inset-sm);
+}
+.lm-seo-table { width: 100%; min-width: 560px; border-collapse: collapse; font-size: 12px; }
+.lm-seo-table th,
+.lm-seo-table td {
+  padding: 10px 12px;
+  border-bottom: 1px solid var(--lm-line);
+  text-align: left;
+  vertical-align: top;
+}
+.lm-seo-table thead th {
+  color: var(--neu-muted);
+  font-size: 9.5px;
+  font-weight: 800;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+.lm-seo-table tbody th { color: var(--neu-heading); font-weight: 700; white-space: nowrap; }
+.lm-seo-table td { color: var(--neu-muted); }
+.lm-seo-table tr:last-child th,
+.lm-seo-table tr:last-child td { border-bottom: 0; }
+.lm-seo-table a { color: var(--lm-green); font-weight: 700; white-space: nowrap; }
+.lm-method-list { margin: 0 0 12px; padding-left: 18px; }
+.lm-method-list li { margin-bottom: 6px; }
+.lm-method-meta {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px 16px;
+  margin-top: 4px;
+  padding-top: 12px;
+  border-top: 1px dashed var(--lm-paper-line);
+  color: var(--neu-muted);
+  font-size: 10.5px;
+  font-weight: 600;
+}
+.lm-print-only { display: none; }
 .lm-aside-col { display: grid; gap: 18px; align-content: start; }
 .lm-card {
   padding: 20px;
@@ -617,11 +722,30 @@ html[data-theme="dark"] body.tool-page-land {
 }
 .lm-copy-proxy { position: fixed; top: -1000px; left: -1000px; }
 
+@media (prefers-reduced-motion: reduce) {
+  .lm-shell *,
+  .lm-shell *::before,
+  .lm-shell *::after,
+  .toast {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+}
+
 @media (max-width: 1000px) {
   .lm-hero { grid-template-columns: 1fr; }
   .lm-hero-art { display: none; }
   .lm-grid,
   .lm-content { grid-template-columns: 1fr; }
+  .lm-grid { display: flex; flex-direction: column; }
+  .lm-main,
+  .lm-side { display: contents; }
+  .lm-convert-panel { order: 1; }
+  #lm-result { order: 2; }
+  .lm-share { order: 3; }
+  .lm-quick { order: 4; }
 }
 
 @media (max-width: 640px) {
@@ -635,15 +759,79 @@ html[data-theme="dark"] body.tool-page-land {
   .lm-lang { width: 100%; }
   .lm-lang-btn { flex: 1; text-align: center; }
   .lm-print { width: 100%; }
+  .lm-actions-split { flex-direction: column; }
   .lm-table { font-size: 11.5px; }
   .lm-combo-option-meta { display: none; }
   .lm-deed-foot { flex-direction: column; align-items: stretch; }
   .lm-deed-copy { width: 100%; }
   .lm-seg { justify-content: center; }
   .lm-copy { padding: 18px; border-radius: 14px; }
+  .lm-table-wrap {
+    overflow: visible;
+    padding: 2px 12px;
+    border-radius: 12px;
+    background: var(--neu-base);
+    box-shadow: var(--neu-inset-sm);
+  }
+  .lm-seo-table { display: block; min-width: 0; }
+  .lm-seo-table thead { display: none; }
+  .lm-seo-table tbody,
+  .lm-seo-table tr,
+  .lm-seo-table th,
+  .lm-seo-table td { display: block; }
+  .lm-seo-table tr { padding: 10px 0; border-bottom: 1px solid var(--lm-line); }
+  .lm-seo-table tr:last-child { border-bottom: 0; }
+  .lm-seo-table tbody th {
+    padding: 0 0 4px;
+    border: 0;
+    white-space: normal;
+    font-size: 12.5px;
+  }
+  .lm-seo-table td { padding: 2px 0; border: 0; line-height: 1.5; }
+  .lm-seo-table td:nth-child(2)::before { content: "Relationship: "; color: var(--neu-heading); font-weight: 700; }
+  .lm-seo-table td:nth-child(3)::before { content: "Reference: "; color: var(--neu-heading); font-weight: 700; }
+  .lm-seo-table td:nth-child(4)::before { content: "Calculator: "; color: var(--neu-heading); font-weight: 700; }
+  .lm-seo-table td:nth-child(4) a {
+    display: inline-block;
+    margin-top: 2px;
+    padding: 4px 9px;
+    border: 1px solid var(--lm-line);
+    border-radius: 8px;
+    text-decoration: none;
+  }
 }
 
 @media print {
+  body.tool-page-land .lm-shell,
+  body.tool-page-land .lm-shell * { visibility: visible !important; }
+  .lm-print-only {
+    display: block !important;
+    margin: 0 0 14px;
+    padding: 0 0 12px;
+    border-bottom: 2px solid #1f5c45;
+  }
+  .lm-print-brand {
+    color: #1f5c45;
+    font-size: 9px;
+    font-weight: 800;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+  }
+  .lm-print-title { margin: 6px 0 4px; color: #111 !important; font-size: 22px; font-weight: 800; letter-spacing: -0.02em; }
+  .lm-print-meta { margin: 0; color: #333; font-size: 10.5px; line-height: 1.5; }
+  .lm-print-note { margin: 8px 0 0; color: #333 !important; font-size: 9.5px; line-height: 1.45; }
+  .lm-deed-standard,
+  .lm-deed-secondary,
+  .lm-deed-breakdown-label { color: #555 !important; }
+  .lm-deed-breakdown-value { color: #111 !important; }
+  .lm-panel-head h2,
+  .lm-panel-head .lm-hint,
+  .lm-quick .lm-muted { color: #333 !important; }
+  .lm-quick .lm-hint { display: none !important; }
+  .lm-table thead th { color: #444 !important; }
+  .lm-table th,
+  .lm-table td { color: #111 !important; }
+  .lm-table tr.is-current { background: #eef4f0 !important; }
   .site-header,
   .site-footer,
   .tp-crumb,
@@ -654,8 +842,13 @@ html[data-theme="dark"] body.tool-page-land {
   .toast { display: none !important; }
   body.pro-theme.bp { background: #fff !important; color: #000 !important; }
   .lm-shell { max-width: none; padding: 0; }
-  .lm-grid { display: block; }
-  .lm-side { margin-top: 14px; }
+  .lm-grid,
+  .lm-side { display: block; }
+  .lm-main,
+  .lm-share,
+  .lm-actions,
+  .lm-deed-foot { display: none !important; }
+  .lm-side { margin-top: 0; }
   .lm-panel,
   .lm-deed {
     border: 1px solid #c9c9c9;
@@ -663,6 +856,9 @@ html[data-theme="dark"] body.tool-page-land {
     box-shadow: none !important;
     color: #111;
   }
+  .lm-print-only,
+  .lm-panel,
+  .lm-deed,
   .lm-quick,
   .lm-reference { page-break-inside: avoid; }
 }

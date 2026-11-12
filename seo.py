@@ -1,4 +1,5 @@
 """Canonical public discovery metadata; private workflows stay out of search."""
+import datetime
 import os
 import re
 from xml.etree.ElementTree import Element, SubElement, tostring
@@ -7,6 +8,7 @@ import security
 
 ORIGIN = 'https://sanuwartools.online'
 SITE_UPDATED = '2026-11-12'
+SITE_UPDATED_DISPLAY = datetime.date.fromisoformat(SITE_UPDATED).strftime('%d %B %Y').lstrip('0')
 OG_IMAGE = ORIGIN + '/assets/og/sanuwartools-og.png'
 TELEGRAM_URL = 'https://t.me/+dBcRFw3B1zcwMDg1'
 INDEXNOW_KEY = '9c3f7a1e5b8d4f2a6c0e9d7b3a5f1c8e'
@@ -181,21 +183,31 @@ def install(app, load_config, load_directory=None, load_tool_catalog=None):
                    'isPartOf': {'@id': ORIGIN + '/#website'}, 'inLanguage': 'en',
                    'primaryImageOfPage': {'@type': 'ImageObject', 'url': OG_IMAGE,
                                           'width': 1200, 'height': 630},
+                   'dateModified': SITE_UPDATED,
                    'publisher': publisher}
         graph = [website, organization, webpage] if path == '/' else [organization, webpage]
         if path != '/':
             if tool_page is not None and tool_page.get('slug') == 'land-measurement-calculator':
-                crumb_name = 'Land Measurement Calculator'
+                crumb_items = [
+                    {'@type': 'ListItem', 'position': 1, 'name': 'Home', 'item': ORIGIN + '/'},
+                    {'@type': 'ListItem', 'position': 2, 'name': 'All tools', 'item': ORIGIN + '/tools'},
+                    {'@type': 'ListItem', 'position': 3, 'name': 'Land Measurement Calculator', 'item': canonical},
+                ]
+            elif category is not None:
+                crumb_name = str(category.get('name'))
+                crumb_items = [
+                    {'@type': 'ListItem', 'position': 1, 'name': 'Home', 'item': ORIGIN + '/'},
+                    {'@type': 'ListItem', 'position': 2, 'name': 'Directories', 'item': ORIGIN + '/directory'},
+                    {'@type': 'ListItem', 'position': 3, 'name': crumb_name, 'item': canonical},
+                ]
             else:
-                crumb_name = str(category.get('name')) if category is not None else BREADCRUMBS.get(path, title.split(' | ')[0].split(' — ')[0])
+                crumb_name = BREADCRUMBS.get(path, title.split(' | ')[0].split(' — ')[0])
+                crumb_items = [
+                    {'@type': 'ListItem', 'position': 1, 'name': 'Home', 'item': ORIGIN + '/'},
+                    {'@type': 'ListItem', 'position': 2, 'name': crumb_name, 'item': canonical},
+                ]
             graph.append({'@type': 'BreadcrumbList', '@id': canonical + '#breadcrumb',
-                          'itemListElement': [
-                              {'@type': 'ListItem', 'position': 1, 'name': 'Home', 'item': ORIGIN + '/'},
-                              {'@type': 'ListItem', 'position': 2,
-                               'name': 'Directories' if category is not None else crumb_name,
-                               'item': ORIGIN + '/directory' if category is not None else canonical}] +
-                              ([{'@type': 'ListItem', 'position': 3, 'name': crumb_name, 'item': canonical}]
-                               if category is not None else [])})
+                          'itemListElement': crumb_items})
         if category is not None:
             site_items = []
             position = 0
@@ -257,6 +269,7 @@ def install(app, load_config, load_directory=None, load_tool_catalog=None):
                 verification.append((meta_name, token))
         return {'seo': {'indexable': True, 'title': title, 'description': description,
                         'canonical': canonical, 'image': OG_IMAGE,
+                        'updated': SITE_UPDATED, 'updated_display': SITE_UPDATED_DISPLAY,
                         'faqs': ([{'q': question, 'a': answer} for question, answer in PHOTO_FAQS] if path == '/photo-tools' else
                                  [{'q': question, 'a': answer} for question, answer in LAND_FAQS] if tool_page is not None and tool_page.get('slug') == 'land-measurement-calculator' else []),
                         'structured_data': {'@context': 'https://schema.org', '@graph': graph}},
