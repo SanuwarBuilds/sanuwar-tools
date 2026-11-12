@@ -1,0 +1,80 @@
+{% extends 'base.html' %}
+{% block bodyclass %}tool-page tool-page-land{% endblock %}
+{% block page_styles %}<link rel="stylesheet" href="/assets/css/tools.css?v=2"><link rel="stylesheet" href="/assets/css/land.css?v=1">{% endblock %}
+{% block content %}
+<section class="tp-shell wrap lm-shell" data-tool-page data-tool-slug="land-measurement-calculator">
+  <nav class="tp-crumb" aria-label="Breadcrumb"><a href="/">Home</a><span aria-hidden="true">/</span><a href="/tools">All tools</a><span aria-hidden="true">/</span><span>Land &amp; Property</span></nav>
+
+  <header class="lm-hero">
+    <div>
+      <span class="lm-kicker">Land &amp; Property · India</span>
+      <h1>Indian Land Measurement Calculator</h1>
+      <p class="lm-lede">Convert Bigha, Katha, Lessa, Biswa, Kanal, Marla, Guntha and standard units using the local standard for your state. Built for Assam, with region-aware references across India.</p>
+      <div class="lm-hero-meta"><span>Runs locally</span><span>No uploads</span><span>English · हिन्दी · অসমীয়া</span><span>Free</span></div>
+    </div>
+    <div class="lm-hero-art" aria-hidden="true"></div>
+  </header>
+
+  <div class="lm-toolbar-anchor">
+    <div id="tool-root" class="lm-workspace">
+      <div class="tp-loading"><span></span>Loading land calculator…</div>
+      <noscript><p class="lm-warning">This calculator needs JavaScript. All calculations run in your browser; nothing is uploaded. You can still read the measurement guide and disclaimer below.</p></noscript>
+    </div>
+  </div>
+
+  <div class="lm-content">
+    <article class="lm-copy">
+      <h2>Land measurement in India</h2>
+      <p>India uses a mix of standard and customary land units. Square feet, square metres, acres and hectares are standard everywhere. <strong>Bigha, Katha, Biswa, Kanal, Marla, Guntha, Lessa and similar names are local units</strong>, and their size changes from state to state — sometimes from district to district. There is no single national Bigha.</p>
+      <p>This calculator keeps the local standard separate from the unit name. Choose your state first, then choose the local standard that matches your land records, and convert between that standard and standard units.</p>
+
+      <h2>Assam: Bigha, Katha and Lessa</h2>
+      <p>In the Brahmaputra Valley standard used here, <strong>1 Bigha = 14,400 sq ft</strong>, <strong>1 Katha = 2,880 sq ft</strong>, <strong>1 Lessa = 144 sq ft</strong>, and <strong>1 Pura = 57,600 sq ft</strong>. One Bigha is 5 Katha, and one Katha is 20 Lessa.</p>
+      <p>The Barak Valley / Cachar reference uses the same Bigha size but divides it into 20 Katha of 720 sq ft, with 16 Chatak in a Katha. Always check the standard written in the local patta or revenue record before relying on a number.</p>
+
+      <h2>Why the same unit changes size</h2>
+      <p>Customary units were defined by local revenue practice. A Bihar Bigha is commonly cited between 27,225 and 65,340 sq ft depending on the district. Punjab and Haryana use Killa, Kanal, Marla and Sarsahi, where 1 Killa = 8 Kanal and 1 Kanal = 20 Marla. Gujarat has both 16-Guntha and 24-Guntha Vigha references. The calculator shows the selected standard, its source value, and a warning whenever the value is a regional reference rather than a universal rule.</p>
+
+      <h2>How this calculator works</h2>
+      <p>Enter the area, choose the unit you have and the unit you want. The result appears immediately with an exact secondary line in square feet, square metres and acres, plus a local breakdown such as <strong>2 Bigha · 2 Katha · 10 Lessa</strong>. Language, state, standard, units, area and precision are stored in the page URL, so you can bookmark or share a conversion.</p>
+
+      <h2 id="faq">Common questions</h2>
+      <div class="lm-faq" data-land-faq>
+        {% for item in seo.faqs %}
+        <details class="lm-faq-item"><summary>{{ item.q }}</summary><p>{{ item.a }}</p></details>
+        {% endfor %}
+      </div>
+    </article>
+
+    <aside class="lm-aside-col">
+      <section class="lm-card">
+        <h2>How it works</h2>
+        <p><strong>01</strong> Choose your state and the local standard used in your land records.</p>
+        <p><strong>02</strong> Enter the area and pick the from and to units. Search works in English, Hindi and Assamese.</p>
+        <p><strong>03</strong> Read the deed-style result, copy it, or print the reference table. Everything stays in your browser.</p>
+      </section>
+      <section class="lm-card">
+        <h2>Accuracy note</h2>
+        <p>Values are reference conversions compiled from state revenue practice and commonly cited local standards. Where sources disagree, the calculator shows the range in the standard note and uses one clearly stated value.</p>
+        <p>Revenue offices, registered deeds and licensed surveyors always take precedence over any online conversion.</p>
+      </section>
+      <section class="lm-card lm-disclaimer">
+        <h2 data-land-disclaimer-title>Important</h2>
+        <p data-land-disclaimer>Land measurement names and values differ by state, district and village, and sometimes between nearby circles. The values shown here are commonly cited reference conversions, not a legal survey. Always confirm the area with your official land records, registered deed, or a licensed surveyor before making a purchase, sale, loan or construction decision. This calculator does not provide legal, financial or valuation advice.</p>
+      </section>
+      <section class="lm-card">
+        <h2>More tools</h2>
+        <p><a href="/tools/area-converter">Area converter</a> · <a href="/tools/percentage-calculator">Percentage calculator</a> · <a href="/tools/loan-emi-calculator">Loan EMI calculator</a></p>
+      </section>
+    </aside>
+  </div>
+</section>
+{% endblock %}
+{% block scripts %}
+<script nonce="{{ csp_nonce }}" src="/assets/js/tools/core.js?v=1" defer></script>
+<script nonce="{{ csp_nonce }}" src="/assets/js/tools/land-data.js?v=1" defer></script>
+<script nonce="{{ csp_nonce }}" src="/assets/js/tools/land-engine.js?v=1" defer></script>
+<script nonce="{{ csp_nonce }}" src="/assets/js/tools/land-i18n.js?v=1" defer></script>
+<script nonce="{{ csp_nonce }}" src="/assets/js/tools/land.js?v=1" defer></script>
+<script nonce="{{ csp_nonce }}" src="/assets/js/tools/boot.js?v=1" defer></script>
+{% endblock %}

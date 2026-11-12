@@ -6,7 +6,7 @@ from flask import Response, request
 import security
 
 ORIGIN = 'https://sanuwartools.online'
-SITE_UPDATED = '2026-11-09'
+SITE_UPDATED = '2026-11-12'
 OG_IMAGE = ORIGIN + '/assets/og/sanuwartools-og.png'
 TELEGRAM_URL = 'https://t.me/+dBcRFw3B1zcwMDg1'
 INDEXNOW_KEY = '9c3f7a1e5b8d4f2a6c0e9d7b3a5f1c8e'
@@ -56,6 +56,20 @@ PHOTO_FAQS = [
      'Yes. Pick a preset or set a 35 × 45 mm output, choose the 4 × 6 inch print sheet, then save or print the sheet at 100% / actual size with page margins off.'),
 ]
 
+LAND_FAQS = [
+    ('How many square feet is 1 Bigha in Assam?',
+     'In the Brahmaputra Valley standard, 1 Bigha = 14,400 sq ft = 5 Katha. In the Barak Valley reference, 1 Bigha is also 14,400 sq ft but is divided into 20 Katha of 720 sq ft. Local records may still differ.'),
+    ('How many Katha are in a Bigha?',
+     'It depends on the standard. In the Assam Brahmaputra Valley standard, 1 Bigha = 5 Katha. In West Bengal and the Assam Barak Valley reference, 1 Bigha = 20 Katha. Choose your state and local standard in the calculator.'),
+    ('What is 1 Lessa in square feet?',
+     '1 Lessa = 144 sq ft. In the Brahmaputra Valley standard, 1 Katha = 2,880 sq ft = 20 Lessa.'),
+    ('Why is a Bigha different in different states?',
+     'Bigha, Katha, Biswa and similar names were defined by local revenue practice, not by a single national rule. Even nearby districts can use different sizes. That is why this calculator asks for your state and local standard.'),
+    ('Can I use this calculator for a legal land record?',
+     'No. Use it for a quick reference only. For purchase, sale, loan, registration or construction, confirm the area with official land records, the registered deed, or a licensed surveyor.'),
+    ('Does the calculator upload my data?',
+     'No. All calculations run in your browser. The page does not send your area or conversions to a server.'),
+]
 
 TOOL_ICON_NAMES = ('photo', 'passport', 'score', 'wallet', 'tool', 'download', 'album',
                    'film', 'anime', 'manga', 'sports', 'tv', 'torrent', 'game', 'music',
@@ -129,8 +143,12 @@ def install(app, load_config, load_directory=None, load_tool_catalog=None):
             if '/' not in slug:
                 tool_page = next((item for item in tools if item.get('slug') == slug), None)
             if tool_page is not None:
-                page = (f"{tool_page['name']} — Free Online Tool | SanuwarTools",
-                        str(tool_page.get('description') or '')[:300])
+                if tool_page['slug'] == 'land-measurement-calculator':
+                    page = ('Land Measurement Calculator — Bigha, Katha, Lessa | SanuwarTools',
+                            'Convert Bigha, Katha, Lessa, Biswa, Kanal, Marla, Guntha and acres with state-wise Indian standards. Assam-first, private, free land calculator.')
+                else:
+                    page = (f"{tool_page['name']} — Free Online Tool | SanuwarTools",
+                            str(tool_page.get('description') or '')[:300])
         if page is None and path.startswith('/directory/'):
             slug = path[len('/directory/'):]
             if '/' not in slug:
@@ -166,7 +184,10 @@ def install(app, load_config, load_directory=None, load_tool_catalog=None):
                    'publisher': publisher}
         graph = [website, organization, webpage] if path == '/' else [organization, webpage]
         if path != '/':
-            crumb_name = str(category.get('name')) if category is not None else BREADCRUMBS.get(path, title.split(' | ')[0].split(' — ')[0])
+            if tool_page is not None and tool_page.get('slug') == 'land-measurement-calculator':
+                crumb_name = 'Land Measurement Calculator'
+            else:
+                crumb_name = str(category.get('name')) if category is not None else BREADCRUMBS.get(path, title.split(' | ')[0].split(' — ')[0])
             graph.append({'@type': 'BreadcrumbList', '@id': canonical + '#breadcrumb',
                           'itemListElement': [
                               {'@type': 'ListItem', 'position': 1, 'name': 'Home', 'item': ORIGIN + '/'},
@@ -206,16 +227,27 @@ def install(app, load_config, load_directory=None, load_tool_catalog=None):
                                           'acceptedAnswer': {'@type': 'Answer', 'text': answer}}
                                          for question, answer in PHOTO_FAQS]})
         if tool_page is not None:
+            land_tool = tool_page.get('slug') == 'land-measurement-calculator'
             graph.append({'@type': 'WebApplication', '@id': canonical + '#app',
                           'name': tool_page['name'], 'url': canonical,
                           'description': description,
-                          'applicationCategory': 'UtilitiesApplication',
+                          'applicationCategory': 'BusinessApplication' if land_tool else 'UtilitiesApplication',
                           'operatingSystem': 'Any (browser-based)',
                           'browserRequirements': 'Requires JavaScript',
                           'offers': {'@type': 'Offer', 'price': '0', 'priceCurrency': 'USD'},
-                          'featureList': ['Runs locally in the browser', 'No account required',
-                                          'No file uploads'],
+                          'featureList': (['State-wise Bigha, Katha, Biswa, Kanal and Marla standards',
+                                           'Assam Brahmaputra and Barak Valley references',
+                                           'Searchable units in English, Hindi and Assamese',
+                                           'Local breakdown and reference tables',
+                                           'Runs locally with no uploads'] if land_tool else
+                                          ['Runs locally in the browser', 'No account required',
+                                           'No file uploads']),
                           'isPartOf': {'@id': ORIGIN + '/#website'}, 'publisher': publisher})
+            if land_tool:
+                graph.append({'@type': 'FAQPage', '@id': canonical + '#faq',
+                              'mainEntity': [{'@type': 'Question', 'name': question,
+                                              'acceptedAnswer': {'@type': 'Answer', 'text': answer}}
+                                             for question, answer in LAND_FAQS]})
         verification = []
         for env_name, meta_name in (('GOOGLE_SITE_VERIFICATION', 'google-site-verification'),
                                     ('BING_SITE_VERIFICATION', 'msvalidate.01'),
@@ -225,7 +257,8 @@ def install(app, load_config, load_directory=None, load_tool_catalog=None):
                 verification.append((meta_name, token))
         return {'seo': {'indexable': True, 'title': title, 'description': description,
                         'canonical': canonical, 'image': OG_IMAGE,
-                        'faqs': [{'q': question, 'a': answer} for question, answer in PHOTO_FAQS] if path == '/photo-tools' else [],
+                        'faqs': ([{'q': question, 'a': answer} for question, answer in PHOTO_FAQS] if path == '/photo-tools' else
+                                 [{'q': question, 'a': answer} for question, answer in LAND_FAQS] if tool_page is not None and tool_page.get('slug') == 'land-measurement-calculator' else []),
                         'structured_data': {'@context': 'https://schema.org', '@graph': graph}},
                 'seo_verification': verification}
 

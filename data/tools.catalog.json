@@ -1,6 +1,6 @@
 {
-  "updated": "2026-11-11",
-  "categories": ["Text Tools", "Developer Tools", "Encoding & Hashing", "Images & Media", "PDF & Documents", "Compression & Archives", "Networking", "Calculators", "Time & Date", "Security & Privacy", "Financial Calculators", "Health & Fitness", "Unit Converters", "Sports & Games"],
+  "updated": "2026-11-12",
+  "categories": ["Text Tools", "Developer Tools", "Encoding & Hashing", "Images & Media", "PDF & Documents", "Compression & Archives", "Networking", "Calculators", "Time & Date", "Security & Privacy", "Financial Calculators", "Health & Fitness", "Unit Converters", "Land & Property", "Sports & Games"],
   "tools": [
     {"slug": "base64", "name": "Base64 Encode / Decode", "category": "Encoding & Hashing", "icon": "64", "bundle": "text", "popular": true, "description": "Encode text to Base64 or decode Base64 back to readable text, with a URL-safe option."},
     {"slug": "base64-file-converter", "name": "Base64 File Converter", "category": "Encoding & Hashing", "icon": "⇄", "bundle": "text", "description": "Turn any file into a Base64 data URL, or decode a data URL back into a file."},
@@ -114,6 +114,7 @@
     {"slug": "length-converter", "name": "Length Converter", "category": "Unit Converters", "icon": "↔", "bundle": "calculators", "description": "Convert millimetres, metres, kilometres, inches, feet, yards and miles."},
     {"slug": "weight-converter", "name": "Weight Converter", "category": "Unit Converters", "icon": "KG", "bundle": "calculators", "description": "Convert milligrams, grams, kilograms, tonnes, ounces, pounds and stones."},
     {"slug": "area-converter", "name": "Area Converter", "category": "Unit Converters", "icon": "m²", "bundle": "calculators", "description": "Convert square metres, square feet, acres, hectares and more."},
+    {"slug": "land-measurement-calculator", "name": "Indian Land Measurement Calculator", "category": "Land & Property", "icon": "LAND", "bundle": "land", "popular": true, "description": "Convert Bigha, Katha, Lessa, Biswa, Kanal, Marla, Guntha and acres with state-wise Indian land measurement standards."},
     {"slug": "volume-converter", "name": "Volume Converter", "category": "Unit Converters", "icon": "L", "bundle": "calculators", "description": "Convert litres, millilitres, cups, pints, quarts, gallons and cubic units."},
     {"slug": "speed-converter", "name": "Speed Converter", "category": "Unit Converters", "icon": "KMH", "bundle": "calculators", "description": "Convert m/s, km/h, mph, ft/s and knots."},
     {"slug": "data-storage-converter", "name": "Data Storage Converter", "category": "Unit Converters", "icon": "GB", "bundle": "calculators", "description": "Convert bits, bytes, KB, MB, GB, KiB, MiB and GiB storage units."},

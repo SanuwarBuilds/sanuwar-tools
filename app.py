@@ -378,7 +378,7 @@ TOOLS_CONFIG_REL = "data/tools.config.json"
 DOWNLOADS_REL    = "data/downloads.json"
 DIRECTORY_REL    = "data/directory.json"
 TOOL_CATALOG_REL = "data/tools.catalog.json"
-TOOL_BUNDLES = {"text", "media", "network", "misc", "calculators", "dls"}
+TOOL_BUNDLES = {"text", "media", "network", "misc", "calculators", "dls", "land"}
 TOOL_VENDORS = {"js-yaml", "marked", "fflate", "pdf-lib", "pdfjs", "jspdf", "bcryptjs"}
 TOOL_CATEGORY_ICONS = {
     'Calculators': 'calculator',
@@ -395,6 +395,7 @@ TOOL_CATEGORY_ICONS = {
     'Compression & Archives': 'archive',
     'Security & Privacy': 'shield',
     'Sports & Games': 'score',
+    'Land & Property': 'convert',
 }
 
 def load_tool_catalog():
@@ -488,7 +489,8 @@ def tool_page(slug):
         abort(404)
     related = [item for item in catalog['tools']
                if item['category'] == tool['category'] and item['slug'] != slug][:4]
-    return render_template('tools/tool.html', tool=tool, related=related, catalog=catalog)
+    template = 'tools/land.html' if slug == 'land-measurement-calculator' else 'tools/tool.html'
+    return render_template(template, tool=tool, related=related, catalog=catalog)
 
 BYPASS_PASSWORD_SALT = 'sanuwar-tools::bypass::jpd::v1'
 BYPASS_PASSWORD_HASH = '2c04d2f0c3db543e3965959bc8968c693ec3db1276077f88f9e3ee8de4e190ed'
