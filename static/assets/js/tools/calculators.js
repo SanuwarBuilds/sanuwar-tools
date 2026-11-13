@@ -189,6 +189,25 @@
     };
     seed();
 
+    const hydrateFromUrl = () => {
+      let params;
+      try { params = new URLSearchParams(location.search); } catch { return { changed: false, auto: false }; }
+      const fields = steps.flatMap((step) => step.fields);
+      let changed = false;
+      fields.forEach((field) => {
+        if (!params.has(field.id)) return;
+        const value = params.get(field.id);
+        if (value === null || value === "") return;
+        if (field.type === "select") {
+          const allowed = (field.options || []).map((option) => String(Array.isArray(option) ? option[1] : option));
+          if (!allowed.includes(value)) return;
+        }
+        values[field.id] = value;
+        changed = true;
+      });
+      return { changed, auto: params.get("auto") === "1" };
+    };
+
     const snapshot = () => {
       const copy = {};
       Object.keys(values).forEach((key) => { copy[key] = values[key]; });
@@ -248,6 +267,25 @@
       return lines.join("\n");
     };
 
+    const fallbackExplanation = (result) => {
+      const lines = [`The main result is ${result.primary.label}: ${result.primary.value}.`];
+      if (result.details?.length) {
+        lines.push(`Supporting figures: ${result.details.slice(0, 5).map(([label, value]) => `${label} — ${value}`).join("; ")}.`);
+      }
+      if (result.steps?.length) lines.push("The full formula is shown in the step-by-step working above.");
+      lines.push("Everything was calculated locally in your browser; no values were uploaded.");
+      return lines;
+    };
+
+    const explanationView = (result) => {
+      const custom = Array.isArray(result.explain) ? result.explain : result.explain ? [result.explain] : null;
+      const lines = (custom || fallbackExplanation(result)).map((line) => String(line || "").trim()).filter(Boolean);
+      if (!lines.length) return null;
+      return el("details", { class: "calc-explain" },
+        el("summary", { text: "Explain this result" }),
+        el("ul", { class: "calc-explain-list" }, lines.map((line) => el("li", { text: line }))));
+    };
+
     const sourceView = () => {
       if (!config.reviewed && !config.sources?.length) return null;
       const source = el("p", { class: "calc-note calc-source" });
@@ -284,6 +322,8 @@
         section.append(el("ol", { class: "calc-working" }, result.steps.map((line) => el("li", { text: String(line) }))));
       }
       (result.notes || []).forEach((note) => section.append(el("p", { class: "calc-note", text: String(note) })));
+      const explanation = explanationView(result);
+      if (explanation) section.append(explanation);
       section.append(el("div", { class: "tp-actions calc-actions" },
         T.button("Copy result", () => T.copy(summary(result)), "primary"),
         T.button("Edit inputs", () => { index = steps.length - 1; render(); }, "ghost"),
@@ -344,7 +384,9 @@
       root.replaceChildren(shell);
     };
 
-    render();
+    const hydration = hydrateFromUrl();
+    if (hydration.changed && hydration.auto) calculate();
+    else render();
   };
 
   const fractionMath = (a, b, c, d, op) => {
@@ -1301,6 +1343,11 @@
           primary: { label: "Tip amount", value: H.money(tip), sub: `Total ${H.money(total)}` },
           details: [["Bill", H.money(bill)], ["Tip", H.money(tip)], ["Total", H.money(total)], ["Per person", H.money(total / people)], ["Tip per person", H.money(tip / people)]],
           steps: [`Tip = bill × tip% = ${H.money(bill)} × ${H.fmt(percent, 4)}% = ${H.money(tip)}`, `Total = bill + tip = ${H.money(total)}`, `Each person pays ${H.money(total / people)}.`],
+          explain: [
+            `A ${H.fmt(percent, 2)}% tip on a ${H.money(bill)} bill is ${H.money(tip)}.`,
+            `Adding the tip to the bill gives ${H.money(total)}.`,
+            people > 1 ? `Split ${H.fmt(people, 0)} ways, each person pays ${H.money(total / people)}, including ${H.money(tip / people)} of tip.` : "The whole bill and tip are for one person.",
+          ],
         };
       },
     },
@@ -1470,6 +1517,15 @@
           steps: v.mode === "inclusive"
             ? [`Taxable value = ${H.money(amount)} ÷ (1 + ${H.fmt(result.rate, 2)} ÷ 100)`, `= ${H.money(result.base)}`, `GST = ${H.money(amount)} − ${H.money(result.base)} = ${H.money(result.tax)}`]
             : [`GST = ${H.money(amount)} × ${H.fmt(result.rate, 2)} ÷ 100 = ${H.money(result.tax)}`, `Total = ${H.money(amount)} + ${H.money(result.tax)} = ${H.money(result.total)}`, result.interstate ? "Inter-state supply: the full GST amount is IGST." : `Intra-state supply: CGST = ${H.money(result.cgst)} and SGST = ${H.money(result.sgst)}.`],
+          explain: [
+            v.mode === "inclusive"
+              ? `The amount ${H.money(amount)} already includes GST. Dividing it by ${H.fmt(1 + result.rate / 100, 4)} gives a taxable value of ${H.money(result.base)} and GST of ${H.money(result.tax)}.`
+              : `GST at ${H.fmt(result.rate, 2)}% of ${H.money(result.base)} is ${H.money(result.tax)}. Adding that to the taxable value gives ${H.money(result.total)}.`,
+            result.interstate
+              ? `This is an inter-state supply, so the full ${H.money(result.tax)} is charged as IGST.`
+              : `This is an intra-state supply, so the GST is split equally: CGST ${H.money(result.cgst)} and SGST ${H.money(result.sgst)}.`,
+            "The rate must match the HSN or SAC classification for the goods or service. Check the official GST portal if you are unsure.",
+          ],
           notes: ["Uses the GST 2.0 rate structure announced on 22 September 2025: 5%, 18% and 40%, plus special rates for specified goods.", "GST treatment depends on the HSN/SAC classification, place of supply and exemptions. Confirm rates with the official GST portal or a tax professional."],
         };
       },
@@ -1546,6 +1602,22 @@
           variant: plan.total === 0 ? "good" : undefined,
           details,
           steps,
+          explain: [
+            `Your gross income is ${H.money(plan.gross)}. The standard deduction of ${H.money(plan.standardDeduction)} and other eligible deductions of ${H.money(plan.deductions.total)} leave taxable income of ${H.money(plan.taxable)}.`,
+            `Applying the ${regimeLabel.toLowerCase()} slabs gives tax of ${H.money(plan.slabTax)} before any rebate or surcharge.`,
+            plan.rebate > 0
+              ? `The Section 87A rebate or marginal relief reduces the tax by ${H.money(plan.rebate)}.`
+              : "No Section 87A rebate or marginal relief applies at this income level.",
+            plan.surcharge > 0
+              ? `A surcharge of ${H.money(plan.surcharge)} is added at ${H.fmt(plan.surchargeRate * 100, 0)}%.`
+              : "No surcharge applies.",
+            `Health and education cess at 4% adds ${H.money(plan.cess)}, so the final tax is ${plan.total === 0 ? "nil" : H.money(plan.total)}.`,
+            compare
+              ? (Math.abs(result.savings) < 1
+                ? `Both regimes produce the same tax of ${H.money(plan.total)}.`
+                : `The new regime tax is ${H.money(result.new.total)} and the old regime tax is ${H.money(result.old.total)}; the ${regimeLabel.toLowerCase()} is lower by ${H.money(result.savings)}.`)
+              : `This estimate uses the ${regimeLabel.toLowerCase()} only; switch to “Compare both regimes” to see the other option.`,
+          ],
           notes: [
             "Built for FY 2026-27 (assessment year 2027-28) using the new-regime slabs of 0–4 lakh: nil, 4–8 lakh: 5%, 8–12 lakh: 10%, 12–16 lakh: 15%, 16–20 lakh: 20%, 20–24 lakh: 25% and above 24 lakh: 30%.",
             "The old regime uses the 2.5 / 5 / 10 lakh slabs, with higher exemption limits for senior citizens. HRA, LTA, employer NPS contributions and other special deductions are not modelled here.",
@@ -1589,6 +1661,9 @@
           rateBasis: v.rateBasis,
         });
         const basisLabel = { sqft: "sq ft", sqm: "sq m", acre: "acre", hectare: "hectare" }[v.rateBasis];
+        const areaInInputUnit = v.unit === "m" ? result.squareMetres : result.squareFeet;
+        const inputAreaLabel = v.unit === "m" ? "sq m" : "sq ft";
+        const shapeLabel = { rectangle: "rectangular", triangle: "triangular", quadrilateral: "four-sided" }[v.shape];
         return {
           primary: {
             label: "Plot area",
@@ -1605,10 +1680,21 @@
             ["Estimated land value", H.money(result.value)],
           ],
           steps: v.shape === "rectangle"
-            ? [`Area = length × width = ${H.fmt(H.num(v.length), 4)} × ${H.fmt(H.num(v.width), 4)} = ${H.fmt(result.squareFeet, 2)} sq ft`, `Square metres = ${H.fmt(result.squareFeet, 2)} ÷ 10.7639 = ${H.fmt(result.squareMetres, 2)}`, `Value = ${H.money(rate)} per ${basisLabel} × area in that unit = ${H.money(result.value)}`]
+            ? [`Area = length × width = ${H.fmt(H.num(v.length), 4)} × ${H.fmt(H.num(v.width), 4)} = ${H.fmt(areaInInputUnit, 2)} ${inputAreaLabel}`, v.unit === "m" ? `Convert to square feet: ${H.fmt(result.squareMetres, 2)} sq m × 10.7639 = ${H.fmt(result.squareFeet, 2)} sq ft` : `Square metres = ${H.fmt(result.squareFeet, 2)} ÷ 10.7639 = ${H.fmt(result.squareMetres, 2)}`, `Value = ${H.money(rate)} per ${basisLabel} × area in that unit = ${H.money(result.value)}`]
             : v.shape === "triangle"
-              ? ["Area uses Heron's formula with the three side lengths.", `Area = ${H.fmt(result.squareFeet, 2)} sq ft`, `Value = ${H.money(rate)} per ${basisLabel} × area in that unit = ${H.money(result.value)}`]
-              : ["The four-sided plot is split into two triangles using the diagonal.", "Area = triangle A–B–diagonal + triangle C–D–diagonal", `Area = ${H.fmt(result.squareFeet, 2)} sq ft`, `Value = ${H.money(rate)} per ${basisLabel} × area in that unit = ${H.money(result.value)}`],
+              ? ["Area uses Heron's formula with the three side lengths.", `Area = ${H.fmt(areaInInputUnit, 2)} ${inputAreaLabel} (${H.fmt(result.squareFeet, 2)} sq ft)`, `Value = ${H.money(rate)} per ${basisLabel} × area in that unit = ${H.money(result.value)}`]
+              : ["The four-sided plot is split into two triangles using the diagonal.", "Area = triangle A–B–diagonal + triangle C–D–diagonal", `Area = ${H.fmt(areaInInputUnit, 2)} ${inputAreaLabel} (${H.fmt(result.squareFeet, 2)} sq ft)`, `Value = ${H.money(rate)} per ${basisLabel} × area in that unit = ${H.money(result.value)}`],
+          explain: [
+            `You measured a ${shapeLabel} plot in ${v.unit === "m" ? "metres" : "feet"}.`,
+            v.shape === "rectangle"
+              ? `The area is length × width: ${H.fmt(H.num(v.length), 4)} × ${H.fmt(H.num(v.width), 4)} = ${H.fmt(areaInInputUnit, 2)} ${inputAreaLabel}, which is ${H.fmt(result.squareFeet, 2)} sq ft.`
+              : v.shape === "triangle"
+                ? `The three sides are used in Heron's formula, which finds the semi-perimeter and then the area: ${H.fmt(areaInInputUnit, 2)} ${inputAreaLabel}, or ${H.fmt(result.squareFeet, 2)} sq ft.`
+                : `The diagonal splits the plot into two triangles, and their areas are added: ${H.fmt(areaInInputUnit, 2)} ${inputAreaLabel}, or ${H.fmt(result.squareFeet, 2)} sq ft.`,
+            `The same area is ${H.fmt(result.squareMetres, 2)} sq m, ${H.fmt(result.squareYards, 2)} sq yd, ${H.fmt(result.acres, 4)} acre and ${H.fmt(result.hectares, 4)} hectare.`,
+            `At ${H.money(rate)} per ${basisLabel}, the estimated land value is ${H.money(result.value)}.`,
+            "This is a geometry-based estimate, not a legal survey. Verify the measurements, title and land use before a transaction.",
+          ],
           notes: ["Enter the measurements from the plot boundary or a registered survey. A four-sided plot calculator assumes the diagonal divides the plot into two valid triangles.", "This is a geometric area estimate, not a legal survey. Verify the area, access, setbacks and title with the revenue record, registered deed or a licensed surveyor.", "Land rates vary by locality, road access and land use. The rate you enter is applied uniformly to the measured area."],
         };
       },
@@ -1701,6 +1787,12 @@
           primary: { label: "Total stamp duty and registration", value: H.money(result.total), sub: `${H.fmt(result.effectiveRate, 2)}% of property value` },
           details: [["Property value", H.money(result.value)], ["Stamp duty rate", `${H.fmt(stampRate, 3)}%`], ["Stamp duty", H.money(result.stamp)], ["Registration rate", `${H.fmt(registrationRate, 3)}%`], ["Registration fee", H.money(result.registration)], ["Other charges", H.money(result.other)], ["Total payable", H.money(result.total)], ["Effective rate", `${H.fmt(result.effectiveRate, 3)}%`]],
           steps: [`Stamp duty = ${H.money(result.value)} × ${H.fmt(stampRate, 3)}% = ${H.money(result.stamp)}`, `Registration fee = ${H.money(result.value)} × ${H.fmt(registrationRate, 3)}% = ${H.money(result.registration)}`, `Total = stamp duty + registration fee + other charges = ${H.money(result.total)}`],
+          explain: [
+            `Stamp duty is ${H.fmt(stampRate, 3)}% of the property value: ${H.money(result.value)} × ${H.fmt(stampRate, 3)}% = ${H.money(result.stamp)}.`,
+            `The registration fee is ${H.fmt(registrationRate, 3)}% of the same value, which is ${H.money(result.registration)}.`,
+            `Adding other charges of ${H.money(result.other)} gives a total of ${H.money(result.total)}, or ${H.fmt(result.effectiveRate, 3)}% of the property value.`,
+            "Rates differ by state, property type, location and buyer category. Use your state's current ready reckoner and confirm the final amount at the stamp office.",
+          ],
           notes: ["Stamp duty and registration rates differ by state, property type, location, buyer category and transaction type. Use the current rate from your state's stamp and registration department.", "This estimate excludes GST, legal fees, brokerage, mutation charges and any concessions. Confirm the final amount with the registering authority.", "The default 6% and 1% are example rates, not a recommendation for any state."],
         };
       },

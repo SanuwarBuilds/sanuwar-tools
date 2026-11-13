@@ -32,6 +32,8 @@ jobs:
           node --check static/assets/js/tools/land.js
           node --check static/assets/js/tools/calc-math.js
           node --check static/assets/js/tools/calculators.js
+          node --check static/assets/js/tools/smart-search.js
+          node --check static/assets/js/tools/hub.js
           node --check static/assets/js/tools/misc.js
           node --check static/assets/vendor/qrcodegen.js
       - name: Run land engine tests
@@ -40,3 +42,5 @@ jobs:
         run: node tests/land_i18n.test.cjs
       - name: Run P0 calculation tests
         run: node tests/calc_math.test.cjs
+      - name: Run smart search tests
+        run: node tests/smart_search.test.cjs

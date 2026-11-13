@@ -1,6 +1,6 @@
 {% extends 'base.html' %}
 {% block bodyclass %}tools-hub-page{% endblock %}
-{% block page_styles %}<link rel="stylesheet" href="/assets/css/tools.css?v=3">{% endblock %}
+{% block page_styles %}<link rel="stylesheet" href="/assets/css/tools.css?v=4">{% endblock %}
 {% block content %}
 <section class="tp-hub wrap">
   <header class="tp-hub-head">
@@ -9,9 +9,21 @@
     <h1>{{ catalog.tools | length }} free browser tools. No uploads.</h1>
     <p>Text converters, encoders, hashes, image and PDF utilities, network checks, step-by-step calculators, DLS cricket targets, unit converters and everyday helpers. Every tool runs inside your browser — files never leave your device.</p>
     <div class="tp-hub-search">
-      <label class="tp-search" for="tp-search"><span aria-hidden="true">⌕</span><input id="tp-search" type="search" placeholder="Search all {{ catalog.tools | length }} tools…" autocomplete="off"><kbd>/</kbd></label>
+      <label class="tp-search" for="tp-search"><span aria-hidden="true">⌕</span><input id="tp-search" type="search" placeholder="Search tools, or type: 18% GST on 5000" autocomplete="off"><kbd>/</kbd></label>
       <span class="tp-hub-count"><b id="tp-visible">{{ catalog.tools | length }}</b> tools ready</span>
     </div>
+    <div class="tp-smart" id="tp-smart" hidden aria-live="polite">
+      <button type="button" class="tp-smart-hit" id="tp-smart-hit">
+        <span class="tp-smart-kicker">Smart match · local</span>
+        <strong id="tp-smart-label"></strong>
+        <span class="tp-smart-open">Open <span aria-hidden="true">→</span></span>
+      </button>
+    </div>
+    <p class="tp-search-hint">Try a full question:
+      <button type="button" data-smart-example="18% GST on 5000">18% GST on 5000</button>
+      <button type="button" data-smart-example="income tax on 12 lakh">income tax on 12 lakh</button>
+      <button type="button" data-smart-example="2 bigha to katha">2 bigha to katha</button>
+    </p>
   </header>
 
   <div class="tp-chips" id="tp-chips" role="group" aria-label="Filter tools by category">
@@ -40,4 +52,5 @@
   </aside>
 </section>
 {% endblock %}
-{% block scripts %}<script nonce="{{ csp_nonce }}" src="/assets/js/tools/hub.js?v=1" defer></script>{% endblock %}
+{% block scripts %}<script nonce="{{ csp_nonce }}" src="/assets/js/tools/smart-search.js?v=1" defer></script>
+<script nonce="{{ csp_nonce }}" src="/assets/js/tools/hub.js?v=2" defer></script>{% endblock %}

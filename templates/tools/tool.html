@@ -1,8 +1,8 @@
 {% extends 'base.html' %}
 {% set vendor_files = {'js-yaml': 'js-yaml.js', 'marked': 'marked.js', 'fflate': 'fflate.js', 'pdf-lib': 'pdf-lib.js', 'pdfjs': 'pdf.min.js', 'jspdf': 'jspdf.umd.min.js', 'bcryptjs': 'bcrypt.min.js', 'qrcodegen': 'qrcodegen.js'} %}
-{% set bundle_version = 3 if tool.bundle == 'calculators' else 2 %}
+{% set bundle_version = 4 if tool.bundle == 'calculators' else 2 %}
 {% block bodyclass %}tool-page tool-page-{{ tool.bundle }}{% endblock %}
-{% block page_styles %}<link rel="stylesheet" href="/assets/css/tools.css?v=3">{% endblock %}
+{% block page_styles %}<link rel="stylesheet" href="/assets/css/tools.css?v=4">{% endblock %}
 {% block content %}
 <section class="tp-shell wrap" data-tool-page data-tool-slug="{{ tool.slug }}">
   <nav class="tp-crumb" aria-label="Breadcrumb"><a href="/">Home</a><span aria-hidden="true">/</span><a href="/tools">All tools</a><span aria-hidden="true">/</span><span>{{ tool.category }}</span></nav>

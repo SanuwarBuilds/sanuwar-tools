@@ -33,6 +33,14 @@
     return dictionary[key] ?? STRINGS.en[key] ?? key;
   };
 
+  const fill = (key, values) => {
+    let text = t(key);
+    Object.entries(values).forEach(([name, value]) => {
+      text = text.split(`{${name}}`).join(String(value));
+    });
+    return text;
+  };
+
   const localized = (value) => (value ? value[state.lang] || value.en || "" : "");
 
   const errorKey = (code) => "error" + code.charAt(0).toUpperCase() + code.slice(1);
@@ -114,6 +122,7 @@
         main,
         to,
         from,
+        value: parsed.value,
         secondary,
         sqm: conversion.sqm,
         parts: engine.breakdown(conversion.sqm, state.regionId, state.standardId, state.lang, state.mode),
@@ -565,6 +574,25 @@
     return wrap;
   }
 
+  function buildExplanation(result) {
+    const fromLabel = engine.label(result.from, state.lang);
+    const toLabel = engine.label(result.to, state.lang);
+    const standardLabel = result.standard ? engine.label(result.standard, state.lang) : t("commonStandard");
+    const number = (value) => engine.formatNumber(value, state.lang, state.mode).text;
+    const factor = number(result.from.sqm);
+    const toFactor = number(result.to.sqm);
+    return [
+      fill("explainIntro", { value: number(result.value), from: fromLabel, to: toLabel }),
+      fill("explainFactor", { standard: standardLabel, from: fromLabel, factor }),
+      fill("explainResult", {
+        value: number(result.value), from: fromLabel, factor,
+        sqm: number(result.sqm), toFactor, to: toLabel, result: result.main.text,
+      }),
+      t("explainRound"),
+      t("explainNote"),
+    ];
+  }
+
   function buildResult(result) {
     const scope = currentScope();
     const section = el("section", { class: "lm-deed" + (result.status === "ok" ? "" : " is-empty"), id: "lm-result", "aria-live": "polite" });
@@ -594,6 +622,9 @@
             .map((part) => `${part.approx ? "≈" : ""}${part.text} ${engine.label(part.unit, state.lang)}`)
             .join(" · ") })));
       }
+      section.append(el("details", { class: "lm-explain" },
+        el("summary", { text: t("explainTitle") }),
+        el("ol", { class: "lm-explain-list" }, buildExplanation(result).map((line) => el("li", { text: line })))));
       const copyButton = el("button", {
         type: "button",
         class: "lm-deed-copy",

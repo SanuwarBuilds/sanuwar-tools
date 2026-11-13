@@ -99,6 +99,53 @@
 }
 .tp-hub-count { color: var(--bp-muted); font-family: var(--tp-mono); font-size: 12px; }
 .tp-hub-count b { color: var(--bp-accent); }
+.tp-smart { margin-top: 12px; }
+.tp-smart[hidden] { display: none; }
+.tp-smart-hit {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 6px 12px;
+  width: 100%;
+  padding: 12px 14px;
+  border: 1px solid var(--bp-accent);
+  border-radius: 12px;
+  background: var(--bp-accent-wash);
+  color: var(--bp-ink);
+  font: inherit;
+  text-align: left;
+  cursor: pointer;
+}
+.tp-smart-hit:focus-visible { outline: 3px solid var(--bp-accent); outline-offset: 2px; }
+.tp-smart-kicker {
+  flex: 0 0 100%;
+  color: var(--bp-faint);
+  font: 600 9.5px var(--tp-mono);
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+}
+.tp-smart-hit strong { flex: 1 1 220px; font-size: 14px; line-height: 1.4; }
+.tp-smart-open { color: var(--bp-accent); font: 700 11px var(--tp-mono); white-space: nowrap; }
+.tp-search-hint {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  gap: 4px 10px;
+  margin: 10px 0 0;
+  color: var(--bp-faint);
+  font: 10.5px/1.6 var(--tp-mono);
+}
+.tp-search-hint button {
+  padding: 0;
+  border: 0;
+  background: none;
+  color: var(--bp-accent);
+  font: inherit;
+  text-decoration: underline;
+  text-underline-offset: 2px;
+  cursor: pointer;
+}
+.tp-search-hint button:hover { color: var(--bp-ink); }
 
 .tp-chips { display: flex; gap: 8px; overflow-x: auto; padding: 2px 2px 14px; margin-bottom: 12px; scrollbar-width: thin; }
 .tp-chip {
@@ -533,6 +580,26 @@
 .calc-source a:hover {
   color: var(--bp-ink);
 }
+.calc-explain {
+  margin-top: 12px;
+  padding-top: 10px;
+  border-top: 1px solid var(--bp-line);
+}
+.calc-explain summary {
+  color: var(--bp-accent);
+  font: 700 11px var(--tp-mono);
+  letter-spacing: 0.02em;
+  cursor: pointer;
+}
+.calc-explain summary:hover { color: var(--bp-ink); }
+.calc-explain-list {
+  margin: 9px 0 0;
+  padding-left: 18px;
+  color: var(--bp-muted);
+  font-size: 12px;
+  line-height: 1.65;
+}
+.calc-explain-list li + li { margin-top: 5px; }
 .calc-interruptions {
   grid-column: 1 / -1;
   margin-top: 6px;
@@ -2035,6 +2102,73 @@ html[data-theme="dark"]:has(body.tool-page) {
   color: var(--neu-accent-ink);
 }
 
+:is(.tools-hub-page, .tool-page) .calc-explain {
+  margin-top: 16px;
+  padding: 14px 16px;
+  border-top: 0;
+  border-radius: 1rem;
+  background: var(--neu-base);
+  box-shadow: var(--neu-inset-sm);
+}
+
+:is(.tools-hub-page, .tool-page) .calc-explain summary {
+  color: var(--neu-accent-ink);
+  font-family: var(--bp-font);
+  font-size: 12px;
+}
+
+:is(.tools-hub-page, .tool-page) .calc-explain-list {
+  color: var(--neu-muted);
+  font-family: var(--bp-font);
+  font-size: 12.5px;
+  line-height: 1.65;
+}
+
+:is(.tools-hub-page, .tool-page) .qr-explain-body {
+  color: var(--neu-muted);
+  font-family: var(--bp-font);
+}
+
+:is(.tools-hub-page, .tool-page) .tp-smart-hit {
+  border: 0;
+  border-radius: 1.25rem;
+  background: var(--neu-base);
+  box-shadow: var(--neu-raised);
+  color: var(--neu-heading);
+  font-family: var(--bp-font);
+}
+
+:is(.tools-hub-page, .tool-page) .tp-smart-hit:hover {
+  box-shadow: var(--neu-raised-lg);
+}
+
+:is(.tools-hub-page, .tool-page) .tp-smart-hit:focus-visible {
+  outline-color: var(--neu-accent);
+}
+
+:is(.tools-hub-page, .tool-page) .tp-smart-kicker {
+  color: var(--neu-faint);
+  font-family: var(--bp-font);
+}
+
+:is(.tools-hub-page, .tool-page) .tp-smart-hit strong {
+  color: var(--neu-accent-ink);
+}
+
+:is(.tools-hub-page, .tool-page) .tp-smart-open {
+  color: var(--neu-muted);
+  font-family: var(--bp-font);
+}
+
+:is(.tools-hub-page, .tool-page) .tp-search-hint {
+  color: var(--neu-muted);
+  font-family: var(--bp-font);
+}
+
+:is(.tools-hub-page, .tool-page) .tp-search-hint button {
+  color: var(--neu-accent-ink);
+}
+
 :is(.tools-hub-page, .tool-page) .calc-interruptions {
   padding: 16px;
   border: 0;
@@ -2267,6 +2401,13 @@ html[data-theme="dark"]:has(body.tool-page) {
   font-size: 11px;
   line-height: 1.55;
   overflow-wrap: anywhere;
+}
+.qr-explain { margin-top: 12px; }
+.qr-explain-body {
+  margin: 8px 0 0;
+  color: var(--bp-muted);
+  font-size: 11px;
+  line-height: 1.55;
 }
 @media (max-width: 700px) {
   .qr-result { grid-template-columns: minmax(0, 1fr); }

@@ -30,7 +30,7 @@ class LandCalculatorTests(unittest.TestCase):
         self.assertEqual(len(re.findall(r'<h1[ >]', self.html)), 1)
         self.assertIn('<h1>Indian Land Measurement Calculator</h1>', self.html)
         for asset in ('core.js?v=1', 'land-data.js?v=1', 'land-engine.js?v=1',
-                      'land-i18n.js?v=2', 'land.js?v=2', 'land.css?v=2', 'tools.css?v=3'):
+                      'land-i18n.js?v=3', 'land.js?v=3', 'land.css?v=3', 'tools.css?v=4'):
             self.assertIn(asset, self.html)
         self.assertIn('data-tool-slug="land-measurement-calculator"', self.html)
         self.assertIn('id="tool-root"', self.html)
@@ -60,6 +60,12 @@ class LandCalculatorTests(unittest.TestCase):
         self.assertIn('ज़रूरी सूचना', i18n)
         self.assertIn('গুৰুত্বপূৰ্ণ', i18n)
         self.assertIn('ভূমি মাপ', i18n)
+        self.assertIn('How this area was calculated', i18n)
+        self.assertIn('यह क्षेत्रफल कैसे निकला', i18n)
+        self.assertIn('এই ক্ষেত্ৰফল কেনেকৈ উলিওৱা হ\'ল', i18n)
+        land_js = self.client.get('/assets/js/tools/land.js').get_data(as_text=True)
+        self.assertIn('lm-explain', land_js)
+        self.assertIn('explainResult', land_js)
 
     def test_search_metadata_and_structured_data(self):
         self.assertIn('<title>Land Measurement Calculator — Bigha, Katha, Lessa | SanuwarTools</title>', self.html)

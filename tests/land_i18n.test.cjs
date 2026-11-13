@@ -32,6 +32,7 @@ const required = [
   "shareTitle", "shareHint", "shareCopyLink", "shareWhatsapp", "sharePrint",
   "shareBadge", "shareUpdated", "methodologyLink", "linkCopied", "clear",
   "printTitle", "printPrepared", "printNote",
+  "explainTitle", "explainIntro", "explainFactor", "explainResult", "explainRound", "explainNote",
 ];
 for (const key of required) {
   assert.ok(keys.includes(key), `missing UI key ${key}`);

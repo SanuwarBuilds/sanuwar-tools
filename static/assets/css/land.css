@@ -455,6 +455,28 @@ html[data-theme="dark"] body.tool-page-land {
   text-transform: uppercase;
 }
 .lm-deed-breakdown-value { font-size: 13px; font-weight: 700; line-height: 1.5; }
+.lm-explain {
+  margin-top: 14px;
+  padding-top: 12px;
+  border-top: 1px dashed var(--lm-paper-line);
+}
+.lm-explain summary {
+  color: var(--lm-green);
+  font-size: 10px;
+  font-weight: 800;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  cursor: pointer;
+}
+.lm-explain summary:hover { color: var(--lm-clay); }
+.lm-explain-list {
+  margin: 8px 0 0;
+  padding-left: 18px;
+  color: var(--lm-deed-muted);
+  font-size: 11.5px;
+  line-height: 1.6;
+}
+.lm-explain-list li + li { margin-top: 5px; }
 .lm-deed-foot {
   display: flex;
   flex-wrap: wrap;
@@ -847,7 +869,8 @@ html[data-theme="dark"] body.tool-page-land {
   .lm-main,
   .lm-share,
   .lm-actions,
-  .lm-deed-foot { display: none !important; }
+  .lm-deed-foot,
+  .lm-explain { display: none !important; }
   .lm-side { margin-top: 0; }
   .lm-panel,
   .lm-deed {

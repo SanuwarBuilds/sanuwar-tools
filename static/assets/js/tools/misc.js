@@ -397,6 +397,7 @@
     const canvas = el("canvas", { class: "qr-canvas", width: 512, height: 512, "aria-label": "Generated QR code" });
     const preview = el("div", { class: "qr-preview" }, canvas);
     const payloadText = el("code", { class: "qr-payload" });
+    const qrExplain = el("p", { class: "qr-explain-body", text: "Generate a QR code to see what it contains." });
     const form = el("div", { class: "tp-cols" },
       T.field("QR code type", type), contentField, ...wifiFields, ...upiFields,
       T.field("Download size (approx.)", size), T.field("Error correction", level),
@@ -414,7 +415,10 @@
         el("div", { class: "qr-meta" },
           el("span", { class: "qr-meta-label", text: "Encoded content" }),
           payloadText,
-          el("p", { class: "tp-hint", text: "The QR code is generated in this browser. Nothing is uploaded." }))));
+          el("p", { class: "tp-hint", text: "The QR code is generated in this browser. Nothing is uploaded." }),
+          el("details", { class: "calc-explain qr-explain" },
+            el("summary", { text: "Explain this QR code" }),
+            qrExplain))));
     root.replaceChildren(panel);
 
     let payload = "";
@@ -488,10 +492,13 @@
         draw(code);
         lastUrl = type.value === "url" ? payload : lastUrl;
         payloadText.textContent = payload;
+        const kind = { url: "website link", text: "plain text", wifi: "Wi-Fi network", upi: "UPI payment" }[type.value];
+        qrExplain.textContent = `This code stores ${payload.length} characters as a ${kind}. A scanner reads the exact encoded content, so test it before printing or sharing. The code was generated locally; nothing was uploaded.`;
         if (announce) status(root, "QR code generated locally.", "ok");
       } catch (error) {
         payload = "";
         payloadText.textContent = "—";
+        qrExplain.textContent = "Generate a valid code to see its explanation.";
         canvas.getContext("2d").clearRect(0, 0, canvas.width, canvas.height);
         if (announce) status(root, error.message, "error");
       }
