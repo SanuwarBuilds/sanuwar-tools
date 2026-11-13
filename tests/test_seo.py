@@ -260,7 +260,7 @@ class ToolHubTests(unittest.TestCase):
     def test_catalog_and_javascript_bundles_are_consistent(self):
         tools=self.catalog['tools']
         slugs=[tool['slug'] for tool in tools]
-        self.assertEqual(len(slugs),119)
+        self.assertEqual(len(slugs),125)
         self.assertEqual(len(slugs),len(set(slugs)))
         categories=set(self.catalog['categories'])
         registered={}

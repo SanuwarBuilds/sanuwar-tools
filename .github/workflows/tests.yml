@@ -24,13 +24,19 @@ jobs:
       - uses: actions/setup-node@v4
         with:
           node-version: "22"
-      - name: Check land JavaScript syntax
+      - name: Check JavaScript syntax
         run: |
           node --check static/assets/js/tools/land-data.js
           node --check static/assets/js/tools/land-engine.js
           node --check static/assets/js/tools/land-i18n.js
           node --check static/assets/js/tools/land.js
+          node --check static/assets/js/tools/calc-math.js
+          node --check static/assets/js/tools/calculators.js
+          node --check static/assets/js/tools/misc.js
+          node --check static/assets/vendor/qrcodegen.js
       - name: Run land engine tests
         run: node tests/land_engine.test.cjs
       - name: Run i18n parity tests
         run: node tests/land_i18n.test.cjs
+      - name: Run P0 calculation tests
+        run: node tests/calc_math.test.cjs

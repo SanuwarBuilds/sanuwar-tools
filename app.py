@@ -379,7 +379,7 @@ DOWNLOADS_REL    = "data/downloads.json"
 DIRECTORY_REL    = "data/directory.json"
 TOOL_CATALOG_REL = "data/tools.catalog.json"
 TOOL_BUNDLES = {"text", "media", "network", "misc", "calculators", "dls", "land"}
-TOOL_VENDORS = {"js-yaml", "marked", "fflate", "pdf-lib", "pdfjs", "jspdf", "bcryptjs"}
+TOOL_VENDORS = {"js-yaml", "marked", "fflate", "pdf-lib", "pdfjs", "jspdf", "bcryptjs", "qrcodegen"}
 TOOL_CATEGORY_ICONS = {
     'Calculators': 'calculator',
     'Encoding & Hashing': 'key',

@@ -1,7 +1,8 @@
 {% extends 'base.html' %}
-{% set vendor_files = {'js-yaml': 'js-yaml.js', 'marked': 'marked.js', 'fflate': 'fflate.js', 'pdf-lib': 'pdf-lib.js', 'pdfjs': 'pdf.min.js', 'jspdf': 'jspdf.umd.min.js', 'bcryptjs': 'bcrypt.min.js'} %}
+{% set vendor_files = {'js-yaml': 'js-yaml.js', 'marked': 'marked.js', 'fflate': 'fflate.js', 'pdf-lib': 'pdf-lib.js', 'pdfjs': 'pdf.min.js', 'jspdf': 'jspdf.umd.min.js', 'bcryptjs': 'bcrypt.min.js', 'qrcodegen': 'qrcodegen.js'} %}
+{% set bundle_version = 3 if tool.bundle == 'calculators' else 2 %}
 {% block bodyclass %}tool-page tool-page-{{ tool.bundle }}{% endblock %}
-{% block page_styles %}<link rel="stylesheet" href="/assets/css/tools.css?v=2">{% endblock %}
+{% block page_styles %}<link rel="stylesheet" href="/assets/css/tools.css?v=3">{% endblock %}
 {% block content %}
 <section class="tp-shell wrap" data-tool-page data-tool-slug="{{ tool.slug }}">
   <nav class="tp-crumb" aria-label="Breadcrumb"><a href="/">Home</a><span aria-hidden="true">/</span><a href="/tools">All tools</a><span aria-hidden="true">/</span><span>{{ tool.category }}</span></nav>
@@ -49,10 +50,13 @@
 {% block scripts %}
 <script nonce="{{ csp_nonce }}" src="/assets/js/tools/core.js?v=1" defer></script>
 {% for vendor in tool.vendor or [] %}{% if vendor in vendor_files %}<script nonce="{{ csp_nonce }}" src="/assets/vendor/{{ vendor_files[vendor] }}?v=1" defer></script>{% endif %}{% endfor %}
+{% if tool.bundle == 'calculators' %}
+<script nonce="{{ csp_nonce }}" src="/assets/js/tools/calc-math.js?v=1" defer></script>
+{% endif %}
 {% if tool.bundle == 'dls' %}
 <script nonce="{{ csp_nonce }}" src="/assets/js/tools/dls-tables.js?v=1" defer></script>
 <script nonce="{{ csp_nonce }}" src="/assets/js/tools/dls-core.js?v=1" defer></script>
 {% endif %}
-<script nonce="{{ csp_nonce }}" src="/assets/js/tools/{{ tool.bundle }}.js?v=1" defer></script>
+<script nonce="{{ csp_nonce }}" src="/assets/js/tools/{{ tool.bundle }}.js?v={{ bundle_version }}" defer></script>
 <script nonce="{{ csp_nonce }}" src="/assets/js/tools/boot.js?v=1" defer></script>
 {% endblock %}

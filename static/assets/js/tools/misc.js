@@ -360,4 +360,163 @@
     setInterval(update, 1000);
     status(root, "Clock running in UTC.", "ok");
   });
+
+  T.register("qr-code-generator", (root) => {
+    const type = T.select([
+      ["Website URL or link", "url"],
+      ["Plain text", "text"],
+      ["Wi-Fi network", "wifi"],
+      ["UPI payment", "upi"],
+    ], "url");
+    const content = T.textarea("https://sanuwartools.online", { rows: 3, placeholder: "https://example.com" });
+    const ssid = T.input({ type: "text", placeholder: "Home Wi-Fi" });
+    const password = T.input({ type: "password", placeholder: "Wi-Fi password" });
+    const security = T.select([["WPA / WPA2 / WPA3", "WPA"], ["WEP", "WEP"], ["Open network", "nopass"]], "WPA");
+    const hidden = el("input", { type: "checkbox" });
+    const pa = T.input({ type: "text", placeholder: "name@bank" });
+    const pn = T.input({ type: "text", placeholder: "Merchant or person name" });
+    const amount = T.input({ type: "number", min: 0, step: "0.01", placeholder: "0.00" });
+    const note = T.input({ type: "text", placeholder: "Payment note" });
+    const size = T.select([["256 × 256 px", "256"], ["512 × 512 px", "512"], ["1024 × 1024 px", "1024"]], "512");
+    const level = T.select([["Low — 7% recovery", "L"], ["Medium — 15% recovery", "M"], ["Quartile — 25% recovery", "Q"], ["High — 30% recovery", "H"]], "M");
+    const margin = T.input({ type: "number", min: 0, max: 16, value: 4 });
+    const contentField = T.field("URL or URI", content, "The QR code stores exactly what you enter.");
+    contentField.classList.add("qr-wide");
+    const wifiFields = [
+      T.field("Network name (SSID)", ssid),
+      T.field("Password", password),
+      T.field("Security", security),
+      T.field("Hidden network", hidden),
+    ];
+    const upiFields = [
+      T.field("UPI ID", pa, "For example name@bank or 9876543210@upi."),
+      T.field("Payee name", pn),
+      T.field("Amount", amount, "Leave blank for an open amount."),
+      T.field("Payment note", note),
+    ];
+    const canvas = el("canvas", { class: "qr-canvas", width: 512, height: 512, "aria-label": "Generated QR code" });
+    const preview = el("div", { class: "qr-preview" }, canvas);
+    const payloadText = el("code", { class: "qr-payload" });
+    const form = el("div", { class: "tp-cols" },
+      T.field("QR code type", type), contentField, ...wifiFields, ...upiFields,
+      T.field("Download size (approx.)", size), T.field("Error correction", level),
+      T.field("Quiet-zone margin (modules)", margin));
+    const actions = el("div", { class: "tp-actions" },
+      T.button("Generate QR code", () => generate(true), "primary"),
+      T.button("Download PNG", () => downloadPng(), "ghost"),
+      T.button("Copy encoded content", () => payload ? T.copy(payload) : status(root, "Generate a QR code first.", "error"), "ghost"));
+    const panel = el("section", { class: "tp-panel" },
+      el("h2", { class: "tp-panel-title", text: "Create a QR code" }),
+      form,
+      actions,
+      el("div", { class: "qr-result" },
+        preview,
+        el("div", { class: "qr-meta" },
+          el("span", { class: "qr-meta-label", text: "Encoded content" }),
+          payloadText,
+          el("p", { class: "tp-hint", text: "The QR code is generated in this browser. Nothing is uploaded." }))));
+    root.replaceChildren(panel);
+
+    let payload = "";
+    let lastUrl = "https://sanuwartools.online";
+    const escapeWifi = (value) => String(value).replace(/([\\;,":])/g, "\\$1");
+    const encodeUpi = (value) => encodeURIComponent(String(value)).replace(/%40/g, "@");
+
+    const syncFields = () => {
+      const kind = type.value;
+      contentField.hidden = kind !== "url" && kind !== "text";
+      contentField.querySelector(".tp-label").textContent = kind === "url" ? "URL or URI" : "Text";
+      content.placeholder = kind === "url" ? "https://example.com" : "Enter the text to encode";
+      wifiFields.forEach((field) => { field.hidden = kind !== "wifi"; });
+      upiFields.forEach((field) => { field.hidden = kind !== "upi"; });
+      contentField.hidden = kind !== "url" && kind !== "text";
+      schedule();
+    };
+
+    const buildPayload = () => {
+      if (type.value === "url" || type.value === "text") {
+        const value = content.value.trim();
+        if (!value) throw new Error("Enter the URL or text to encode.");
+        return value;
+      }
+      if (type.value === "wifi") {
+        const network = ssid.value.trim();
+        if (!network) throw new Error("Enter the Wi-Fi network name.");
+        if (security.value !== "nopass" && !password.value) throw new Error("Enter the Wi-Fi password, or choose an open network.");
+        let value = `WIFI:T:${security.value};S:${escapeWifi(network)};`;
+        if (security.value !== "nopass") value += `P:${escapeWifi(password.value)};`;
+        if (hidden.checked) value += "H:true;";
+        return value + ";";
+      }
+      const address = pa.value.trim();
+      if (!address) throw new Error("Enter the UPI ID.");
+      const params = [`pa=${encodeUpi(address)}`];
+      if (pn.value.trim()) params.push(`pn=${encodeUpi(pn.value.trim())}`);
+      if (amount.value !== "" && Number(amount.value) > 0) params.push(`am=${encodeUpi(Number(amount.value).toFixed(2))}`);
+      params.push("cu=INR");
+      if (note.value.trim()) params.push(`tn=${encodeUpi(note.value.trim())}`);
+      return `upi://pay?${params.join("&")}`;
+    };
+
+    const draw = (code) => {
+      const count = code.getModuleCount();
+      const quiet = Math.max(0, Math.min(16, Math.round(Number(margin.value) || 0)));
+      const target = Math.max(128, Number(size.value) || 512);
+      const cell = Math.max(1, Math.floor(target / (count + quiet * 2)));
+      const pixels = cell * (count + quiet * 2);
+      canvas.width = pixels;
+      canvas.height = pixels;
+      const ctx = canvas.getContext("2d");
+      ctx.fillStyle = "#ffffff";
+      ctx.fillRect(0, 0, pixels, pixels);
+      ctx.fillStyle = "#000000";
+      for (let row = 0; row < count; row += 1) {
+        for (let column = 0; column < count; column += 1) {
+          if (code.isDark(row, column)) ctx.fillRect((column + quiet) * cell, (row + quiet) * cell, cell, cell);
+        }
+      }
+      canvas.setAttribute("aria-label", `QR code for ${type.value === "wifi" ? "Wi-Fi network" : type.value === "upi" ? "UPI payment" : "content"}`);
+    };
+
+    const generate = (announce) => {
+      try {
+        if (!window.qrcode) throw new Error("The QR encoder did not load. Refresh the page.");
+        payload = buildPayload();
+        const code = window.qrcode(0, level.value);
+        code.addData(payload);
+        code.make();
+        draw(code);
+        lastUrl = type.value === "url" ? payload : lastUrl;
+        payloadText.textContent = payload;
+        if (announce) status(root, "QR code generated locally.", "ok");
+      } catch (error) {
+        payload = "";
+        payloadText.textContent = "—";
+        canvas.getContext("2d").clearRect(0, 0, canvas.width, canvas.height);
+        if (announce) status(root, error.message, "error");
+      }
+    };
+
+    const downloadPng = () => {
+      if (!payload) return status(root, "Generate a QR code first.", "error");
+      canvas.toBlob((blob) => {
+        if (!blob) return status(root, "Could not create the PNG.", "error");
+        const name = (type.value === "url" ? lastUrl : type.value === "wifi" ? ssid.value : type.value === "upi" ? pa.value : "qr-code")
+          .replace(/^https?:\/\//, "").replace(/[^\w.-]+/g, "-").replace(/^-+|-+$/g, "").slice(0, 50) || "qr-code";
+        T.download(`${name}.png`, blob, "image/png");
+        status(root, "PNG downloaded.", "ok");
+      }, "image/png");
+    };
+
+    const schedule = () => {
+      clearTimeout(schedule.timer);
+      schedule.timer = setTimeout(() => generate(false), 250);
+    };
+
+    [content, ssid, password, pa, pn, amount, note, margin].forEach((control) => control.addEventListener("input", schedule));
+    [type, security, size, level].forEach((control) => control.addEventListener("change", syncFields));
+    hidden.addEventListener("change", schedule);
+    syncFields();
+    generate(false);
+  });
 })();

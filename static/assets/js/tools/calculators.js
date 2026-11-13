@@ -1,6 +1,7 @@
 "use strict";
 (() => {
   const T = window.SANU_TOOLS;
+  const M = window.CalcMath;
   const { el } = T;
 
   const num = (value) => {
@@ -247,6 +248,26 @@
       return lines.join("\n");
     };
 
+    const sourceView = () => {
+      if (!config.reviewed && !config.sources?.length) return null;
+      const source = el("p", { class: "calc-note calc-source" });
+      if (config.reviewed) source.append(`Last reviewed ${config.reviewed}. `);
+      if (config.sources?.length) {
+        source.append("Official source: ");
+        config.sources.forEach((item, sourceIndex) => {
+          if (sourceIndex) source.append(" · ");
+          source.append(el("a", {
+            href: item.url,
+            target: "_blank",
+            rel: "noopener noreferrer",
+            text: item.label,
+          }));
+        });
+        source.append(".");
+      }
+      return source;
+    };
+
     const resultView = () => {
       const result = resultState;
       const hero = el("div", { class: `calc-result-hero${result.variant ? " is-" + result.variant : ""}` },
@@ -318,6 +339,8 @@
       } else {
         shell.append(stepView());
       }
+      const source = sourceView();
+      if (source) shell.append(source);
       root.replaceChildren(shell);
     };
 
@@ -1399,6 +1422,286 @@
           details: [["Months", H.fmt(months)], ["Total contributed", H.money(contributed)], ["Interest earned", H.money(Math.max(0, finalBalance - contributed))], ["Projected balance", H.money(finalBalance)]],
           steps: [rate === 0 ? `Months = (goal − saved) ÷ monthly = ${months}` : "Formula: n = ln[(goal + monthly ÷ r) ÷ (saved + monthly ÷ r)] ÷ ln(1 + r)", `Monthly rate r = ${H.fmt(annualRate, 4)}% ÷ 12 = ${H.fmt(rate, 8)}`, `Months = ${months}`, `Total contributed = ${H.money(contributed)}`, `Interest earned ≈ ${H.money(Math.max(0, finalBalance - contributed))}`],
           notes: ["Returns are compounded monthly. Actual investment returns vary and are not guaranteed."],
+        };
+      },
+    },
+    {
+      slug: "gst-calculator",
+      title: "GST Calculator",
+      intro: "Add or remove GST at current Indian rates, with CGST and SGST split for intra-state supplies and IGST for inter-state supplies.",
+      reviewed: "12 November 2026",
+      sources: [{ label: "CBIC Notification No. 9/2025-Integrated Tax (Rate), effective 22 September 2025", url: "https://courier.cbic.gov.in/ECCS/advisory/2025/NOTIFICATION%20NO.%209_2025-INTEGRATED%20TAX%20(RATE)%20-1759486719.pdf" }],
+      stepTitle: "Enter the amount and GST details",
+      fields: [
+        { id: "amount", label: "Amount", type: "number", min: 0, default: 1000 },
+        { id: "rate", label: "GST rate", type: "select", default: "18", options: [
+          ["0%", "0"], ["5%", "5"], ["18%", "18"], ["40%", "40"],
+          ["3% — specified goods", "3"], ["1.5% — specified goods", "1.5"],
+          ["0.25% — specified goods", "0.25"], ["28% — specified goods", "28"], ["Custom rate", "custom"],
+        ] },
+        { id: "customRate", label: "Custom GST rate (%)", type: "number", min: 0, max: 100, default: 18, showIf: (v) => v.rate === "custom" },
+        { id: "mode", label: "The amount is", type: "select", default: "exclusive", options: [["Before GST — add GST", "exclusive"], ["Including GST — remove GST", "inclusive"]] },
+        { id: "supply", label: "Supply type", type: "select", default: "intra", options: [["Intra-state — CGST + SGST", "intra"], ["Inter-state — IGST", "inter"]] },
+      ],
+      compute(v, H) {
+        const amount = H.num(v.amount);
+        const rate = v.rate === "custom" ? H.num(v.customRate) : H.num(v.rate);
+        if (amount === null || rate === null) throw new Error("Enter the amount and GST rate.");
+        const result = M.gst({ amount, rate, inclusive: v.mode === "inclusive", interstate: v.supply === "inter" });
+        const split = result.interstate
+          ? ["IGST", H.money(result.igst)]
+          : ["CGST", H.money(result.cgst)];
+        const splitTwo = result.interstate ? null : ["SGST", H.money(result.sgst)];
+        return {
+          primary: {
+            label: v.mode === "inclusive" ? "Amount before GST" : "Total including GST",
+            value: H.money(v.mode === "inclusive" ? result.base : result.total),
+            sub: `GST ${H.money(result.tax)} at ${H.fmt(result.rate, 2)}%`,
+          },
+          details: [
+            ["Taxable value", H.money(result.base)],
+            ["GST rate", `${H.fmt(result.rate, 2)}%`],
+            ["GST amount", H.money(result.tax)],
+            split,
+            ...(splitTwo ? [splitTwo] : []),
+            ["Total", H.money(result.total)],
+            ["Supply type", result.interstate ? "Inter-state" : "Intra-state"],
+          ],
+          steps: v.mode === "inclusive"
+            ? [`Taxable value = ${H.money(amount)} ÷ (1 + ${H.fmt(result.rate, 2)} ÷ 100)`, `= ${H.money(result.base)}`, `GST = ${H.money(amount)} − ${H.money(result.base)} = ${H.money(result.tax)}`]
+            : [`GST = ${H.money(amount)} × ${H.fmt(result.rate, 2)} ÷ 100 = ${H.money(result.tax)}`, `Total = ${H.money(amount)} + ${H.money(result.tax)} = ${H.money(result.total)}`, result.interstate ? "Inter-state supply: the full GST amount is IGST." : `Intra-state supply: CGST = ${H.money(result.cgst)} and SGST = ${H.money(result.sgst)}.`],
+          notes: ["Uses the GST 2.0 rate structure announced on 22 September 2025: 5%, 18% and 40%, plus special rates for specified goods.", "GST treatment depends on the HSN/SAC classification, place of supply and exemptions. Confirm rates with the official GST portal or a tax professional."],
+        };
+      },
+    },
+    {
+      slug: "income-tax-calculator",
+      title: "Income Tax Calculator",
+      intro: "Compare the new and old Indian income-tax regimes for FY 2026-27 using salary income, deductions and the latest slab rates.",
+      reviewed: "12 November 2026",
+      sources: [{ label: "Finance Bill 2026 memorandum — income-tax rates (PDF)", url: "https://www.incometaxindia.gov.in/documents/81799/11848482/memo-2026.pdf" }],
+      stepTitle: "Enter your income and deductions",
+      fields: [
+        { id: "gross", label: "Gross annual income", type: "number", min: 0, default: 1200000, placeholder: "1200000" },
+        { id: "regime", label: "Tax regime", type: "select", default: "compare", options: [["Compare both regimes", "compare"], ["New regime", "new"], ["Old regime", "old"]] },
+        { id: "age", label: "Age group", type: "select", default: "below60", options: [["Below 60", "below60"], ["60 to 79", "senior"], ["80 or above", "super"]] },
+        { id: "salaried", label: "Salaried or pensioner?", type: "select", default: "yes", options: [["Yes — claim standard deduction", "yes"], ["No", "no"]] },
+        { id: "c80", label: "Section 80C investments", type: "number", min: 0, default: 0, hint: "PPF, ELSS, life insurance, principal repayment; capped at ₹1.5 lakh.", showIf: (v) => v.regime !== "new" },
+        { id: "d80", label: "Section 80D health insurance", type: "number", min: 0, default: 0, hint: "Capped at ₹25,000 below 60, or ₹50,000 for senior citizens.", showIf: (v) => v.regime !== "new" },
+        { id: "homeLoan", label: "Home loan interest", type: "number", min: 0, default: 0, hint: "Self-occupied property interest is capped at ₹2 lakh.", showIf: (v) => v.regime !== "new" },
+        { id: "nps", label: "NPS — Section 80CCD(1B)", type: "number", min: 0, default: 0, hint: "Additional NPS deduction capped at ₹50,000.", showIf: (v) => v.regime !== "new" },
+        { id: "other", label: "Other old-regime deductions", type: "number", min: 0, default: 0, hint: "Enter the eligible amount, for example 80G or 80TTA.", showIf: (v) => v.regime !== "new" },
+      ],
+      compute(v, H) {
+        const gross = H.num(v.gross);
+        if (gross === null) throw new Error("Enter your gross annual income.");
+        const result = M.incomeTax({
+          gross,
+          regime: v.regime,
+          age: v.age,
+          salaried: v.salaried === "yes",
+          deductions: {
+            c80: H.num(v.c80) || 0,
+            d80: H.num(v.d80) || 0,
+            homeLoan: H.num(v.homeLoan) || 0,
+            nps: H.num(v.nps) || 0,
+            other: H.num(v.other) || 0,
+          },
+        });
+        const plan = result.selected;
+        const regimeLabel = result.recommendation === "new" ? "New regime" : "Old regime";
+        const compare = v.regime === "compare";
+        const details = [
+          ["Gross annual income", H.money(plan.gross)],
+          ["Standard deduction", H.money(plan.standardDeduction)],
+          ["Deductions allowed", H.money(plan.deductions.total)],
+          ["Taxable income", H.money(plan.taxable)],
+          ["Tax before rebate / relief", H.money(plan.slabTax)],
+          ["87A rebate / marginal relief", H.money(plan.rebate)],
+          ["Surcharge", plan.surcharge > 0 ? `${H.money(plan.surcharge)} (${H.fmt(plan.surchargeRate * 100, 0)}%)` : "Nil"],
+          ["Health and education cess (4%)", H.money(plan.cess)],
+          ["Total tax", H.money(plan.total)],
+          ["Effective tax rate", `${H.fmt(plan.effectiveRate, 2)}%`],
+          ["Monthly tax (approx.)", H.money(plan.monthly)],
+          ["New regime total", H.money(result.new.total)],
+          ["Old regime total", H.money(result.old.total)],
+        ];
+        if (compare) details.unshift(["Recommended regime", plan.total === 0 ? `${regimeLabel} — no tax` : `${regimeLabel} — saves ${H.money(result.savings)}`]);
+        const steps = [
+          `Taxable income = gross income − standard deduction − eligible deductions`,
+          `= ${H.money(plan.gross)} − ${H.money(plan.standardDeduction)} − ${H.money(plan.deductions.total)} = ${H.money(plan.taxable)}`,
+          ...plan.breakdown.filter((band) => band.amount > 0).map((band) => `${H.money(band.from)} to ${band.to === Infinity ? "above" : H.money(band.to)} at ${H.fmt(band.rate * 100, 0)}% = ${H.money(band.amount)}`),
+          `Tax before rebate = ${H.money(plan.slabTax)}`,
+          plan.rebate > 0 ? `87A rebate / marginal relief = ${H.money(plan.rebate)}` : "No Section 87A rebate applies.",
+          plan.surcharge > 0 ? `Surcharge = ${H.money(plan.surcharge)}` : "No surcharge applies.",
+          `Cess = 4% × (tax after rebate + surcharge) = ${H.money(plan.cess)}`,
+          `Total tax = ${H.money(plan.total)}`,
+        ];
+        return {
+          primary: {
+            label: compare ? `${regimeLabel} — lower tax` : `${regimeLabel} tax`,
+            value: plan.total === 0 ? "Nil" : H.money(plan.total),
+            sub: plan.total === 0 ? "No tax payable after rebate" : `Effective ${H.fmt(plan.effectiveRate, 2)}% · ${H.money(plan.monthly)} per month`,
+          },
+          variant: plan.total === 0 ? "good" : undefined,
+          details,
+          steps,
+          notes: [
+            "Built for FY 2026-27 (assessment year 2027-28) using the new-regime slabs of 0–4 lakh: nil, 4–8 lakh: 5%, 8–12 lakh: 10%, 12–16 lakh: 15%, 16–20 lakh: 20%, 20–24 lakh: 25% and above 24 lakh: 30%.",
+            "The old regime uses the 2.5 / 5 / 10 lakh slabs, with higher exemption limits for senior citizens. HRA, LTA, employer NPS contributions and other special deductions are not modelled here.",
+            "Surcharge marginal relief is estimated. This is a planning estimate, not a filing or legal opinion; confirm with the official income-tax calculator or a chartered accountant.",
+          ],
+        };
+      },
+    },
+    {
+      slug: "plot-area-calculator",
+      title: "Plot Area and Land Rate Calculator",
+      intro: "Measure a rectangular, triangular or four-sided plot and estimate its land value from a rate per square foot, square metre, acre or hectare.",
+      stepTitle: "Choose the plot shape and dimensions",
+      fields: [
+        { id: "shape", label: "Plot shape", type: "select", default: "rectangle", options: [["Rectangle", "rectangle"], ["Triangle — three sides", "triangle"], ["Four-sided plot — four sides and one diagonal", "quadrilateral"]] },
+        { id: "unit", label: "Measurement unit", type: "select", default: "ft", options: [["Feet", "ft"], ["Metres", "m"]] },
+        { id: "length", label: (v) => `Length (${v.unit === "m" ? "m" : "ft"})`, type: "number", min: 0.01, default: 30, showIf: (v) => v.shape === "rectangle" },
+        { id: "width", label: (v) => `Width (${v.unit === "m" ? "m" : "ft"})`, type: "number", min: 0.01, default: 40, showIf: (v) => v.shape === "rectangle" },
+        { id: "sideA", label: (v) => `Side A (${v.unit === "m" ? "m" : "ft"})`, type: "number", min: 0.01, default: 30, showIf: (v) => v.shape !== "rectangle" },
+        { id: "sideB", label: (v) => `Side B (${v.unit === "m" ? "m" : "ft"})`, type: "number", min: 0.01, default: 40, showIf: (v) => v.shape !== "rectangle" },
+        { id: "sideC", label: (v) => `Side C (${v.unit === "m" ? "m" : "ft"})`, type: "number", min: 0.01, default: 50, showIf: (v) => v.shape !== "rectangle" },
+        { id: "sideD", label: (v) => `Side D (${v.unit === "m" ? "m" : "ft"})`, type: "number", min: 0.01, default: 35, showIf: (v) => v.shape === "quadrilateral" },
+        { id: "diagonal", label: (v) => `Diagonal from A–B corner to C–D corner (${v.unit === "m" ? "m" : "ft"})`, type: "number", min: 0.01, default: 50, showIf: (v) => v.shape === "quadrilateral" },
+        { id: "rate", label: "Land rate", type: "number", min: 0, default: 1000 },
+        { id: "rateBasis", label: "Rate is per", type: "select", default: "sqft", options: [["Square foot", "sqft"], ["Square metre", "sqm"], ["Acre", "acre"], ["Hectare", "hectare"]] },
+      ],
+      compute(v, H) {
+        const rate = H.num(v.rate);
+        if (rate === null) throw new Error("Enter the land rate, or zero if you only need the area.");
+        const result = M.plotArea({
+          shape: v.shape,
+          unit: v.unit,
+          length: H.num(v.length),
+          width: H.num(v.width),
+          sideA: H.num(v.sideA),
+          sideB: H.num(v.sideB),
+          sideC: H.num(v.sideC),
+          sideD: H.num(v.sideD),
+          diagonal: H.num(v.diagonal),
+          rate,
+          rateBasis: v.rateBasis,
+        });
+        const basisLabel = { sqft: "sq ft", sqm: "sq m", acre: "acre", hectare: "hectare" }[v.rateBasis];
+        return {
+          primary: {
+            label: "Plot area",
+            value: `${H.fmt(result.squareFeet, 2)} sq ft`,
+            sub: `${H.fmt(result.squareMetres, 2)} sq m · ${H.fmt(result.acres, 4)} acre`,
+          },
+          details: [
+            ["Square feet", H.fmt(result.squareFeet, 2)],
+            ["Square metres", H.fmt(result.squareMetres, 2)],
+            ["Square yards (gaj)", H.fmt(result.squareYards, 2)],
+            ["Acres", H.fmt(result.acres, 4)],
+            ["Hectares", H.fmt(result.hectares, 4)],
+            ["Land rate", `${H.money(rate)} per ${basisLabel}`],
+            ["Estimated land value", H.money(result.value)],
+          ],
+          steps: v.shape === "rectangle"
+            ? [`Area = length × width = ${H.fmt(H.num(v.length), 4)} × ${H.fmt(H.num(v.width), 4)} = ${H.fmt(result.squareFeet, 2)} sq ft`, `Square metres = ${H.fmt(result.squareFeet, 2)} ÷ 10.7639 = ${H.fmt(result.squareMetres, 2)}`, `Value = ${H.money(rate)} per ${basisLabel} × area in that unit = ${H.money(result.value)}`]
+            : v.shape === "triangle"
+              ? ["Area uses Heron's formula with the three side lengths.", `Area = ${H.fmt(result.squareFeet, 2)} sq ft`, `Value = ${H.money(rate)} per ${basisLabel} × area in that unit = ${H.money(result.value)}`]
+              : ["The four-sided plot is split into two triangles using the diagonal.", "Area = triangle A–B–diagonal + triangle C–D–diagonal", `Area = ${H.fmt(result.squareFeet, 2)} sq ft`, `Value = ${H.money(rate)} per ${basisLabel} × area in that unit = ${H.money(result.value)}`],
+          notes: ["Enter the measurements from the plot boundary or a registered survey. A four-sided plot calculator assumes the diagonal divides the plot into two valid triangles.", "This is a geometric area estimate, not a legal survey. Verify the area, access, setbacks and title with the revenue record, registered deed or a licensed surveyor.", "Land rates vary by locality, road access and land use. The rate you enter is applied uniformly to the measured area."],
+        };
+      },
+    },
+    {
+      slug: "construction-material-calculator",
+      title: "Construction Material Calculator",
+      intro: "Estimate concrete, bricks, tiles or paint from room dimensions, with wastage and Indian site-mix ratios built in.",
+      stepTitle: "Choose the material and enter measurements",
+      fields: [
+        { id: "mode", label: "Material to estimate", type: "select", default: "concrete", options: [["Concrete — cement, sand and aggregate", "concrete"], ["Brickwork — bricks and mortar", "brick"], ["Tiles — tile and box count", "tile"], ["Paint — litres required", "paint"]] },
+        { id: "unit", label: "Room or wall dimensions in", type: "select", default: "ft", options: [["Feet", "ft"], ["Metres", "m"]] },
+        { id: "length", label: (v) => v.mode === "brick" ? "Wall length" : v.mode === "tile" ? "Room length" : v.mode === "paint" ? "Wall length" : "Length", type: "number", min: 0.01, default: 10 },
+        { id: "width", label: (v) => v.mode === "tile" ? "Room width" : "Width", type: "number", min: 0.01, default: 10, showIf: (v) => v.mode !== "brick" && v.mode !== "paint" },
+        { id: "height", label: (v) => v.mode === "brick" ? "Wall height" : "Wall height", type: "number", min: 0.01, default: 10, showIf: (v) => v.mode === "brick" || v.mode === "paint" },
+        { id: "thickness", label: (v) => v.mode === "brick" ? "Wall thickness" : "Slab thickness", type: "number", min: 0.01, default: 0.5, showIf: (v) => v.mode === "concrete" || v.mode === "brick" },
+        { id: "mix", label: "Concrete mix", type: "select", default: "m20", options: [["M5 — 1 : 5 : 10", "m5"], ["M7.5 — 1 : 4 : 8", "m75"], ["M10 — 1 : 3 : 6", "m10"], ["M15 — 1 : 2 : 4", "m15"], ["M20 — 1 : 1.5 : 3", "m20"], ["M25 — 1 : 1 : 2", "m25"]], showIf: (v) => v.mode === "concrete" },
+        { id: "brickSize", label: "Brick size", type: "select", default: "standard", options: [["Standard — 190 × 90 × 90 mm", "standard"], ["Traditional — 230 × 110 × 75 mm", "traditional"]], showIf: (v) => v.mode === "brick" },
+        { id: "mortar", label: "Mortar mix", type: "select", default: "1:6", options: [["1 : 4 — stronger", "1:4"], ["1 : 6 — common", "1:6"]], showIf: (v) => v.mode === "brick" },
+        { id: "tileLength", label: "Tile length (mm)", type: "number", min: 1, default: 600, showIf: (v) => v.mode === "tile" },
+        { id: "tileWidth", label: "Tile width (mm)", type: "number", min: 1, default: 600, showIf: (v) => v.mode === "tile" },
+        { id: "perBox", label: "Tiles per box", type: "number", min: 1, default: 4, showIf: (v) => v.mode === "tile" },
+        { id: "openings", label: (v) => `Doors and windows area (${v.unit === "m" ? "sq m" : "sq ft"})`, type: "number", min: 0, default: 20, showIf: (v) => v.mode === "paint" },
+        { id: "coats", label: "Paint coats", type: "number", min: 1, max: 5, default: 2, showIf: (v) => v.mode === "paint" },
+        { id: "coverage", label: "Coverage (sq m per litre per coat)", type: "number", min: 0.1, default: 10, showIf: (v) => v.mode === "paint" },
+        { id: "waste", label: "Wastage allowance (%)", type: "number", min: 0, max: 50, default: 5 },
+      ],
+      compute(v, H) {
+        const result = M.construction({
+          mode: v.mode, unit: v.unit,
+          length: H.num(v.length), width: H.num(v.width), height: H.num(v.height), thickness: H.num(v.thickness),
+          mix: v.mix, brickSize: v.brickSize, mortar: v.mortar,
+          tileLength: H.num(v.tileLength), tileWidth: H.num(v.tileWidth), perBox: H.num(v.perBox),
+          openings: H.num(v.openings), coats: H.num(v.coats), coverage: H.num(v.coverage),
+          waste: H.num(v.waste),
+        });
+        if (v.mode === "concrete") {
+          return {
+            primary: { label: "Cement required", value: `${H.fmt(result.cementBags, 2)} bags`, sub: `Sand ${H.fmt(result.sandVolume, 2)} m³ · Aggregate ${H.fmt(result.aggregateVolume, 2)} m³` },
+            details: [["Concrete mix", result.mix], ["Wet volume", `${H.fmt(result.wetVolume, 3)} m³`], ["Dry volume", `${H.fmt(result.dryVolume, 3)} m³`], ["Cement volume", `${H.fmt(result.cementVolume, 3)} m³`], ["Cement", `${H.fmt(result.cementBags, 2)} bags (50 kg)`], ["Sand", `${H.fmt(result.sandVolume, 3)} m³`], ["Aggregate", `${H.fmt(result.aggregateVolume, 3)} m³`], ["Water (approx.)", `${H.fmt(result.waterLitres, 0)} litres`]],
+            steps: [`Wet volume = length × width × thickness = ${H.fmt(result.wetVolume, 3)} m³`, `Dry volume = wet volume × 1.54 × wastage factor = ${H.fmt(result.dryVolume, 3)} m³`, `Split the dry volume in the selected mix ratio, then convert cement volume to 50 kg bags.`, `Cement = ${H.fmt(result.cementBags, 2)} bags; sand = ${H.fmt(result.sandVolume, 3)} m³; aggregate = ${H.fmt(result.aggregateVolume, 3)} m³.`],
+            notes: ["Nominal mixes are a site estimate, not a design mix. Water is shown at a 0.50 water–cement ratio; actual water depends on workability and admixtures.", "Confirm quantities with your contractor or structural engineer before ordering."],
+          };
+        }
+        if (v.mode === "brick") {
+          return {
+            primary: { label: "Bricks required", value: `${H.fmt(result.bricks, 0)} bricks`, sub: `Cement ${H.fmt(result.cementBags, 2)} bags · Sand ${H.fmt(result.sandVolume, 2)} m³` },
+            details: [["Brick size", result.brickSize], ["Mortar mix", `1 : ${result.mortar.split(":")[1]}`], ["Wall volume", `${H.fmt(result.wallVolume, 3)} m³`], ["Bricks", `${H.fmt(result.bricks, 0)}`], ["Mortar dry volume", `${H.fmt(result.mortarVolume, 3)} m³`], ["Cement", `${H.fmt(result.cementBags, 2)} bags (50 kg)`], ["Sand", `${H.fmt(result.sandVolume, 3)} m³`]],
+            steps: [`Wall volume = length × height × thickness = ${H.fmt(result.wallVolume, 3)} m³`, "Brick count uses the brick size plus a 10 mm mortar joint and the wastage allowance.", `Bricks = ${H.fmt(result.bricks, 0)}`, `Mortar dry volume = (wall volume − brick volume) × 1.33 = ${H.fmt(result.mortarVolume, 3)} m³`, `Cement = ${H.fmt(result.cementBags, 2)} bags; sand = ${H.fmt(result.sandVolume, 3)} m³.`],
+            notes: ["Brick quantities assume a 10 mm mortar joint. Actual wastage depends on breakage, bond pattern and site handling.", "Confirm the brick size and mortar ratio with your mason or structural engineer."],
+          };
+        }
+        if (v.mode === "tile") {
+          return {
+            primary: { label: "Tiles required", value: `${H.fmt(result.tiles, 0)} tiles`, sub: `${H.fmt(result.boxes, 0)} boxes · ${H.fmt(result.area, 2)} m² floor` },
+            details: [["Floor area", `${H.fmt(result.area, 2)} m²`], ["Tile area", `${H.fmt(result.tileArea, 4)} m²`], ["Tiles with wastage", `${H.fmt(result.tiles, 0)}`], ["Boxes", `${H.fmt(result.boxes, 0)}`], ["Tiles per box", `${H.fmt(result.perBox, 0)}`]],
+            steps: [`Floor area = length × width = ${H.fmt(result.area, 2)} m²`, `Tile area = tile length × tile width = ${H.fmt(result.tileArea, 4)} m²`, `Tiles = floor area ÷ tile area × wastage factor = ${H.fmt(result.tiles, 0)}`, `Boxes = ceil(tiles ÷ tiles per box) = ${H.fmt(result.boxes, 0)}`],
+            notes: ["Tile box sizes vary by brand and tile size. Check the actual tiles per box before ordering.", "Keep extra tiles for cuts, future repairs and pattern matching."],
+          };
+        }
+        return {
+          primary: { label: "Paint required", value: `${H.fmt(result.litres, 2)} litres`, sub: `${H.fmt(result.area, 2)} m² × ${H.fmt(result.coats, 0)} coats` },
+          details: [["Paintable area", `${H.fmt(result.area, 2)} m²`], ["Coats", `${H.fmt(result.coats, 0)}`], ["Coverage", `${H.fmt(result.coverage, 2)} m² per litre per coat`], ["Paint with wastage", `${H.fmt(result.litres, 2)} litres`]],
+          steps: [`Paintable area = wall area − doors and windows = ${H.fmt(result.area, 2)} m²`, `Paint = area × coats ÷ coverage × wastage factor = ${H.fmt(result.litres, 2)} litres`],
+          notes: ["Coverage varies by paint brand, surface porosity, colour and application method. Check the tin label for the product coverage.", "Primer, putty and undercoat are not included."],
+        };
+      },
+    },
+    {
+      slug: "stamp-duty-calculator",
+      title: "Stamp Duty and Registration Calculator",
+      intro: "Estimate stamp duty, registration fees and other charges using the rates that apply in your state.",
+      reviewed: "12 November 2026",
+      sources: [{ label: "Indian Stamp Act, 1899 — India Code", url: "https://www.indiacode.nic.in/handle/123456789/15510?locale=en" }],
+      stepTitle: "Enter the property value and applicable rates",
+      fields: [
+        { id: "value", label: "Property value", type: "number", min: 0, default: 5000000 },
+        { id: "stampRate", label: "Stamp duty rate (%)", type: "number", min: 0, max: 100, default: 6, hint: "Use the rate from your state's current ready reckoner or stamp office." },
+        { id: "registrationRate", label: "Registration fee rate (%)", type: "number", min: 0, max: 100, default: 1 },
+        { id: "other", label: "Other charges", type: "number", min: 0, default: 1000, hint: "For example document charges, scanning or user fees." },
+      ],
+      compute(v, H) {
+        const value = H.num(v.value);
+        const stampRate = H.num(v.stampRate);
+        const registrationRate = H.num(v.registrationRate);
+        const other = H.num(v.other);
+        if (value === null || stampRate === null || registrationRate === null || other === null) throw new Error("Enter the property value and all rate fields.");
+        const result = M.stampDuty({ value, stampRate, registrationRate, other });
+        return {
+          primary: { label: "Total stamp duty and registration", value: H.money(result.total), sub: `${H.fmt(result.effectiveRate, 2)}% of property value` },
+          details: [["Property value", H.money(result.value)], ["Stamp duty rate", `${H.fmt(stampRate, 3)}%`], ["Stamp duty", H.money(result.stamp)], ["Registration rate", `${H.fmt(registrationRate, 3)}%`], ["Registration fee", H.money(result.registration)], ["Other charges", H.money(result.other)], ["Total payable", H.money(result.total)], ["Effective rate", `${H.fmt(result.effectiveRate, 3)}%`]],
+          steps: [`Stamp duty = ${H.money(result.value)} × ${H.fmt(stampRate, 3)}% = ${H.money(result.stamp)}`, `Registration fee = ${H.money(result.value)} × ${H.fmt(registrationRate, 3)}% = ${H.money(result.registration)}`, `Total = stamp duty + registration fee + other charges = ${H.money(result.total)}`],
+          notes: ["Stamp duty and registration rates differ by state, property type, location, buyer category and transaction type. Use the current rate from your state's stamp and registration department.", "This estimate excludes GST, legal fees, brokerage, mutation charges and any concessions. Confirm the final amount with the registering authority.", "The default 6% and 1% are example rates, not a recommendation for any state."],
         };
       },
     },

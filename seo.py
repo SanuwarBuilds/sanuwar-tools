@@ -73,6 +73,21 @@ LAND_FAQS = [
      'No. All calculations run in your browser. The page does not send your area or conversions to a server.'),
 ]
 
+TOOL_SEO = {
+    'gst-calculator': ('GST Calculator — Add or Remove GST, CGST & SGST | SanuwarTools',
+                       'Calculate GST at 5%, 18% or 40%, split CGST and SGST for intra-state supplies, or use IGST for inter-state supplies.'),
+    'income-tax-calculator': ('Income Tax Calculator FY 2026-27 — New vs Old Regime | SanuwarTools',
+                              'Compare new and old income-tax regimes for FY 2026-27 with salary income, 80C, 80D, home-loan interest, NPS, rebate, surcharge and cess.'),
+    'plot-area-calculator': ('Plot Area Calculator — Land Rate and Square Feet | SanuwarTools',
+                             'Measure a rectangular, triangular or four-sided plot in feet or metres and estimate land value from a rate per square foot, square metre, acre or hectare.'),
+    'stamp-duty-calculator': ('Stamp Duty and Registration Calculator — India | SanuwarTools',
+                              'Estimate stamp duty, registration fees and total property transfer charges using the rates that apply in your state.'),
+    'construction-material-calculator': ('Construction Material Calculator — Cement, Bricks, Tiles | SanuwarTools',
+                                         'Estimate concrete cement, sand and aggregate, brick counts, tile boxes and paint litres from room or wall dimensions.'),
+    'qr-code-generator': ('QR Code Generator — URL, Wi-Fi and UPI QR Codes | SanuwarTools',
+                          'Create a QR code for a website, text, Wi-Fi network or UPI payment and download a PNG. Everything is generated in your browser.'),
+}
+
 TOOL_ICON_NAMES = ('photo', 'passport', 'score', 'wallet', 'tool', 'download', 'album',
                    'film', 'anime', 'manga', 'sports', 'tv', 'torrent', 'game', 'music',
                    'ebook', 'comics', 'drama', 'vpn', 'shield', 'calculator', 'key',
@@ -148,6 +163,8 @@ def install(app, load_config, load_directory=None, load_tool_catalog=None):
                 if tool_page['slug'] == 'land-measurement-calculator':
                     page = ('Land Measurement Calculator — Bigha, Katha, Lessa | SanuwarTools',
                             'Convert Bigha, Katha, Lessa, Biswa, Kanal, Marla, Guntha and acres with state-wise Indian standards. Assam-first, private, free land calculator.')
+                elif tool_page['slug'] in TOOL_SEO:
+                    page = TOOL_SEO[tool_page['slug']]
                 else:
                     page = (f"{tool_page['name']} — Free Online Tool | SanuwarTools",
                             str(tool_page.get('description') or '')[:300])

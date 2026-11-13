@@ -525,6 +525,14 @@
   font-size: 11px;
   line-height: 1.55;
 }
+.calc-source a {
+  color: var(--bp-accent);
+  text-decoration: underline;
+  text-underline-offset: 2px;
+}
+.calc-source a:hover {
+  color: var(--bp-ink);
+}
 .calc-interruptions {
   grid-column: 1 / -1;
   margin-top: 6px;
@@ -2023,6 +2031,10 @@ html[data-theme="dark"]:has(body.tool-page) {
   box-shadow: var(--neu-inset-sm);
 }
 
+:is(.tools-hub-page, .tool-page) .calc-source a {
+  color: var(--neu-accent-ink);
+}
+
 :is(.tools-hub-page, .tool-page) .calc-interruptions {
   padding: 16px;
   border: 0;
@@ -2203,4 +2215,59 @@ html[data-theme="dark"]:has(body.tool-page) {
   :is(.tools-hub-page, .tool-page) .tp-viewer canvas {
     box-shadow: none;
   }
+}
+
+/* ---------- QR code generator ------------------------------------------- */
+.qr-wide { grid-column: 1 / -1; }
+.tp-field[hidden] { display: none !important; }
+.qr-result {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(220px, 1.4fr);
+  gap: 18px;
+  align-items: start;
+  margin-top: 18px;
+}
+.qr-preview {
+  display: grid;
+  place-items: center;
+  min-height: 260px;
+  padding: 16px;
+  border: 1px solid var(--bp-line);
+  border-radius: 12px;
+  background: #fff;
+}
+.qr-canvas {
+  display: block;
+  width: min(100%, 320px);
+  height: auto;
+  image-rendering: pixelated;
+}
+.qr-meta {
+  min-width: 0;
+  padding: 14px;
+  border: 1px solid var(--bp-line);
+  border-radius: 12px;
+  background: var(--bp-panel-2);
+}
+.qr-meta-label {
+  display: block;
+  margin-bottom: 8px;
+  color: var(--bp-faint);
+  font-family: var(--tp-mono);
+  font-size: 9px;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+}
+.qr-payload {
+  display: block;
+  max-height: 180px;
+  overflow: auto;
+  color: var(--bp-ink);
+  font-family: var(--tp-mono);
+  font-size: 11px;
+  line-height: 1.55;
+  overflow-wrap: anywhere;
+}
+@media (max-width: 700px) {
+  .qr-result { grid-template-columns: minmax(0, 1fr); }
 }

@@ -30,7 +30,7 @@ class LandCalculatorTests(unittest.TestCase):
         self.assertEqual(len(re.findall(r'<h1[ >]', self.html)), 1)
         self.assertIn('<h1>Indian Land Measurement Calculator</h1>', self.html)
         for asset in ('core.js?v=1', 'land-data.js?v=1', 'land-engine.js?v=1',
-                      'land-i18n.js?v=2', 'land.js?v=2', 'land.css?v=2', 'tools.css?v=2'):
+                      'land-i18n.js?v=2', 'land.js?v=2', 'land.css?v=2', 'tools.css?v=3'):
             self.assertIn(asset, self.html)
         self.assertIn('data-tool-slug="land-measurement-calculator"', self.html)
         self.assertIn('id="tool-root"', self.html)
