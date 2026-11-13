@@ -3,13 +3,343 @@
    narrow screens, and a mobile-only downloads shortcut under the hero.
    ------------------------------------------------------------------------ */
 
-body.pro-theme.bp.home-page .bp-keys {
-  display: block;
+/* Compact hero utility row: the search is a secondary, top-right control. */
+body.pro-theme.bp.home-page .home-hero .home-hero-nav {
+  gap: 24px;
+  padding-bottom: 16px;
+}
+
+body.pro-theme.bp.home-page .home-hero-utilities {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 18px;
+  min-width: 0;
+  margin-left: auto;
+}
+
+body.pro-theme.bp.home-page .home-hero-count {
+  color: var(--bp-muted);
+  font-family: var(--bp-font);
+  font-size: 11px;
+  font-weight: 500;
+  letter-spacing: 0.02em;
+  text-transform: none;
+  white-space: nowrap;
+}
+
+body.pro-theme.bp.home-page .home-hero-search {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  width: clamp(230px, 23vw, 300px);
+  height: 40px;
+  padding: 0 10px 0 13px;
+  border-radius: 999px;
+  background: var(--neu-base, var(--bp-panel-2));
+  box-shadow: var(--neu-inset-sm, inset 0 0 0 1px var(--bp-line-2));
+  color: var(--bp-muted);
+  cursor: text;
+  transition: box-shadow 150ms ease;
+}
+
+body.pro-theme.bp.home-page .home-hero-search:focus-within {
+  box-shadow: var(--neu-inset-sm, inset 0 0 0 1px var(--bp-line-2));
+  outline: 3px solid var(--neu-accent, var(--bp-accent));
+  outline-offset: 3px;
+}
+
+body.pro-theme.bp.home-page .home-hero-search svg {
+  width: 15px;
+  height: 15px;
+  flex: none;
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 1.8;
+  stroke-linecap: round;
+}
+
+body.pro-theme.bp.home-page .home-hero-search input {
+  flex: 1;
+  min-width: 0;
+  height: 38px;
+  padding: 0;
+  border: 0;
+  background: transparent;
+  color: var(--bp-ink);
+  font-family: var(--bp-font);
+  font-size: 12.5px;
+  letter-spacing: 0;
+  outline: none;
+}
+
+body.pro-theme.bp.home-page .home-hero-search input::placeholder {
+  color: var(--bp-faint);
+  opacity: 1;
+}
+
+body.pro-theme.bp.home-page .home-hero-search kbd {
+  display: grid;
+  place-items: center;
+  min-width: 20px;
+  height: 20px;
+  padding: 0 5px;
+  border: 0;
+  border-radius: 5px;
+  background: var(--neu-light, var(--bp-panel));
+  box-shadow: var(--neu-raised-sm, none);
+  color: var(--bp-faint);
+  font-family: var(--bp-mono);
+  font-size: 9px;
+}
+
+/* Brand-first hero: one large wordmark, a short promise, one clear action. */
+body.pro-theme.bp.home-page .home-hero .bp-machine {
+  width: min(100%, 1120px);
+  padding: clamp(48px, 5.4vw, 70px) clamp(28px, 5vw, 64px)
+    clamp(26px, 3vw, 36px);
+  text-align: left;
+}
+
+body.pro-theme.bp.home-page .home-hero-main {
+  display: grid;
+  grid-template-columns: minmax(0, 1.06fr) minmax(290px, 0.94fr);
+  align-items: center;
+  gap: clamp(34px, 5vw, 72px);
+  text-align: left;
+}
+
+body.pro-theme.bp.home-page .home-hero-lead,
+body.pro-theme.bp.home-page .home-hero-copy {
   min-width: 0;
 }
 
-body.pro-theme.bp.home-page .filter-tabs {
+body.pro-theme.bp.home-page .home-hero-lead .bp-kicker {
+  margin-bottom: 17px;
+  color: var(--bp-accent);
+  font-family: var(--bp-mono);
+  font-size: 10px;
+  font-weight: 600;
+  letter-spacing: 0.19em;
+}
+
+body.pro-theme.bp.home-page .home-hero-lead .bp-title {
+  font-size: clamp(58px, 7.6vw, 106px);
+  font-weight: 600;
+  line-height: 0.86;
+  letter-spacing: -0.065em;
+  white-space: normal;
+}
+
+body.pro-theme.bp.home-page .home-hero-lead .bp-title > span {
+  display: block;
+}
+
+body.pro-theme.bp.home-page .home-hero-lead .bp-title i {
+  color: var(--bp-accent);
+  font-style: normal;
+}
+
+body.pro-theme.bp.home-page .home-hero-tagline {
+  margin: 22px 0 0;
+  color: var(--bp-ink-2);
+  font-size: clamp(18px, 1.8vw, 24px);
+  font-weight: 600;
+  line-height: 1.2;
+  letter-spacing: -0.03em;
+}
+
+body.pro-theme.bp.home-page .home-hero-copy .bp-hero-line {
+  max-width: 46ch;
+  margin: 0;
+  color: var(--bp-muted);
+  font-family: var(--bp-font);
+  font-size: 14px;
+  line-height: 1.8;
+  letter-spacing: 0;
+}
+
+body.pro-theme.bp.home-page .home-hero-copy .bp-hero-actions {
+  justify-content: flex-start;
+  margin-top: 26px;
+  gap: 10px 16px;
+}
+
+body.pro-theme.bp.home-page .home-hero-copy .bp-cta {
+  min-height: 54px;
+  padding: 0 24px;
+  font-size: 14px;
+}
+
+body.pro-theme.bp.home-page .home-hero-note {
+  display: flex;
   flex-wrap: wrap;
+  gap: 6px 14px;
+  margin: 18px 0 0;
+  color: var(--bp-faint);
+  font-family: var(--bp-mono);
+  font-size: 9.5px;
+  font-weight: 500;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+}
+
+body.pro-theme.bp.home-page .home-hero-note span {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+}
+
+body.pro-theme.bp.home-page .home-hero-note span::before {
+  content: "";
+  width: 4px;
+  height: 4px;
+  border-radius: 50%;
+  background: var(--bp-accent);
+  opacity: 0.75;
+}
+
+/* Category filtering stays available, but as a quiet secondary rail. */
+body.pro-theme.bp.home-page .home-hero-index {
+  margin-top: clamp(38px, 4.5vw, 58px);
+  padding-top: 19px;
+  border-top: 1px solid color-mix(in oklab, var(--bp-ink) 10%, transparent);
+}
+
+body.pro-theme.bp.home-page .home-hero-index-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  margin-bottom: 12px;
+  color: var(--bp-faint);
+  font-family: var(--bp-mono);
+  font-size: 9.5px;
+  font-weight: 500;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+}
+
+body.pro-theme.bp.home-page .home-hero-index-head b {
+  color: var(--bp-ink-2);
+  font-weight: 600;
+}
+
+body.pro-theme.bp.home-page .home-hero-index .bp-keys {
+  display: block;
+  min-width: 0;
+  padding: 0;
+}
+
+body.pro-theme.bp.home-page .home-hero-index .filter-tabs {
+  flex-wrap: wrap;
+  gap: 6px;
+}
+
+body.pro-theme.bp.home-page .home-hero-index .filter-tab {
+  min-height: 34px;
+  padding: 0 12px;
+  font-size: 11px;
+  font-weight: 600;
+}
+
+@media (max-width: 900px) {
+  body.pro-theme.bp.home-page .home-hero-main {
+    grid-template-columns: minmax(0, 1fr);
+    gap: 27px;
+  }
+
+  body.pro-theme.bp.home-page .home-hero-copy .bp-hero-line {
+    max-width: 58ch;
+  }
+}
+
+@media (max-width: 760px) {
+  body.pro-theme.bp.home-page .home-hero .home-hero-nav {
+    flex-wrap: wrap;
+    gap: 12px;
+  }
+
+  body.pro-theme.bp.home-page .home-hero-utilities {
+    width: 100%;
+    margin-left: 0;
+  }
+
+  body.pro-theme.bp.home-page .home-hero-count {
+    display: none;
+  }
+
+  body.pro-theme.bp.home-page .home-hero-search {
+    width: 100%;
+    height: 44px;
+  }
+
+  body.pro-theme.bp.home-page .home-hero-search input {
+    height: 42px;
+  }
+
+  body.pro-theme.bp.home-page .home-hero-index .bp-keys {
+    overflow-x: auto;
+    padding-bottom: 3px;
+    scrollbar-width: none;
+    -webkit-overflow-scrolling: touch;
+  }
+
+  body.pro-theme.bp.home-page .home-hero-index .bp-keys::-webkit-scrollbar {
+    display: none;
+  }
+
+  body.pro-theme.bp.home-page .home-hero-index .filter-tabs {
+    flex-wrap: nowrap;
+  }
+
+  body.pro-theme.bp.home-page .home-hero-index .filter-tab {
+    flex: 0 0 auto;
+  }
+}
+
+@media (max-width: 680px) {
+  body.pro-theme.bp.home-page .home-hero .home-hero-nav {
+    display: flex;
+  }
+
+  body.pro-theme.bp.home-page .home-hero .bp-machine {
+    padding: 26px 18px 20px;
+  }
+
+  body.pro-theme.bp.home-page .home-hero-lead .bp-title {
+    font-size: clamp(52px, 14.5vw, 68px);
+  }
+
+  body.pro-theme.bp.home-page .home-hero-tagline {
+    margin-top: 18px;
+    font-size: 19px;
+  }
+
+  body.pro-theme.bp.home-page .home-hero-copy .bp-hero-line {
+    display: block;
+    font-size: 13px;
+  }
+
+  body.pro-theme.bp.home-page .home-hero-copy .bp-hero-actions {
+    display: flex;
+    margin-top: 22px;
+  }
+
+  body.pro-theme.bp.home-page .home-hero-note {
+    margin-top: 14px;
+    font-size: 9px;
+  }
+
+  body.pro-theme.bp.home-page .home-hero-index {
+    margin-top: 32px;
+    padding-top: 16px;
+  }
+
+  body.pro-theme.bp.home-page .home-hero-index-head {
+    align-items: flex-start;
+    font-size: 9px;
+  }
 }
 
 @media (min-width: 1180px) {

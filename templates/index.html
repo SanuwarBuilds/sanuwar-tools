@@ -1,16 +1,23 @@
 {% extends 'base.html' %}
 {% from '_ad_unit.html' import ad_unit with context %}
 {% block bodyclass %}home-page{% endblock %}
-{% block page_styles %}<link rel="stylesheet" href="/assets/css/tools-shelf.css?v=3">{% endblock %}
+{% block page_styles %}<link rel="stylesheet" href="/assets/css/tools-shelf.css?v=4">{% endblock %}
 {% block content %}
 {% set tools = public_config.get('tools', []) %}
-<section class="bp-hero wrap" aria-labelledby="hero-title">
-  <div class="bp-hero-nav">
+<section class="bp-hero wrap home-hero" aria-labelledby="hero-title">
+  <div class="bp-hero-nav home-hero-nav">
     <span><i aria-hidden="true"></i>SanuwarTools · web toolkit</span>
-    <span>{{ tools | length }} tools · no install</span>
+    <div class="home-hero-utilities">
+      <span class="home-hero-count">{{ tools | length }} tools · no install</span>
+      <label class="home-hero-search" for="tool-search">
+        <svg aria-hidden="true" viewBox="0 0 24 24"><circle cx="10.5" cy="10.5" r="6.5"/><path d="m16 16 4.5 4.5"/></svg>
+        <input type="search" id="tool-search" placeholder="Search tools…" aria-label="Search tools, apps and directories">
+        <kbd>/</kbd>
+      </label>
+    </div>
   </div>
   <div class="bp-hero-core">
-    <div class="bp-machine">
+    <div class="bp-machine home-hero-machine">
       <span class="bp-leds" aria-hidden="true"><i></i><i></i><i></i></span>
       <span class="bp-machine-label" aria-hidden="true">The toolkit computer · model ST-04</span>
       <span class="bp-screw is-tl" aria-hidden="true"></span>
@@ -18,27 +25,31 @@
       <span class="bp-screw is-bl" aria-hidden="true"></span>
       <span class="bp-screw is-br" aria-hidden="true"></span>
       <span class="bp-etched" aria-hidden="true">s</span>
-      <h1 id="hero-title" class="bp-title">Small tools. Big work.</h1>
-      <p class="bp-hero-line">{{ catalog.tools | length }} free browser tools for text, encoding, images, PDFs, networking and security — plus <b>photo resizing and passport photos</b> and Android downloads. No install — open, work, done.</p>
-      <div class="bp-hero-actions">
-        <a class="bp-cta" href="#tools">
-          <svg aria-hidden="true" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M4 4h6v6H4zM14 4h6v6h-6zM4 14h6v6H4zM14 14h6v6h-6z"/></svg>
-          <span>Browse {{ catalog.tools | length }} browser tools</span>
-        </a>
-        {% if public_config.get('downloadPage', {}).get('enabled', True) %}
-        <a class="bp-cta-ghost" href="#downloads">Download apps &amp; files <span aria-hidden="true">→</span></a>
-        {% endif %}
-      </div>
-      <div class="bp-console">
-        <div class="bp-console-bar">
-          <span>Catalogue · live</span>
-          <span><b id="tool-total">{{ tools | length }}</b> items</span>
+      <div class="home-hero-main">
+        <div class="home-hero-lead">
+          <span class="bp-kicker">Free browser toolkit</span>
+          <h1 id="hero-title" class="bp-title">Sanuwar <span>Tools<i aria-hidden="true">.</i></span></h1>
+          <p class="home-hero-tagline">Small tools. Big work.</p>
         </div>
-        <label class="bp-screen" for="tool-search">
-          <svg aria-hidden="true" viewBox="0 0 24 24"><circle cx="10.5" cy="10.5" r="6.5"/><path d="m16 16 4.5 4.5"/></svg>
-          <input type="search" id="tool-search" placeholder="Search tools, apps & directories…" aria-label="Search tools, apps and directories">
-          <kbd>/</kbd>
-        </label>
+        <div class="home-hero-copy">
+          <p class="bp-hero-line">{{ catalog.tools | length }} free browser tools for text, encoding, images, PDFs, networking and security — plus <b>photo resizing and passport photos</b> and Android downloads. No install — open, work, done.</p>
+          <div class="bp-hero-actions">
+            <a class="bp-cta" href="#tools">
+              <svg aria-hidden="true" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M4 4h6v6H4zM14 4h6v6h-6zM4 14h6v6H4zM14 14h6v6h-6z"/></svg>
+              <span>Browse {{ catalog.tools | length }} tools</span>
+            </a>
+            {% if public_config.get('downloadPage', {}).get('enabled', True) %}
+            <a class="bp-cta-ghost" href="#downloads">Download apps &amp; files <span aria-hidden="true">→</span></a>
+            {% endif %}
+          </div>
+          <p class="home-hero-note"><span>No install</span><span>No account</span><span>Runs in your browser</span></p>
+        </div>
+      </div>
+      <div class="home-hero-index">
+        <div class="home-hero-index-head">
+          <span>Browse by category</span>
+          <span><b id="tool-total">{{ tools | length }}</b> tools shown</span>
+        </div>
         <div class="bp-keys"><div class="filter-tabs" id="categories" role="group" aria-label="Filter tools"></div></div>
       </div>
     </div>
