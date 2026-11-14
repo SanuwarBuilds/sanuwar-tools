@@ -75,7 +75,7 @@ class SearchDiscoveryTests(unittest.TestCase):
         self.assertEqual([node.text for node in root.iter('{http://www.sitemaps.org/schemas/sitemap/0.9}loc')],
                          ['https://sanuwartools.online/','https://sanuwartools.online/downloads',
                           'https://sanuwartools.online/photo-tools','https://sanuwartools.online/about','https://sanuwartools.online/contact','https://sanuwartools.online/privacy',
-                          'https://sanuwartools.online/directory','https://sanuwartools.online/directory/anime'])
+                          'https://sanuwartools.online/directory','https://sanuwartools.online/eduhelp','https://sanuwartools.online/directory/anime'])
         self.records[module.TOOLS_CONFIG_REL]['downloadPage']['enabled']=False
         self.assertNotIn(b'/downloads',self.client.get('/sitemap.xml').data)
         self.assertEqual(self.client.get('/downloads').status_code,404)
@@ -132,7 +132,7 @@ class SearchDiscoveryTests(unittest.TestCase):
         self.assertEqual(response.status_code,200)
         self.assertEqual(response.get_data(as_text=True),seo.INDEXNOW_KEY)
         sitemap=self.client.get('/sitemap.xml').data.decode()
-        self.assertEqual(sitemap.count('<lastmod>'+seo.SITE_UPDATED+'</lastmod>'),8)
+        self.assertEqual(sitemap.count('<lastmod>'+seo.SITE_UPDATED+'</lastmod>'),9)
 
     def test_directory_hub_and_category_pages_are_indexable(self):
         hub=self.client.get('/directory')

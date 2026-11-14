@@ -27,6 +27,8 @@ PAGES = {
                    'Browse Android apps, files and albums on SanuwarTools. Preview available downloads, check versions and choose the files you need.'),
     '/directory': ('Open Directories — Movies, Anime, Manga & More | SanuwarTools',
                    'Browse hand-checked directories for movies, TV shows, anime, manga, live sports, live TV, torrents, games, music, eBooks, comics, Asian drama, VPNs and ad blockers.'),
+    '/eduhelp': ('Eduhelp — Exam, Result, Admission & Scholarship Updates | SanuwarTools',
+                 'Follow education updates in one place: exam notices, board and university results, admission dates, scholarships and career alerts with links to official sources.'),
 }
 PAGE_TYPES = {
     '/': 'WebPage',
@@ -36,6 +38,7 @@ PAGE_TYPES = {
     '/contact': 'ContactPage',
     '/downloads': 'CollectionPage',
     '/directory': 'CollectionPage',
+    '/eduhelp': 'CollectionPage',
 }
 BREADCRUMBS = {
     '/photo-tools': 'Photo Tools',
@@ -44,6 +47,7 @@ BREADCRUMBS = {
     '/contact': 'Contact',
     '/privacy': 'Privacy',
     '/directory': 'Directories',
+    '/eduhelp': 'Eduhelp',
 }
 PHOTO_FAQS = [
     ('How do I resize a photo to exact pixels?',
@@ -309,7 +313,7 @@ def install(app, load_config, load_directory=None, load_tool_catalog=None):
             paths.append('/downloads')
         if not any(tool.get('id') == 'builtin-photo-tools' and not all(tool.get(flag, True) is True for flag in ('enabled', 'visible')) for tool in config.get('tools', [])):
             paths.append('/photo-tools')
-        paths.extend(['/about', '/contact', '/privacy', '/directory'])
+        paths.extend(['/about', '/contact', '/privacy', '/directory', '/eduhelp'])
         for category in directory_categories():
             slug = category.get('slug')
             if isinstance(slug, str) and re.fullmatch(r'[a-z0-9-]{1,80}', slug):

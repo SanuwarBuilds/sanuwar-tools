@@ -7,6 +7,7 @@
     widgets = [],
     store = [],
     directories = { categories: [] },
+    eduhelp = { updates: [] },
     current = "dashboard";
   const titles = {
     dashboard: [
@@ -37,6 +38,13 @@
       "Add directories.",
       "Publish categories, groups and external sites on the public directory pages.",
       "Add a directory",
+    ],
+    eduhelp: [
+      "Eduhelp",
+      "THE EDUCATION DESK",
+      "Education updates, one board.",
+      "Publish exam notices, results, admission dates, scholarships and career alerts on /eduhelp.",
+      "Add an update",
     ],
     widgets: [
       "Home widgets",
@@ -153,6 +161,7 @@
     $("#nav-downloads-count").textContent = downloads.length;
     $("#nav-directories-count").textContent =
       directories.categories?.length || 0;
+    $("#nav-eduhelp-count").textContent = eduhelp.updates?.length || 0;
   }
   function navigate(view) {
     current = view;
@@ -179,6 +188,7 @@
       tools: () => editTool(),
       downloads: () => editDownload(),
       directories: () => editDirectory(),
+      eduhelp: () => editEduhelp(),
       widgets: () => editWidget(),
       store: () => editStore(),
     })[current]?.();
@@ -1808,6 +1818,266 @@
       },
     );
   }
+  const EDUHELP_CATEGORIES = [
+    "Exam",
+    "Result",
+    "Admission",
+    "Scholarship",
+    "Notice",
+  ];
+  const saveEduhelp = async (next) => {
+    const result = await mutate("/api/admin/eduhelp", "POST", next);
+    eduhelp = result.eduhelp || next;
+    updateCounts();
+  };
+  const eduhelpSorted = () =>
+    [...(Array.isArray(eduhelp.updates) ? eduhelp.updates : [])].sort(
+      (a, b) =>
+        Number(b.pinned === true) - Number(a.pinned === true) ||
+        String(b.date || "").localeCompare(String(a.date || "")),
+    );
+  function eduhelpView() {
+    const updates = eduhelpSorted();
+    const rows = updates.map((update) => {
+      const enabled = isEnabled(update);
+      const toggle = rowButton(
+        enabled ? "Disable" : "Enable",
+        async () => {
+          const next = clone(eduhelp);
+          next.updates = next.updates.map((item) =>
+            item.id === update.id ? { ...item, enabled: !enabled } : item,
+          );
+          next.updated = new Date().toISOString().slice(0, 10);
+          await saveEduhelp(next);
+          render();
+          toast(
+            enabled
+              ? "Update hidden from the public page."
+              : "Update published.",
+          );
+        },
+        false,
+        `${enabled ? "Hide" : "Publish"} ${update.title || "update"}`,
+      );
+      return el(
+        "tr",
+        {},
+        el(
+          "td",
+          {},
+          el(
+            "div",
+            { class: "table-name" },
+            el(
+              "div",
+              {},
+              el("strong", {}, update.title || "Untitled"),
+              el(
+                "small",
+                {},
+                `${update.category || "Notice"}${update.date ? " · " + update.date : ""}${update.pinned ? " · pinned" : ""}`,
+              ),
+            ),
+          ),
+        ),
+        el("td", {}, update.link ? "Official link" : "Notice only"),
+        el("td", {}, pill(enabled)),
+        el(
+          "td",
+          {},
+          el(
+            "div",
+            { class: "row-actions" },
+            rowButton(
+              "Edit",
+              () => editEduhelp(update),
+              false,
+              `Edit ${update.title || "update"}`,
+            ),
+            toggle,
+            rowButton(
+              "×",
+              () =>
+                confirmDelete(update.title || "this update", async () => {
+                  const next = clone(eduhelp);
+                  next.updates = next.updates.filter(
+                    (item) => item.id !== update.id,
+                  );
+                  next.updated = new Date().toISOString().slice(0, 10);
+                  await saveEduhelp(next);
+                  render();
+                }),
+              true,
+              `Delete ${update.title || "update"}`,
+            ),
+          ),
+        ),
+      );
+    });
+    const notice = el("textarea", { rows: "3", maxlength: "2000" });
+    notice.value = eduhelp.notice || "";
+    const noticeForm = el(
+      "form",
+      { class: "settings-form" },
+      el("label", {}, "Public notice", notice),
+      el(
+        "button",
+        { class: "button button-light", type: "submit" },
+        "Save notice",
+        el("span", {}, "✓"),
+      ),
+    );
+    noticeForm.addEventListener("submit", async (event) => {
+      event.preventDefault();
+      try {
+        const next = clone(eduhelp);
+        next.notice = notice.value.trim();
+        await saveEduhelp(next);
+        toast("Eduhelp notice saved.");
+      } catch (error) {
+        toast(error.message);
+      }
+    });
+    root.replaceChildren(
+      card(
+        "Eduhelp updates",
+        el(
+          "div",
+          {},
+          el(
+            "p",
+            { class: "form-note" },
+            "Education updates shown on /eduhelp. Pinned updates stay on top; every link must be HTTPS.",
+          ),
+          el(
+            "div",
+            { class: "backup-actions" },
+            el(
+              "button",
+              { class: "button button-light", onclick: () => editEduhelp() },
+              "Add an update",
+              el("span", {}, "+"),
+            ),
+            el(
+              "a",
+              { class: "text-link", href: "/eduhelp", target: "_blank", rel: "noopener" },
+              "View live ↗",
+            ),
+          ),
+        ),
+      ),
+      el(
+        "section",
+        { class: "admin-card" },
+        el(
+          "div",
+          { class: "table-wrap" },
+          el(
+            "table",
+            { class: "admin-table" },
+            el(
+              "thead",
+              {},
+              el(
+                "tr",
+                {},
+                ...["UPDATE", "TYPE", "STATUS", "ACTIONS"].map((label) =>
+                  el("th", {}, label),
+                ),
+              ),
+            ),
+            el(
+              "tbody",
+              {},
+              ...(rows.length
+                ? rows
+                : [
+                    el(
+                      "tr",
+                      {},
+                      el(
+                        "td",
+                        { colspan: "4" },
+                        "No Eduhelp updates yet. Add your first one.",
+                      ),
+                    ),
+                  ]),
+            ),
+          ),
+        ),
+      ),
+      card("Eduhelp notice", noticeForm, "Shown at the bottom of the public Eduhelp page."),
+    );
+  }
+  function editEduhelp(update) {
+    const draft = update
+      ? clone(update)
+      : {
+          id: uid("edu"),
+          title: "",
+          category: "Notice",
+          summary: "",
+          link: "",
+          date: new Date().toISOString().slice(0, 10),
+          pinned: false,
+          enabled: true,
+        };
+    const title = field("Title", draft.title || "", "text", true);
+    const category = select(
+      "Category",
+      EDUHELP_CATEGORIES,
+      EDUHELP_CATEGORIES.includes(draft.category) ? draft.category : "Notice",
+    );
+    const date = field(
+      "Date",
+      draft.date || new Date().toISOString().slice(0, 10),
+      "date",
+    );
+    const link = field("Official link (optional)", draft.link || "", "url");
+    const summary = field("Summary", draft.summary || "", "textarea");
+    const pinned = checkbox(
+      "Pin this update to the top",
+      draft.pinned === true,
+    );
+    const enabled = checkbox(
+      "Show on the public Eduhelp page",
+      draft.enabled !== false,
+    );
+    editor(
+      update ? "Edit update" : "Add an Eduhelp update",
+      [
+        title.node,
+        el("div", { class: "form-grid" }, category.node, date.node),
+        link.node,
+        summary.node,
+        el("div", { class: "form-grid" }, pinned.node, enabled.node),
+      ],
+      async () => {
+        const titleValue = title.input.value.trim();
+        if (!titleValue) throw new Error("Update title required.");
+        if (date.input.value && !/^\d{4}-\d{2}-\d{2}$/.test(date.input.value))
+          throw new Error("Use a YYYY-MM-DD date.");
+        const updated = {
+          ...draft,
+          id: draft.id || uid("edu"),
+          title: titleValue,
+          category: category.input.value,
+          summary: summary.input.value.trim(),
+          link: link.input.value.trim(),
+          date: date.input.value,
+          pinned: pinned.input.checked,
+          enabled: enabled.input.checked,
+        };
+        const next = clone(eduhelp);
+        next.updates = Array.isArray(next.updates) ? next.updates : [];
+        next.updates = update
+          ? next.updates.map((item) => (item.id === update.id ? updated : item))
+          : [updated, ...next.updates];
+        next.updated = new Date().toISOString().slice(0, 10);
+        await saveEduhelp(next);
+      },
+    );
+  }
   function settings() {
     const name = field(
         "Site name",
@@ -2260,19 +2530,22 @@
       tools: () => listing(config.tools, "tools"),
       downloads: () => listing(downloads, "downloads"),
       directories: directoriesView,
+      eduhelp: eduhelpView,
       widgets: () => listing(widgets, "widgets"),
       store: () => listing(store, "store"),
     })[current]();
   }
   async function load() {
     try {
-      [config, downloads, widgets, store, directories] = await Promise.all([
-        api("/api/admin/tools.config"),
-        api("/api/admin/downloads"),
-        api("/api/admin/widgets"),
-        api("/api/admin/store-apps"),
-        api("/api/admin/directories"),
-      ]);
+      [config, downloads, widgets, store, directories, eduhelp] =
+        await Promise.all([
+          api("/api/admin/tools.config"),
+          api("/api/admin/downloads"),
+          api("/api/admin/widgets"),
+          api("/api/admin/store-apps"),
+          api("/api/admin/directories"),
+          api("/api/admin/eduhelp"),
+        ]);
       navigate("dashboard");
     } catch (error) {
       empty(root, "Workspace unavailable.", error.message, load, "Try again");

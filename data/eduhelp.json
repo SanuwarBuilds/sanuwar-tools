@@ -1,0 +1,36 @@
+{
+  "updated": "2026-11-14",
+  "notice": "Eduhelp shares education updates for quick reference only. Always confirm exam dates, results, admission and scholarship details on the official board, university or government website before you act.",
+  "updates": [
+    {
+      "id": "edu_welcome",
+      "title": "Welcome to Eduhelp",
+      "category": "Notice",
+      "summary": "Exam notices, results, admission dates, scholarships and career alerts now live here. New entries appear on top, and pinned updates stay first.",
+      "link": "",
+      "date": "2026-11-14",
+      "pinned": true,
+      "enabled": true
+    },
+    {
+      "id": "edu_seba",
+      "title": "SEBA exam notices and results — official portal",
+      "category": "Result",
+      "summary": "Check HSLC and Assam High Madrassa results, routines and board notices on the official Board of Secondary Education, Assam portal.",
+      "link": "https://sebaonline.org/",
+      "date": "2026-11-14",
+      "pinned": false,
+      "enabled": true
+    },
+    {
+      "id": "edu_nsp",
+      "title": "National Scholarship Portal — central scholarship applications",
+      "category": "Scholarship",
+      "summary": "Apply for central government scholarships, track application status and read the latest scheme guidelines on the National Scholarship Portal.",
+      "link": "https://scholarships.gov.in/",
+      "date": "2026-11-14",
+      "pinned": false,
+      "enabled": true
+    }
+  ]
+}

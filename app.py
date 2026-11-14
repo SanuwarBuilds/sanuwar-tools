@@ -223,6 +223,82 @@ def site_domain(value):
         return ''
     return host[4:] if host.startswith('www.') else host
 
+def load_eduhelp():
+    data = safe_read(EDUHELP_REL)
+    if not isinstance(data, dict) or not isinstance(data.get('updates'), list):
+        return {'updates': [], 'notice': '', 'updated': ''}
+    return data
+
+def validate_eduhelp_document(data):
+    if not isinstance(data, dict) or not isinstance(data.get('updates'), list):
+        raise ValueError('Eduhelp must include an updates array')
+    if len(data['updates']) > 200:
+        raise ValueError('Too many Eduhelp updates')
+    for key in ('notice', 'updated'):
+        if key in data and not isinstance(data[key], str):
+            raise ValueError(f'{key} must be text')
+    if str(data.get('notice') or '') and len(data['notice']) > 2000:
+        raise ValueError('Keep the Eduhelp notice under 2000 characters')
+    if data.get('updated') and not EDUHELP_DATE.match(data['updated']):
+        raise ValueError('The updated date must use YYYY-MM-DD')
+    seen = set()
+    for item in data['updates']:
+        if not isinstance(item, dict):
+            raise ValueError('Each Eduhelp update must be an object')
+        identity = item.get('id')
+        if not isinstance(identity, str) or not EDUHELP_ID.match(identity):
+            raise ValueError('Each Eduhelp update needs a simple unique ID')
+        if identity in seen:
+            raise ValueError('Eduhelp update IDs must be unique')
+        seen.add(identity)
+        title = item.get('title')
+        if not isinstance(title, str) or not title.strip() or len(title) > 160:
+            raise ValueError('Each Eduhelp update needs a title up to 160 characters')
+        summary = item.get('summary', '')
+        if not isinstance(summary, str) or len(summary) > 800:
+            raise ValueError('Eduhelp summaries must be text up to 800 characters')
+        if item.get('category') not in EDUHELP_CATEGORIES:
+            raise ValueError('Choose a valid Eduhelp category')
+        if item.get('link'):
+            if not isinstance(item['link'], str) or not security.valid_url(item['link']):
+                raise ValueError('Eduhelp links must be HTTPS URLs')
+        if item.get('date') and (not isinstance(item['date'], str) or not EDUHELP_DATE.match(item['date'])):
+            raise ValueError('Eduhelp dates must use YYYY-MM-DD')
+        for key in ('enabled', 'pinned'):
+            if key in item and type(item[key]) is not bool:
+                raise ValueError(f'{key} must be true or false')
+    return data
+
+@app.get('/eduhelp')
+def eduhelp():
+    data = load_eduhelp()
+    updates = [item for item in data.get('updates', [])
+               if isinstance(item, dict) and is_public(item)]
+    updates.sort(key=lambda item: item.get('date') or '', reverse=True)
+    updates.sort(key=lambda item: item.get('pinned') is not True)
+    categories = [name for name in EDUHELP_CATEGORIES
+                  if any(item.get('category') == name for item in updates)]
+    return render_template('eduhelp.html', updates=updates, categories=categories,
+                           notice=data.get('notice', ''), updated=data.get('updated', ''))
+
+@app.route('/api/admin/eduhelp', methods=['GET'])
+@login_required
+def admin_eduhelp():
+    return jsonify(load_eduhelp())
+
+@app.route('/api/admin/eduhelp', methods=['POST'])
+@login_required
+def save_admin_eduhelp():
+    try:
+        data = validate_eduhelp_document(request.get_json(silent=True))
+        safe_write(EDUHELP_REL, data)
+        return jsonify(success=True, eduhelp=data)
+    except ValueError as error:
+        return jsonify(error=str(error)), 400
+    except Exception:
+        app.logger.exception('Could not save Eduhelp updates')
+        return jsonify(error='Could not save Eduhelp updates. Check server configuration and try again.'), 500
+
 @app.route("/payment-demo")
 def payment_demo():
     return render_template("payment_demo.html")
@@ -377,7 +453,11 @@ utils.safe_writer = safe_write
 TOOLS_CONFIG_REL = "data/tools.config.json"
 DOWNLOADS_REL    = "data/downloads.json"
 DIRECTORY_REL    = "data/directory.json"
+EDUHELP_REL      = "data/eduhelp.json"
 TOOL_CATALOG_REL = "data/tools.catalog.json"
+EDUHELP_CATEGORIES = ('Exam', 'Result', 'Admission', 'Scholarship', 'Notice')
+EDUHELP_DATE = re.compile(r'^\d{4}-\d{2}-\d{2}$')
+EDUHELP_ID = re.compile(r'^[A-Za-z0-9_-]{1,60}$')
 TOOL_BUNDLES = {"text", "media", "network", "misc", "calculators", "dls", "land"}
 TOOL_VENDORS = {"js-yaml", "marked", "fflate", "pdf-lib", "pdfjs", "jspdf", "bcryptjs", "qrcodegen"}
 TOOL_CATEGORY_ICONS = {
@@ -397,6 +477,23 @@ TOOL_CATEGORY_ICONS = {
     'Sports & Games': 'score',
     'Land & Property': 'convert',
 }
+TOOL_CATEGORY_ORDER = [
+    'Text Tools',
+    'Developer Tools',
+    'Encoding & Hashing',
+    'Images & Media',
+    'PDF & Documents',
+    'Compression & Archives',
+    'Networking',
+    'Security & Privacy',
+    'Calculators',
+    'Financial Calculators',
+    'Unit Converters',
+    'Time & Date',
+    'Health & Fitness',
+    'Land & Property',
+    'Sports & Games',
+]
 
 def load_tool_catalog():
     data = safe_read(TOOL_CATALOG_REL)
@@ -440,6 +537,8 @@ def load_tool_catalog():
         })
         if category.strip() not in categories:
             categories.append(category.strip())
+    order = {name: index for index, name in enumerate(TOOL_CATEGORY_ORDER)}
+    categories.sort(key=lambda name: (order.get(name, len(order)), name))
     return {'updated': data.get('updated', ''), 'categories': categories, 'tools': tools}
 
 def browser_tool_cards(catalog):
@@ -475,7 +574,8 @@ def tools_hub():
 
 @app.get('/api/browser-tools.json')
 def browser_tools_feed():
-    response = jsonify({'tools': browser_tool_cards(load_tool_catalog())})
+    catalog = load_tool_catalog()
+    response = jsonify({'tools': browser_tool_cards(catalog), 'categories': catalog['categories']})
     response.headers['Cache-Control'] = 'public, max-age=300'
     return response
 

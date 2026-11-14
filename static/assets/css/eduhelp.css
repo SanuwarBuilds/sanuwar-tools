@@ -1,0 +1,261 @@
+/* ---------- Eduhelp ----------------------------------------------------- */
+body.pro-theme.bp.eduhelp-page .edu-hero .bp-machine .bp-title {
+  max-width: 18ch;
+  margin-inline: auto;
+  white-space: normal;
+  text-wrap: balance;
+}
+
+body.pro-theme.bp.eduhelp-page .bp-machine .bp-kicker {
+  display: block;
+  margin-bottom: 14px;
+  font-family: var(--bp-mono);
+  font-size: 9px;
+  letter-spacing: 0.24em;
+  text-transform: uppercase;
+  color: var(--bp-accent);
+}
+
+body.pro-theme.bp.eduhelp-page .edu-section {
+  padding-top: clamp(28px, 4vw, 44px);
+}
+
+/* ---------- Update grid ------------------------------------------------- */
+body.pro-theme.bp.eduhelp-page .edu-grid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 14px;
+}
+
+body.pro-theme.bp.eduhelp-page .edu-card {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  min-height: 200px;
+  padding: 20px 20px 18px;
+  border: 1px solid var(--bp-line-2);
+  border-radius: 12px;
+  background: linear-gradient(180deg, var(--bp-panel-2) 0%, var(--bp-panel) 100%);
+  box-shadow: var(--bp-emboss);
+  transition:
+    transform 0.25s var(--bp-ease),
+    border-color 0.25s var(--bp-ease),
+    box-shadow 0.25s var(--bp-ease);
+}
+
+body.pro-theme.bp.eduhelp-page .edu-card::before {
+  content: "";
+  position: absolute;
+  left: 0;
+  top: 18px;
+  bottom: 18px;
+  width: 2px;
+  border-radius: 2px;
+  background: var(--bp-line-3);
+  transition: background-color 0.2s ease;
+}
+
+body.pro-theme.bp.eduhelp-page .edu-card:hover {
+  transform: translateY(-2px);
+  border-color: var(--bp-line-3);
+  box-shadow: var(--bp-emboss), var(--bp-shadow-lift);
+}
+
+body.pro-theme.bp.eduhelp-page .edu-card:hover::before {
+  background: var(--bp-accent);
+}
+
+body.pro-theme.bp.eduhelp-page .edu-card:focus-within {
+  border-color: var(--bp-accent);
+  outline: 2px solid var(--bp-accent);
+  outline-offset: 2px;
+}
+
+body.pro-theme.bp.eduhelp-page .edu-card-top {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  margin-bottom: 12px;
+}
+
+body.pro-theme.bp.eduhelp-page .edu-tag {
+  padding: 3px 8px;
+  border: 1px solid var(--bp-line-2);
+  border-radius: 4px;
+  background: var(--bp-panel-3);
+  color: var(--bp-ink-2);
+  font-family: var(--bp-mono);
+  font-size: 9px;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+}
+
+body.pro-theme.bp.eduhelp-page .edu-date {
+  color: var(--bp-faint);
+  font-family: var(--bp-mono);
+  font-size: 9px;
+  letter-spacing: 0.08em;
+}
+
+body.pro-theme.bp.eduhelp-page .edu-card h3 {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 8px;
+  margin: 0 0 9px;
+  font-size: 16px;
+  font-weight: 600;
+  letter-spacing: -0.02em;
+  line-height: 1.35;
+  overflow-wrap: anywhere;
+}
+
+body.pro-theme.bp.eduhelp-page .edu-card h3 a {
+  color: var(--bp-ink);
+  text-decoration: none;
+}
+
+body.pro-theme.bp.eduhelp-page .edu-card h3 a:hover {
+  color: var(--bp-accent);
+}
+
+body.pro-theme.bp.eduhelp-page .edu-pin {
+  padding: 2px 7px;
+  border: 1px solid var(--bp-accent);
+  border-radius: 999px;
+  color: var(--bp-accent);
+  font-family: var(--bp-mono);
+  font-size: 8px;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+}
+
+body.pro-theme.bp.eduhelp-page .edu-card > p {
+  margin: 0;
+  color: var(--bp-muted);
+  font-size: 12.5px;
+  line-height: 1.7;
+}
+
+body.pro-theme.bp.eduhelp-page .edu-card-bottom {
+  display: flex;
+  align-items: center;
+  margin-top: auto;
+  padding-top: 16px;
+}
+
+body.pro-theme.bp.eduhelp-page .edu-open {
+  color: var(--bp-accent);
+  font-family: var(--bp-mono);
+  font-size: 10px;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  text-decoration: none;
+}
+
+body.pro-theme.bp.eduhelp-page .edu-open span {
+  display: inline-block;
+  margin-left: 4px;
+  transition: transform 0.2s var(--bp-ease);
+}
+
+body.pro-theme.bp.eduhelp-page .edu-open:hover span {
+  transform: translate(2px, -2px);
+}
+
+body.pro-theme.bp.eduhelp-page .edu-open.is-muted {
+  color: var(--bp-faint);
+}
+
+body.pro-theme.bp.eduhelp-page .edu-card[hidden],
+body.pro-theme.bp.eduhelp-page .edu-empty[hidden] {
+  display: none;
+}
+
+/* ---------- Filter keys ------------------------------------------------ */
+body.pro-theme.bp.eduhelp-page .edu-filters {
+  padding-top: 8px;
+}
+
+/* ---------- Notice plate ------------------------------------------------ */
+body.pro-theme.bp.eduhelp-page .edu-notice {
+  display: flex;
+  gap: 16px;
+  padding: 22px 24px;
+  border: 1px solid var(--bp-line-2);
+  border-left: 3px solid var(--bp-accent);
+  border-radius: 12px;
+  background: linear-gradient(180deg, var(--bp-panel-2), var(--bp-panel));
+  box-shadow: var(--bp-emboss), var(--bp-shadow);
+}
+
+body.pro-theme.bp.eduhelp-page .edu-notice-led {
+  width: 9px;
+  height: 9px;
+  flex: none;
+  margin-top: 5px;
+  border-radius: 50%;
+  background: var(--bp-accent);
+  box-shadow: 0 0 0 3px var(--bp-accent-wash), 0 0 12px color-mix(in oklab, var(--bp-accent) 55%, transparent);
+}
+
+body.pro-theme.bp.eduhelp-page .edu-notice h2 {
+  margin: 6px 0 0;
+  font-size: clamp(20px, 2.2vw, 26px);
+  font-weight: 500;
+  letter-spacing: -0.03em;
+}
+
+body.pro-theme.bp.eduhelp-page .edu-notice p {
+  max-width: 82ch;
+  margin: 8px 0 0;
+  color: var(--bp-muted);
+  font-size: 13px;
+  line-height: 1.75;
+}
+
+/* ---------- Empty state ------------------------------------------------- */
+body.pro-theme.bp.eduhelp-page .edu-empty {
+  margin-top: 16px;
+  padding: 34px 24px;
+  border: 1px dashed var(--bp-line-3);
+  border-radius: 12px;
+  text-align: center;
+}
+
+body.pro-theme.bp.eduhelp-page .edu-empty h3 {
+  margin: 0;
+  font-size: 19px;
+  font-weight: 500;
+  letter-spacing: -0.02em;
+}
+
+body.pro-theme.bp.eduhelp-page .edu-empty p {
+  margin: 8px 0 16px;
+  color: var(--bp-muted);
+  font-size: 13px;
+}
+
+/* ---------- Responsive -------------------------------------------------- */
+@media (max-width: 1000px) {
+  body.pro-theme.bp.eduhelp-page .edu-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+@media (max-width: 680px) {
+  body.pro-theme.bp.eduhelp-page .edu-grid {
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  body.pro-theme.bp.eduhelp-page .edu-card {
+    min-height: 0;
+    padding: 17px 16px 15px;
+  }
+
+  body.pro-theme.bp.eduhelp-page .edu-notice {
+    padding: 18px 16px;
+    gap: 12px;
+  }
+}

@@ -18,6 +18,9 @@ class WorkspaceTests(unittest.TestCase):
             module.DOWNLOADS_REL: [],
             'data/config.json': {'widgets':[], 'store_apps':[]},
             module.DIRECTORY_REL: {'notice':'Test notice','categories':[]},
+            module.EDUHELP_REL: {'updated':'2026-11-14','notice':'Verify official dates.','updates':[
+                {'id':'exam','title':'Exam notice','category':'Exam','summary':'Check the official date.','link':'https://example.com/notice','date':'2026-11-14','pinned':True,'enabled':True},
+                {'id':'hidden','title':'Hidden update','category':'Notice','summary':'Private','date':'2026-11-13','enabled':False}]},
         }
         self.read = patch.object(module,'safe_read',side_effect=lambda path:copy.deepcopy(self.records.get(path)))
         self.write = patch.object(module,'safe_write',side_effect=lambda path,data:self.records.__setitem__(path,copy.deepcopy(data)))
@@ -41,7 +44,7 @@ class WorkspaceTests(unittest.TestCase):
         self.assertEqual(response.status_code,200)
         with self.client.session_transaction() as session:self.token=session['csrf_token']
     def test_public_pages_render(self):
-        for path in ('/','/downloads','/download.html','/admin/login','/payment-demo','/purchases'):
+        for path in ('/','/downloads','/download.html','/admin/login','/payment-demo','/purchases','/eduhelp'):
             response=self.client.get(path);self.assertEqual(response.status_code,200,path)
             self.assertNotIn(b'cdn.tailwindcss.com',response.data)
     def test_dark_theme_and_workspace_shell_assets(self):
@@ -58,14 +61,14 @@ class WorkspaceTests(unittest.TestCase):
         self.assertIn('admin-pro.css?v=3',admin)
         self.assertIn('admin-body',admin)
         self.assertIn('admin-drawer-close',admin)
-        self.assertIn('admin.js?v=4',admin)
+        self.assertIn('admin.js?v=5',admin)
 
     def test_admin_requires_authentication(self):
         self.assertEqual(self.client.get('/admin').status_code,302)
-        for path in ('/api/admin/tools.config','/api/admin/widgets','/api/admin/store-apps','/api/admin/directories'):
+        for path in ('/api/admin/tools.config','/api/admin/widgets','/api/admin/store-apps','/api/admin/directories','/api/admin/eduhelp'):
             self.assertEqual(self.client.get(path).status_code,401)
     def test_all_management_writes_require_auth(self):
-        for path,method,payload in [('/api/tools.config','POST',{'tools':[],'categories':[]}),('/api/add_item','POST',{'title':'Test'}),('/api/update_item','PUT',{'id':'test','title':'Test'}),('/api/delete_item/test','DELETE',{}),('/api/admin/store-apps','POST',{}),('/api/admin/widgets','POST',{'type':'notice'}),('/api/admin/directories','POST',{})]:
+        for path,method,payload in [('/api/tools.config','POST',{'tools':[],'categories':[]}),('/api/add_item','POST',{'title':'Test'}),('/api/update_item','PUT',{'id':'test','title':'Test'}),('/api/delete_item/test','DELETE',{}),('/api/admin/store-apps','POST',{}),('/api/admin/widgets','POST',{'type':'notice'}),('/api/admin/directories','POST',{}),('/api/admin/eduhelp','POST',{})]:
             self.assertEqual(self.request(path,method,payload).status_code,401,path)
     def test_csrf_required_for_login(self):
         self.assertEqual(self.client.post('/admin/login',json={'username':'admin','password':'admin'}).status_code,403)
@@ -112,6 +115,34 @@ class WorkspaceTests(unittest.TestCase):
                             {'name':'Same again','slug':'same','groups':[{'name':'All','sites':[{'name':'Y','url':'https://example.org/'}]}]}]},
         ):
             self.assertEqual(self.request('/api/admin/directories', data=document).status_code, 400, document)
+
+    def test_eduhelp_public_page_filters_updates(self):
+        page = self.client.get('/eduhelp')
+        self.assertEqual(page.status_code, 200)
+        text = page.get_data(as_text=True)
+        self.assertIn('Exam notice', text)
+        self.assertIn('Verify official dates.', text)
+        self.assertNotIn('Hidden update', text)
+        self.assertIn('/eduhelp', self.client.get('/').get_data(as_text=True))
+
+    def test_eduhelp_save_and_validation(self):
+        self.login()
+        document = {'updated':'2026-11-14','notice':'Official dates only.','updates':[
+            {'id':'admission','title':'Admission window opens','category':'Admission','summary':'Apply online.','link':'https://example.com/apply','date':'2026-11-14','pinned':False,'enabled':True}]}
+        response = self.request('/api/admin/eduhelp', data=document)
+        self.assertEqual(response.status_code, 200, response.json)
+        self.assertEqual(self.records[module.EDUHELP_REL]['updates'][0]['id'], 'admission')
+        self.assertIn(b'Admission window opens', self.client.get('/eduhelp').data)
+        for bad in (
+            {'updates': 'bad'},
+            {'updates': [{'id':'x','title':'','category':'Exam'}]},
+            {'updates': [{'id':'x','title':'T','category':'Sports'}]},
+            {'updates': [{'id':'x','title':'T','category':'Exam','link':'javascript:alert(1)'}]},
+            {'updates': [{'id':'x','title':'T','category':'Exam','date':'14-11-2026'}]},
+            {'updates': [{'id':'x','title':'T','category':'Exam','enabled':'false'}]},
+            {'updates': [{'id':'x','title':'A','category':'Exam'},{'id':'x','title':'B','category':'Exam'}]},
+        ):
+            self.assertEqual(self.request('/api/admin/eduhelp', data=bad).status_code, 400, bad)
 
     def test_invalid_config_schema(self):
         self.login()

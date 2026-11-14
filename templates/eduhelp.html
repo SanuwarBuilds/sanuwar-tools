@@ -1,0 +1,105 @@
+{% extends 'base.html' %}
+{% block bodyclass %}eduhelp-page{% endblock %}
+{% block page_styles %}<link rel="stylesheet" href="/assets/css/eduhelp.css?v=1">{% endblock %}
+{% block content %}
+<section class="bp-hero wrap edu-hero" aria-labelledby="eduhelp-title">
+  <div class="bp-hero-nav">
+    <span><i aria-hidden="true"></i>Eduhelp · education desk</span>
+    <span>{{ updates | length }} updates{% if updated %} · updated {{ updated }}{% endif %}</span>
+  </div>
+  <div class="bp-hero-core">
+    <div class="bp-machine">
+      <span class="bp-leds" aria-hidden="true"><i></i><i></i><i></i></span>
+      <span class="bp-machine-label" aria-hidden="true">Eduhelp · notice board</span>
+      <span class="bp-screw is-tl" aria-hidden="true"></span>
+      <span class="bp-screw is-tr" aria-hidden="true"></span>
+      <span class="bp-screw is-bl" aria-hidden="true"></span>
+      <span class="bp-screw is-br" aria-hidden="true"></span>
+      <span class="bp-etched" aria-hidden="true">E</span>
+      <span class="bp-kicker">Eduhelp · exam, result &amp; admission updates</span>
+      <h1 id="eduhelp-title" class="bp-title">Eduhelp</h1>
+      <p class="bp-hero-line">Exam notices, results, admission dates, scholarships and career alerts — collected in one calm board. Every update links to the official source, so always verify the final details there.</p>
+      <div class="bp-hero-actions">
+        <a class="bp-cta" href="#updates">Browse {{ updates | length }} updates</a>
+        <a class="bp-cta-ghost" href="#eduhelp-notice">Read the notice <span aria-hidden="true">→</span></a>
+      </div>
+      <div class="bp-console">
+        <div class="bp-console-bar">
+          <span>Update scan · live</span>
+          <span><b id="eduhelp-total">{{ updates | length }}</b> updates</span>
+        </div>
+        <label class="bp-screen" for="eduhelp-search">
+          <svg aria-hidden="true" viewBox="0 0 24 24"><circle cx="10.5" cy="10.5" r="6.5"/><path d="m16 16 4.5 4.5"/></svg>
+          <input type="search" id="eduhelp-search" placeholder="Search Eduhelp updates…" aria-label="Search Eduhelp updates">
+          <kbd>/</kbd>
+        </label>
+        {% if categories | length > 1 %}
+        <div class="bp-keys edu-filters" id="eduhelp-filters" role="group" aria-label="Filter updates by category">
+          <button type="button" class="filter-tab active" data-category="all" aria-pressed="true">All <span>{{ updates | length }}</span></button>
+          {% for category in categories %}
+          <button type="button" class="filter-tab" data-category="{{ category }}" aria-pressed="false">{{ category }} <span>{{ updates | selectattr('category', 'equalto', category) | list | length }}</span></button>
+          {% endfor %}
+        </div>
+        {% endif %}
+      </div>
+    </div>
+  </div>
+  <div class="bp-hero-nav is-foot">
+    <span>Official links · verify every date</span>
+    <span>sanuwartools.online</span>
+  </div>
+</section>
+
+<section class="bp-section wrap edu-section" id="updates" aria-labelledby="updates-title">
+  <div class="bp-section-head">
+    <div><span class="bp-eyebrow">01 — Updates</span><h2 id="updates-title">Latest education updates</h2></div>
+    <p class="bp-count"><b id="eduhelp-visible">{{ updates | length }}</b> of {{ updates | length }}</p>
+  </div>
+  {% if updates %}
+  <div class="edu-grid" id="eduhelp-grid" aria-live="polite">
+    {% for update in updates %}
+    <article class="edu-card" data-category="{{ update.category }}" data-search="{{ (update.title ~ ' ' ~ (update.summary or '') ~ ' ' ~ update.category) | lower }}">
+      <div class="edu-card-top">
+        <span class="edu-tag">{{ update.category }}</span>
+        {% if update.date %}<time class="edu-date" datetime="{{ update.date }}">{{ update.date }}</time>{% endif %}
+      </div>
+      <h3>
+        {% if update.link %}<a href="{{ update.link | public_url }}" target="_blank" rel="noopener noreferrer">{{ update.title }}</a>{% else %}{{ update.title }}{% endif %}
+        {% if update.pinned %}<span class="edu-pin">Pinned</span>{% endif %}
+      </h3>
+      {% if update.summary %}<p>{{ update.summary }}</p>{% endif %}
+      <div class="edu-card-bottom">
+        {% if update.link %}
+        <a class="edu-open" href="{{ update.link | public_url }}" target="_blank" rel="noopener noreferrer">Open official link <span aria-hidden="true">↗</span></a>
+        {% else %}
+        <span class="edu-open is-muted">Notice only</span>
+        {% endif %}
+      </div>
+    </article>
+    {% endfor %}
+  </div>
+  <div class="edu-empty" id="eduhelp-empty" hidden>
+    <h3>No updates found.</h3>
+    <p>Try another word or clear the current filter.</p>
+    <button type="button" class="filter-tab" id="eduhelp-clear">Clear filters</button>
+  </div>
+  {% else %}
+  <div class="edu-empty">
+    <h3>No updates published yet.</h3>
+    <p>New education updates will appear here soon.</p>
+  </div>
+  {% endif %}
+</section>
+
+<section class="bp-section wrap" id="eduhelp-notice" aria-labelledby="eduhelp-notice-title">
+  <div class="edu-notice">
+    <span class="edu-notice-led" aria-hidden="true"></span>
+    <div>
+      <span class="bp-eyebrow">Please read</span>
+      <h2 id="eduhelp-notice-title">Before you act on an update</h2>
+      <p>{{ notice or 'Eduhelp shares education updates for quick reference only. Always confirm exam dates, results, admission and scholarship details on the official board, university or government website before you act.' }}</p>
+    </div>
+  </div>
+</section>
+{% endblock %}
+{% block scripts %}<script nonce="{{ csp_nonce }}" src="/assets/js/eduhelp.js?v=1" defer></script>{% endblock %}
