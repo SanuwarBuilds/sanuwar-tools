@@ -1,0 +1,31 @@
+{
+  "/": {
+    "status": 200,
+    "type": "text/html; charset=utf-8",
+    "server_cards": 8
+  },
+  "/downloads": {
+    "status": 200,
+    "type": "text/html; charset=utf-8"
+  },
+  "/assets/css/catalogue.css?v=1": {
+    "status": 200,
+    "type": "text/css; charset=utf-8"
+  },
+  "/assets/icons/photo.svg": {
+    "status": 200,
+    "type": "image/svg+xml; charset=utf-8"
+  },
+  "/ads.txt": {
+    "status": 200,
+    "type": "text/plain; charset=utf-8"
+  },
+  "/privacy": {
+    "status": 200,
+    "type": "text/html; charset=utf-8"
+  },
+  "/api/downloads_data": {
+    "status": 200,
+    "type": "application/json"
+  }
+}

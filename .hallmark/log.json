@@ -1,0 +1,60 @@
+[
+ {
+  "mode": "redesign",
+  "depth": "full",
+  "scope": "app",
+  "shape": "search-first directory workspace",
+  "theme": "cobalt",
+  "axes": "light/grotesk-sans/cool",
+  "hero": "search only",
+  "nav": "dark category rail",
+  "footer": "utility links",
+  "imagery": "actual tool icons",
+  "photos": [],
+  "entry": "templates/index.html",
+  "fingerprint": "category-rail/search-only/horizontal-identity-tool-cards",
+  "sections": [
+   "categories",
+   "search",
+   "tool grid",
+   "guide disclosure"
+  ],
+  "signature": "four working tools visible alongside category rail",
+  "waived": [
+   "24b",
+   "71"
+  ],
+  "prompt": "User rejected old layout as too similar; remove all hero copy and recompose workspace",
+  "date": "2026-10-27"
+ },
+ {
+  "mode": "redesign",
+  "depth": "full",
+  "scope": "app",
+  "shape": "tool workspace",
+  "theme": "cobalt",
+  "axes": "light/grotesk-sans/cool",
+  "hero": "compact search",
+  "nav": "balanced bar",
+  "footer": "ruled links",
+  "imagery": "real tool icons and uploaded covers",
+  "photos": [],
+  "entry": "templates/index.html",
+  "fingerprint": "compact-search/two-column-directory/thumbnail-rows",
+  "sections": [
+   "search",
+   "tools",
+   "photo tools",
+   "guide",
+   "support",
+   "footer"
+  ],
+  "signature": "working search directly beside title",
+  "waived": [
+   "24b",
+   "39b"
+  ],
+  "prompt": "Clean premium tools workspace with minimal hero text",
+  "date": "2026-10-27"
+ }
+]

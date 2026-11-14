@@ -1,0 +1,5 @@
+render tier: 5 screenshots in /Users/sanuwarhussain/Desktop/Personal/sanuwar-tools/.hallmark/before (1280x800, 1440x900, 1920x1080 folds; 1440 and 375 full pages)
+  WAIVED 24b x49 static/assets/css/hallmark/workspace.css:51 gap: 10px (off the 4px scale) on .pro-theme.studio-theme .brand; static/assets/css/hallmark/workspace.css:59 padding: 11px 18px (off the 4px scale) on .pro-theme.studio-the… | fix: Use the 4px spacing scale
+  DISMISSED 25 static/assets/css/hallmark/workspace.css:119 measure 29ch on .workspace-steps p (45-75ch range) | fix: Set prose measure between 45 and 75ch; a one-sentence lede or caption from 28ch
+sloplint: 0 FAIL, 0 WARN, 49 WAIVED, 1 DISMISSED across 3 file(s) and 1 URL(s), grouped by gate; every line is in .hallmark/before.txt.
+before: recorded 17 links, 1 fields, 0 handlers, 0 test hooks, 0 script hooks and 1 rendered page(s) in .hallmark/before.json; --kept checks a redesign against it

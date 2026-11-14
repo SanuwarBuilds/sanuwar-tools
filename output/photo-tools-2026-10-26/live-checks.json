@@ -1,0 +1,33 @@
+{
+  "/": {
+    "status": 200,
+    "photo_card": true
+  },
+  "/photo-tools": {
+    "status": 200,
+    "css": true,
+    "local_processing_csp": true,
+    "ads": false
+  },
+  "/downloads": {
+    "status": 200
+  },
+  "/signin": {
+    "status": 200
+  },
+  "/sitemap.xml": {
+    "status": 200,
+    "photo_listed": true
+  },
+  "live_export": {
+    "dimensions": [
+      197,
+      276
+    ],
+    "dpi": [
+      200,
+      200
+    ],
+    "bytes": 7207
+  }
+}

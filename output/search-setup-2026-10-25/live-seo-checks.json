@@ -1,0 +1,25 @@
+{
+  "/": {
+    "title": "SanuwarTools \u2014 Web Tools, Android Apps & Downloads",
+    "canonical": "https://sanuwartools.online/",
+    "json_ld_valid": true,
+    "robots": "indexable"
+  },
+  "/downloads": {
+    "title": "Downloads \u2014 Android Apps & Files | SanuwarTools",
+    "canonical": "https://sanuwartools.online/downloads",
+    "json_ld_valid": true,
+    "robots": "indexable",
+    "all_public_titles_in_initial_html": true,
+    "private_asset_metadata_exposed": false
+  },
+  "/admin/login": {
+    "robots": "noindex, nofollow"
+  },
+  "/tools.config.json": {
+    "robots": "noindex, nofollow"
+  },
+  "/purchases": {
+    "robots": "noindex, nofollow"
+  }
+}

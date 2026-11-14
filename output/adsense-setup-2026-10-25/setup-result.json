@@ -1,0 +1,27 @@
+{
+  "domain": "sanuwartools.online",
+  "publisher": "ca-pub-8814284684394847",
+  "commit": "876fac0",
+  "deployment": "success (both Vercel projects)",
+  "site_ownership": "verified by Google AdSense",
+  "site_review": "requested; Getting ready, approval pending",
+  "auto_ads": "saved; onboarding confirms Ads settings confirmed",
+  "formats": {
+    "banner": true,
+    "anchor": "mobile bottom only; dynamic anchors off",
+    "vignette": "10 minutes; extra triggers off",
+    "side_rail": false,
+    "multiplex": false,
+    "ad_intents": false
+  },
+  "privacy_pages": [
+    "/privacy",
+    "/about",
+    "/contact"
+  ],
+  "european_consent": "Published; consent, reject, manage and close choices; optimization off",
+  "payments_profile": "Owner submitted; Google AdSense confirms We have got your info.",
+  "verification": "105 Python tests; JS syntax and consent callback behavior; live public/private route isolation",
+  "us_privacy_message": "Published; all current and future supported US states; Google-managed opt-out link",
+  "onboarding": "Google confirms all steps completed; Getting your site ready to show ads; approval pending."
+}

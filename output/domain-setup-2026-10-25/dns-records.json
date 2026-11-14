@@ -1,0 +1,27 @@
+{
+  "domain": "sanuwartools.online",
+  "project": "sanuwar-tools",
+  "host": "Vercel",
+  "registrar": "GoDaddy",
+  "records": [
+    {
+      "type": "A",
+      "name": "@",
+      "previous": "Parked",
+      "value": "216.198.79.1",
+      "ttl": 600
+    },
+    {
+      "type": "CNAME",
+      "name": "www",
+      "previous": "sanuwartools.online.",
+      "value": "39c26ee5c172bef2.vercel-dns-017.com.",
+      "ttl": 3600
+    }
+  ],
+  "redirect": {
+    "source": "www.sanuwartools.online",
+    "destination": "sanuwartools.online",
+    "status": 308
+  }
+}

@@ -1,0 +1,37 @@
+{
+  "checks": [
+    {
+      "path": "/",
+      "width": 375,
+      "heading": "Tools",
+      "overflow": false,
+      "background": "rgb(243, 245, 248)",
+      "stylesheet": true
+    },
+    {
+      "path": "/downloads",
+      "width": 375,
+      "heading": "Downloads",
+      "overflow": false,
+      "background": "oklch(0.986 0.005 250)",
+      "stylesheet": true
+    },
+    {
+      "path": "/",
+      "width": 1440,
+      "heading": "Tools",
+      "overflow": false,
+      "background": "rgb(243, 245, 248)",
+      "stylesheet": true
+    },
+    {
+      "path": "/downloads",
+      "width": 1440,
+      "heading": "Downloads",
+      "overflow": false,
+      "background": "oklch(0.986 0.005 250)",
+      "stylesheet": true
+    }
+  ],
+  "errors": []
+}

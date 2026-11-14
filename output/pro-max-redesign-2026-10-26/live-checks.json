@@ -1,0 +1,35 @@
+{
+  "/": {
+    "status": 200,
+    "pro_style": true,
+    "pro_shell": true,
+    "new_hero": true
+  },
+  "/downloads": {
+    "status": 200,
+    "pro_style": true,
+    "pro_shell": true
+  },
+  "/photo-tools": {
+    "status": 200,
+    "pro_style": true,
+    "pro_shell": true
+  },
+  "/signin": {
+    "status": 200,
+    "pro_style": true,
+    "pro_shell": true,
+    "google_configured": true
+  },
+  "/privacy": {
+    "status": 200,
+    "pro_style": true,
+    "pro_shell": true
+  },
+  "/admin/login": {
+    "status": 200,
+    "pro_style": false,
+    "pro_shell": false,
+    "admin_still_private": true
+  }
+}

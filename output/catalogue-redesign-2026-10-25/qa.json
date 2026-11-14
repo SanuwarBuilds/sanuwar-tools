@@ -1,0 +1,26 @@
+{
+  "commit": "009f49b",
+  "reference": "https://www.ilovepdf.com/",
+  "automated": "106 Python tests pass; shared.js, main.js and downloads.js syntax pass",
+  "browser_checks": [
+    "390px home and downloads: two columns, no horizontal overflow",
+    "320px home: two columns, no horizontal overflow",
+    "1440px home: four columns, no horizontal overflow",
+    "search by cricket and Bangla returns matching items",
+    "Web tools filter returns three current web tools",
+    "tool details open and close",
+    "home file card opens the matching file details in downloads",
+    "local-only album fixture opens album and full image preview with download link",
+    "mobile navigation opens and closes",
+    "light/dark theme switch"
+  ],
+  "data": "No catalogue records changed; album fixture exists only in a separate local QA process.",
+  "deployment": "009f49b pushed to main; both Vercel projects succeeded",
+  "live_verified": [
+    "home and downloads show new CSS with intact AdSense nonce policy",
+    "1440px home: 8 actual public records in four columns; no overflow",
+    "390px home: two columns; no overflow",
+    "home download link opens matching live file details with date and download link",
+    "ads.txt, privacy, public downloads API and SVG asset return 200"
+  ]
+}

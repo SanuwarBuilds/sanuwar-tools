@@ -1,0 +1,50 @@
+{
+  "/": {
+    "status": 200,
+    "ad_tag": true,
+    "csp": "default-src 'self'; script-src 'nonce-szPlMHzEzg3SjNEztwinnGGERG2_MuEBV4Czv49Wyx4' 'unsafe-eval' 'strict-dynamic' https:; style-src 'self' 'unsafe-inline' https:; img-src 'self' https: data:; font-src 'self' https:; connect-src 'self' https:; frame-src https:; media-src 'self' https:; object-src 'none'; base-uri 'none'; frame-ancestors 'none'; form-action 'self'",
+    "consent_script": true
+  },
+  "/downloads": {
+    "status": 200,
+    "ad_tag": true,
+    "csp": "default-src 'self'; script-src 'nonce-om5bYq99t9ZK_8qwM5NPwpjqooD0GNrryCgmjeUISN8' 'unsafe-eval' 'strict-dynamic' https:; style-src 'self' 'unsafe-inline' https:; img-src 'self' https: data:; font-src 'self' https:; connect-src 'self' https:; frame-src https:; media-src 'self' https:; object-src 'none'; base-uri 'none'; frame-ancestors 'none'; form-action 'self'",
+    "consent_script": true
+  },
+  "/ads.txt": {
+    "status": 200,
+    "ad_tag": false,
+    "csp": "default-src 'self'; script-src 'self'; style-src 'self' 'unsafe-inline'; img-src 'self' https: data:; font-src 'self'; connect-src 'self'; media-src 'self' https:; object-src 'none'; base-uri 'self'; frame-ancestors 'none'; form-action 'self'",
+    "consent_script": false
+  },
+  "/privacy": {
+    "status": 200,
+    "ad_tag": false,
+    "csp": "default-src 'self'; script-src 'self'; style-src 'self' 'unsafe-inline'; img-src 'self' https: data:; font-src 'self'; connect-src 'self'; media-src 'self' https:; object-src 'none'; base-uri 'self'; frame-ancestors 'none'; form-action 'self'",
+    "consent_script": false
+  },
+  "/about": {
+    "status": 200,
+    "ad_tag": false,
+    "csp": "default-src 'self'; script-src 'self'; style-src 'self' 'unsafe-inline'; img-src 'self' https: data:; font-src 'self'; connect-src 'self'; media-src 'self' https:; object-src 'none'; base-uri 'self'; frame-ancestors 'none'; form-action 'self'",
+    "consent_script": false
+  },
+  "/contact": {
+    "status": 200,
+    "ad_tag": false,
+    "csp": "default-src 'self'; script-src 'self'; style-src 'self' 'unsafe-inline'; img-src 'self' https: data:; font-src 'self'; connect-src 'self'; media-src 'self' https:; object-src 'none'; base-uri 'self'; frame-ancestors 'none'; form-action 'self'",
+    "consent_script": false
+  },
+  "/admin/login": {
+    "status": 200,
+    "ad_tag": false,
+    "csp": "default-src 'self'; script-src 'self'; style-src 'self' 'unsafe-inline'; img-src 'self' https: data:; font-src 'self'; connect-src 'self'; media-src 'self' https:; object-src 'none'; base-uri 'self'; frame-ancestors 'none'; form-action 'self'",
+    "consent_script": false
+  },
+  "/api/downloads_data": {
+    "status": 200,
+    "ad_tag": false,
+    "csp": "default-src 'self'; script-src 'self'; style-src 'self' 'unsafe-inline'; img-src 'self' https: data:; font-src 'self'; connect-src 'self'; media-src 'self' https:; object-src 'none'; base-uri 'self'; frame-ancestors 'none'; form-action 'self'",
+    "consent_script": false
+  }
+}

@@ -1,0 +1,20 @@
+{
+  "scanned": "2026-10-27",
+  "findings": {
+    "framework": "Flask/Jinja templates/base.html:1",
+    "fonts": "Manrope local static/assets/css/studio.css:1",
+    "palette": "public blue tokens static/assets/css/pro-max.css:2",
+    "motion": "pro-ui.js optional reveals"
+  },
+  "preserve": [
+    "brand",
+    "Manrope",
+    "all routes and IDs",
+    "private analytics and auth"
+  ],
+  "introduce": [
+    "compact tool workspace",
+    "Cobalt light paper",
+    "restrained control surfaces"
+  ]
+}

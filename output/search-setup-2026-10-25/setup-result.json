@@ -1,0 +1,18 @@
+{
+  "domain": "sanuwartools.online",
+  "date": "2026-10-25",
+  "commit": "fb7884e",
+  "domain_property_verified": true,
+  "sitemap": {
+    "url": "https://sanuwartools.online/sitemap.xml",
+    "status": "Success",
+    "discovered_pages": 2
+  },
+  "priority_crawl_requests_accepted": [
+    "https://sanuwartools.online/",
+    "https://sanuwartools.online/downloads"
+  ],
+  "google_index_inclusion_confirmed": false,
+  "automated_tests_passed": 101,
+  "production_deployments": "both successful"
+}

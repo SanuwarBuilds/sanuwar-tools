@@ -1,0 +1,265 @@
+{
+  "report": [
+    {
+      "route": "/",
+      "width": 320,
+      "overflow": false,
+      "theme": "light",
+      "h1": "Tools",
+      "firstToolY": 295.5
+    },
+    {
+      "route": "/",
+      "width": 375,
+      "overflow": false,
+      "theme": "light",
+      "h1": "Tools",
+      "firstToolY": 295.5
+    },
+    {
+      "route": "/",
+      "width": 390,
+      "overflow": false,
+      "theme": "light",
+      "h1": "Tools",
+      "firstToolY": 295.5
+    },
+    {
+      "route": "/",
+      "width": 768,
+      "overflow": false,
+      "theme": "light",
+      "h1": "Tools",
+      "firstToolY": 243
+    },
+    {
+      "route": "/",
+      "width": 1024,
+      "overflow": false,
+      "theme": "light",
+      "h1": "Tools",
+      "firstToolY": 243
+    },
+    {
+      "route": "/",
+      "width": 1440,
+      "overflow": false,
+      "theme": "light",
+      "h1": "Tools",
+      "firstToolY": 243
+    },
+    {
+      "route": "/",
+      "width": 1920,
+      "overflow": false,
+      "theme": "light",
+      "h1": "Tools",
+      "firstToolY": 243
+    },
+    {
+      "route": "/downloads",
+      "width": 320,
+      "overflow": false,
+      "theme": "light",
+      "h1": "Downloads"
+    },
+    {
+      "route": "/downloads",
+      "width": 375,
+      "overflow": false,
+      "theme": "light",
+      "h1": "Downloads"
+    },
+    {
+      "route": "/downloads",
+      "width": 390,
+      "overflow": false,
+      "theme": "light",
+      "h1": "Downloads"
+    },
+    {
+      "route": "/downloads",
+      "width": 768,
+      "overflow": false,
+      "theme": "light",
+      "h1": "Downloads"
+    },
+    {
+      "route": "/downloads",
+      "width": 1024,
+      "overflow": false,
+      "theme": "light",
+      "h1": "Downloads"
+    },
+    {
+      "route": "/downloads",
+      "width": 1440,
+      "overflow": false,
+      "theme": "light",
+      "h1": "Downloads"
+    },
+    {
+      "route": "/downloads",
+      "width": 1920,
+      "overflow": false,
+      "theme": "light",
+      "h1": "Downloads"
+    },
+    {
+      "route": "/photo-tools",
+      "width": 320,
+      "overflow": false,
+      "theme": "light",
+      "h1": "A better fit.\nFor every photo."
+    },
+    {
+      "route": "/photo-tools",
+      "width": 375,
+      "overflow": false,
+      "theme": "light",
+      "h1": "A better fit.\nFor every photo."
+    },
+    {
+      "route": "/photo-tools",
+      "width": 390,
+      "overflow": false,
+      "theme": "light",
+      "h1": "A better fit.\nFor every photo."
+    },
+    {
+      "route": "/photo-tools",
+      "width": 768,
+      "overflow": false,
+      "theme": "light",
+      "h1": "A better fit.\nFor every photo."
+    },
+    {
+      "route": "/photo-tools",
+      "width": 1024,
+      "overflow": false,
+      "theme": "light",
+      "h1": "A better fit.\nFor every photo."
+    },
+    {
+      "route": "/photo-tools",
+      "width": 1440,
+      "overflow": false,
+      "theme": "light",
+      "h1": "A better fit.\nFor every photo."
+    },
+    {
+      "route": "/photo-tools",
+      "width": 1920,
+      "overflow": false,
+      "theme": "light",
+      "h1": "A better fit.\nFor every photo."
+    },
+    {
+      "route": "/signin",
+      "width": 320,
+      "overflow": false,
+      "theme": "light",
+      "h1": "A familiar way\nto sign in."
+    },
+    {
+      "route": "/signin",
+      "width": 375,
+      "overflow": false,
+      "theme": "light",
+      "h1": "A familiar way\nto sign in."
+    },
+    {
+      "route": "/signin",
+      "width": 390,
+      "overflow": false,
+      "theme": "light",
+      "h1": "A familiar way\nto sign in."
+    },
+    {
+      "route": "/signin",
+      "width": 768,
+      "overflow": false,
+      "theme": "light",
+      "h1": "A familiar way\nto sign in."
+    },
+    {
+      "route": "/signin",
+      "width": 1024,
+      "overflow": false,
+      "theme": "light",
+      "h1": "A familiar way\nto sign in."
+    },
+    {
+      "route": "/signin",
+      "width": 1440,
+      "overflow": false,
+      "theme": "light",
+      "h1": "A familiar way\nto sign in."
+    },
+    {
+      "route": "/signin",
+      "width": 1920,
+      "overflow": false,
+      "theme": "light",
+      "h1": "A familiar way\nto sign in."
+    },
+    {
+      "route": "/privacy",
+      "width": 320,
+      "overflow": false,
+      "theme": "light",
+      "h1": "Privacy policy"
+    },
+    {
+      "route": "/privacy",
+      "width": 375,
+      "overflow": false,
+      "theme": "light",
+      "h1": "Privacy policy"
+    },
+    {
+      "route": "/privacy",
+      "width": 390,
+      "overflow": false,
+      "theme": "light",
+      "h1": "Privacy policy"
+    },
+    {
+      "route": "/privacy",
+      "width": 768,
+      "overflow": false,
+      "theme": "light",
+      "h1": "Privacy policy"
+    },
+    {
+      "route": "/privacy",
+      "width": 1024,
+      "overflow": false,
+      "theme": "light",
+      "h1": "Privacy policy"
+    },
+    {
+      "route": "/privacy",
+      "width": 1440,
+      "overflow": false,
+      "theme": "light",
+      "h1": "Privacy policy"
+    },
+    {
+      "route": "/privacy",
+      "width": 1920,
+      "overflow": false,
+      "theme": "light",
+      "h1": "Privacy policy"
+    }
+  ],
+  "errors": [],
+  "checks": [
+    "search empty/reset",
+    "category",
+    "mobile menu/Escape",
+    "theme",
+    "details dialog",
+    "no-script SSR"
+  ]
+}

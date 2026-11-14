@@ -1,0 +1,51 @@
+...[2026-10-27 08:29:40,378] ERROR in app: Could not save availability
+Traceback (most recent call last):
+  File "/Users/sanuwarhussain/Desktop/Personal/sanuwar-tools/app.py", line 396, in set_content_availability
+    safe_write(TOOLS_CONFIG_REL, record)
+  File "/Users/sanuwarhussain/.cache/codex-runtimes/codex-primary-runtime/dependencies/python/lib/python3.12/unittest/mock.py", line 1139, in __call__
+    return self._mock_call(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/Users/sanuwarhussain/.cache/codex-runtimes/codex-primary-runtime/dependencies/python/lib/python3.12/unittest/mock.py", line 1143, in _mock_call
+    return self._execute_mock_call(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/Users/sanuwarhussain/.cache/codex-runtimes/codex-primary-runtime/dependencies/python/lib/python3.12/unittest/mock.py", line 1198, in _execute_mock_call
+    raise effect
+RuntimeError: private details
+................................[2026-10-27 08:29:40,706] ERROR in app: Operation failed
+Traceback (most recent call last):
+  File "/Users/sanuwarhussain/Desktop/Personal/sanuwar-tools/app.py", line 450, in api_add_item
+    save_downloads(items)
+  File "/Users/sanuwarhussain/Desktop/Personal/sanuwar-tools/app.py", line 363, in save_downloads
+    safe_write(DOWNLOADS_REL, items)
+  File "/Users/sanuwarhussain/.cache/codex-runtimes/codex-primary-runtime/dependencies/python/lib/python3.12/unittest/mock.py", line 1139, in __call__
+    return self._mock_call(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/Users/sanuwarhussain/.cache/codex-runtimes/codex-primary-runtime/dependencies/python/lib/python3.12/unittest/mock.py", line 1143, in _mock_call
+    return self._execute_mock_call(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/Users/sanuwarhussain/.cache/codex-runtimes/codex-primary-runtime/dependencies/python/lib/python3.12/unittest/mock.py", line 1198, in _execute_mock_call
+    raise effect
+RuntimeError: private implementation details
+.............[2026-10-27 08:29:40,739] ERROR in app: Persistent configuration write failed
+Traceback (most recent call last):
+  File "/Users/sanuwarhussain/Desktop/Personal/sanuwar-tools/app.py", line 186, in github_push
+    response.raise_for_status()
+  File "/Users/sanuwarhussain/.cache/codex-runtimes/codex-primary-runtime/dependencies/python/lib/python3.12/unittest/mock.py", line 1139, in __call__
+    return self._mock_call(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/Users/sanuwarhussain/.cache/codex-runtimes/codex-primary-runtime/dependencies/python/lib/python3.12/unittest/mock.py", line 1143, in _mock_call
+    return self._execute_mock_call(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/Users/sanuwarhussain/.cache/codex-runtimes/codex-primary-runtime/dependencies/python/lib/python3.12/unittest/mock.py", line 1198, in _execute_mock_call
+    raise effect
+requests.exceptions.HTTPError: Conflict
+..[2026-10-27 08:29:40,741] ERROR in app: Catalogue refresh unavailable: Timeout
+........................................................./Users/sanuwarhussain/Desktop/Personal/sanuwar-tools/tests/test_seo.py:43: ResourceWarning: unclosed file <_io.BufferedReader name='/Users/sanuwarhussain/Desktop/Personal/sanuwar-tools/static/assets/favicon.png'>
+  self.assertEqual(self.client.get('/assets/favicon.png').status_code,200)
+ResourceWarning: Enable tracemalloc to get the object allocation traceback
+.............[2026-10-27 08:29:41,349] WARNING in visitor_analytics: Analytics write unavailable
+...
+----------------------------------------------------------------------
+Ran 123 tests in 1.020s
+
+OK

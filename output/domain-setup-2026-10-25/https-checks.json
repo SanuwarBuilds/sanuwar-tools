@@ -1,0 +1,27 @@
+[
+  {
+    "url": "https://sanuwartools.online/",
+    "result": "200 0 ",
+    "exit": 0
+  },
+  {
+    "url": "https://sanuwartools.online/downloads",
+    "result": "200 0 ",
+    "exit": 0
+  },
+  {
+    "url": "https://sanuwartools.online/api/downloads_data",
+    "result": "200 0 ",
+    "exit": 0
+  },
+  {
+    "url": "https://sanuwartools.online/admin",
+    "result": "302 0 https://sanuwartools.online/admin/login",
+    "exit": 0
+  },
+  {
+    "url": "https://www.sanuwartools.online/downloads",
+    "result": "308 0 https://sanuwartools.online/downloads",
+    "exit": 0
+  }
+]

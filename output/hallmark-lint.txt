@@ -1,0 +1,57 @@
+render tier: 10 screenshots in /Users/sanuwarhussain/Desktop/Personal/sanuwar-tools/.hallmark/shots (1280x800, 1440x900, 1920x1080 folds; 1440 and 375 full pages)
+http://127.0.0.1:5005/downloads
+  REFLEX 39b :1 [1440px] control height outside 32 to 52px: button.card-visual 116px, button.card-visual 116px, button.card-visual 116px | fix: Marketing controls stand 44 to 52px; app UI 32 to 40px with a 44px hit target
+  WARN 23 :1 [1280px] accent paints ~6.1% of the 1280x800 viewport | fix: Confirm this is a declared posture surface, else retreat to <= 5%
+  WARN F19 :1 [1440px] 4 font weights in running use (400, 600, 700, 800) | fix: Three weights at most, display and body together, picked as extremes
+static/assets/css/hallmark/workspace.css
+  WAIVED 24b :46 gap: 10px (off the 4px scale) on .pro-theme.studio-theme .brand
+  WAIVED 24b :54 padding: 11px 18px (off the 4px scale) on .pro-theme.studio-theme .button, .pro-theme.studio-theme .nav-actions .visito…
+  WAIVED 24b :69 padding: 62px 0 46px (off the 4px scale) on .pro-theme.studio-theme .workspace-hero
+  WAIVED 24b :72 padding: 0 18px (off the 4px scale) on .workspace-search
+  WAIVED 24b :79 margin-bottom: 22px (off the 4px scale) on .workspace-toolbar
+  WAIVED 24b :79 padding-bottom: 18px (off the 4px scale) on .workspace-toolbar
+  WAIVED 24b :80 gap: 10px (off the 4px scale) on .pro-theme.studio-theme .workspace-toolbar h2
+  WAIVED 24b :82 gap: 5px (off the 4px scale) on .pro-theme.studio-theme .filter-tabs
+  WAIVED 24b :84 padding: 9px 13px (off the 4px scale) on .pro-theme.studio-theme .filter-tab, .pro-theme.studio-theme .collection-types…
+  WAIVED 24b :98 margin: 5px 0 0 (off the 4px scale) on .pro-theme.studio-theme .card-body h3
+  WAIVED 24b :99 margin-top: 9px (off the 4px scale) on .pro-theme.studio-theme .catalogue-card .card-body > p
+  WAIVED 24b :100 padding-top: 17px (off the 4px scale) on .pro-theme.studio-theme .card-bottom
+  WAIVED 24b :106 margin: 7px 0 0 (off the 4px scale) on .workspace-photo p
+  WAIVED 24b :107 margin-top: 6px (off the 4px scale) on .workspace-photo span
+  WAIVED 24b :108 padding: 34px 0 (off the 4px scale) on .pro-theme.studio-theme .workspace-guide
+  WAIVED 24b :109 margin: 0 0 22px (off the 4px scale) on .pro-theme.studio-theme .workspace-guide > h2
+  WAIVED 24b :111 gap: 14px (off the 4px scale) on .workspace-steps article
+  WAIVED 24b :114 margin: 6px 0 0 (off the 4px scale) on .workspace-steps p
+  WAIVED 24b :118 margin-top: 22px (off the 4px scale) on .pro-theme.studio-theme .site-footer
+  WAIVED 24b :118 padding-bottom: 30px (off the 4px scale) on .pro-theme.studio-theme .site-footer
+  WAIVED 24b :122 padding-top: 42px (off the 4px scale) on .pro-theme.studio-theme .download-intro
+  WAIVED 24b :122 padding-bottom: 26px (off the 4px scale) on .pro-theme.studio-theme .download-intro
+  WAIVED 24b :124 margin-top: 10px (off the 4px scale) on .pro-theme.studio-theme .download-intro p
+  WAIVED 24b :125 padding: 18px (off the 4px scale) on .pro-theme.studio-theme .download-controls
+  WAIVED 24b :128 margin-top: 14px (off the 4px scale) on .pro-theme.studio-theme .download-filter-row
+  WAIVED 24b :142 gap: 18px (off the 4px scale) on .pro-theme.studio-theme .site-header
+  WAIVED 24b :143 gap: 18px (off the 4px scale) on .pro-theme.studio-theme .site-header nav
+  WAIVED 24b :152 padding: var(--space-sm) 14px (off the 4px scale) on .pro-theme.studio-theme .site-header nav a
+  WAIVED 24b :155 gap: 22px (off the 4px scale) on .pro-theme.studio-theme .workspace-hero
+  WAIVED 24b :155 padding: 30px 0 var(--space-lg) (off the 4px scale) on .pro-theme.studio-theme .workspace-hero
+  WAIVED 24b :157 margin-top: 10px (off the 4px scale) on .workspace-hero p
+  WAIVED 24b :158 padding-inline: 14px (off the 4px scale) on .workspace-search
+  WAIVED 24b :161 gap: 10px (off the 4px scale) on .workspace-toolbar
+  WAIVED 24b :161 padding-bottom: 14px (off the 4px scale) on .workspace-toolbar
+  WAIVED 24b :164 padding: 9px var(--space-sm) (off the 4px scale) on .pro-theme.studio-theme .filter-tab
+  WAIVED 24b :166 padding: 18px 18px 14px 76px (off the 4px scale) on .pro-theme.studio-theme .catalogue-card
+  WAIVED 24b :170 margin-top: 3px (off the 4px scale) on .pro-theme.studio-theme .card-body h3
+  WAIVED 24b :171 margin-top: 6px (off the 4px scale) on .pro-theme.studio-theme .catalogue-card .card-body > p
+  WAIVED 24b :173 padding-top: 9px (off the 4px scale) on .pro-theme.studio-theme .card-bottom
+  WAIVED 24b :176 padding-bottom: 26px (off the 4px scale) on .pro-theme.studio-theme .catalogue-collection
+  WAIVED 24b :177 gap: 18px (off the 4px scale) on .pro-theme.studio-theme .workspace-photo
+  WAIVED 24b :183 padding-top: 26px (off the 4px scale) on .pro-theme.studio-theme .site-footer
+  WAIVED 24b :184 gap: var(--space-3xs) 18px (off the 4px scale) on .pro-theme.studio-theme .site-footer nav
+  WAIVED 24b :185 padding-bottom: 22px (off the 4px scale) on .pro-theme.studio-theme .download-intro
+  WAIVED 24b :188 padding: 14px (off the 4px scale) on .pro-theme.studio-theme .download-controls
+  WAIVED 24b :191 padding-inline: 11px (off the 4px scale) on .pro-theme.studio-theme .download-filter-row .collection-types .filter-tab
+  WAIVED 24b :194 padding: 15px (off the 4px scale) on .pro-theme.studio-theme .download-card .card-body
+  WAIVED 24b :199 padding-inline: 10px (off the 4px scale) on .pro-theme.studio-theme .filter-tab
+  WAIVED 24b :200 padding-right: 14px (off the 4px scale) on .pro-theme.studio-theme .catalogue-card
+  DISMISSED 25 :114 measure 29ch on .workspace-steps p (45-75ch range)
+sloplint: 0 FAIL, 1 REFLEX, 2 WARN, 49 WAIVED, 1 DISMISSED across 3 file(s) and 2 URL(s).

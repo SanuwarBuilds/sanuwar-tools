@@ -1,0 +1,27 @@
+[
+  {
+    "path": "/",
+    "status": 200,
+    "location": null
+  },
+  {
+    "path": "/downloads",
+    "status": 200,
+    "location": null
+  },
+  {
+    "path": "/api/downloads_data",
+    "status": 200,
+    "location": null
+  },
+  {
+    "path": "/admin",
+    "status": 302,
+    "location": "/admin/login"
+  },
+  {
+    "host": "www.sanuwartools.online",
+    "status": 308,
+    "location": "https://sanuwartools.online/downloads"
+  }
+]
