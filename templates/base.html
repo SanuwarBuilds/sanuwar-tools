@@ -32,8 +32,8 @@
 {% if adsense_client %}
 <script nonce="{{ csp_nonce }}" async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client={{ adsense_client }}" crossorigin="anonymous"></script>
 {% endif %}
-<meta name="theme-color" id="theme-color" content="{{ '#0b0b0c' if default_theme == 'dark' else '#f7f7f5' }}">
-<script nonce="{{ csp_nonce }}" src="/assets/js/theme-init.js?v=1"></script>
+<meta name="theme-color" id="theme-color" content="{{ '#0c0817' if default_theme == 'dark' else '#fbfaff' }}">
+<script nonce="{{ csp_nonce }}" src="/assets/js/theme-init.js?v=2"></script>
 <title>{% block title %}{{ seo.title if seo.indexable else 'SanuwarTools' }}{% endblock %}</title>
 {% set favicon = (public_config.get('site', {}).get('favicon') | public_image) or '/assets/favicon.png' %}
 {% if favicon == '/assets/favicon.png' %}
@@ -48,7 +48,7 @@
 {% if public_ui %}<link rel="preload" href="/assets/fonts/Inter-Variable.woff2" as="font" type="font/woff2" crossorigin>{% endif %}
 <link rel="preload" href="/assets/fonts/Manrope-Variable.ttf" as="font" type="font/ttf" crossorigin>
 <link rel="stylesheet" href="/assets/css/style.css">
-<script nonce="{{ csp_nonce }}" src="/assets/js/shared.js?v=2" defer></script>
+<script nonce="{{ csp_nonce }}" src="/assets/js/shared.js?v=3" defer></script>
 {% block head %}{% endblock %}
 {% if not public_ui or request.path == '/photo-tools' %}
 <link rel="stylesheet" href="/assets/css/studio.css?v=1">
@@ -61,8 +61,8 @@
 {% if public_ui or request.path.startswith('/admin') %}<link rel="stylesheet" href="/assets/css/sanuwar.css?v=8">{% endif %}
 {% if public_ui and request.path != '/photo-tools' %}<link rel="stylesheet" href="/assets/css/neumorphism.css?v=1">{% endif %}
 {% if public_ui %}<link rel="stylesheet" href="/assets/css/nixtool.css?v=5">{% endif %}
-{% if public_ui %}<link rel="stylesheet" href="/assets/css/workbench.css?v=3">{% endif %}
-{% if public_ui %}<script nonce="{{ csp_nonce }}" src="/assets/js/sanuwar.js?v=5" defer></script>{% endif %}
+{% if public_ui %}<link rel="stylesheet" href="/assets/css/workbench.css?v=12">{% endif %}
+{% if public_ui %}<script nonce="{{ csp_nonce }}" src="/assets/js/sanuwar.js?v=6" defer></script>{% endif %}
 {% if public_ui %}<script nonce="{{ csp_nonce }}" src="/assets/js/workbench.js?v=1" defer></script>{% endif %}
 {% if request.path.startswith('/admin') %}<link rel="stylesheet" href="/assets/css/admin-pro.css?v=3">{% endif %}
 </head>
@@ -72,7 +72,7 @@
 {% if public_ui %}
 <header class="wb-header">
 <div class="wb-header-inner wrap">
-<a class="wb-brand" href="/" aria-label="SanuwarTools home"><span class="wb-brand-mark" aria-hidden="true">s</span><span>{{ public_config.get('site', {}).get('name', 'SanuwarTools') }}<span class="wb-brand-dot">.</span></span></a>
+<a class="wb-brand" href="/" aria-label="SanuwarTools home"><span class="wb-brand-mark" aria-hidden="true"><svg viewBox="0 0 24 24"><circle cx="8" cy="8" r="4"/><circle cx="16" cy="8" r="4"/><circle cx="8" cy="16" r="4"/><circle cx="16" cy="16" r="4"/></svg></span><span>{{ public_config.get('site', {}).get('name', 'SanuwarTools') }}<span class="wb-brand-dot">.</span></span></a>
 <nav class="wb-nav" aria-label="Main navigation">
 <a href="/tools" {% if request.path.startswith('/tools') %}class="is-active" aria-current="page"{% endif %}>Tools</a>
 <a href="/#browse-categories">Categories</a>
@@ -162,7 +162,7 @@
 <div class="wrap">
 <div class="wb-footer-grid">
 <div class="wb-footer-brand">
-<a class="wb-brand" href="/" aria-label="SanuwarTools home"><span class="wb-brand-mark" aria-hidden="true">s</span><span>SanuwarTools<span class="wb-brand-dot">.</span></span></a>
+<a class="wb-brand" href="/" aria-label="SanuwarTools home"><span class="wb-brand-mark" aria-hidden="true"><svg viewBox="0 0 24 24"><circle cx="8" cy="8" r="4"/><circle cx="16" cy="8" r="4"/><circle cx="8" cy="16" r="4"/><circle cx="16" cy="16" r="4"/></svg></span><span>SanuwarTools<span class="wb-brand-dot">.</span></span></a>
 <p>{{ public_config.get('site', {}).get('tagline', 'All my tools, one place.') }} A small, carefully built collection of browser tools, photo utilities, labs and files.</p>
 {% set social = public_config.get('socialLinks', {}) %}{% if social %}<div class="wb-footer-social">{% for label, link in social.items() %}{% if link | public_url %}<a href="{{ link | public_url }}" target="_blank" rel="noopener noreferrer">{{ label | capitalize }}</a>{% endif %}{% endfor %}</div>{% endif %}
 </div>

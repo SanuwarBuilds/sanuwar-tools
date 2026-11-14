@@ -8,34 +8,41 @@
 {% set popular_shelf = popular_browser[:6] if popular_browser else catalog.tools[:6] %}
 <section class="wb-hero" aria-labelledby="hero-title">
   <div class="wrap wb-hero-inner">
-    <span class="wb-eyebrow">Free browser utilities</span>
-    <h1 id="hero-title">Small tools.<br><span>Big work.</span></h1>
-    <p class="wb-hero-lede">One calm workbench for text, code, photo resizing and passport photos, PDFs, money, land and everyday maths. Open a tool and get moving — everything runs in this tab.</p>
+    <h1 id="hero-title">Small tools. <span>Big work.</span></h1>
+    <p class="wb-hero-lede">{{ total_tools }} free browser {{ 'tool' if total_tools == 1 else 'tools' }} for everyday digital work.</p>
     <div class="wb-hero-search">
       <label class="wb-search-field" for="tool-search">
         <svg aria-hidden="true" viewBox="0 0 24 24"><circle cx="10.5" cy="10.5" r="6.5"/><path d="m16 16 4.5 4.5"/></svg>
         <input type="search" id="tool-search" placeholder="Search {{ total_tools }} tools…" aria-label="Search tools, apps and directories" autocomplete="off">
-        <kbd>/</kbd>
+        <kbd>⌘K</kbd>
       </label>
-      <a class="button button-light" href="#tools">Browse tools</a>
     </div>
-    <div class="wb-hero-hints"><span>Try</span>{% for tool in popular_browser[:4] %}<a href="/tools/{{ tool.slug }}">{{ tool.name }}</a>{% endfor %}<span class="wb-hero-note">Private by default · No account needed</span></div>
+    <div class="wb-hero-hints"><span class="wb-hints-label">Popular:</span><a href="/tools/json-formatter">JSON</a><a href="/tools/base64">Base64</a><a href="/tools/qr-code-generator">QR</a><a href="/tools/uuid">UUID</a><a href="/tools/image-compressor">Image</a><a href="/tools/pdf-merge">PDF</a></div>
   </div>
 </section>
 
 <section class="wrap wb-popular" aria-labelledby="popular-title">
   <div class="wb-section-head">
-    <div><span class="wb-eyebrow">Selected shelf</span><h2 id="popular-title">Popular tools</h2></div>
-    <a href="/tools">See every tool →</a>
+    <div class="wb-section-title">
+      <span class="wb-section-icon" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M13 2 4.5 13.5H11l-1 8.5L19.5 10H13Z"/></svg></span>
+      <h2 id="popular-title">Popular Tools</h2>
+    </div>
+    <a href="/tools">See all →</a>
   </div>
   <div class="wb-pop-grid">
-    {% for tool in popular_shelf %}
+    {% set popular_icons = {'json-formatter': 'tool', 'base64': 'key', 'qr-code-generator': 'text', 'image-compressor': 'photo'} %}
+    {% for slug in ['json-formatter', 'base64', 'qr-code-generator', 'image-compressor'] %}
+    {% set tool = catalog.tools | selectattr('slug', 'equalto', slug) | list | first %}
+    {% if tool %}
     <a class="wb-pop-card" href="/tools/{{ tool.slug }}">
-      <span class="wb-pop-cat">{{ tool.category }}</span>
-      <strong>{{ tool.name }}</strong>
-      <span class="wb-pop-desc">{{ tool.description }}</span>
-      <span class="wb-pop-open">Open tool →</span>
+      <span class="wb-pop-icon"><img src="/assets/icons/{{ popular_icons.get(slug, 'tool') }}.svg" alt="" width="30" height="30" loading="lazy"></span>
+      <span class="wb-pop-body">
+        <strong>{{ tool.name }}</strong>
+        <span class="wb-pop-desc">{{ tool.description }}</span>
+        <span class="wb-pop-meta"><span class="wb-pop-cat">{{ tool.category }}</span><span class="wb-pop-open" aria-hidden="true">→</span></span>
+      </span>
     </a>
+    {% endif %}
     {% endfor %}
   </div>
 </section>
@@ -57,16 +64,22 @@
 
 <section class="wrap wb-categories" id="browse-categories" aria-labelledby="categories-title">
   <div class="wb-section-head">
-    <div><span class="wb-eyebrow">Explore</span><h2 id="categories-title">Pick a category</h2></div>
-    <a href="/tools">All tools →</a>
+    <div class="wb-section-title">
+      <span class="wb-section-icon" aria-hidden="true"><svg viewBox="0 0 24 24"><rect x="3" y="3" width="7" height="7" rx="1.6"/><rect x="14" y="3" width="7" height="7" rx="1.6"/><rect x="3" y="14" width="7" height="7" rx="1.6"/><rect x="14" y="14" width="7" height="7" rx="1.6"/></svg></span>
+      <h2 id="categories-title">Browse by Category</h2>
+    </div>
+    <a href="/tools">See all →</a>
   </div>
   <div class="wb-cat-grid">
-    {% for category in catalog.categories %}
+    {% set category_icons = {'Developer Tools': 'tool', 'Images & Media': 'photo', 'PDF & Documents': 'document', 'Text Tools': 'text', 'Calculators': 'calculator', 'Security & Privacy': 'shield'} %}
+    {% for category in category_icons %}
     {% set category_count = catalog.tools | selectattr('category', 'equalto', category) | list | length %}
+    {% if category_count %}
     <a class="wb-cat-card" href="/tools?category={{ category | urlencode }}">
+      <span class="wb-cat-icon"><img src="/assets/icons/{{ category_icons.get(category, 'tool') }}.svg" alt="" width="28" height="28" loading="lazy"></span>
       <span><strong>{{ category }}</strong><small>{{ category_count }} {{ 'tool' if category_count == 1 else 'tools' }}</small></span>
-      <i aria-hidden="true">→</i>
     </a>
+    {% endif %}
     {% endfor %}
   </div>
 </section>
@@ -120,7 +133,7 @@
       <h2 id="about-toolkit-title">A small toolkit for everyday work.</h2>
     </div>
     <div class="wb-about-copy">
-      <p>SanuwarTools is a free, browser-based toolkit maintained by Sanuwar. The collection now includes {{ catalog.tools | length }} browser tools for text, encoding, hashes, images, PDFs, networking, security and everyday maths, plus the <a href="/photo-tools">photo resizer and compressor</a> that crops images to exact pixels, DPI and KB limits for passport, PAN, voter ID and exam forms — entirely on your device.</p>
+      <p>SanuwarTools is a free, browser-based toolkit maintained by Sanuwar. The collection now includes {{ catalog.tools | length }} browser tools for text, encoding, hashes, images, PDFs, networking, security and everyday maths, plus the <a href="/photo-tools">photo resizer and compressor</a> for photo resizing and passport photos — crop images to exact pixels, DPI and KB limits for passport, PAN, voter ID and exam forms, entirely on your device.</p>
       <p>Explore the <a href="#tools">browser tools</a> or the <a href="/tools">full tool page</a>, browse the <a href="/downloads">downloads library</a> for Android apps, files and albums, and open the source <a href="/directory">directories</a> for movies, anime, music and more. New modules are added as they are ready; no account is needed for public tools.</p>
     </div>
   </div>
