@@ -1,8 +1,9 @@
 "use strict";
 (async () => {
   const { $, el, api, image, external, empty, tabs, open, toast } = ST;
-  let tools = [], selected = "All";
+  let tools = [], selected = "All", categoryOrder = [];
   const grid = $("#tools-grid");
+  const categorySelect = $("#category-select");
   const ICON_NAMES = new Set(["photo", "passport", "score", "wallet", "tool", "download", "album", "film", "anime", "manga", "sports", "tv", "torrent", "game", "music", "ebook", "comics", "drama", "vpn", "shield", "calculator", "key", "text", "convert", "document", "clock", "heart", "archive"]);
   const kindFor = (text) =>
     text.includes("passport") ? "passport" :
@@ -32,6 +33,9 @@
   const routeFor = (tool) =>
     typeof tool.route === "string" && tool.route.startsWith("/") &&
     !tool.route.startsWith("//") && !/[\\\r\n]/.test(tool.route) ? tool.route : "";
+  const actionLabel = (tool) =>
+    tool.category !== "Directories" ? "Open tool" :
+    routeFor(tool) ? "Browse directory" : "Open directory";
   const toolLink = (tool, text, className = "text-link catalogue-open") => {
     const path = routeFor(tool);
     return path
@@ -43,8 +47,23 @@
     const filtered = tools.filter((t) =>
       (selected === "All" || t.category === selected) &&
       `${t.name} ${t.description || ""} ${t.category || ""} ${(t.tags || []).join(" ")}`.toLowerCase().includes(query));
-    const cats = ["All", ...new Set(tools.map(t => t.category).filter(Boolean))];
-    tabs($("#categories"), cats, selected, (cat) => { selected = cat; render(); }, Object.fromEntries(cats.map(cat => [cat, cat === "All" ? tools.length : tools.filter(tool => tool.category === cat).length])));
+    const available = [...new Set(tools.map(t => t.category).filter(Boolean))];
+    const ordered = [
+      ...categoryOrder.filter(cat => available.includes(cat)),
+      ...available.filter(cat => !categoryOrder.includes(cat)).sort(),
+    ];
+    const cats = ["All", ...ordered];
+    if (!cats.includes(selected)) selected = "All";
+    const counts = Object.fromEntries(cats.map(cat => [cat, cat === "All" ? tools.length : tools.filter(tool => tool.category === cat).length]));
+    tabs($("#categories"), cats, selected, (cat) => { selected = cat; render(); }, counts);
+    if (categorySelect) {
+      const signature = cats.map(cat => `${cat}:${counts[cat]}`).join("|");
+      if (categorySelect.dataset.signature !== signature) {
+        categorySelect.replaceChildren(...cats.map(cat => el("option", { value: cat }, cat === "All" ? `All tools · ${counts[cat]}` : `${cat} · ${counts[cat]}`)));
+        categorySelect.dataset.signature = signature;
+      }
+      categorySelect.value = selected;
+    }
     const tabRow = $("#categories");
     const activeTab = tabRow?.querySelector(".filter-tab.active");
     if (tabRow && activeTab) {
@@ -65,9 +84,9 @@
         image(tool.thumbnail, tool.name, "dialog-preview"),
         el("p", {class: "dialog-description"}, tool.longDescription || tool.description || "Open this tool to get started."),
         el("div", {class: "dialog-meta"}, ...(tool.tags || []).map(tag => el("span", {class: "tag"}, tag))),
-        measuredLink(toolLink(tool, "Open tool", "button button-orange")),
+        measuredLink(toolLink(tool, actionLabel(tool), "button button-orange")),
       ], tool.category || "WEB TOOL");
-      const action = isTool ? toolLink(tool, "Open tool", "text-link catalogue-open") :
+      const action = isTool ? toolLink(tool, actionLabel(tool), "text-link catalogue-open") :
         el("a", {href: `/downloads?item=${encodeURIComponent(tool.id)}`, class: "text-link catalogue-open", "data-google-vignette": "false"}, tool.kind === "album" ? "View album" : "View download");
       measuredLink(action);
       const badge = isTool
@@ -210,15 +229,28 @@
     }
   }
   $("#tool-search").addEventListener("input", render);
+  categorySelect?.addEventListener("change", (event) => {
+    selected = event.target.value;
+    render();
+  });
   async function load() {
     try {
       const [config, browserFeed] = await Promise.all([
         api("/tools.config.json"),
         api("/api/browser-tools.json").catch(() => ({ tools: [] })),
       ]);
+      categoryOrder = [...new Set([
+        ...(browserFeed.categories || []),
+        ...(config.categories || []),
+      ])].filter((cat) => typeof cat === "string" && cat && cat !== "All");
       const curated = (config.tools || []).filter((t) => t.visible !== false);
       const browserTools = (browserFeed.tools || []).filter((t) => t.visible !== false);
-      tools = [...curated, ...browserTools].map(t => ({...t, kind: "tool"}));
+      const rank = new Map(categoryOrder.map((category, index) => [category, index]));
+      tools = [...curated, ...browserTools]
+        .map(t => ({...t, kind: "tool"}))
+        .sort((a, b) =>
+          (rank.get(a.category) ?? categoryOrder.length) - (rank.get(b.category) ?? categoryOrder.length) ||
+          String(a.name).localeCompare(String(b.name), undefined, { sensitivity: "base" }));
       render();
       await widgets();
     } catch (error) {

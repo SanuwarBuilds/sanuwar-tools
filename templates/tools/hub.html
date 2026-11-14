@@ -26,6 +26,16 @@
     </p>
   </header>
 
+  <div class="nx-filter-mobile">
+    <label for="tp-category-select">Filter by category</label>
+    <select id="tp-category-select">
+      <option value="All">All tools · {{ catalog.tools | length }}</option>
+      {% for category in catalog.categories %}
+      <option value="{{ category }}">{{ category }} · {{ catalog.tools | selectattr('category', 'equalto', category) | list | length }}</option>
+      {% endfor %}
+    </select>
+  </div>
+
   <div class="tp-chips" id="tp-chips" role="group" aria-label="Filter tools by category">
     <button type="button" class="tp-chip is-active" data-category="All">All <span>{{ catalog.tools | length }}</span></button>
     {% for category in catalog.categories %}
@@ -53,4 +63,4 @@
 </section>
 {% endblock %}
 {% block scripts %}<script nonce="{{ csp_nonce }}" src="/assets/js/tools/smart-search.js?v=1" defer></script>
-<script nonce="{{ csp_nonce }}" src="/assets/js/tools/hub.js?v=2" defer></script>{% endblock %}
+<script nonce="{{ csp_nonce }}" src="/assets/js/tools/hub.js?v=3" defer></script>{% endblock %}

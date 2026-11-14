@@ -90,7 +90,7 @@ class P0ToolTests(unittest.TestCase):
     def test_local_explanations_and_smart_search_are_shipped(self):
         hub = self.client.get("/tools").get_data(as_text=True)
         self.assertIn("/assets/js/tools/smart-search.js?v=1", hub)
-        self.assertIn("/assets/js/tools/hub.js?v=2", hub)
+        self.assertIn("/assets/js/tools/hub.js?v=3", hub)
         self.assertIn('id="tp-smart-hit"', hub)
         self.assertIn('data-smart-example="18% GST on 5000"', hub)
         smart = self.client.get("/assets/js/tools/smart-search.js").get_data(as_text=True)

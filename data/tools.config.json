@@ -1,11 +1,22 @@
 {
   "categories": [
     "All",
-    "Directory",
-    "Utility",
-    "Downloader",
-    "Converter",
-    "Generator"
+    "Text Tools",
+    "Developer Tools",
+    "Encoding & Hashing",
+    "Images & Media",
+    "PDF & Documents",
+    "Compression & Archives",
+    "Networking",
+    "Security & Privacy",
+    "Calculators",
+    "Financial Calculators",
+    "Unit Converters",
+    "Time & Date",
+    "Health & Fitness",
+    "Land & Property",
+    "Sports & Games",
+    "Directories"
   ],
   "downloadPage": {
     "buttonLabel": "\u2b07 Download Tools",
@@ -29,7 +40,7 @@
   "tools": [
     {
       "addedDate": "2026-10-26",
-      "category": "Converter",
+      "category": "Images & Media",
       "description": "Crop, resize and compress photos. Set exact dimensions, DPI and KB limits, or make a printable photo sheet.",
       "downloadAvailable": false,
       "enabled": true,
@@ -53,7 +64,7 @@
     },
     {
       "addedDate": "2026-11-10",
-      "category": "Utility",
+      "category": "Text Tools",
       "description": "Insert invisible Unicode marks into lyrics so the text reads the same but no longer matches the stored copy. Password-protected module.",
       "downloadAvailable": false,
       "enabled": true,
@@ -75,7 +86,7 @@
     },
     {
       "addedDate": "2025-01-15",
-      "category": "Generator",
+      "category": "Images & Media",
       "description": "Generate passport-size photo sheets instantly from any image. Supports multiple formats and layouts.",
       "downloadAvailable": false,
       "featured": true,
@@ -95,7 +106,7 @@
     },
     {
       "addedDate": "2026-04-21",
-      "category": "Utility",
+      "category": "Sports & Games",
       "description": "Get instant cricket scores in real time!\nNever miss a match again \u2014 every ball updates the moment it happens \u26a1",
       "downloadAvailable": false,
       "enabled": false,
@@ -111,7 +122,7 @@
     },
     {
       "addedDate": "2026-04-21",
-      "category": "Utility",
+      "category": "Financial Calculators",
       "description": "\ud83d\udcb8 Manage your room expenses easily with Room Expense Manager!  \nNo more money mix-ups ruining a friendship",
       "downloadAvailable": false,
       "enabled": false,
@@ -127,7 +138,7 @@
     },
     {
       "addedDate": "2026-11-09",
-      "category": "Directory",
+      "category": "Directories",
       "description": "A hand-checked list of streaming and download sources for movies and TV shows. Search the list and open any source in a new tab.",
       "downloadAvailable": false,
       "enabled": true,
@@ -152,7 +163,7 @@
     },
     {
       "addedDate": "2026-11-09",
-      "category": "Directory",
+      "category": "Directories",
       "description": "Anime streaming directories with subbed and dubbed catalogues. Keep an ad blocker on before opening a player.",
       "downloadAvailable": false,
       "enabled": true,
@@ -177,7 +188,7 @@
     },
     {
       "addedDate": "2026-11-09",
-      "category": "Directory",
+      "category": "Directories",
       "description": "Manga readers and scanlation archives with searchable libraries, chapter lists and reading progress.",
       "downloadAvailable": false,
       "enabled": true,
@@ -201,7 +212,7 @@
     },
     {
       "addedDate": "2026-11-09",
-      "category": "Directory",
+      "category": "Directories",
       "description": "Live sports stream directories for cricket, football, hockey and more. Refresh the source if a feed drops.",
       "downloadAvailable": false,
       "enabled": true,
@@ -226,7 +237,7 @@
     },
     {
       "addedDate": "2026-11-09",
-      "category": "Directory",
+      "category": "Directories",
       "description": "Live TV and IPTV web players with news, entertainment and 24/7 channel lists. Availability depends on region.",
       "downloadAvailable": false,
       "enabled": true,
@@ -250,7 +261,7 @@
     },
     {
       "addedDate": "2026-11-09",
-      "category": "Directory",
+      "category": "Directories",
       "description": "Public torrent indexes for movies, TV, software and more. Use a client you trust and check what you download.",
       "downloadAvailable": false,
       "enabled": true,
@@ -274,7 +285,7 @@
     },
     {
       "addedDate": "2026-11-09",
-      "category": "Directory",
+      "category": "Directories",
       "description": "PC game download and repack directories. Read the installer notes and scan files before running anything.",
       "downloadAvailable": false,
       "enabled": true,
@@ -298,7 +309,7 @@
     },
     {
       "addedDate": "2026-11-09",
-      "category": "Directory",
+      "category": "Directories",
       "description": "Spotify rips, YouTube MP3 and multi-service downloaders, grouped by source and desktop software.",
       "downloadAvailable": false,
       "enabled": true,
@@ -322,7 +333,7 @@
     },
     {
       "addedDate": "2026-11-09",
-      "category": "Directory",
+      "category": "Directories",
       "description": "eBook libraries, audiobook archives and desktop readers, grouped by format so you can pick a reader first.",
       "downloadAvailable": false,
       "enabled": true,
@@ -346,7 +357,7 @@
     },
     {
       "addedDate": "2026-11-09",
-      "category": "Directory",
+      "category": "Directories",
       "description": "Comic readers, digital shops and issue archives. Check the format before downloading a full run.",
       "downloadAvailable": false,
       "enabled": true,
@@ -370,7 +381,7 @@
     },
     {
       "addedDate": "2026-11-09",
-      "category": "Directory",
+      "category": "Directories",
       "description": "Korean, Japanese, Chinese and Thai drama sources with subtitles, often updated same-day.",
       "downloadAvailable": false,
       "enabled": true,
@@ -395,7 +406,7 @@
     },
     {
       "addedDate": "2026-11-09",
-      "category": "Directory",
+      "category": "Directories",
       "description": "Virtual private network services with apps for phones, desktops and browsers. Compare policies before subscribing.",
       "downloadAvailable": false,
       "enabled": true,
@@ -419,7 +430,7 @@
     },
     {
       "addedDate": "2026-11-09",
-      "category": "Directory",
+      "category": "Directories",
       "description": "Browser extensions and privacy browsers that block intrusive ads, trackers and popunders.",
       "downloadAvailable": false,
       "enabled": true,
@@ -443,7 +454,7 @@
     },
     {
       "addedDate": "2026-11-09",
-      "category": "Directory",
+      "category": "Directories",
       "description": "",
       "downloadAvailable": false,
       "enabled": true,

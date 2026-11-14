@@ -9,6 +9,7 @@
   const smartLabel = document.getElementById("tp-smart-label");
   const examples = [...document.querySelectorAll("[data-smart-example]")];
   const chips = [...document.querySelectorAll(".tp-chip")];
+  const categorySelect = document.getElementById("tp-category-select");
   if (!search || !grid) return;
   let category = "All";
   let smartTarget = null;
@@ -37,11 +38,14 @@
   const openSmart = () => {
     if (smartTarget) location.assign(smartTarget.href);
   };
-  chips.forEach((chip) => chip.addEventListener("click", () => {
-    category = chip.dataset.category;
-    chips.forEach((item) => item.classList.toggle("is-active", item === chip));
+  const setCategory = (value) => {
+    category = value;
+    chips.forEach((item) => item.classList.toggle("is-active", item.dataset.category === category));
+    if (categorySelect) categorySelect.value = category;
     apply();
-  }));
+  };
+  chips.forEach((chip) => chip.addEventListener("click", () => setCategory(chip.dataset.category)));
+  categorySelect?.addEventListener("change", () => setCategory(categorySelect.value));
   examples.forEach((button) => button.addEventListener("click", () => {
     search.value = button.dataset.smartExample || button.textContent;
     updateSmart();
