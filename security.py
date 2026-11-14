@@ -37,6 +37,8 @@ def valid_url(value, image=False):
         return True  # Only rendered in an img element, never inline markup.
     if value.startswith('/assets/') and not any(c in value for c in ('\\', '\n', '\r')):
         return True
+    if value.startswith('/eduhelp/labs/') and '..' not in value and not any(c in value for c in ('\\', '\n', '\r')):
+        return True
     parsed = urlsplit(value)
     return parsed.scheme == 'https' and bool(parsed.hostname) and not parsed.username and not parsed.password and not any(c in value for c in ('\\', '\n', '\r'))
 
@@ -184,10 +186,19 @@ def install(app):
                 "img-src 'self' https: data:; font-src 'self'; object-src 'none'; base-uri 'self'; "
                 "frame-ancestors 'none'; form-action 'self'")
             response.headers['Cross-Origin-Opener-Policy'] = 'same-origin-allow-popups'
+        if request.path.startswith('/eduhelp/labs/') and response.status_code == 200 and response.mimetype == 'text/html':
+            # Self-hosted interactive labs carry inline handlers and load their 3D
+            # libraries from CDNs; keep the relaxation scoped to these lab pages.
+            response.headers['Content-Security-Policy'] = (
+                "default-src 'self'; script-src 'self' 'nonce-" + monetization.nonce() + "' https://cdn.tailwindcss.com https://cdnjs.cloudflare.com; "
+                "script-src-attr 'unsafe-inline'; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com https://cdnjs.cloudflare.com; "
+                "font-src 'self' https://fonts.gstatic.com https://cdnjs.cloudflare.com; img-src 'self' https: data: blob:; "
+                "connect-src 'self' https:; media-src 'self' https: data: blob:; worker-src 'self' blob:; "
+                "object-src 'none'; base-uri 'none'; frame-ancestors 'none'; form-action 'self'")
         if request.is_secure:
             response.headers['Strict-Transport-Security'] = 'max-age=31536000'
         cacheable_feed = request.path == '/api/browser-tools.json'
-        if not cacheable_feed and (request.path.startswith(('/admin','/api/','/purchase')) or request.path in ('/', '/downloads', '/download.html', '/tools.config.json', '/privacy', '/about', '/contact')):
+        if not cacheable_feed and (request.path.startswith(('/admin','/api/','/purchase','/eduhelp/labs/')) or request.path in ('/', '/downloads', '/download.html', '/tools.config.json', '/privacy', '/about', '/contact')):
             response.headers['Cache-Control'] = 'no-store'
         return response
     @app.errorhandler(HTTPException)

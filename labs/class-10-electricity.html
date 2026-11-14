@@ -1,0 +1,1181 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Class 10 NCERT 3D Physics Lab — Electricity</title>
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Three.js r128 -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+    <!-- Google Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@500;700&display=swap" rel="stylesheet">
+    <!-- Font Awesome Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        * {
+            box-sizing: border-box;
+            user-select: none;
+            -webkit-user-select: none;
+        }
+        body, html {
+            margin: 0;
+            padding: 0;
+            width: 100%;
+            height: 100%;
+            overflow: hidden;
+            font-family: 'Inter', sans-serif;
+            background-color: #050a15;
+            color: #f1f5f9;
+        }
+        #canvas-container {
+            position: absolute;
+            inset: 0;
+            width: 100%;
+            height: 100%;
+            z-index: 1;
+            background: radial-gradient(circle at 50% 50%, #0d1b2a 0%, #050a15 80%);
+        }
+        canvas {
+            display: block;
+            width: 100%;
+            height: 100%;
+            cursor: grab;
+        }
+        canvas:active {
+            cursor: grabbing;
+        }
+        .glass-panel {
+            background: rgba(10, 15, 30, 0.82);
+            backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
+            border: 1px solid rgba(250, 204, 21, 0.15);
+            box-shadow: 0 12px 32px rgba(0, 0, 0, 0.6);
+        }
+        /* 3D Floating Labels */
+        .label-3d {
+            position: absolute;
+            pointer-events: auto;
+            transform: translate(-50%, -100%);
+            background: rgba(15, 23, 42, 0.9);
+            border: 1px solid rgba(250, 204, 21, 0.5);
+            color: #f8fafc;
+            padding: 4px 9px;
+            border-radius: 6px;
+            font-size: 11px;
+            font-weight: 600;
+            white-space: nowrap;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.6);
+            transition: opacity 0.2s, transform 0.15s;
+            cursor: pointer;
+            z-index: 10;
+        }
+        .label-3d:hover {
+            background: rgba(161, 98, 7, 0.95);
+            border-color: #facc15;
+            transform: translate(-50%, -105%) scale(1.06);
+        }
+        .label-3d::after {
+            content: '';
+            position: absolute;
+            bottom: -5px;
+            left: 50%;
+            transform: translateX(-50%);
+            border-width: 5px 5px 0;
+            border-style: solid;
+            border-color: rgba(250, 204, 21, 0.6) transparent transparent;
+        }
+        /* Custom Range Sliders */
+        input[type="range"] {
+            -webkit-appearance: none;
+            appearance: none;
+            width: 100%;
+            height: 6px;
+            background: #1e293b;
+            border-radius: 999px;
+            outline: none;
+        }
+        input[type="range"]::-webkit-slider-thumb {
+            -webkit-appearance: none;
+            appearance: none;
+            width: 16px;
+            height: 16px;
+            border-radius: 50%;
+            background: #eab308;
+            border: 2px solid #f8fafc;
+            cursor: pointer;
+            box-shadow: 0 0 8px rgba(234, 179, 8, 0.8);
+        }
+        .custom-scroll::-webkit-scrollbar {
+            width: 5px;
+            height: 5px;
+        }
+        .custom-scroll::-webkit-scrollbar-track {
+            background: rgba(15, 23, 42, 0.4);
+        }
+        .custom-scroll::-webkit-scrollbar-thumb {
+            background: rgba(100, 116, 139, 0.5);
+            border-radius: 999px;
+        }
+        .tab-active {
+            background: linear-gradient(135deg, #ca8a04 0%, #ea580c 100%);
+            color: #ffffff;
+            border-color: #facc15;
+            box-shadow: 0 0 16px rgba(234, 179, 8, 0.35);
+        }
+        .step-dot-active {
+            background: #eab308;
+            border-color: #fde047;
+            box-shadow: 0 0 12px rgba(234, 179, 8, 0.9);
+            transform: scale(1.15);
+        }
+        .led-glow {
+            text-shadow: 0 0 10px #facc15, 0 0 20px #ca8a04;
+        }
+    </style>
+</head>
+<body class="relative w-full h-full select-none">
+
+    <!-- 3D WebGL Canvas Container -->
+    <div id="canvas-container"></div>
+
+    <!-- Floating 3D Annotations Container -->
+    <div id="labels-container" class="absolute inset-0 pointer-events-none overflow-hidden z-10"></div>
+
+    <!-- TOP NAVIGATION & MODULE TABS -->
+    <header class="absolute top-0 left-0 right-0 z-20 p-2.5 md:p-3.5 flex flex-col lg:flex-row items-center justify-between gap-2 pointer-events-none">
+        <div class="glass-panel px-3.5 py-2 rounded-xl flex items-center gap-3 pointer-events-auto w-full lg:w-auto justify-between lg:justify-start">
+            <div class="flex items-center gap-2.5">
+                <div class="w-9 h-9 rounded-lg bg-gradient-to-br from-yellow-500 to-orange-600 flex items-center justify-center shadow-lg shadow-yellow-500/25">
+                    <i class="fa-solid fa-bolt text-white text-lg"></i>
+                </div>
+                <div>
+                    <div class="flex items-center gap-2">
+                        <span class="text-[10px] font-bold uppercase tracking-wider px-2 py-0.5 rounded bg-yellow-500/20 text-yellow-300 border border-yellow-500/30">NCERT Class 10 • Ch 12</span>
+                    </div>
+                    <h1 class="text-sm md:text-base font-extrabold text-white tracking-tight">Electricity — 3D Interactive Lab</h1>
+                </div>
+            </div>
+            <button id="btn-edu-mode" onclick="toggleEduMode()" class="px-3 py-1.5 rounded-lg text-xs font-bold border transition flex items-center gap-1.5 bg-amber-500/20 border-amber-400/50 text-amber-300 hover:bg-amber-500/30">
+                <i class="fa-solid fa-chalkboard-user"></i>
+                <span id="edu-mode-label">Hinglish Mode: ON</span>
+            </button>
+        </div>
+
+        <!-- 4 Core Chapter Modules -->
+        <nav class="glass-panel p-1.5 rounded-xl flex flex-wrap items-center justify-center gap-1.5 pointer-events-auto w-full lg:w-auto">
+            <button onclick="switchModule('potential')" id="tab-potential" class="module-tab tab-active px-3 py-1.5 rounded-lg text-xs font-bold border border-transparent transition flex items-center gap-1.5">
+                <i class="fa-solid fa-car-battery"></i>
+                <span>1. Current & Potential</span>
+            </button>
+            <button onclick="switchModule('ohmslaw')" id="tab-ohmslaw" class="module-tab px-3 py-1.5 rounded-lg text-xs font-bold text-slate-300 hover:text-white border border-transparent transition flex items-center gap-1.5">
+                <i class="fa-solid fa-wave-square"></i>
+                <span>2. Ohm's Law & Resistors</span>
+            </button>
+            <button onclick="switchModule('circuits')" id="tab-circuits" class="module-tab px-3 py-1.5 rounded-lg text-xs font-bold text-slate-300 hover:text-white border border-transparent transition flex items-center gap-1.5">
+                <i class="fa-solid fa-network-wired"></i>
+                <span>3. Series vs Parallel</span>
+            </button>
+            <button onclick="switchModule('heating')" id="tab-heating" class="module-tab px-3 py-1.5 rounded-lg text-xs font-bold text-slate-300 hover:text-white border border-transparent transition flex items-center gap-1.5">
+                <i class="fa-solid fa-fire-flame-curved"></i>
+                <span>4. Heating Effect</span>
+            </button>
+        </nav>
+    </header>
+
+    <!-- LEFT PANEL: EDUCATIONAL GUIDE -->
+    <aside class="absolute top-28 md:top-20 left-3 z-20 w-80 md:w-96 max-h-[calc(100vh-175px)] flex flex-col gap-2.5 pointer-events-none">
+        <div id="sub-selector-panel" class="glass-panel p-2.5 rounded-xl pointer-events-auto">
+            <div class="text-[11px] font-bold uppercase tracking-wider text-yellow-400 mb-1.5 flex items-center justify-between">
+                <span id="sub-selector-title"><i class="fa-solid fa-sliders mr-1"></i> Sub-topics</span>
+            </div>
+            <div id="sub-selector-buttons" class="grid grid-cols-2 gap-1.5"></div>
+        </div>
+
+        <div class="glass-panel p-3.5 rounded-xl pointer-events-auto overflow-y-auto custom-scroll flex-1 flex flex-col justify-between">
+            <div>
+                <div class="flex items-center justify-between gap-2 mb-2">
+                    <span id="step-badge" class="px-2.5 py-0.5 rounded-full text-[11px] font-extrabold bg-yellow-500/20 text-yellow-300 border border-yellow-500/40">STAGE 1 OF 6</span>
+                </div>
+                <h2 id="stage-title" class="text-base font-extrabold text-white leading-snug mb-2">Title</h2>
+                <div id="stage-description" class="text-xs text-slate-200 leading-relaxed space-y-2"></div>
+                <div id="exam-tip-box" class="mt-3 p-2.5 rounded-lg bg-orange-500/10 border border-orange-500/30 text-orange-200 text-[11px] leading-relaxed">
+                    <div class="font-bold text-orange-300 mb-0.5 flex items-center gap-1">
+                        <i class="fa-solid fa-lightbulb"></i> <span id="exam-tip-title">Teacher's Point:</span>
+                    </div>
+                    <p id="exam-tip-text">Tip</p>
+                </div>
+            </div>
+            <div class="mt-3 pt-2.5 border-t border-slate-700/60">
+                <div class="text-[10px] font-bold uppercase tracking-wider text-slate-400 mb-1">Active Formula / Law:</div>
+                <div id="live-formula-box" class="font-mono text-xs bg-slate-900/90 border border-slate-700 px-2.5 py-1.5 rounded text-yellow-300 overflow-x-auto whitespace-nowrap">
+                    I = Q / t
+                </div>
+            </div>
+        </div>
+    </aside>
+
+    <!-- RIGHT PANEL: CONTROLS & METERS -->
+    <aside class="absolute top-28 md:top-20 right-3 z-20 w-72 md:w-80 max-h-[calc(100vh-175px)] flex flex-col gap-2.5 pointer-events-none">
+        
+        <!-- Live Multimeter Display -->
+        <div class="glass-panel p-3 rounded-xl pointer-events-auto border-t-4 border-t-yellow-500">
+            <div class="text-[10px] font-bold uppercase tracking-wider text-slate-400 mb-2">Live Circuit Readings</div>
+            <div class="grid grid-cols-2 gap-2 text-center">
+                <div class="bg-slate-900/80 border border-slate-700 rounded p-1.5">
+                    <div class="text-[10px] text-blue-400">Voltage (V)</div>
+                    <div id="meter-v" class="font-mono text-lg text-white font-bold led-glow">0.0 V</div>
+                </div>
+                <div class="bg-slate-900/80 border border-slate-700 rounded p-1.5">
+                    <div class="text-[10px] text-green-400">Current (I)</div>
+                    <div id="meter-i" class="font-mono text-lg text-white font-bold led-glow">0.0 A</div>
+                </div>
+            </div>
+        </div>
+
+        <div class="glass-panel p-3 rounded-xl pointer-events-auto space-y-2.5">
+            <div class="text-[11px] font-bold uppercase tracking-wider text-yellow-400 flex items-center gap-1.5">
+                <i class="fa-solid fa-sliders"></i> <span>Circuit Controls</span>
+            </div>
+            <div>
+                <div class="flex justify-between text-xs mb-1">
+                    <span id="param1-label" class="text-slate-300 font-medium">Battery Voltage</span>
+                    <span id="param1-val" class="font-mono text-yellow-300 font-bold">0 V</span>
+                </div>
+                <input id="slider-param1" type="range" min="0" max="24" value="0" step="1" oninput="updateParameters()">
+            </div>
+            <div>
+                <div class="flex justify-between text-xs mb-1">
+                    <span id="param2-label" class="text-slate-300 font-medium">Wire Length (L)</span>
+                    <span id="param2-val" class="font-mono text-sky-300 font-bold">1x</span>
+                </div>
+                <input id="slider-param2" type="range" min="1" max="5" value="1" step="0.1" oninput="updateParameters()">
+            </div>
+            <div>
+                <div class="flex justify-between text-xs mb-1">
+                    <span id="param3-label" class="text-slate-300 font-medium">Cross-Section Area (A)</span>
+                    <span id="param3-val" class="font-mono text-amber-300 font-bold">1x</span>
+                </div>
+                <input id="slider-param3" type="range" min="0.5" max="3" value="1" step="0.1" oninput="updateParameters()">
+            </div>
+        </div>
+
+        <div id="inspector-card" class="glass-panel p-3.5 rounded-xl pointer-events-auto overflow-y-auto custom-scroll flex-1 border-l-4 border-l-blue-400">
+            <div class="flex items-center justify-between mb-1.5">
+                <span class="text-[10px] font-bold uppercase tracking-wider text-blue-400"><i class="fa-solid fa-magnifying-glass"></i> Component Inspector</span>
+                <span class="text-[10px] text-slate-400">Click 3D part</span>
+            </div>
+            <h3 id="insp-name" class="text-sm font-extrabold text-white mb-2">Select an object</h3>
+            <div class="space-y-2 text-xs">
+                <div class="bg-slate-900/70 p-2 rounded-lg border border-slate-800">
+                    <div class="text-[10px] font-bold text-yellow-400 uppercase">What is it?</div>
+                    <p id="insp-function" class="text-slate-200 mt-0.5">-</p>
+                </div>
+                <div class="bg-slate-900/70 p-2 rounded-lg border border-slate-800">
+                    <div class="text-[10px] font-bold text-blue-400 uppercase">NCERT Concept</div>
+                    <p id="insp-action" class="text-slate-200 mt-0.5">-</p>
+                </div>
+            </div>
+        </div>
+    </aside>
+
+    <!-- BOTTOM PROCESS TIMELINE & PLAYBACK -->
+    <footer class="absolute bottom-3 left-3 right-3 z-20 flex flex-col items-center pointer-events-none">
+        <div class="glass-panel px-4 py-2.5 rounded-2xl pointer-events-auto w-full max-w-4xl flex flex-col md:flex-row items-center justify-between gap-3">
+            <div class="flex items-center gap-2">
+                <button id="btn-play" onclick="togglePlayPause()" class="w-10 h-10 rounded-xl bg-gradient-to-br from-yellow-500 to-orange-600 hover:from-yellow-400 hover:to-orange-500 text-white flex items-center justify-center shadow-lg shadow-yellow-500/30 transition">
+                    <i id="icon-play" class="fa-solid fa-pause text-sm"></i>
+                </button>
+                <div class="h-6 w-px bg-slate-700 mx-1"></div>
+                <button onclick="prevStep()" class="px-2.5 py-1.5 rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-200 border border-slate-600 text-xs font-semibold transition flex items-center gap-1">
+                    <i class="fa-solid fa-backward-step"></i> Prev
+                </button>
+                <button onclick="nextStep()" class="px-2.5 py-1.5 rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-200 border border-slate-600 text-xs font-semibold transition flex items-center gap-1">
+                    Next <i class="fa-solid fa-forward-step"></i>
+                </button>
+            </div>
+            <div class="flex-1 w-full flex flex-col gap-1.5">
+                <div class="flex items-center justify-between text-[11px] font-semibold text-slate-300 px-1">
+                    <span id="timeline-caption">Lesson Timeline</span>
+                    <span id="progress-percent" class="font-mono text-yellow-400">Stage 1 / 6</span>
+                </div>
+                <div id="stepper-nodes" class="grid grid-cols-6 gap-1.5">
+                    <button onclick="setStage(0)" class="stage-btn h-2.5 rounded-full bg-yellow-500 transition-all"></button>
+                    <button onclick="setStage(1)" class="stage-btn h-2.5 rounded-full bg-slate-700 transition-all"></button>
+                    <button onclick="setStage(2)" class="stage-btn h-2.5 rounded-full bg-slate-700 transition-all"></button>
+                    <button onclick="setStage(3)" class="stage-btn h-2.5 rounded-full bg-slate-700 transition-all"></button>
+                    <button onclick="setStage(4)" class="stage-btn h-2.5 rounded-full bg-slate-700 transition-all"></button>
+                    <button onclick="setStage(5)" class="stage-btn h-2.5 rounded-full bg-slate-700 transition-all"></button>
+                </div>
+            </div>
+            <div class="flex items-center gap-1">
+                <button onclick="zoomCamera(-3)" class="w-8 h-8 rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-200 border border-slate-600 flex items-center justify-center text-xs"><i class="fa-solid fa-plus"></i></button>
+                <button onclick="zoomCamera(3)" class="w-8 h-8 rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-200 border border-slate-600 flex items-center justify-center text-xs"><i class="fa-solid fa-minus"></i></button>
+            </div>
+        </div>
+    </footer>
+
+    <!-- LOGIC -->
+    <script>
+        const state = {
+            currentModule: 'potential',
+            subType: 'basic_wire',
+            stage: 0,
+            isPlaying: true,
+            eduMode: true,
+            voltage: 0,
+            wireLength: 1,
+            wireArea: 1,
+            currentI: 0,
+            resistanceR: 10,
+            selectedObject: null
+        };
+
+        const eduData = {
+            potential: {
+                subs: [{ id: 'basic_wire', label: 'Wire & Drift', icon: 'fa-minus' }, { id: 'battery_view', label: 'Battery/Cell', icon: 'fa-car-battery' }],
+                params: { p1: { label: 'Battery Voltage', unit: ' V', min: 0, max: 24, val: 0 }, p2: { label: '-', unit: '', min: 1, max: 1, val: 1 }, p3: { label: '-', unit: '', min: 1, max: 1, val: 1 } },
+                stages: [
+                    {
+                        t: "Stage 1: Free Electrons in a Conductor",
+                        h: "<p><strong>1. Random Motion:</strong> Kisi bhi metal wire mein bahot saare <strong>Free Electrons</strong> hote hain jo idhar-udhar (randomly) bhagte rehte hain.</p><p><strong>2. No Net Flow:</strong> Kyunki inki koi ek disha nahi hoti, isliye inka net flow ZERO hota hai. Tabhi bina battery ke wire me current nahi lagta!</p>",
+                        s: "<p><strong>Random Thermal Motion:</strong> In a metallic conductor, free valence electrons move randomly at high speeds due to thermal energy. The net charge crossing any cross-section is zero, hence zero current.</p>",
+                        tip: "Slider mein Voltage 0V hai. Dhyan se dekhiye blue electrons aage-peeche vibrate kar rahe hain par aage nahi badh rahe.",
+                        form: "Net Charge Flow (Q) = 0 → Current (I) = 0"
+                    },
+                    {
+                        t: "Stage 2: Applying Potential Difference (Battery)",
+                        h: "<p><strong>1. Battery ki Entry:</strong> Jab hum Battery lagate hain, to wo wire ke dono sirno ke beech ek <strong>Potential Difference (Voltage)</strong> create karti hai.</p><p><strong>2. Dhakka (Electric Pressure):</strong> Ek side se Negative terminal electrons ko dhakka marta hai, aur Positive terminal unhe apni taraf kheencta hai.</p>",
+                        s: "<p><strong>Electric Potential Difference (V):</strong> A cell generates a chemical potential difference. It does work (W) to move a charge (Q) from one terminal to another.</p>",
+                        tip: "Voltage slider ko badhayein! Dekhiye kaise ek disha mein 'Electric Pressure' banta hai.",
+                        form: "V = W / Q (1 Volt = 1 Joule / 1 Coulomb)"
+                    },
+                    {
+                        t: "Stage 3: Drift Velocity of Electrons",
+                        h: "<p><strong>1. Ek Disha Mein Bahaav:</strong> Voltage lagte hi saare electrons ek particular speed se Positive terminal ki taraf khisakne lagte hain. Ise <strong>Drift Velocity</strong> kehte hain.</p>",
+                        s: "<p><strong>Drift Velocity:</strong> Under the influence of an electric field, electrons drift slowly towards the positive terminal, despite continuous collisions with lattice ions.</p>",
+                        tip: "Voltage badhane se electrons ki drift speed badhti hui dikhegi. (Live meter me Current I dekhein).",
+                        form: "Electric Current (I) = Rate of flow of charge (Q/t)"
+                    },
+                    {
+                        t: "Stage 4: Direction of Electric Current",
+                        h: "<p><strong>1. Ulta Chakkar:</strong> Electrons humesha Negative (-) se Positive (+) ki taraf behte hain.</p><p><strong>2. Conventional Current:</strong> Par purane zamane ke niyam ke hisaab se, hum Current ki disha ko <strong>Positive (+) se Negative (-)</strong> mante hain!</p>",
+                        s: "<p><strong>Conventional Current:</strong> Historically, current was thought to be the flow of positive charges. Thus, its direction is taken opposite to the flow of electrons.</p>",
+                        tip: "3D scene me dhyaan se dekhein: Electrons (Blue) right ja rahe hain, par Current flow ki arrows (Yellow) left ja rahi hain!",
+                        form: "Current Direction = Opposite to Electron Flow"
+                    },
+                    {
+                        t: "Stage 5: Measuring Current (Ammeter)",
+                        h: "<p><strong>1. Ammeter:</strong> Current (I) napne ke liye hum Ammeter ka use karte hain. Ise humesha <strong>Series</strong> me lagaya jata hai taaki saara current iske andar se paas ho.</p><p><strong>2. Low Resistance:</strong> Iska resistance bahut kam hota hai taaki current na ruke.</p>",
+                        s: "<p><strong>Ammeter:</strong> An instrument used to measure electric current in a circuit. It is always connected in series and has very low resistance.</p>",
+                        tip: "NCERT Board Question: 'Why is Ammeter connected in series?' Answer: So that the entire current of the circuit passes through it.",
+                        form: "Measured in Amperes (A). 1A = 1 C/s"
+                    },
+                    {
+                        t: "Stage 6: Measuring Potential Difference (Voltmeter)",
+                        h: "<p><strong>1. Voltmeter:</strong> Voltage (V) napne ke liye hum Voltmeter ka use karte hain. Ise humesha wire/resistor ke <strong>Parallel</strong> lagaya jata hai.</p><p><strong>2. High Resistance:</strong> Iska resistance bahut high hota hai taaki ye main wire se current chori na kare!</p>",
+                        s: "<p><strong>Voltmeter:</strong> Used to measure potential difference across two points. Always connected in parallel. It has very high resistance to draw negligible current.</p>",
+                        tip: "Yad rakhein: Ammeter = Series (Low R), Voltmeter = Parallel (High R).",
+                        form: "Measured in Volts (V)."
+                    }
+                ]
+            },
+            ohmslaw: {
+                subs: [{ id: 'collision', label: 'Resistance Cause', icon: 'fa-atom' }, { id: 'factors', label: 'Length & Area', icon: 'fa-ruler-combined' }],
+                params: { p1: { label: 'Voltage (V)', unit: ' V', min: 0, max: 24, val: 12 }, p2: { label: 'Wire Length (L)', unit: 'x', min: 1, max: 3, val: 1 }, p3: { label: 'Wire Area (A)', unit: 'x', min: 0.5, max: 3, val: 1 } },
+                stages: [
+                    {
+                        t: "Stage 1: Cause of Resistance (Collisions)",
+                        h: "<p><strong>1. Rukawat (Resistance):</strong> Jab electrons wire me behte hain, to wo wire ke bade Atoms (Lattice ions) se takrate hain.</p><p><strong>2. Takkar = Resistance:</strong> Yahi takkar electrons ke bahaav ko rokti hai, jise hum <strong>Resistance (R)</strong> kehte hain.</p>",
+                        s: "<p><strong>Origin of Resistance:</strong> As electrons drift, they frequently collide with the vibrating positive ions of the crystal lattice. This opposition to flow is Resistance.</p>",
+                        tip: "Red atoms ko dekhein! Electrons jab inke paas se guzarte hain to unki speed kam hoti hai (rukawat).",
+                        form: "Resistance (R) = Opposition to electron flow"
+                    },
+                    {
+                        t: "Stage 2: Ohm's Law (V ∝ I)",
+                        h: "<p><strong>1. Ohm ka Niyam:</strong> Agar wire ka temperature same rahe, to <strong>Voltage (V) badhane par Current (I) bhi barabar badhta hai.</strong></p><p><strong>2. Constant (R):</strong> V aur I ka ratio humesha ek constant aata hai, jise Resistance kehte hain.</p>",
+                        s: "<p><strong>Ohm's Law:</strong> The potential difference (V) across a metallic wire is directly proportional to the current (I) flowing through it, provided its temperature remains the same.</p>",
+                        tip: "Voltage slider ko 12V se 24V karein. Current (I) meter bhi exact double ho jayega! (Kyuki R constant hai).",
+                        form: "V ∝ I  →  V = IR"
+                    },
+                    {
+                        t: "Stage 3: Factor 1 - Length of Wire (R ∝ L)",
+                        h: "<p><strong>1. Lamba Rasta:</strong> Agar wire ki Length (L) badha di jaye, to electrons ko zyada door jana padega aur <strong>zyada takkarein</strong> hongi.</p><p><strong>2. Result:</strong> Length badhne se Resistance (R) badh jata hai, aur Current (I) kam ho jata hai.</p>",
+                        s: "<p><strong>Effect of Length:</strong> Resistance of a uniform metallic conductor is directly proportional to its length (L).</p>",
+                        tip: "Length (L) slider badhayein! Dekhiye wire lambi hogi, aur live meter me Current (A) gir jayega.",
+                        form: "R ∝ L (Longer wire = More Resistance)"
+                    },
+                    {
+                        t: "Stage 4: Factor 2 - Cross-Sectional Area (R ∝ 1/A)",
+                        h: "<p><strong>1. Chauda Rasta:</strong> Agar wire moti ho (Area A zyada ho), to electrons ko nikalne ke liye khuli jagah milti hai.</p><p><strong>2. Result:</strong> Area badhane se Resistance (R) kam ho jata hai, aur Current (I) badh jata hai.</p>",
+                        s: "<p><strong>Effect of Area:</strong> Resistance is inversely proportional to the area of cross-section (A).</p>",
+                        tip: "Area (A) slider badhayein! Wire moti ho jayegi, takkarein kam hongi aur Current tezi se badhega.",
+                        form: "R ∝ 1/A (Thicker wire = Less Resistance)"
+                    },
+                    {
+                        t: "Stage 5: Resistivity (ρ - Material Property)",
+                        h: "<p><strong>1. Material ka Farak:</strong> Copper me takkarein kam hoti hain (Low Resistivity), jabki Nichrome me bahot takkarein hoti hain (High Resistivity).</p><p><strong>2. Formula:</strong> R = ρ(L/A). Yahan ρ (rho) material ki property hai.</p>",
+                        s: "<p><strong>Electrical Resistivity (ρ):</strong> A characteristic property of the material. Metals/alloys have low resistivity (10⁻⁸ to 10⁻⁶ Ωm), insulators have high (10¹² to 10¹⁷ Ωm).</p>",
+                        tip: "Resistivity shape ya size par depend nahi karti, sirf Material par depend karti hai!",
+                        form: "R = ρ(L/A) | Unit of ρ is Ω·m"
+                    },
+                    {
+                        t: "Stage 6: Variable Resistance (Rheostat)",
+                        h: "<p><strong>1. Rheostat:</strong> Ek aisi device jo bina Voltage badle circuit ka Current change kar sakti hai, uska Resistance (L) badha ya ghata kar.</p>",
+                        s: "<p><strong>Variable Resistor:</strong> A component used to regulate current without changing the voltage source is called a rheostat.</p>",
+                        tip: "Length aur Area slider ko aage peeche karein, ye bilkul ek Rheostat ki tarah kaam kar raha hai!",
+                        form: "Rheostat changes L to change R, modifying I."
+                    }
+                ]
+            },
+            circuits: {
+                subs: [{ id: 'series', label: 'Series Circuit', icon: 'fa-grip-lines' }, { id: 'parallel', label: 'Parallel Circuit', icon: 'fa-grip-lines-vertical' }],
+                params: { p1: { label: 'Battery Voltage', unit: ' V', min: 0, max: 24, val: 12 }, p2: { label: 'Resistor 1 (Ω)', unit: ' Ω', min: 1, max: 20, val: 5 }, p3: { label: 'Resistor 2 (Ω)', unit: ' Ω', min: 1, max: 20, val: 5 } },
+                stages: [
+                    {
+                        t: "Stage 1: Series Combination Setup",
+                        h: "<p><strong>1. Ek Ke Baad Ek:</strong> Jab do ya zyada resistors ko end-to-end joda jata hai, to use Series combination kehte hain.</p><p><strong>2. Single Path:</strong> Electrons ke paas flow karne ke liye sirf <strong>ek hi rasta</strong> hota hai.</p>",
+                        s: "<p><strong>Resistors in Series:</strong> Joined end to end. There is only one path for the flow of electric current.</p>",
+                        tip: "Sub-topics se 'Series Circuit' chunein. Yahan R1 aur R2 ek hi line me jude hain.",
+                        form: "R_equivalent = R₁ + R₂ + R₃ ..."
+                    },
+                    {
+                        t: "Stage 2: Current in Series (I remains Constant)",
+                        h: "<p><strong>1. Current Same Rehta Hai:</strong> Kyunki rasta ek hi hai, isliye Series circuit ke har hisse (R1, R2) me <strong>ek saman Current (I)</strong> behta hai.</p>",
+                        s: "<p><strong>Constant Current:</strong> In a series circuit, the current is the same in every part of the circuit or the same current through each resistor.</p>",
+                        tip: "Electrons (Blue dots) ki speed dono resistors me bilkul same hai!",
+                        form: "I_total = I₁ = I₂ = I₃"
+                    },
+                    {
+                        t: "Stage 3: Voltage in Series (V divides)",
+                        h: "<p><strong>1. Voltage Bant Jata Hai:</strong> Total Battery voltage (V) alag-alag resistors par unke resistance ke hisaab se bant jata hai (V1, V2).</p>",
+                        s: "<p><strong>Voltage Division:</strong> The total potential difference across a combination of resistors in series is equal to the sum of potential differences across the individual resistors.</p>",
+                        tip: "V = V1 + V2. Jiska resistance zyada hoga, wo zyada voltage draw karega.",
+                        form: "V_total = V₁ + V₂ + V₃"
+                    },
+                    {
+                        t: "Stage 4: Parallel Combination Setup",
+                        h: "<p><strong>1. Branches (Shakhayein):</strong> Jab resistors ko do common points ke beech joda jata hai, to use Parallel kehte hain.</p><p><strong>2. Multiple Paths:</strong> Yahan current (electrons) ke paas flow karne ke liye alag-alag raste hote hain!</p>",
+                        s: "<p><strong>Resistors in Parallel:</strong> Connected together between two points. Current divides into parallel branches.</p>",
+                        tip: "Sub-topics se 'Parallel Circuit' chunein. Dekhiye current kaise junction par aakar bant raha hai!",
+                        form: "1/R_eq = 1/R₁ + 1/R₂ + 1/R₃ ..."
+                    },
+                    {
+                        t: "Stage 5: Voltage in Parallel (V remains Constant)",
+                        h: "<p><strong>1. Voltage Same Rehta Hai:</strong> Parallel circuit me har branch ke cross Potential Difference (V) bilkul Battery ke voltage ke barabar hota hai.</p>",
+                        s: "<p><strong>Constant Voltage:</strong> In a parallel circuit, the potential difference across each resistor is the same and is equal to the total applied voltage.</p>",
+                        tip: "Dono resistors directly battery ke +/- se jude hain, isliye dono par same V milta hai.",
+                        form: "V_total = V₁ = V₂ = V₃"
+                    },
+                    {
+                        t: "Stage 6: Current in Parallel (I divides)",
+                        h: "<p><strong>1. Current Bant Jata Hai:</strong> Junction par aakar total current (I) alag-alag branches (I1, I2) me bant jata hai. Jis branch me R kam hoga, wahan current zyada jayega!</p><p><strong>2. Ghar ki Wiring:</strong> Hamare gharo me Parallel wiring hoti hai taaki ek device band hone par baaki chalte rahein.</p>",
+                        s: "<p><strong>Current Division & Advantages:</strong> Total current I = I1 + I2. Equivalent resistance is LESS than the smallest individual resistance. Used in domestic circuits.</p>",
+                        tip: "Slider se R1 ko 2Ω aur R2 ko 20Ω karein. Dekhiye 2Ω wale raste se zyada electrons (current) guzrenge!",
+                        form: "I_total = I₁ + I₂ + I₃"
+                    }
+                ]
+            },
+            heating: {
+                subs: [{ id: 'filament', label: 'Bulb Filament', icon: 'fa-lightbulb' }, { id: 'fuse', label: 'Electric Fuse', icon: 'fa-plug' }],
+                params: { p1: { label: 'Battery Voltage', unit: ' V', min: 0, max: 24, val: 5 }, p2: { label: 'Resistance (Ω)', unit: ' Ω', min: 1, max: 10, val: 5 }, p3: { label: '-', unit: '', min: 1, max: 1, val: 1 } },
+                stages: [
+                    {
+                        t: "Stage 1: Joule's Law of Heating",
+                        h: "<p><strong>1. Current se Garmi:</strong> Jab current kisi wire se guzarta hai, to electrons ki takkaron (Resistance) ki wajah se Electrical Energy <strong>Heat Energy</strong> me badal jati hai.</p>",
+                        s: "<p><strong>Joule's Law:</strong> Heat produced in a resistor is (i) directly proportional to square of current (I²), (ii) resistance (R), and (iii) time (t).</p>",
+                        tip: "Voltage slider badhayein! Current badhne se I² ke hisaab se Heat bahot tezi se badhegi.",
+                        form: "H = I²Rt"
+                    },
+                    {
+                        t: "Stage 2: Electric Bulb (Filament)",
+                        h: "<p><strong>1. Tungsten Filament:</strong> Bulb ke andar patla Tungsten ka wire hota hai. Iska Resistance bahut high hota hai.</p><p><strong>2. White Hot:</strong> Jab isme current jata hai, to ye itna garm ho jata hai (approx 3380°C) ki heat ke sath <strong>Light</strong> bhi dene lagta hai!</p>",
+                        s: "<p><strong>Incandescent Bulb:</strong> Tungsten is used because it has a high melting point (3380°C). It retains most of the heat generated to become very hot and emit light.</p>",
+                        tip: "Voltage ko dheere-dheere badhayein. Filament pehle Red, phir Yellow, aur phir White glow karega!",
+                        form: "Electrical Energy → Heat + Light"
+                    },
+                    {
+                        t: "Stage 3: Why Inert Gases?",
+                        h: "<p><strong>1. Argon / Nitrogen:</strong> Agar bulb me oxygen hoti, to itni garmi me Tungsten jal kar raakh (oxidize) ho jata!</p><p><strong>2. Protection:</strong> Isliye bulb ke andar Argon ya Nitrogen jaisi unreactive gases bhari jati hain.</p>",
+                        s: "<p><strong>Inert Environment:</strong> Bulbs are filled with chemically inactive nitrogen and argon gases to prolong the life of the filament and prevent oxidation.</p>",
+                        tip: "NCERT Concept: Ye gases filament ki heat ko bahar nikalne nahi deti aur use jalne se bachati hain.",
+                        form: "Tungsten + O₂ (at high temp) → Burns (Oxidation)"
+                    },
+                    {
+                        t: "Stage 4: Electric Fuse (Safety Device)",
+                        h: "<p><strong>1. Circuit ka Chowkidar:</strong> Fuse ek patla wire hota hai (Lead/Tin alloy) jiska melting point low hota hai.</p><p><strong>2. Overloading:</strong> Jab circuit me achanak limit se zyada Current aa jata hai (jaise short circuit), to H=I²Rt ke karan Fuse wire <strong>pighal (melt)</strong> jata hai aur connection toot jata hai!</p>",
+                        s: "<p><strong>Electric Fuse:</strong> Protects circuits and appliances by stopping the flow of any unduly high electric current. Placed in series.</p>",
+                        tip: "Sub-topics se 'Electric Fuse' chunein. Voltage slider ko achanak max (24V) par karein—dekhiye Fuse kaise udata hai!",
+                        form: "If I > Safe Limit → Fuse Melts → Circuit Breaks"
+                    },
+                    {
+                        t: "Stage 5: Electric Power (P)",
+                        h: "<p><strong>1. Power Kya Hai?</strong> Kis speed se Electrical Energy consume (kharach) ho rahi hai, use Electric Power kehte hain.</p>",
+                        s: "<p><strong>Electric Power:</strong> The rate at which electric energy is dissipated or consumed in an electric circuit. P = VI.</p>",
+                        tip: "Bulb ka brightness Power (P) par depend karta hai, sirf Voltage ya Current par nahi.",
+                        form: "P = VI = I²R = V²/R  (Unit: Watt)"
+                    },
+                    {
+                        t: "Stage 6: Commercial Unit of Energy (kWh)",
+                        h: "<p><strong>1. Bijli ka Bill:</strong> Humare gharo me bijli ka bill 'Units' me aata hai. 1 Unit ka matlab <strong>1 kiloWatt-hour (kWh)</strong> hota hai.</p><p><strong>2. Value:</strong> 1 kWh = 3.6 × 10⁶ Joules.</p>",
+                        s: "<p><strong>Commercial Energy:</strong> Watt is a small unit. We use kilowatt (1000 W). Electrical energy = Power × time. Unit is kWh.</p>",
+                        tip: "Agar 1000W ki Iron (Press) 1 ghante chalegi, to exact 1 Unit bijli kharch hogi!",
+                        form: "1 kWh = 1000 W × 3600 s = 3.6 × 10⁶ J"
+                    }
+                ]
+            }
+        };
+
+        // --- THREE.JS SETUP ---
+        const container = document.getElementById('canvas-container');
+        const labelsContainer = document.getElementById('labels-container');
+        const scene = new THREE.Scene();
+        scene.fog = new THREE.FogExp2(0x050a15, 0.015);
+        const camera = new THREE.PerspectiveCamera(45, window.innerWidth / window.innerHeight, 0.1, 1000);
+        const renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true });
+        renderer.setSize(window.innerWidth, window.innerHeight);
+        renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+        container.appendChild(renderer.domElement);
+
+        const ambientLight = new THREE.AmbientLight(0xffffff, 0.4);
+        scene.add(ambientLight);
+        const mainLight = new THREE.DirectionalLight(0xffffff, 1);
+        mainLight.position.set(10, 20, 10);
+        scene.add(mainLight);
+        const bulbLight = new THREE.PointLight(0xffaa00, 0, 50); // Used for heating/bulb
+        scene.add(bulbLight);
+
+        // Orbit Controller Setup
+        const camCtrl = { theta: 0.4, phi: 1.2, radius: 25, target: new THREE.Vector3(0, 0, 0), isDragging: false, prevX: 0, prevY: 0 };
+
+        function updateCamera() {
+            camCtrl.phi = Math.max(0.1, Math.min(Math.PI - 0.1, camCtrl.phi));
+            camCtrl.radius = Math.max(10, Math.min(60, camCtrl.radius));
+            camera.position.x = camCtrl.target.x + camCtrl.radius * Math.sin(camCtrl.phi) * Math.sin(camCtrl.theta);
+            camera.position.y = camCtrl.target.y + camCtrl.radius * Math.cos(camCtrl.phi);
+            camera.position.z = camCtrl.target.z + camCtrl.radius * Math.sin(camCtrl.phi) * Math.cos(camCtrl.theta);
+            camera.lookAt(camCtrl.target);
+        }
+        updateCamera();
+        function zoomCamera(delta) { camCtrl.radius += delta; updateCamera(); }
+
+        // Interaction
+        renderer.domElement.addEventListener('mousedown', e => { camCtrl.isDragging = true; camCtrl.prevX = e.clientX; camCtrl.prevY = e.clientY; });
+        window.addEventListener('mousemove', e => {
+            if (!camCtrl.isDragging) return;
+            camCtrl.theta -= (e.clientX - camCtrl.prevX) * 0.01;
+            camCtrl.phi -= (e.clientY - camCtrl.prevY) * 0.01;
+            camCtrl.prevX = e.clientX; camCtrl.prevY = e.clientY;
+            updateCamera();
+        });
+        window.addEventListener('mouseup', () => { camCtrl.isDragging = false; });
+        renderer.domElement.addEventListener('wheel', e => { camCtrl.radius += e.deltaY * 0.02; updateCamera(); }, {passive: true});
+
+        // Touch
+        renderer.domElement.addEventListener('touchstart', e => { if (e.touches.length === 1) { camCtrl.isDragging = true; camCtrl.prevX = e.touches[0].clientX; camCtrl.prevY = e.touches[0].clientY; }});
+        renderer.domElement.addEventListener('touchmove', e => {
+            if (camCtrl.isDragging && e.touches.length === 1) {
+                camCtrl.theta -= (e.touches[0].clientX - camCtrl.prevX) * 0.01;
+                camCtrl.phi -= (e.touches[0].clientY - camCtrl.prevY) * 0.01;
+                camCtrl.prevX = e.touches[0].clientX; camCtrl.prevY = e.touches[0].clientY;
+                updateCamera();
+            }
+        });
+        renderer.domElement.addEventListener('touchend', () => { camCtrl.isDragging = false; });
+
+
+        // Materials
+        const mats = {
+            wireGlass: new THREE.MeshPhysicalMaterial({ color: 0xffffff, transparent: true, opacity: 0.15, roughness: 0.1, transmission: 0.9, metalness: 0.2 }),
+            wireSolid: new THREE.MeshStandardMaterial({ color: 0x94a3b8, roughness: 0.6, metalness: 0.8 }),
+            electron: new THREE.MeshStandardMaterial({ color: 0x3b82f6, emissive: 0x2563eb, emissiveIntensity: 1 }),
+            latticeIon: new THREE.MeshStandardMaterial({ color: 0xef4444, roughness: 0.4 }),
+            resistorBody: new THREE.MeshStandardMaterial({ color: 0xcdb4db, roughness: 0.8 }),
+            resistorBand1: new THREE.MeshStandardMaterial({ color: 0xef4444 }),
+            resistorBand2: new THREE.MeshStandardMaterial({ color: 0x000000 }),
+            filamentGlow: new THREE.MeshBasicMaterial({ color: 0xffaa00 }),
+            filamentCold: new THREE.MeshStandardMaterial({ color: 0x555555, roughness: 0.8, metalness: 0.8 }),
+            batteryBody: new THREE.MeshStandardMaterial({ color: 0x1e293b }),
+            batteryPos: new THREE.MeshStandardMaterial({ color: 0xef4444 }),
+            batteryNeg: new THREE.MeshStandardMaterial({ color: 0x3b82f6 }),
+            glassBulb: new THREE.MeshPhysicalMaterial({ color: 0xffffff, transparent: true, opacity: 0.2, transmission: 1, roughness: 0 })
+        };
+
+        const rootGroup = new THREE.Group();
+        scene.add(rootGroup);
+        let sceneObjects = { electrons: [], ions: [], arrows: [], bulbs: [], filament: null, fuse: null };
+
+        function clearScene() {
+            while(rootGroup.children.length > 0){ 
+                rootGroup.remove(rootGroup.children[0]); 
+            }
+            sceneObjects = { electrons: [], ions: [], arrows: [], bulbs: [], filament: null, fuse: null };
+            labelsContainer.innerHTML = '';
+            bulbLight.intensity = 0;
+        }
+
+        // Module Builders
+        function buildPotentialModule() {
+            clearScene();
+            camCtrl.radius = 20; updateCamera();
+            
+            if (state.subType === 'battery_view') {
+                buildBatteryScene();
+            } else {
+                buildWireScene(false);
+            }
+        }
+
+        function buildOhmsLawModule() {
+            clearScene();
+            camCtrl.radius = 22; updateCamera();
+            buildWireScene(true);
+        }
+
+        function buildWireScene(isOhmsLaw) {
+            // Thick transparent wire segment
+            const L = state.wireLength * 12;
+            const R = Math.sqrt(state.wireArea) * 1.5;
+            
+            const wireGeo = new THREE.CylinderGeometry(R, R, L, 32);
+            wireGeo.rotateZ(Math.PI/2);
+            const wire = new THREE.Mesh(wireGeo, mats.wireGlass);
+            rootGroup.add(wire);
+
+            // Connectors
+            const connGeo = new THREE.CylinderGeometry(R*0.8, R*0.8, 1, 16);
+            connGeo.rotateZ(Math.PI/2);
+            const c1 = new THREE.Mesh(connGeo, mats.wireSolid); c1.position.x = -L/2 - 0.5; rootGroup.add(c1);
+            const c2 = new THREE.Mesh(connGeo, mats.wireSolid); c2.position.x = L/2 + 0.5; rootGroup.add(c2);
+
+            // Lattice Ions (vibrating atoms)
+            const numIons = Math.floor(L * R * 2);
+            for(let i=0; i<numIons; i++){
+                const ion = new THREE.Mesh(new THREE.SphereGeometry(0.3, 16, 16), mats.latticeIon);
+                const x = (Math.random() - 0.5) * (L - 1);
+                const r = Math.random() * (R - 0.4);
+                const theta = Math.random() * Math.PI * 2;
+                ion.position.set(x, r*Math.cos(theta), r*Math.sin(theta));
+                ion.userData.basePos = ion.position.clone();
+                ion.userData.phase = Math.random() * 10;
+                rootGroup.add(ion);
+                sceneObjects.ions.push(ion);
+            }
+
+            // Free Electrons
+            const numE = Math.floor(L * R * 4);
+            for(let i=0; i<numE; i++){
+                const e = new THREE.Mesh(new THREE.SphereGeometry(0.12, 12, 12), mats.electron);
+                const x = (Math.random() - 0.5) * L;
+                const r = Math.random() * (R - 0.2);
+                const theta = Math.random() * Math.PI * 2;
+                e.position.set(x, r*Math.cos(theta), r*Math.sin(theta));
+                e.userData.baseY = e.position.y;
+                e.userData.baseZ = e.position.z;
+                e.userData.randomVel = new THREE.Vector3(Math.random()-0.5, Math.random()-0.5, Math.random()-0.5).multiplyScalar(0.2);
+                rootGroup.add(e);
+                sceneObjects.electrons.push(e);
+            }
+
+            addLabel(-L/2, R+1, 0, "➖ Negative End (High Electron Concentration)");
+            addLabel(L/2, R+1, 0, "➕ Positive End");
+            addLabel(0, 0, R+0.5, isOhmsLaw ? "🔴 Lattice Ion (Causes Resistance)" : "🔵 Free Electron");
+        }
+
+        function buildBatteryScene() {
+            // Simplified Battery 3D model
+            const bGrp = new THREE.Group();
+            
+            const body = new THREE.Mesh(new THREE.CylinderGeometry(2, 2, 6, 32), mats.batteryBody);
+            bGrp.add(body);
+            
+            const posTerm = new THREE.Mesh(new THREE.CylinderGeometry(0.8, 0.8, 0.5, 16), mats.batteryPos);
+            posTerm.position.y = 3.25;
+            bGrp.add(posTerm);
+
+            const negTerm = new THREE.Mesh(new THREE.CylinderGeometry(2, 2, 0.5, 32), mats.batteryNeg);
+            negTerm.position.y = -3.25;
+            bGrp.add(negTerm);
+
+            bGrp.rotation.z = Math.PI / 2;
+            bGrp.position.y = -2;
+            rootGroup.add(bGrp);
+
+            // Wires connecting
+            const w1 = new THREE.Mesh(new THREE.CylinderGeometry(0.2, 0.2, 4, 8), mats.wireSolid);
+            w1.position.set(-3.5, 0, 0); rootGroup.add(w1);
+            const w2 = new THREE.Mesh(new THREE.CylinderGeometry(0.2, 0.2, 4, 8), mats.wireSolid);
+            w2.position.set(3.5, 0, 0); rootGroup.add(w2);
+            
+            const rGrp = new THREE.Mesh(new THREE.CylinderGeometry(1, 1, 4, 16), mats.resistorBody);
+            rGrp.rotation.z = Math.PI / 2;
+            rGrp.position.y = 2;
+            rootGroup.add(rGrp);
+            
+            // Electrons flowing in circle
+            for(let i=0; i<30; i++) {
+                const e = new THREE.Mesh(new THREE.SphereGeometry(0.15, 12,12), mats.electron);
+                e.userData.progress = i/30;
+                rootGroup.add(e);
+                sceneObjects.electrons.push(e);
+            }
+
+            addLabel(0, -2, 2, "🔋 Battery (Potential Difference Source)");
+            addLabel(0, 2, 1.5, "Resistor / Load");
+        }
+
+        function buildCircuitsModule() {
+            clearScene();
+            camCtrl.radius = 28; updateCamera();
+            const isPar = state.subType === 'parallel';
+
+            // Battery at bottom
+            const bat = new THREE.Mesh(new THREE.BoxGeometry(6, 2, 2), mats.batteryBody);
+            bat.position.y = -6;
+            rootGroup.add(bat);
+            addLabel(0, -6, 1.5, "12V Battery");
+
+            // Build path
+            if(!isPar) {
+                // Series
+                createLineWire(-6, -6, -6, 2);
+                createLineWire(-6, 2, -2, 2);
+                createResistor(-2, 2, "R1");
+                createLineWire(2, 2, 6, 2);
+                createLineWire(6, 2, 6, -6);
+                createResistor(6, -2, "R2", true); // Vertical
+                
+                initCircuitElectrons(seriesPath, 40);
+            } else {
+                // Parallel
+                createLineWire(-6, -6, -6, 4);
+                createLineWire(6, -6, 6, 4);
+                
+                // Branch 1
+                createLineWire(-6, 0, -3, 0);
+                createResistor(0, 0, "R1 (Branch 1)");
+                createLineWire(3, 0, 6, 0);
+                
+                // Branch 2
+                createLineWire(-6, 4, -3, 4);
+                createResistor(0, 4, "R2 (Branch 2)");
+                createLineWire(3, 4, 6, 4);
+
+                initCircuitElectrons(parallelPath, 60);
+            }
+        }
+
+        function createLineWire(x1, y1, x2, y2) {
+            const dir = new THREE.Vector3(x2-x1, y2-y1, 0);
+            const len = dir.length();
+            const mesh = new THREE.Mesh(new THREE.CylinderGeometry(0.15, 0.15, len, 8), mats.wireSolid);
+            mesh.position.set((x1+x2)/2, (y1+y2)/2, 0);
+            mesh.quaternion.setFromUnitVectors(new THREE.Vector3(0,1,0), dir.normalize());
+            rootGroup.add(mesh);
+        }
+        
+        function createResistor(x, y, label, isVertical=false) {
+            const grp = new THREE.Group();
+            const body = new THREE.Mesh(new THREE.CylinderGeometry(0.8, 0.8, 2.5, 16), mats.resistorBody);
+            grp.add(body);
+            const b1 = new THREE.Mesh(new THREE.CylinderGeometry(0.82, 0.82, 0.2, 16), mats.resistorBand1);
+            b1.position.y = 0.5; grp.add(b1);
+            const b2 = new THREE.Mesh(new THREE.CylinderGeometry(0.82, 0.82, 0.2, 16), mats.resistorBand2);
+            b2.position.y = -0.5; grp.add(b2);
+            
+            if(!isVertical) grp.rotation.z = Math.PI/2;
+            grp.position.set(x, y, 0);
+            rootGroup.add(grp);
+            addLabel(x, y + 1.2, 0, label);
+        }
+
+        const seriesPath = [ [-3, -6], [-6,-6], [-6,2], [6,2], [6,-6], [3,-6] ];
+        const parallelPath = {
+            mainIn: [[-3,-6], [-6,-6]],
+            branch1: [[-6,-6], [-6,0], [6,0], [6,-6]],
+            branch2: [[-6,-6], [-6,4], [6,4], [6,-6]],
+            mainOut: [[6,-6], [3,-6]]
+        };
+
+        function initCircuitElectrons(path, count) {
+            sceneObjects.path = path;
+            for(let i=0; i<count; i++){
+                const e = new THREE.Mesh(new THREE.SphereGeometry(0.2, 8,8), mats.electron);
+                e.userData.progress = i/count;
+                if(state.subType === 'parallel') {
+                    e.userData.branch = Math.random() > 0.5 ? 'branch1' : 'branch2';
+                }
+                rootGroup.add(e);
+                sceneObjects.electrons.push(e);
+            }
+        }
+
+        function getPathPos(pathArr, t) {
+            const segs = pathArr.length - 1;
+            const scaledT = t * segs;
+            const idx = Math.floor(scaledT);
+            const f = scaledT - idx;
+            if(idx >= segs) return new THREE.Vector3(pathArr[segs][0], pathArr[segs][1], 0);
+            const p1 = pathArr[idx];
+            const p2 = pathArr[idx+1];
+            return new THREE.Vector3(
+                p1[0] + (p2[0]-p1[0])*f,
+                p1[1] + (p2[1]-p1[1])*f,
+                0
+            );
+        }
+
+
+        function buildHeatingModule() {
+            clearScene();
+            camCtrl.radius = 18; updateCamera();
+            
+            if(state.subType === 'filament') {
+                // Tungsten Coil
+                class CustomCoilCurve extends THREE.Curve {
+                    getPoint(t, optionalTarget = new THREE.Vector3()) {
+                        const turns = 15;
+                        const x = (t - 0.5) * 12;
+                        const y = Math.sin(t * Math.PI * 2 * turns) * 1.5;
+                        const z = Math.cos(t * Math.PI * 2 * turns) * 1.5;
+                        return optionalTarget.set(x, y, z);
+                    }
+                }
+                const path = new CustomCoilCurve();
+                const geo = new THREE.TubeGeometry(path, 200, 0.15, 8, false);
+                const fil = new THREE.Mesh(geo, mats.filamentCold);
+                rootGroup.add(fil);
+                sceneObjects.filament = fil;
+
+                // Bulb Glass
+                const bGeo = new THREE.SphereGeometry(7, 32, 32);
+                const bulb = new THREE.Mesh(bGeo, mats.glassBulb);
+                rootGroup.add(bulb);
+
+                addLabel(0, 7.5, 0, "💡 Inert Gas (Argon) filled Bulb");
+                addLabel(0, -2, 2, "High Resistance Tungsten Filament");
+                
+                bulbLight.position.set(0,0,0);
+            } else {
+                // Fuse
+                const fGrp = new THREE.Group();
+                const glass = new THREE.Mesh(new THREE.CylinderGeometry(1.5, 1.5, 8, 32), mats.glassBulb);
+                glass.rotation.z = Math.PI/2;
+                fGrp.add(glass);
+                
+                const capGeo = new THREE.CylinderGeometry(1.55, 1.55, 1.5, 32);
+                capGeo.rotateZ(Math.PI/2);
+                const c1 = new THREE.Mesh(capGeo, mats.wireSolid); c1.position.x = -3.5; fGrp.add(c1);
+                const c2 = new THREE.Mesh(capGeo, mats.wireSolid); c2.position.x = 3.5; fGrp.add(c2);
+                
+                const fuseWire = new THREE.Mesh(new THREE.CylinderGeometry(0.1, 0.1, 7, 8), mats.filamentCold);
+                fuseWire.rotation.z = Math.PI/2;
+                fGrp.add(fuseWire);
+                sceneObjects.fuse = fuseWire;
+                sceneObjects.fuseParticles = [];
+
+                rootGroup.add(fGrp);
+                addLabel(0, 2, 0, "🔌 Glass Cartridge Fuse");
+                addLabel(0, -0.5, 0, "Low Melting Point Alloy Wire");
+            }
+        }
+
+        function addLabel(x, y, z, text) {
+            const el = document.createElement('div');
+            el.className = 'label-3d';
+            el.innerHTML = text;
+            labelsContainer.appendChild(el);
+            sceneObjects.arrows.push({ el, pos: new THREE.Vector3(x,y,z) });
+        }
+
+        // Animation Loop Logic
+        const clock = new THREE.Clock();
+
+        function animate() {
+            requestAnimationFrame(animate);
+            const dt = clock.getDelta();
+            const time = clock.getElapsedTime();
+
+            if (state.isPlaying) {
+                // Logic based on module
+                const V = state.voltage;
+                
+                if (state.currentModule === 'potential' || state.currentModule === 'ohmslaw') {
+                    // Update Wire L and A
+                    if (sceneObjects.electrons.length > 0 && !sceneObjects.path) {
+                        const L = state.wireLength * 12;
+                        const R = Math.sqrt(state.wireArea) * 1.5;
+                        rootGroup.children[0].scale.set(Math.sqrt(state.wireArea), 1, state.wireLength);
+                        
+                        // Current Calculation (Ohm's Law)
+                        state.resistanceR = (state.wireLength / state.wireArea) * 10;
+                        state.currentI = V / state.resistanceR;
+
+                        const driftSpeed = state.currentI * 1.5; // Visual speed
+
+                        sceneObjects.electrons.forEach(e => {
+                            // Drift
+                            e.position.x += driftSpeed * dt;
+                            // Random thermal motion
+                            e.position.addScaledVector(e.userData.randomVel, (1 - V/24) * 0.5);
+                            
+                            // Bounds check
+                            if(e.position.x > L/2) e.position.x = -L/2;
+                            if(e.position.x < -L/2) e.position.x = L/2;
+                            
+                            // Area bounds
+                            const rSq = e.position.y*e.position.y + e.position.z*e.position.z;
+                            if(rSq > R*R) {
+                                e.position.y *= 0.9;
+                                e.position.z *= 0.9;
+                            }
+                        });
+
+                        // Ion vibration
+                        const tempVib = 0.05 + (state.currentI * 0.02);
+                        sceneObjects.ions.forEach(ion => {
+                            ion.position.x = ion.userData.basePos.x + Math.sin(time*20 + ion.userData.phase) * tempVib;
+                            ion.position.y = ion.userData.basePos.y + Math.cos(time*23 + ion.userData.phase) * tempVib;
+                        });
+                    }
+
+                    if(state.subType === 'battery_view') {
+                        state.currentI = V / 5;
+                        const speed = state.currentI * 0.5;
+                        sceneObjects.electrons.forEach((e, i) => {
+                            e.userData.progress = (e.userData.progress + speed * dt) % 1.0;
+                            // Rectangle path
+                            const p = e.userData.progress;
+                            if(p < 0.25) e.position.set(-3.5, -2 + (p/0.25)*4, 0);
+                            else if(p < 0.5) e.position.set(-3.5 + ((p-0.25)/0.25)*7, 2, 0);
+                            else if(p < 0.75) e.position.set(3.5, 2 - ((p-0.5)/0.25)*4, 0);
+                            else e.position.set(3.5 - ((p-0.75)/0.25)*7, -2, 0);
+                        });
+                    }
+                }
+                
+                else if (state.currentModule === 'circuits') {
+                    let R_eq = 1;
+                    const r1 = parseFloat(document.getElementById('slider-param2').value);
+                    const r2 = parseFloat(document.getElementById('slider-param3').value);
+                    
+                    if(state.subType === 'series') {
+                        R_eq = r1 + r2;
+                        state.currentI = V / R_eq;
+                        sceneObjects.electrons.forEach(e => {
+                            e.userData.progress = (e.userData.progress + state.currentI * 0.2 * dt) % 1.0;
+                            e.position.copy(getPathPos(sceneObjects.path, e.userData.progress));
+                        });
+                    } else {
+                        R_eq = 1 / (1/r1 + 1/r2);
+                        state.currentI = V / R_eq;
+                        
+                        const i1 = V / r1;
+                        const i2 = V / r2;
+                        
+                        sceneObjects.electrons.forEach(e => {
+                            const speed = e.userData.branch === 'branch1' ? i1*0.2 : i2*0.2;
+                            e.userData.progress = (e.userData.progress + speed * dt);
+                            if(e.userData.progress > 1.0) {
+                                e.userData.progress = 0;
+                                // Re-assign branch based on current ratio
+                                e.userData.branch = Math.random() < (i1/(i1+i2)) ? 'branch1' : 'branch2';
+                            }
+                            const pathArr = sceneObjects.path[e.userData.branch];
+                            e.position.copy(getPathPos(pathArr, e.userData.progress));
+                        });
+                    }
+                }
+
+                else if (state.currentModule === 'heating') {
+                    const R = parseFloat(document.getElementById('slider-param2').value);
+                    state.currentI = V / R;
+                    const Power = V * state.currentI; // Heat ~ Power
+
+                    if (state.subType === 'filament' && sceneObjects.filament) {
+                        // Color lerp based on power
+                        const maxP = (24 * 24) / 1; // max possible
+                        const ratio = Math.min(1, Power / (maxP * 0.2)); // scales fast
+                        
+                        const cold = new THREE.Color(0x222222);
+                        const hot = new THREE.Color(0xffffff);
+                        if(ratio > 0.1) hot.setHex(0xff0000);
+                        if(ratio > 0.4) hot.setHex(0xffaa00);
+                        if(ratio > 0.8) hot.setHex(0xffffff);
+
+                        sceneObjects.filament.material = ratio > 0.05 ? mats.filamentGlow : mats.filamentCold;
+                        if(ratio > 0.05) {
+                            sceneObjects.filament.material.color.lerpColors(cold, hot, ratio);
+                        }
+                        
+                        bulbLight.intensity = ratio * 2;
+                        bulbLight.color.copy(hot);
+                    }
+                    
+                    if (state.subType === 'fuse' && sceneObjects.fuse) {
+                        const maxSafeI = 15; // Amp
+                        if (state.currentI > maxSafeI && sceneObjects.fuse.visible) {
+                            // Blow fuse!
+                            sceneObjects.fuse.visible = false;
+                            state.currentI = 0;
+                            // Create particles
+                            for(let k=0; k<20; k++) {
+                                const p = new THREE.Mesh(new THREE.SphereGeometry(0.1, 4, 4), mats.filamentGlow);
+                                p.position.set((Math.random()-0.5)*6, 0, (Math.random()-0.5)*1);
+                                p.userData.v = new THREE.Vector3((Math.random()-0.5)*5, Math.random()*5, (Math.random()-0.5)*5);
+                                rootGroup.add(p);
+                                sceneObjects.fuseParticles.push(p);
+                            }
+                        } else if (state.currentI <= maxSafeI && !sceneObjects.fuse.visible && V < 1) {
+                            // Reset when voltage drops
+                            sceneObjects.fuse.visible = true;
+                            sceneObjects.fuseParticles.forEach(p => rootGroup.remove(p));
+                            sceneObjects.fuseParticles = [];
+                        }
+                        
+                        // Animate particles
+                        sceneObjects.fuseParticles.forEach(p => {
+                            p.position.addScaledVector(p.userData.v, dt);
+                            p.userData.v.y -= 9.8 * dt; // Gravity
+                        });
+                    }
+                }
+
+                updateMeters();
+            }
+
+            // Update Labels
+            const halfW = window.innerWidth / 2;
+            const halfH = window.innerHeight / 2;
+            sceneObjects.arrows.forEach(lbl => {
+                const p = lbl.pos.clone().project(camera);
+                if (p.z > 1) { lbl.el.style.opacity = '0'; return; }
+                lbl.el.style.opacity = '1';
+                lbl.el.style.left = `${(p.x * halfW) + halfW}px`;
+                lbl.el.style.top = `${-(p.y * halfH) + halfH}px`;
+            });
+
+            renderer.render(scene, camera);
+        }
+
+        function updateMeters() {
+            if(!state.isPlaying) return;
+            // Introduce slight measurement noise for realism
+            let dispV = state.voltage;
+            let dispI = state.currentI;
+            
+            if(state.subType === 'fuse' && !sceneObjects.fuse?.visible) {
+                dispI = 0; // Broken circuit
+            }
+
+            const noiseV = dispV > 0 ? (Math.random()-0.5)*0.1 : 0;
+            const noiseI = dispI > 0 ? (Math.random()-0.5)*0.02 : 0;
+            
+            document.getElementById('meter-v').textContent = (dispV + noiseV).toFixed(1) + ' V';
+            document.getElementById('meter-i').textContent = (dispI + noiseI).toFixed(2) + ' A';
+        }
+
+        // --- UI LOGIC ---
+        function updateParameters() {
+            state.voltage = parseFloat(document.getElementById('slider-param1').value);
+            state.wireLength = parseFloat(document.getElementById('slider-param2').value);
+            state.wireArea = parseFloat(document.getElementById('slider-param3').value);
+
+            document.getElementById('param1-val').textContent = state.voltage + ' V';
+            document.getElementById('param2-val').textContent = state.wireLength + (state.currentModule==='circuits' ? ' Ω' : 'x');
+            document.getElementById('param3-val').textContent = state.wireArea + (state.currentModule==='circuits' ? ' Ω' : 'x');
+        }
+
+        function switchModule(modName) {
+            state.currentModule = modName;
+            state.stage = 0;
+            state.voltage = 0; // Reset voltage for safety
+            
+            document.querySelectorAll('.module-tab').forEach(btn => {
+                btn.classList.remove('tab-active');
+                btn.classList.add('text-slate-300');
+            });
+            document.getElementById(`tab-${modName}`).classList.add('tab-active');
+            document.getElementById(`tab-${modName}`).classList.remove('text-slate-300');
+
+            const mData = eduData[modName];
+            state.subType = mData.subs[0].id;
+            
+            // Build Sub-selector
+            const subPanel = document.getElementById('sub-selector-buttons');
+            subPanel.innerHTML = '';
+            mData.subs.forEach(sub => {
+                const b = document.createElement('button');
+                b.className = `px-2.5 py-1.5 rounded-lg text-[11px] font-bold transition flex items-center justify-center gap-1.5 border ${state.subType===sub.id ? 'bg-yellow-500/25 text-yellow-200 border-yellow-400' : 'bg-slate-800/80 text-slate-300 border-slate-700 hover:bg-slate-700'}`;
+                b.innerHTML = `<i class="fa-solid ${sub.icon}"></i><span class="truncate">${sub.label}</span>`;
+                b.onclick = () => { state.subType = sub.id; switchModule(modName); };
+                subPanel.appendChild(b);
+            });
+
+            // Update Sliders Setup
+            const p = mData.params;
+            const s1 = document.getElementById('slider-param1'); s1.min=p.p1.min; s1.max=p.p1.max; s1.value=p.p1.val; document.getElementById('param1-label').textContent=p.p1.label;
+            const s2 = document.getElementById('slider-param2'); s2.min=p.p2.min; s2.max=p.p2.max; s2.value=p.p2.val; document.getElementById('param2-label').textContent=p.p2.label;
+            const s3 = document.getElementById('slider-param3'); s3.min=p.p3.min; s3.max=p.p3.max; s3.value=p.p3.val; document.getElementById('param3-label').textContent=p.p3.label;
+            
+            // Hide unused sliders
+            s2.parentElement.style.display = p.p2.label === '-' ? 'none' : 'block';
+            s3.parentElement.style.display = p.p3.label === '-' ? 'none' : 'block';
+
+            updateParameters();
+            
+            if(modName === 'potential') buildPotentialModule();
+            else if(modName === 'ohmslaw') buildOhmsLawModule();
+            else if(modName === 'circuits') buildCircuitsModule();
+            else if(modName === 'heating') buildHeatingModule();
+
+            updateStageUI();
+        }
+
+        function updateStageUI() {
+            const stObj = eduData[state.currentModule].stages[state.stage];
+            document.getElementById('step-badge').textContent = `STAGE ${state.stage + 1} OF 6`;
+            document.getElementById('progress-percent').textContent = `Stage ${state.stage + 1} / 6`;
+            document.getElementById('stage-title').textContent = stObj.t;
+            document.getElementById('stage-description').innerHTML = state.eduMode ? stObj.h : stObj.s;
+            document.getElementById('exam-tip-text').textContent = stObj.tip;
+            document.getElementById('live-formula-box').textContent = stObj.form;
+
+            document.querySelectorAll('.stage-btn').forEach((dot, idx) => {
+                if (idx === state.stage) dot.className = 'stage-btn h-2.5 rounded-full step-dot-active transition-all';
+                else if (idx < state.stage) dot.className = 'stage-btn h-2.5 rounded-full bg-yellow-600/70 transition-all';
+                else dot.className = 'stage-btn h-2.5 rounded-full bg-slate-700 transition-all';
+            });
+        }
+
+        function setStage(idx) { state.stage = Math.max(0, Math.min(5, idx)); updateStageUI(); }
+        function nextStep() { setStage((state.stage + 1) % 6); }
+        function prevStep() { setStage((state.stage + 5) % 6); }
+        function togglePlayPause() { state.isPlaying = !state.isPlaying; document.getElementById('icon-play').className = state.isPlaying ? 'fa-solid fa-pause text-sm' : 'fa-solid fa-play text-sm'; }
+        
+        function toggleEduMode() {
+            state.eduMode = !state.eduMode;
+            const btn = document.getElementById('btn-edu-mode');
+            if (state.eduMode) {
+                document.getElementById('edu-mode-label').textContent = 'Hinglish Mode: ON';
+                btn.className = 'px-3 py-1.5 rounded-lg text-xs font-bold border transition flex items-center gap-1.5 bg-amber-500/20 border-amber-400/50 text-amber-300';
+            } else {
+                document.getElementById('edu-mode-label').textContent = 'Scientific Mode: ON';
+                btn.className = 'px-3 py-1.5 rounded-lg text-xs font-bold border transition flex items-center gap-1.5 bg-sky-500/20 border-sky-400/50 text-sky-300';
+            }
+            updateStageUI();
+        }
+
+        window.addEventListener('resize', () => {
+            camera.aspect = window.innerWidth / window.innerHeight;
+            camera.updateProjectionMatrix();
+            renderer.setSize(window.innerWidth, window.innerHeight);
+        });
+
+        window.onload = () => {
+            switchModule('potential');
+            animate();
+        };
+    </script>
+</body>
+</html>

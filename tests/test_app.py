@@ -20,6 +20,7 @@ class WorkspaceTests(unittest.TestCase):
             module.DIRECTORY_REL: {'notice':'Test notice','categories':[]},
             module.EDUHELP_REL: {'updated':'2026-11-14','notice':'Verify official dates.','updates':[
                 {'id':'exam','title':'Exam notice','category':'Exam','summary':'Check the official date.','link':'https://example.com/notice','date':'2026-11-14','pinned':True,'enabled':True},
+                {'id':'lab','title':'Physics lab','category':'Physics','summary':'Interactive 3D lab.','link':'/eduhelp/labs/electricity','date':'2026-11-14','enabled':True},
                 {'id':'hidden','title':'Hidden update','category':'Notice','summary':'Private','date':'2026-11-13','enabled':False}]},
         }
         self.read = patch.object(module,'safe_read',side_effect=lambda path:copy.deepcopy(self.records.get(path)))
@@ -61,7 +62,7 @@ class WorkspaceTests(unittest.TestCase):
         self.assertIn('admin-pro.css?v=3',admin)
         self.assertIn('admin-body',admin)
         self.assertIn('admin-drawer-close',admin)
-        self.assertIn('admin.js?v=5',admin)
+        self.assertIn('admin.js?v=6',admin)
 
     def test_admin_requires_authentication(self):
         self.assertEqual(self.client.get('/admin').status_code,302)
@@ -122,8 +123,26 @@ class WorkspaceTests(unittest.TestCase):
         text = page.get_data(as_text=True)
         self.assertIn('Exam notice', text)
         self.assertIn('Verify official dates.', text)
+        self.assertIn('Physics lab', text)
+        self.assertIn('/eduhelp/labs/electricity', text)
+        self.assertIn('Open interactive lab', text)
         self.assertNotIn('Hidden update', text)
         self.assertIn('/eduhelp', self.client.get('/').get_data(as_text=True))
+
+    def test_eduhelp_labs_serve_with_scoped_csp(self):
+        for slug, marker in (('electricity','3D Physics Lab'), ('carbon-compounds','Carbon')):
+            page = self.client.get(f'/eduhelp/labs/{slug}')
+            self.assertEqual(page.status_code, 200, slug)
+            text = page.get_data(as_text=True)
+            self.assertIn(marker, text)
+            self.assertIn('<script nonce="', text)
+            csp = page.headers['Content-Security-Policy']
+            self.assertIn('cdn.tailwindcss.com', csp)
+            self.assertIn('cdnjs.cloudflare.com', csp)
+            self.assertIn("script-src 'self' 'nonce-", csp)
+            self.assertNotIn("'unsafe-inline'", csp.split('script-src ')[1].split(';')[0])
+            self.assertIn('script-src-attr', csp)
+        self.assertEqual(self.client.get('/eduhelp/labs/unknown').status_code, 404)
 
     def test_eduhelp_save_and_validation(self):
         self.login()
@@ -133,11 +152,16 @@ class WorkspaceTests(unittest.TestCase):
         self.assertEqual(response.status_code, 200, response.json)
         self.assertEqual(self.records[module.EDUHELP_REL]['updates'][0]['id'], 'admission')
         self.assertIn(b'Admission window opens', self.client.get('/eduhelp').data)
+        lab = {'updated':'2026-11-14','updates':[
+            {'id':'lab2','title':'Carbon lab','category':'Chemistry','link':'/eduhelp/labs/carbon-compounds','date':'2026-11-14','enabled':True}]}
+        self.assertEqual(self.request('/api/admin/eduhelp', data=lab).status_code, 200, lab)
         for bad in (
             {'updates': 'bad'},
             {'updates': [{'id':'x','title':'','category':'Exam'}]},
             {'updates': [{'id':'x','title':'T','category':'Sports'}]},
             {'updates': [{'id':'x','title':'T','category':'Exam','link':'javascript:alert(1)'}]},
+            {'updates': [{'id':'x','title':'T','category':'Physics','link':'/admin'}]},
+            {'updates': [{'id':'x','title':'T','category':'Physics','link':'/eduhelp/labs/../admin'}]},
             {'updates': [{'id':'x','title':'T','category':'Exam','date':'14-11-2026'}]},
             {'updates': [{'id':'x','title':'T','category':'Exam','enabled':'false'}]},
             {'updates': [{'id':'x','title':'A','category':'Exam'},{'id':'x','title':'B','category':'Exam'}]},

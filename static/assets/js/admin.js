@@ -1824,6 +1824,8 @@
     "Admission",
     "Scholarship",
     "Notice",
+    "Physics",
+    "Chemistry",
   ];
   const saveEduhelp = async (next) => {
     const result = await mutate("/api/admin/eduhelp", "POST", next);
@@ -1880,7 +1882,7 @@
             ),
           ),
         ),
-        el("td", {}, update.link ? "Official link" : "Notice only"),
+        el("td", {}, update.link ? (update.link.startsWith("/") ? "Lab page" : "Official link") : "Notice only"),
         el("td", {}, pill(enabled)),
         el(
           "td",
@@ -1947,7 +1949,7 @@
           el(
             "p",
             { class: "form-note" },
-            "Education updates shown on /eduhelp. Pinned updates stay on top; every link must be HTTPS.",
+            "Education updates shown on /eduhelp. Pinned updates stay on top; links can be HTTPS URLs or /eduhelp/labs/ pages.",
           ),
           el(
             "div",

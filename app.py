@@ -281,6 +281,20 @@ def eduhelp():
     return render_template('eduhelp.html', updates=updates, categories=categories,
                            notice=data.get('notice', ''), updated=data.get('updated', ''))
 
+@app.get('/eduhelp/labs/<slug>')
+def eduhelp_lab(slug):
+    filename = EDUHELP_LABS.get(slug)
+    if not filename:
+        abort(404)
+    try:
+        with open(os.path.join(BASE_DIR, 'labs', filename), encoding='utf-8') as lab_file:
+            markup = lab_file.read()
+    except OSError:
+        abort(404)
+    nonce = monetization.nonce()
+    markup = re.sub(r'<script(?![^>]*\bsrc=)', f'<script nonce="{nonce}"', markup, flags=re.IGNORECASE)
+    return make_response(markup, 200, {'Content-Type': 'text/html; charset=utf-8'})
+
 @app.route('/api/admin/eduhelp', methods=['GET'])
 @login_required
 def admin_eduhelp():
@@ -455,9 +469,13 @@ DOWNLOADS_REL    = "data/downloads.json"
 DIRECTORY_REL    = "data/directory.json"
 EDUHELP_REL      = "data/eduhelp.json"
 TOOL_CATALOG_REL = "data/tools.catalog.json"
-EDUHELP_CATEGORIES = ('Exam', 'Result', 'Admission', 'Scholarship', 'Notice')
+EDUHELP_CATEGORIES = ('Exam', 'Result', 'Admission', 'Scholarship', 'Notice', 'Physics', 'Chemistry')
 EDUHELP_DATE = re.compile(r'^\d{4}-\d{2}-\d{2}$')
 EDUHELP_ID = re.compile(r'^[A-Za-z0-9_-]{1,60}$')
+EDUHELP_LABS = {
+    'electricity': 'class-10-electricity.html',
+    'carbon-compounds': 'carbon-compounds.html',
+}
 TOOL_BUNDLES = {"text", "media", "network", "misc", "calculators", "dls", "land"}
 TOOL_VENDORS = {"js-yaml", "marked", "fflate", "pdf-lib", "pdfjs", "jspdf", "bcryptjs", "qrcodegen"}
 TOOL_CATEGORY_ICONS = {

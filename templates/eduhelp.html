@@ -64,13 +64,13 @@
         {% if update.date %}<time class="edu-date" datetime="{{ update.date }}">{{ update.date }}</time>{% endif %}
       </div>
       <h3>
-        {% if update.link %}<a href="{{ update.link | public_url }}" target="_blank" rel="noopener noreferrer">{{ update.title }}</a>{% else %}{{ update.title }}{% endif %}
+        {% if update.link %}{% set external = not update.link.startswith('/') %}<a href="{{ update.link | public_url }}"{% if external %} target="_blank" rel="noopener noreferrer"{% endif %}>{{ update.title }}</a>{% else %}{{ update.title }}{% endif %}
         {% if update.pinned %}<span class="edu-pin">Pinned</span>{% endif %}
       </h3>
       {% if update.summary %}<p>{{ update.summary }}</p>{% endif %}
       <div class="edu-card-bottom">
         {% if update.link %}
-        <a class="edu-open" href="{{ update.link | public_url }}" target="_blank" rel="noopener noreferrer">Open official link <span aria-hidden="true">↗</span></a>
+        <a class="edu-open" href="{{ update.link | public_url }}"{% if not update.link.startswith('/') %} target="_blank" rel="noopener noreferrer"{% endif %}>{{ 'Open interactive lab' if update.link.startswith('/') else 'Open official link' }} <span aria-hidden="true">{{ '→' if update.link.startswith('/') else '↗' }}</span></a>
         {% else %}
         <span class="edu-open is-muted">Notice only</span>
         {% endif %}

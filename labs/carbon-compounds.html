@@ -1,0 +1,2182 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Class 10 NCERT 3D Chemistry Lab — Carbon and its Compounds</title>
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Three.js r128 -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+    <!-- Google Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@500;700&display=swap" rel="stylesheet">
+    <!-- Font Awesome Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        * {
+            box-sizing: border-box;
+            user-select: none;
+            -webkit-user-select: none;
+        }
+        body, html {
+            margin: 0;
+            padding: 0;
+            width: 100%;
+            height: 100%;
+            overflow: hidden;
+            font-family: 'Inter', sans-serif;
+            background-color: #070b14;
+            color: #f1f5f9;
+        }
+        #canvas-container {
+            position: absolute;
+            inset: 0;
+            width: 100%;
+            height: 100%;
+            z-index: 1;
+            background: radial-gradient(circle at 50% 45%, #111c35 0%, #070b14 75%);
+        }
+        canvas {
+            display: block;
+            width: 100%;
+            height: 100%;
+            cursor: grab;
+        }
+        canvas:active {
+            cursor: grabbing;
+        }
+        .glass-panel {
+            background: rgba(15, 23, 42, 0.82);
+            backdrop-filter: blur(14px);
+            -webkit-backdrop-filter: blur(14px);
+            border: 1px solid rgba(148, 163, 184, 0.18);
+            box-shadow: 0 12px 32px rgba(0, 0, 0, 0.55);
+        }
+        .glass-pill {
+            background: rgba(30, 41, 59, 0.85);
+            backdrop-filter: blur(8px);
+            border: 1px solid rgba(148, 163, 184, 0.22);
+        }
+        /* 3D Floating Labels */
+        .label-3d {
+            position: absolute;
+            pointer-events: auto;
+            transform: translate(-50%, -100%);
+            background: rgba(15, 23, 42, 0.9);
+            border: 1px solid rgba(56, 189, 248, 0.5);
+            color: #f8fafc;
+            padding: 4px 9px;
+            border-radius: 6px;
+            font-size: 11px;
+            font-weight: 600;
+            white-space: nowrap;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.6);
+            transition: opacity 0.2s, transform 0.15s;
+            cursor: pointer;
+            z-index: 10;
+        }
+        .label-3d:hover {
+            background: rgba(14, 116, 144, 0.95);
+            border-color: #38bdf8;
+            transform: translate(-50%, -105%) scale(1.06);
+        }
+        .label-3d::after {
+            content: '';
+            position: absolute;
+            bottom: -5px;
+            left: 50%;
+            transform: translateX(-50%);
+            border-width: 5px 5px 0;
+            border-style: solid;
+            border-color: rgba(56, 189, 248, 0.6) transparent transparent;
+        }
+        /* Custom Range Sliders */
+        input[type="range"] {
+            -webkit-appearance: none;
+            appearance: none;
+            width: 100%;
+            height: 6px;
+            background: #1e293b;
+            border-radius: 999px;
+            outline: none;
+        }
+        input[type="range"]::-webkit-slider-thumb {
+            -webkit-appearance: none;
+            appearance: none;
+            width: 16px;
+            height: 16px;
+            border-radius: 50%;
+            background: #14b8a6;
+            border: 2px solid #f8fafc;
+            cursor: pointer;
+            box-shadow: 0 0 8px rgba(20, 184, 166, 0.8);
+        }
+        .custom-scroll::-webkit-scrollbar {
+            width: 5px;
+            height: 5px;
+        }
+        .custom-scroll::-webkit-scrollbar-track {
+            background: rgba(15, 23, 42, 0.4);
+        }
+        .custom-scroll::-webkit-scrollbar-thumb {
+            background: rgba(100, 116, 139, 0.5);
+            border-radius: 999px;
+        }
+        .tab-active {
+            background: linear-gradient(135deg, #0d9488 0%, #0284c7 100%);
+            color: #ffffff;
+            border-color: #38bdf8;
+            box-shadow: 0 0 16px rgba(14, 165, 233, 0.4);
+        }
+        .step-dot-active {
+            background: #14b8a6;
+            border-color: #5eead4;
+            box-shadow: 0 0 12px rgba(20, 184, 166, 0.9);
+            transform: scale(1.15);
+        }
+    </style>
+</head>
+<body class="relative w-full h-full select-none">
+
+    <!-- 3D WebGL Canvas Container -->
+    <div id="canvas-container"></div>
+
+    <!-- Floating 3D Annotations Container -->
+    <div id="labels-container" class="absolute inset-0 pointer-events-none overflow-hidden z-10"></div>
+
+    <!-- TOP NAVIGATION & MODULE TABS -->
+    <header class="absolute top-0 left-0 right-0 z-20 p-2.5 md:p-3.5 flex flex-col lg:flex-row items-center justify-between gap-2 pointer-events-none">
+        <!-- Brand & Title -->
+        <div class="glass-panel px-3.5 py-2 rounded-xl flex items-center gap-3 pointer-events-auto w-full lg:w-auto justify-between lg:justify-start">
+            <div class="flex items-center gap-2.5">
+                <div class="w-9 h-9 rounded-lg bg-gradient-to-br from-teal-500 to-sky-600 flex items-center justify-center shadow-lg shadow-teal-500/25">
+                    <i class="fa-solid fa-atom text-white text-lg animate-spin" style="animation-duration: 12s;"></i>
+                </div>
+                <div>
+                    <div class="flex items-center gap-2">
+                        <span class="text-[10px] font-bold uppercase tracking-wider px-2 py-0.5 rounded bg-teal-500/20 text-teal-300 border border-teal-500/30">NCERT Class 10 • Ch 4</span>
+                        <span id="fps-badge" class="hidden sm:inline-block text-[10px] font-mono text-slate-400">3D WebGL Lab</span>
+                    </div>
+                    <h1 class="text-sm md:text-base font-extrabold text-white tracking-tight">Carbon &amp; its Compounds — 3D Interactive Lab</h1>
+                </div>
+            </div>
+
+            <!-- Classroom / Beginner Mode Switch (Mobile visible) -->
+            <button id="btn-edu-mode" onclick="toggleEduMode()" class="px-3 py-1.5 rounded-lg text-xs font-bold border transition flex items-center gap-1.5 bg-amber-500/20 border-amber-400/50 text-amber-300 hover:bg-amber-500/30" title="Switch between Easy Hinglish Classroom Mode and Advanced Scientific Mode">
+                <i class="fa-solid fa-chalkboard-user"></i>
+                <span id="edu-mode-label">Hinglish Classroom Mode: ON</span>
+            </button>
+        </div>
+
+        <!-- 4 Core Chapter Modules -->
+        <nav class="glass-panel p-1.5 rounded-xl flex flex-wrap items-center justify-center gap-1.5 pointer-events-auto w-full lg:w-auto">
+            <button onclick="switchModule('micelle')" id="tab-micelle" class="module-tab tab-active px-3 py-1.5 rounded-lg text-xs font-bold border border-transparent transition flex items-center gap-1.5">
+                <i class="fa-solid fa-soap"></i>
+                <span>1. Soap &amp; Micelle Action</span>
+            </button>
+            <button onclick="switchModule('bonding')" id="tab-bonding" class="module-tab px-3 py-1.5 rounded-lg text-xs font-bold text-slate-300 hover:text-white border border-transparent transition flex items-center gap-1.5">
+                <i class="fa-solid fa-circle-nodes"></i>
+                <span>2. Covalent Bonding</span>
+            </button>
+            <button onclick="switchModule('allotropes')" id="tab-allotropes" class="module-tab px-3 py-1.5 rounded-lg text-xs font-bold text-slate-300 hover:text-white border border-transparent transition flex items-center gap-1.5">
+                <i class="fa-regular fa-gem"></i>
+                <span>3. Allotropes (3D Lattice)</span>
+            </button>
+            <button onclick="switchModule('isomers')" id="tab-isomers" class="module-tab px-3 py-1.5 rounded-lg text-xs font-bold text-slate-300 hover:text-white border border-transparent transition flex items-center gap-1.5">
+                <i class="fa-solid fa-code-branch"></i>
+                <span>4. Isomers &amp; Functional Groups</span>
+            </button>
+        </nav>
+    </header>
+
+    <!-- LEFT PANEL: STEP-BY-STEP EDUCATIONAL GUIDE & SUB-SELECTOR -->
+    <aside class="absolute top-28 md:top-20 left-3 z-20 w-80 md:w-96 max-h-[calc(100vh-175px)] flex flex-col gap-2.5 pointer-events-none">
+        <!-- Sub-Topic / Preset Selector Bar -->
+        <div id="sub-selector-panel" class="glass-panel p-2.5 rounded-xl pointer-events-auto">
+            <div class="text-[11px] font-bold uppercase tracking-wider text-teal-400 mb-1.5 flex items-center justify-between">
+                <span id="sub-selector-title"><i class="fa-solid fa-sliders mr-1"></i> Select Simulation View</span>
+                <span class="text-[10px] text-slate-400 font-normal">Click 3D parts to inspect</span>
+            </div>
+            <div id="sub-selector-buttons" class="grid grid-cols-2 sm:grid-cols-3 gap-1.5">
+                <!-- Populated dynamically per module -->
+            </div>
+        </div>
+
+        <!-- Step-by-Step Storyboard / Teacher Explanation Card -->
+        <div class="glass-panel p-3.5 rounded-xl pointer-events-auto overflow-y-auto custom-scroll flex-1 flex flex-col justify-between">
+            <div>
+                <div class="flex items-center justify-between gap-2 mb-2">
+                    <span id="step-badge" class="px-2.5 py-0.5 rounded-full text-[11px] font-extrabold bg-teal-500/20 text-teal-300 border border-teal-500/40">
+                        STAGE 1 OF 6
+                    </span>
+                    <span id="state-indicator" class="text-[11px] font-mono text-sky-400 font-semibold">
+                        <i class="fa-solid fa-circle-play mr-1"></i>Interactive 3D Process
+                    </span>
+                </div>
+
+                <h2 id="stage-title" class="text-base font-extrabold text-white leading-snug mb-2">
+                    Initial State: Oily Dirt on Cloth Fiber
+                </h2>
+
+                <div id="stage-description" class="text-xs text-slate-200 leading-relaxed space-y-2">
+                    <!-- Dynamic Hinglish / Scientific content -->
+                </div>
+
+                <!-- Teacher's Board Exam Point Callout -->
+                <div id="exam-tip-box" class="mt-3 p-2.5 rounded-lg bg-amber-500/10 border border-amber-500/30 text-amber-200 text-[11px] leading-relaxed">
+                    <div class="font-bold text-amber-300 mb-0.5 flex items-center gap-1">
+                        <i class="fa-solid fa-lightbulb"></i>
+                        <span id="exam-tip-title">Teacher's Classroom Point (Hinglish):</span>
+                    </div>
+                    <p id="exam-tip-text">Students ko dikhayein ki Oil non-polar hai, isliye paani ke molecules (blue spheres) oil ko touch karke bhaag rahe hain—paani akela tel ka daag nahi dho sakta!</p>
+                </div>
+            </div>
+
+            <!-- Chemical Equation / Live Formula Box -->
+            <div class="mt-3 pt-2.5 border-t border-slate-700/60">
+                <div class="text-[10px] font-bold uppercase tracking-wider text-slate-400 mb-1">Active Chemical Formula / Principle:</div>
+                <div id="live-formula-box" class="font-mono text-xs bg-slate-900/90 border border-slate-700 px-2.5 py-1.5 rounded text-teal-300 overflow-x-auto whitespace-nowrap">
+                    C₁₇H₃₅COO⁻Na⁺ (aq) → C₁₇H₃₅COO⁻ + Na⁺
+                </div>
+            </div>
+        </div>
+    </aside>
+
+    <!-- RIGHT PANEL: REAL-TIME PARAMETERS & COMPONENT INSPECTOR -->
+    <aside class="absolute top-28 md:top-20 right-3 z-20 w-72 md:w-80 max-h-[calc(100vh-175px)] flex flex-col gap-2.5 pointer-events-none">
+        <!-- 3D View & Section Controls -->
+        <div class="glass-panel p-3 rounded-xl pointer-events-auto">
+            <div class="text-[11px] font-bold uppercase tracking-wider text-sky-400 mb-2 flex items-center justify-between">
+                <span><i class="fa-solid fa-cube mr-1"></i> 3D Visualization Tools</span>
+                <button onclick="resetCameraView()" class="text-[10px] px-2 py-0.5 rounded bg-slate-800 hover:bg-slate-700 text-slate-300 border border-slate-600 transition">
+                    <i class="fa-solid fa-rotate-left mr-0.5"></i> Reset Cam
+                </button>
+            </div>
+            <div class="grid grid-cols-2 gap-1.5">
+                <button id="btn-cutaway" onclick="toggleCutaway()" class="px-2.5 py-1.5 rounded-lg text-xs font-semibold bg-slate-800/90 hover:bg-slate-700 text-slate-200 border border-slate-600/80 transition flex items-center justify-center gap-1.5">
+                    <i class="fa-solid fa-circle-half-stroke text-teal-400"></i>
+                    <span>Cutaway: OFF</span>
+                </button>
+                <button id="btn-exploded" onclick="toggleExploded()" class="px-2.5 py-1.5 rounded-lg text-xs font-semibold bg-slate-800/90 hover:bg-slate-700 text-slate-200 border border-slate-600/80 transition flex items-center justify-center gap-1.5">
+                    <i class="fa-solid fa-arrows-up-down-left-right text-sky-400"></i>
+                    <span>Explode: OFF</span>
+                </button>
+                <button id="btn-labels" onclick="toggleLabels()" class="px-2.5 py-1.5 rounded-lg text-xs font-semibold bg-teal-500/20 text-teal-300 border border-teal-500/40 transition flex items-center justify-center gap-1.5">
+                    <i class="fa-solid fa-tags"></i>
+                    <span>3D Labels: ON</span>
+                </button>
+                <button id="btn-autorotate" onclick="toggleAutoRotate()" class="px-2.5 py-1.5 rounded-lg text-xs font-semibold bg-slate-800/90 hover:bg-slate-700 text-slate-200 border border-slate-600/80 transition flex items-center justify-center gap-1.5">
+                    <i class="fa-solid fa-sync"></i>
+                    <span>360° Spin: OFF</span>
+                </button>
+            </div>
+        </div>
+
+        <!-- Real-Time Physical Parameters Panel -->
+        <div class="glass-panel p-3 rounded-xl pointer-events-auto space-y-2.5">
+            <div class="text-[11px] font-bold uppercase tracking-wider text-teal-400 flex items-center gap-1.5">
+                <i class="fa-solid fa-gauge-high"></i>
+                <span>Real-Time Lab Parameters</span>
+            </div>
+
+            <!-- Parameter 1: Temperature / Agitation -->
+            <div>
+                <div class="flex justify-between text-xs mb-1">
+                    <span id="param1-label" class="text-slate-300 font-medium">Water Temperature / Agitation</span>
+                    <span id="param1-val" class="font-mono text-teal-300 font-bold">35 °C</span>
+                </div>
+                <input id="slider-param1" type="range" min="15" max="85" value="35" oninput="updateParameters()">
+            </div>
+
+            <!-- Parameter 2: Concentration / Electron Speed / Voltage -->
+            <div>
+                <div class="flex justify-between text-xs mb-1">
+                    <span id="param2-label" class="text-slate-300 font-medium">Soap Concentration</span>
+                    <span id="param2-val" class="font-mono text-sky-300 font-bold">100% (Optimal)</span>
+                </div>
+                <input id="slider-param2" type="range" min="20" max="150" value="100" oninput="updateParameters()">
+            </div>
+
+            <!-- Parameter 3: Water Hardness (Ca2+/Mg2+) / Mechanical Stress -->
+            <div id="param3-container">
+                <div class="flex justify-between text-xs mb-1">
+                    <span id="param3-label" class="text-slate-300 font-medium">Water Hardness (Ca²⁺/Mg²⁺)</span>
+                    <span id="param3-val" class="font-mono text-amber-300 font-bold">0 ppm (Soft Water)</span>
+                </div>
+                <input id="slider-param3" type="range" min="0" max="100" value="0" oninput="updateParameters()">
+            </div>
+        </div>
+
+        <!-- Component Inspector Card (Populated on 3D Raycast Click) -->
+        <div id="inspector-card" class="glass-panel p-3.5 rounded-xl pointer-events-auto overflow-y-auto custom-scroll flex-1 border-l-4 border-l-sky-400">
+            <div class="flex items-center justify-between mb-1.5">
+                <span class="text-[10px] font-bold uppercase tracking-wider text-sky-400 flex items-center gap-1">
+                    <i class="fa-solid fa-magnifying-glass-chart"></i> 3D Component Inspector
+                </span>
+                <span class="text-[10px] text-slate-400">Click any 3D part</span>
+            </div>
+            <h3 id="insp-name" class="text-sm font-extrabold text-white mb-2">
+                Hydrophilic Ionic Head (—COO⁻Na⁺)
+            </h3>
+            <div class="space-y-2 text-xs">
+                <div class="bg-slate-900/70 p-2 rounded-lg border border-slate-800">
+                    <div class="text-[10px] font-bold text-teal-400 uppercase">Function / Role</div>
+                    <p id="insp-function" class="text-slate-200 mt-0.5">Water-loving (polar) carboxylate group that dissolves in water and keeps the micelle suspended.</p>
+                </div>
+                <div class="bg-slate-900/70 p-2 rounded-lg border border-slate-800">
+                    <div class="text-[10px] font-bold text-sky-400 uppercase">What It Connects To</div>
+                    <p id="insp-connects" class="text-slate-200 mt-0.5">Covalently bonded to the C₁₇H₃₅ hydrocarbon tail; electrostatically attracts polar H₂O molecules &amp; Na⁺ counter-ions.</p>
+                </div>
+                <div class="bg-slate-900/70 p-2 rounded-lg border border-slate-800">
+                    <div class="text-[10px] font-bold text-amber-400 uppercase">What Happens When Operating</div>
+                    <p id="insp-action" class="text-slate-200 mt-0.5">Faces outward toward water, creating a negatively charged spherical shield that repels other micelles (preventing dirt from settling back).</p>
+                </div>
+            </div>
+        </div>
+    </aside>
+
+    <!-- BOTTOM PROCESS TIMELINE & PLAYBACK BAR -->
+    <footer class="absolute bottom-3 left-3 right-3 z-20 flex flex-col items-center pointer-events-none">
+        <div class="glass-panel px-4 py-2.5 rounded-2xl pointer-events-auto w-full max-w-4xl flex flex-col md:flex-row items-center justify-between gap-3">
+            <!-- Playback Buttons -->
+            <div class="flex items-center gap-2">
+                <button id="btn-play" onclick="togglePlayPause()" class="w-10 h-10 rounded-xl bg-gradient-to-br from-teal-500 to-sky-600 hover:from-teal-400 hover:to-sky-500 text-white flex items-center justify-center shadow-lg shadow-teal-500/30 transition" title="Play / Pause Process Animation">
+                    <i id="icon-play" class="fa-solid fa-pause text-sm"></i>
+                </button>
+                <button onclick="restartSimulation()" class="w-9 h-9 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-200 border border-slate-600 flex items-center justify-center transition" title="Restart Process from Stage 1">
+                    <i class="fa-solid fa-rotate-right text-xs"></i>
+                </button>
+                <div class="h-6 w-px bg-slate-700 mx-1"></div>
+                <button onclick="prevStep()" class="px-2.5 py-1.5 rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-200 border border-slate-600 text-xs font-semibold transition flex items-center gap-1">
+                    <i class="fa-solid fa-backward-step"></i> Prev
+                </button>
+                <button onclick="nextStep()" class="px-2.5 py-1.5 rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-200 border border-slate-600 text-xs font-semibold transition flex items-center gap-1">
+                    Next <i class="fa-solid fa-forward-step"></i>
+                </button>
+            </div>
+
+            <!-- Interactive 6-Stage Stepper Bar -->
+            <div class="flex-1 w-full flex flex-col gap-1.5">
+                <div class="flex items-center justify-between text-[11px] font-semibold text-slate-300 px-1">
+                    <span id="timeline-caption">Process Stage Timeline (Click any stage to jump)</span>
+                    <span id="progress-percent" class="font-mono text-teal-400">Stage 1 / 6</span>
+                </div>
+                <div id="stepper-nodes" class="grid grid-cols-6 gap-1.5">
+                    <button onclick="setStage(0)" class="stage-btn h-2.5 rounded-full bg-teal-500 transition-all" title="Stage 1"></button>
+                    <button onclick="setStage(1)" class="stage-btn h-2.5 rounded-full bg-slate-700 hover:bg-slate-500 transition-all" title="Stage 2"></button>
+                    <button onclick="setStage(2)" class="stage-btn h-2.5 rounded-full bg-slate-700 hover:bg-slate-500 transition-all" title="Stage 3"></button>
+                    <button onclick="setStage(3)" class="stage-btn h-2.5 rounded-full bg-slate-700 hover:bg-slate-500 transition-all" title="Stage 4"></button>
+                    <button onclick="setStage(4)" class="stage-btn h-2.5 rounded-full bg-slate-700 hover:bg-slate-500 transition-all" title="Stage 5"></button>
+                    <button onclick="setStage(5)" class="stage-btn h-2.5 rounded-full bg-slate-700 hover:bg-slate-500 transition-all" title="Stage 6"></button>
+                </div>
+            </div>
+
+            <!-- Speed & Zoom Controls -->
+            <div class="flex items-center gap-2.5">
+                <div class="flex items-center gap-1.5 bg-slate-900/80 px-2.5 py-1 rounded-lg border border-slate-700">
+                    <span class="text-[11px] text-slate-400 font-medium">Speed:</span>
+                    <button onclick="cycleSpeed()" id="btn-speed" class="text-xs font-mono font-bold text-teal-300 hover:text-white">1.0x</button>
+                </div>
+                <div class="flex items-center gap-1">
+                    <button onclick="zoomCamera(-3)" class="w-8 h-8 rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-200 border border-slate-600 flex items-center justify-center text-xs" title="Zoom In">
+                        <i class="fa-solid fa-magnifying-glass-plus"></i>
+                    </button>
+                    <button onclick="zoomCamera(3)" class="w-8 h-8 rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-200 border border-slate-600 flex items-center justify-center text-xs" title="Zoom Out">
+                        <i class="fa-solid fa-magnifying-glass-minus"></i>
+                    </button>
+                </div>
+            </div>
+        </div>
+    </footer>
+
+    <!-- APPLICATION LOGIC & THREE.JS 3D SIMULATION ENGINE -->
+    <script>
+        // ============================================================================
+        // 1. GLOBAL SIMULATION STATE & EDUCATIONAL CONTENT DATABASE
+        // ============================================================================
+        const state = {
+            currentModule: 'micelle', // 'micelle' | 'bonding' | 'allotropes' | 'isomers'
+            subType: 'micelle_main',
+            stage: 0,                 // 0 to 5 (6 stages per module)
+            stageProgress: 0,         // 0.0 to 1.0 within a stage
+            isPlaying: true,
+            speed: 1.0,
+            eduMode: true,            // true = Hinglish Classroom Mode, false = Advanced Scientific
+            cutaway: false,
+            exploded: false,
+            showLabels: true,
+            autoRotate: false,
+            param1: 35,               // Temperature / Thermal vibration
+            param2: 100,              // Soap Concentration / Electron speed / Voltage
+            param3: 0,                // Water Hardness (Scum) / Lattice shear force
+            selectedObject: null
+        };
+
+        // Detailed Educational Database for all 4 Modules (6 Stages each, Hinglish + Scientific)
+        const moduleData = {
+            micelle: {
+                subOptions: [
+                    { id: 'micelle_main', label: 'Soap Micelle', icon: 'fa-soap' },
+                    { id: 'single_soap', label: '1 Soap Ion', icon: 'fa-wand-magic-sparkles' },
+                    { id: 'hard_scum', label: 'Hard Water Scum', icon: 'fa-triangle-exclamation' }
+                ],
+                params: {
+                    p1: { label: 'Water Temp / Agitation', unit: '°C', min: 15, max: 85, val: 35 },
+                    p2: { label: 'Soap Concentration', unit: '%', min: 25, max: 150, val: 100 },
+                    p3: { label: 'Water Hardness (Ca²⁺/Mg²⁺)', unit: ' ppm', min: 0, max: 100, val: 0 }
+                },
+                stages: [
+                    {
+                        title: "Stage 1: Initial State — Oily Dirt Stuck on Cloth Fiber",
+                        hinglish: "<p><strong>1. Problem Kya Hai?</strong> Kapde ke reshe (fabric fiber) par <strong>Oily Dirt / Grease</strong> ki boond chipki hui hai.</p><p><strong>2. Paani फेल kyun hai?</strong> Oil <em>non-polar hydrocarbon</em> hai aur Paani (H₂O) <em>polar</em> hai. Dono ki bilkul nahi banti! Isliye paani akela tel ke daag ko kapde se nahi hata sakta.</p>",
+                        scientific: "<p><strong>Initial State:</strong> A hydrophobic triglyceride/hydrocarbon oil droplet adheres strongly to cellulose/polyester textile fibers via dispersion forces.</p><p>Polar H₂O molecules form hydrogen-bonded networks and cannot solvate the non-polar lipid phase.</p>",
+                        tip: "Students ko dikhayein ki neele Water molecules (H₂O) peele Oil droplet se takra kar door bhaag rahe hain (Hydrophobic repulsion).",
+                        formula: "Oil/Grease (Non-Polar) + H₂O (Polar) → Immiscible (No Mixing)"
+                    },
+                    {
+                        title: "Stage 2: Trigger — Soap Dissociation in Water (R-COO⁻ + Na⁺)",
+                        hinglish: "<p><strong>1. Soap ki Entry:</strong> Jab hum paani mein Soap (Sodium Stearate, C₁₇H₃₅COONa) daalte hain, to wo toot kar <strong>Soap Anion (C₁₇H₃₅COO⁻)</strong> aur <strong>Na⁺ ion</strong> banata hai.</p><p><strong>2. Do Sire (Two Ends):</strong> Soap ke har molecule mein ek <strong>Hydrophilic Head (नीला/हरा गोला, पाानी का दोस्त)</strong> aur ek lambi <strong>Hydrophobic Tail (सफेद/ग्रे पूंछ, तेल का दोस्त)</strong> hoti hai.</p>",
+                        scientific: "<p><strong>Trigger / Ionization:</strong> Amphiphilic sodium stearate dissociates in aqueous solution into stearate anions (C₁₇H₃₅COO⁻) and sodium counter-ions (Na⁺).</p><p>Each amphiphile possesses a polar carboxylate head and a non-polar C₁₇ alkyl chain.</p>",
+                        tip: "Kisi bhi Soap molecule par click karke students ko uska 'Head' aur 'Wavy Tail' 3D mein zoom karke dikhayein!",
+                        formula: "C₁₇H₃₅COONa (s) + H₂O → C₁₇H₃₅COO⁻ (aq) + Na⁺ (aq)"
+                    },
+                    {
+                        title: "Stage 3: Internal Change — Hydrophobic Tails Dive into Oil",
+                        hinglish: "<p><strong>1. Pooch Ander, Sir Bahar:</strong> Soap ki <strong>Hydrophobic tails</strong> paani se darti hain, isliye wo bhaag kar Oil droplet ke andar ghusna shuru karti hain.</p><p><strong>2. Ionic Head Bahar:</strong> Neela <strong>Hydrophilic head (—COO⁻)</strong> paani se pyaar karta hai, isliye wo Oil ke bahar paani ki taraf hi rehta hai.</p>",
+                        scientific: "<p><strong>Hydrophobic Effect &amp; Orientation:</strong> Driven by entropy and hydrophobic exclusion, non-polar alkyl tails penetrate the lipid core while polar —COO⁻ heads remain hydrated at the oil-water interface.</p>",
+                        tip: "Right panel mein 'Cutaway: ON' dabayein taaki bache dekh sakein ki tails kaise oil droplet ke andar dhas gayi hain!",
+                        formula: "Tail (—C₁₇H₃₅) → Dissolves in Oil | Head (—COO⁻) → Stays in Water"
+                    },
+                    {
+                        title: "Stage 4: Spherical 3D Micelle Formation (Encapsulation)",
+                        hinglish: "<p><strong>1. Chakravyuh (Micelle):</strong> Dher saare soap molecules charon taraf se Oil droplet ko gher kar ek <strong>3D Spherical Gola (Micelle)</strong> bana lete hain!</p><p><strong>2. Oil Qaid Ho Gaya:</strong> Ab tel ki boond beech mein qaid hai aur kapde ke fiber se uski pakad dheeli (loose) padne lagti hai.</p>",
+                        scientific: "<p><strong>Supramolecular Micellization:</strong> Above Critical Micelle Concentration (CMC), soap anions self-assemble into a spherical colloidal aggregate encapsulating the non-polar oil droplet at its core.</p>",
+                        tip: "Cutaway View ON karke Micelle ka cross-section dikhayein—yahi NCERT Figure 4.12 ka asli 3D roop hai!",
+                        formula: "n(C₁₇H₃₅COO⁻) + Oil Droplet → [Micelle Core-Shell Complex]ⁿ⁻"
+                    },
+                    {
+                        title: "Stage 5: Ion-Ion Repulsion & Mechanical Agitation",
+                        hinglish: "<p><strong>1. Aapas Mein Takraav (Repulsion):</strong> Har Micelle ki bahari surface par <strong>Negative Charge (—COO⁻)</strong> hota hai. Isliye do micelles ek-doosre ko repel (dhakka) dete hain aur wapas judkar kapde par nahi baith paate!</p><p><strong>2. Ragadna (Agitation):</strong> Jab hum kapde ko ragadte hain ya washing machine ghumti hai, to paani ki dhaar Micelle ko kapde se ukhaad deti hai.</p>",
+                        scientific: "<p><strong>Electrostatic Stabilization &amp; Shear Detachment:</strong> Zeta-potential repulsion between negatively charged carboxylate shells prevents coalescence, forming a stable oil-in-water emulsion lifted by hydrodynamic shear.</p>",
+                        tip: "NCERT In-text Q: 'Why is agitation necessary?' — Temp/Agitation slider badha kar dikhayein ki kaise micelle kapde se udaya jata hai!",
+                        formula: "Micelle(-) ↔ Micelle(-) : Electrostatic Repulsion → Stable Emulsion"
+                    },
+                    {
+                        title: "Stage 6: Final Result — Clean Cloth & Emulsified Dirt Washed Away",
+                        hinglish: "<p><strong>1. Kapda एकदम Chakachak:</strong> Paani se khangalne (rinsing) par saare Micelles apne andar qaid tel/mail ko lekar paani ke saath beh jaate hain.</p><p><strong>2. Hard Water Warning:</strong> Right panel mein <em>Water Hardness slider</em> badha kar dekhein—Ca²⁺/Mg²⁺ ions soap ke saath milkar safed <strong>Scum (दही जैसा कचरा)</strong> bana denge!</p>",
+                        scientific: "<p><strong>Final Emulsification &amp; Rinsing:</strong> Detached micelles remain colloidally dispersed in the bulk aqueous phase and flush away with rinse water, leaving a clean substrate.</p>",
+                        tip: "Hardness slider ko 80 ppm par le jayein aur students ko dikhayein ki Hard Water mein Soap kaam kyun nahi karta (Scum formation)!",
+                        formula: "Hard Water: 2C₁₇H₃₅COONa + Ca²⁺ → (C₁₇H₃₅COO)₂Ca↓ (White Scum) + 2Na⁺"
+                    }
+                ]
+            },
+
+            bonding: {
+                subOptions: [
+                    { id: 'ch4', label: 'Methane (CH₄)', icon: 'fa-circle-nodes' },
+                    { id: 'c2h4', label: 'Ethene (C₂H₄)', icon: 'fa-equals' },
+                    { id: 'c2h2', label: 'Ethyne (C₂H₂)', icon: 'fa-bars' },
+                    { id: 'co2', label: 'Carbon Dioxide (CO₂)', icon: 'fa-cloud' },
+                    { id: 's8', label: 'Sulphur Ring (S₈)', icon: 'fa-crown' }
+                ],
+                params: {
+                    p1: { label: 'Thermal Vibration', unit: ' K', min: 50, max: 500, val: 298 },
+                    p2: { label: 'Electron Orbit Speed', unit: '%', min: 20, max: 200, val: 100 },
+                    p3: { label: 'Inter-Atomic Distance', unit: '%', min: 0, max: 100, val: 0 }
+                },
+                stages: [
+                    {
+                        title: "Stage 1: Separated Neutral Atoms & Electronic Configuration",
+                        hinglish: "<p><strong>1. Carbon (Z = 6):</strong> Carbon ke andar K-shell mein <strong>2 electrons</strong> aur bahari L-shell (valence shell) mein <strong>4 electrons</strong> hote hain (2, 4).</p><p><strong>2. Octet ki Bhookh:</strong> Carbon ko stable hone ke liye 4 aur electrons chahiye, aur Hydrogen (Z = 1) ko Duplet poora karne ke liye 1 electron chahiye.</p>",
+                        scientific: "<p><strong>Ground State Atoms:</strong> Carbon (1s² 2s² 2p²) has 4 valence electrons. Neither C⁴⁺ cation (excessive ionization enthalpy) nor C⁴⁻ anion (6 protons cannot hold 10e⁻) is energetically favorable.</p>",
+                        tip: "'Inter-Atomic Distance' slider ya Stage buttons se atoms ko alag-alag karke unke K aur L shells ke ghoomte electrons dikhayein!",
+                        formula: "Carbon (Z=6): K(2), L(4) | Needs 4e⁻ for Octet (8e⁻)"
+                    },
+                    {
+                        title: "Stage 2: Trigger — Mutual Approach & Valence Shell Overlap",
+                        hinglish: "<p><strong>1. Na Dega, Na Lega — Share Karega!</strong> Kyunki 6 protons 10 electrons nahi sambhal sakte (No C⁴⁻) aur 4 electrons nikalne mein bahut energy lagti hai (No C⁴⁺), isliye atoms paas aakar apne valence shells <strong>overlap</strong> karte hain.</p>",
+                        scientific: "<p><strong>Orbital Approach:</strong> As atoms approach to equilibrium bond distance, their valence orbitals overlap constructively, lowering the potential energy of the system.</p>",
+                        tip: "Students ko dikhayein ki kaise atoms paas aate hi valence rings ek-doosre ko cross (overlap) karti hain.",
+                        formula: "Sharing of Valence Electrons → Lower Potential Energy"
+                    },
+                    {
+                        title: "Stage 3: Electron Pair Sharing (Electron Dot Visualization in 3D)",
+                        hinglish: "<p><strong>1. Sajhedari (Sharing):</strong> Har shared jode (pair of electrons) par dono atoms ka barabar haq hota hai!</p><p><strong>2. Single, Double, Triple:</strong> 1 pair share = <strong>Single Bond (—)</strong>, 2 pairs share = <strong>Double Bond (=)</strong>, 3 pairs share = <strong>Triple Bond (≡)</strong>.</p>",
+                        scientific: "<p><strong>Shared Electron Density:</strong> Shared electron pairs circulate in the internuclear region between bonded nuclei, simultaneously satisfying Carbon's octet (8e⁻) and Hydrogen's duplet (2e⁻).</p>",
+                        tip: "Top left se Ethene (C=C), Ethyne (C≡C), CO₂ (O=C=O) aur Crown S₈ Ring badal-badal kar 3D sharing dikhayein!",
+                        formula: "1 Shared Pair = Single (—) | 2 Pairs = Double (=) | 3 Pairs = Triple (≡)"
+                    },
+                    {
+                        title: "Stage 4: 3D VSEPR Molecular Geometry & Bond Angles",
+                        hinglish: "<p><strong>1. Asli 3D Shape:</strong> Copy-pen par hum Methane (CH₄) ko flat (+) jaisa banate hain, par asliyat mein 4 electron pairs ek-doosre ko repel karke <strong>109.5° Tetrahedral (तिपाई जैसा 3D आकार)</strong> banate hain!</p>",
+                        scientific: "<p><strong>3D Molecular Geometry:</strong> CH₄ adopts sp³ tetrahedral geometry (109.5°); Ethene (C₂H₄) adopts sp² trigonal planar geometry (120°); Ethyne (C₂H₂) and CO₂ adopt sp linear geometry (180°).</p>",
+                        tip: "Mouse drag karke Methane ko 360° ghumayein taaki students ko 2D blackboard aur asli 3D Tetrahedral shape ka farak dikhe!",
+                        formula: "CH₄: 109.5° (Tetrahedral) | C₂H₄: 120° (Planar) | C₂H₂ & CO₂: 180° (Linear)"
+                    },
+                    {
+                        title: "Stage 5: Strong Intramolecular vs Weak Intermolecular Forces",
+                        hinglish: "<p><strong>1. Low Melting &amp; Boiling Point Kyun?</strong> Molecule ke andar C—H bond to bahut strong hai, lekin do alag-alag CH₄ molecules ke beech aakarshan (intermolecular force) bahut kamzor hota hai!</p>",
+                        scientific: "<p><strong>Physical Properties:</strong> Despite strong directional covalent bonds within molecules, weak Van der Waals dispersion forces between discrete molecules result in low melting and boiling points.</p>",
+                        tip: "Thermal Vibration slider badha kar dikhayein ki thodi si garmi milte hi covalent molecules kaise vibrate karne lagte hain.",
+                        formula: "Strong Covalent Bonds Inside + Weak Forces Between Molecules = Low MP/BP"
+                    },
+                    {
+                        title: "Stage 6: Poor Electrical Conductivity of Covalent Compounds",
+                        hinglish: "<p><strong>1. Bijli Kyun Nahi Chalti?</strong> Kyunki saare electrons atoms ke beech sharing mein bandhe hue hain—koi bhi <strong>Free Ion</strong> ya <strong>Free Electron</strong> nahi banta. Isliye covalent compounds electricity conduct nahi karte!</p>",
+                        scientific: "<p><strong>Electrical Insulators:</strong> Localized electron pairs in sigma/pi covalent bonds leave no mobile charge carriers (ions or delocalized electrons), making covalent liquids/gases non-conductors.</p>",
+                        tip: "Sulphur S₈ button par click karke NCERT Page 61 ka famous 8-atom Crown Ring structure 3D mein zaroor dikhayein!",
+                        formula: "No Free Ions / No Delocalized e⁻ → Non-Conductor of Electricity"
+                    }
+                ]
+            },
+
+            allotropes: {
+                subOptions: [
+                    { id: 'diamond', label: 'Diamond (3D Rigid)', icon: 'fa-gem' },
+                    { id: 'graphite', label: 'Graphite (Layers)', icon: 'fa-layer-group' },
+                    { id: 'fullerene', label: 'Fullerene (C₆₀)', icon: 'fa-futbol' }
+                ],
+                params: {
+                    p1: { label: 'Thermal Vibration', unit: ' K', min: 100, max: 600, val: 300 },
+                    p2: { label: 'Applied Voltage (Conductivity)', unit: ' V', min: 0, max: 24, val: 12 },
+                    p3: { label: 'Mechanical Shear Force', unit: ' N', min: 0, max: 100, val: 0 }
+                },
+                stages: [
+                    {
+                        title: "Stage 1: Allotropy — Same Carbon Atom, Different 3D Architectures",
+                        hinglish: "<p><strong>1. Ek Hi Carbon, Teen Roop:</strong> Diamond (Heera), Graphite (Pencil ki nok) aur Fullerene (C₆₀) teeno 100% shuddh Carbon se bane hain!</p><p><strong>2. Farak Kahan Hai?</strong> Farak sirf is baat ka hai ki Carbon atoms 3D space mein <strong>kis tarah ek-doosre se jude (bonded)</strong> hain.</p>",
+                        scientific: "<p><strong>Allotropy:</strong> The existence of an element in multiple crystalline physical forms with identical chemical properties (combustion to CO₂) but drastically different physical properties due to bonding topology.</p>",
+                        tip: "Sub-selector se Diamond, Graphite aur Fullerene C₆₀ ke beech switch karke teeno ka 3D architecture compare karayein.",
+                        formula: "Diamond (sp³) | Graphite (sp²) | Buckminsterfullerene C₆₀ (Cage)"
+                    },
+                    {
+                        title: "Stage 2: Diamond — Rigid 3D Tetrahedral Covalent Network",
+                        hinglish: "<p><strong>1. Har Carbon ke 4 Bond:</strong> Diamond mein har ek Carbon atom apne charon taraf <strong>4 aur Carbon atoms</strong> se strong single covalent bond (154 pm) se juda hota hai.</p><p><strong>2. Hardest Substance:</strong> Charon dishaon mein 3D jaal (network) banne ki wajah se ye duniya ka sabse kathor (hardest) natural substance hai!</p>",
+                        scientific: "<p><strong>Diamond Lattice:</strong> Each sp³ carbon bonds tetrahedrally to 4 neighbors (C—C = 154 pm), forming a continuous 3D giant covalent macromolecule with extreme bulk modulus.</p>",
+                        tip: "Diamond select karke 'Mechanical Shear Force' slider ko 100 N tak badhayein—lattice bilkul nahi khisakta (rigid)!",
+                        formula: "1 Carbon → 4 Carbons (3D Tetrahedral Giant Network, 0 Free e⁻)"
+                    },
+                    {
+                        title: "Stage 3: Graphite — Hexagonal Layered Sheets (Why It Is Slippery)",
+                        hinglish: "<p><strong>1. Har Carbon ke 3 Bond:</strong> Graphite mein har Carbon ek hi plane mein sirf <strong>3 aur Carbon atoms</strong> se judkar <strong>Hexagonal (षट्कोण) chadar/layers</strong> banata hai.</p><p><strong>2. Smooth &amp; Slippery:</strong> Do layers ke beech bahut kamzor Van der Waals force hota hai, isliye layers ek-doosre ke upar aasani se fisalti (slide) hain!</p>",
+                        scientific: "<p><strong>Graphite Sheet Structure:</strong> sp² carbons form planar hexagonal graphene sheets (C—C = 142 pm) stacked 335 pm apart, held by weak interlayer Van der Waals forces allowing easy basal cleavage.</p>",
+                        tip: "Graphite select karke 'Mechanical Shear Force' slider badhayein—students live dekhenge ki kaise upar aur neeche ki layers ek-doosre par slide karti hain!",
+                        formula: "Hexagonal Layers + Weak Interlayer Forces → Soft, Smooth & Lubricant"
+                    },
+                    {
+                        title: "Stage 4: Electrical Conductivity Test — Diamond vs Graphite",
+                        hinglish: "<p><strong>1. Graphite Mein Bijli Kyun Chalti Hai?</strong> Carbon ke paas 4 valence electrons hote hain. Graphite mein 3 electrons bond bana lete hain, par <strong>4th electron FREE rehta hai</strong>!</p><p><strong>2. Live Voltage Test:</strong> Jab hum Voltage lagate hain, to ye chamakte hue free electrons layers ke beech daudte hain aur current flow hota hai!</p>",
+                        scientific: "<p><strong>Delocalized Pi-Electrons:</strong> In Graphite, the unhybridized 2p_z electron on each carbon delocalizes across the hexagonal sheet, enabling metallic electrical conductivity along the planes.</p>",
+                        tip: "Graphite mein 'Applied Voltage' slider badha kar chamakte hue Free Electrons ka flow dikhayein, fir Diamond par switch karke dikhayein ki wahan 0 free electrons hain!",
+                        formula: "Graphite: 3 Bonded e⁻ + 1 Free Delocalized e⁻ → Good Conductor!"
+                    },
+                    {
+                        title: "Stage 5: Buckminsterfullerene (C₆₀) — The 3D Geodesic Football",
+                        hinglish: "<p><strong>1. Football Jaisa Molecule:</strong> Fullerene (C₆₀) mein <strong>60 Carbon atoms</strong> aapas mein judkar bilkul football jaisa gol pinjra (cage) banate hain!</p><p><strong>2. Pentagons &amp; Hexagons:</strong> Isme <strong>20 Hexagons (6-carbon rings)</strong> aur <strong>12 Pentagons (5-carbon rings)</strong> hote hain. Iska naam architect Buckminster Fuller ke geodesic dome par pada.</p>",
+                        scientific: "<p><strong>Truncated Icosahedron (C₆₀):</strong> A discrete molecular allotrope comprising 60 sp²-hybridized vertices arranged into 12 pentagonal and 20 hexagonal faces.</p>",
+                        tip: "Fullerene C₆₀ select karke 'Explode: ON' ya 360° Spin chalayein taaki football cage structure saaf dikhe.",
+                        formula: "C₆₀ Fullerene = 60 Carbons (12 Pentagons + 20 Hexagons)"
+                    },
+                    {
+                        title: "Stage 6: Summary & Industrial Applications of Carbon Allotropes",
+                        hinglish: "<p><strong>1. Uses:</strong> Diamond ka use glass cutting, rock drilling aur jewellery mein; Graphite ka use pencil lead, dry lubricant aur electrodes mein; aur Fullerenes ka use nanotechnology aur drug delivery mein hota hai.</p>",
+                        scientific: "<p><strong>Structure-Property Correlation:</strong> 3D sp³ network yields extreme hardness &amp; optical dispersion (Diamond); 2D sp² sheets yield lubricity &amp; conductivity (Graphite).</p>",
+                        tip: "Kisi bhi Carbon atom ya Interlayer gap par click karke Inspector Card mein uske exact bond details dikhayein.",
+                        formula: "All Burn in O₂: C (Diamond/Graphite/C₆₀) + O₂ → CO₂ + Heat"
+                    }
+                ]
+            },
+
+            isomers: {
+                subOptions: [
+                    { id: 'n_butane', label: 'n-Butane (C₄H₁₀)', icon: 'fa-minus' },
+                    { id: 'iso_butane', label: 'Iso-butane (C₄H₁₀)', icon: 'fa-code-branch' },
+                    { id: 'neo_pentane', label: 'Neo-pentane (C₅H₁₂)', icon: 'fa-asterisk' },
+                    { id: 'ethanol', label: 'Ethanol (—OH)', icon: 'fa-wine-bottle' },
+                    { id: 'ethanoic', label: 'Ethanoic Acid (—COOH)', icon: 'fa-flask' },
+                    { id: 'benzene', label: 'Benzene Ring (C₆H₆)', icon: 'fa-ring' }
+                ],
+                params: {
+                    p1: { label: 'Molecular Tumbling / Thermal', unit: ' K', min: 0, max: 400, val: 150 },
+                    p2: { label: 'Bond Length Scale', unit: '%', min: 70, max: 140, val: 100 },
+                    p3: { label: 'Highlight Functional Group', unit: '%', min: 0, max: 100, val: 80 }
+                },
+                stages: [
+                    {
+                        title: "Stage 1: Catenation — Carbon's Superpower of Self-Linking",
+                        hinglish: "<p><strong>1. Catenation Kya Hai?</strong> Carbon atoms aapas mein strong covalent bonds banakar <strong>Straight Chains, Branched Chains, ya Closed Rings</strong> bana sakte hain!</p>",
+                        scientific: "<p><strong>Catenation:</strong> High C—C bond enthalpy (~348 kJ/mol) due to small atomic radius enables carbon to form stable linear, branched, and cyclic backbones.</p>",
+                        tip: "Sub-selector buttons daba kar Straight Chain (n-Butane), Branched (Iso-butane, Neo-pentane) aur Ring (Benzene) turant switch karein!",
+                        formula: "Catenation + Tetravalency → Millions of Organic Compounds"
+                    },
+                    {
+                        title: "Stage 2: Structural Isomerism — Same Formula, Different 3D Skeleton",
+                        hinglish: "<p><strong>1. Judwaa Formula (Structural Isomers):</strong> <em>n-Butane</em> aur <em>Iso-butane</em> dono mein bilkul barabar <strong>4 Carbon aur 10 Hydrogen (C₄H₁₀)</strong> hain!</p><p><strong>2. Farak:</strong> n-Butane mein charon C seedhi line mein hain, jabki Iso-butane mein 3 C ki chain par beech mein 1 C branch nikli hui hai.</p>",
+                        scientific: "<p><strong>Constitutional (Structural) Isomers:</strong> Compounds sharing an identical molecular formula (e.g., C₄H₁₀ or C₅H₁₂) but differing in atom-to-atom connectivity and physical boiling points.</p>",
+                        tip: "n-Butane aur Iso-butane ke beech bar-bar click karke students se Carbon (4) aur Hydrogen (10) ginwayein!",
+                        formula: "C₄H₁₀ → 2 Isomers (n-Butane, Iso-butane) | C₅H₁₂ → 3 Isomers"
+                    },
+                    {
+                        title: "Stage 3: Pentane Isomers (n-Pentane, Isopentane, Neopentane C₅H₁₂)",
+                        hinglish: "<p><strong>1. Neo-Pentane (Plus Shape in 3D):</strong> Sub-selector mein <strong>Neo-pentane (C₅H₁₂)</strong> chunein—beech wale 1 Carbon ke charon taraf 4 CH₃ groups jude hain!</p>",
+                        scientific: "<p><strong>Quaternary Carbon Center:</strong> In 2,2-dimethylpropane (neopentane, C₅H₁₂), a central sp³ carbon is bonded to four methyl (—CH₃) groups in a spherical tetrahedral arrangement.</p>",
+                        tip: "NCERT In-text Q1 (Page 68): 'How many structural isomers can you draw for pentane?' — Answer: 3!",
+                        formula: "C₅H₁₂ Isomers: n-Pentane (Chain) | Isopentane (1 Branch) | Neopentane (Cross)"
+                    },
+                    {
+                        title: "Stage 4: Functional Groups — Alcohol (—OH) in Ethanol",
+                        hinglish: "<p><strong>1. Heteroatom &amp; Functional Group:</strong> Jab Hydrocarbon chain se 1 Hydrogen hata kar <strong>—OH (Hydroxyl group)</strong> jud jata hai, to wo <strong>Alcohol</strong> ban jata hai!</p><p><strong>2. Ethanol (CH₃CH₂OH):</strong> Sub-selector mein Ethanol chunein aur laal Oxygen + safed Hydrogen (—OH group) ko 3D mein dekhein.</p>",
+                        scientific: "<p><strong>Hydroxyl Functional Group (—OH):</strong> Confers polarity, hydrogen bonding capability, water miscibility, and reactivity with active metals (2C₂H₅OH + 2Na → 2C₂H₅ONa + H₂↑).</p>",
+                        tip: "Ethanol select karke laal Oxygen atom par click karein—Inspector Card mein Ethanol ke reactions dikhenge!",
+                        formula: "Ethanol: CH₃—CH₂—OH (Suffix: -ol | Functional Group: —OH)"
+                    },
+                    {
+                        title: "Stage 5: Carboxylic Acid (—COOH) in Ethanoic Acid (Vinegar)",
+                        hinglish: "<p><strong>1. Carboxylic Acid (—COOH):</strong> Sub-selector mein <strong>Ethanoic Acid (CH₃COOH)</strong> chunein. Isme ek Carbon par <strong>Double bond Oxygen (=O)</strong> aur ek <strong>Single bond —OH</strong> dono jude hote hain!</p>",
+                        scientific: "<p><strong>Carboxyl Group (—C(=O)OH):</strong> Combines a carbonyl (>C=O) and hydroxyl (—OH) on the same carbon. Undergoes esterification with alcohols and brisk effervescence of CO₂ with NaHCO₃.</p>",
+                        tip: "Students ko dikhayein ki Ethanoic Acid mein 2 Oxygen atoms hain: ek C=O (double bond) aur ek C—O—H (single bond)!",
+                        formula: "Ethanoic Acid: CH₃—COOH + NaHCO₃ → CH₃COONa + H₂O + CO₂↑"
+                    },
+                    {
+                        title: "Stage 6: Cyclic Hydrocarbons — Benzene Aromatic Ring (C₆H₆)",
+                        hinglish: "<p><strong>1. Benzene Ring (C₆H₆):</strong> Sub-selector mein <strong>Benzene</strong> chunein. Isme 6 Carbon atoms ek 6-membered ring banate hain jisme <strong>ek chhod kar ek Double Bond (Alternate Single &amp; Double Bonds)</strong> hote hain!</p>",
+                        scientific: "<p><strong>Aromatic Ring (C₆H₆):</strong> Six sp² carbons form a planar hexagonal ring with 3 conjugated double bonds (delocalized 6π electron system) and one hydrogen attached to each carbon.</p>",
+                        tip: "Benzene ring ko 360° ghumayein aur students ko dikhayein ki har Carbon ke 4 bonds kaise poore ho rahe hain (1 C-C, 1 C=C, 1 C-H)!",
+                        formula: "Benzene (C₆H₆): 6 Carbons + 6 Hydrogens (3 C=C Double + 3 C—C Single)"
+                    }
+                ]
+            }
+        };
+
+        // ============================================================================
+        // 2. THREE.JS SCENE, CAMERA, LIGHTS & ORBIT CONTROLLER SETUP
+        // ============================================================================
+        const container = document.getElementById('canvas-container');
+        const labelsContainer = document.getElementById('labels-container');
+
+        const scene = new THREE.Scene();
+        scene.fog = new THREE.FogExp2(0x070b14, 0.015);
+
+        const camera = new THREE.PerspectiveCamera(45, window.innerWidth / window.innerHeight, 0.1, 1000);
+        const renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true });
+        renderer.setSize(window.innerWidth, window.innerHeight);
+        renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+        renderer.shadowMap.enabled = true;
+        renderer.shadowMap.type = THREE.PCFSoftShadowMap;
+        container.appendChild(renderer.domElement);
+
+        // Lighting Setup (Laboratory PBR Look)
+        const ambientLight = new THREE.AmbientLight(0xdbeafe, 0.65);
+        scene.add(ambientLight);
+
+        const mainLight = new THREE.DirectionalLight(0xffffff, 1.15);
+        mainLight.position.set(14, 22, 16);
+        mainLight.castShadow = true;
+        scene.add(mainLight);
+
+        const rimLight = new THREE.PointLight(0x38bdf8, 0.9, 60);
+        rimLight.position.set(-15, 10, -14);
+        scene.add(rimLight);
+
+        const warmLight = new THREE.PointLight(0xf59e0b, 0.5, 50);
+        warmLight.position.set(12, -12, 10);
+        scene.add(warmLight);
+
+        // Subtle Lab Floor Grid
+        const gridHelper = new THREE.GridHelper(44, 44, 0x1e293b, 0x0f172a);
+        gridHelper.position.y = -8.5;
+        scene.add(gridHelper);
+
+        // Custom Smooth Spherical Camera Controller (Orbit + Pan + Zoom)
+        const camCtrl = {
+            theta: 0.45,
+            phi: 1.18,
+            radius: 21,
+            target: new THREE.Vector3(0, 0, 0),
+            isDragging: false,
+            isPanning: false,
+            prevX: 0,
+            prevY: 0,
+            downX: 0,
+            downY: 0
+        };
+
+        function updateCameraTransform() {
+            camCtrl.phi = Math.max(0.15, Math.min(Math.PI - 0.15, camCtrl.phi));
+            camCtrl.radius = Math.max(6, Math.min(48, camCtrl.radius));
+            camera.position.x = camCtrl.target.x + camCtrl.radius * Math.sin(camCtrl.phi) * Math.sin(camCtrl.theta);
+            camera.position.y = camCtrl.target.y + camCtrl.radius * Math.cos(camCtrl.phi);
+            camera.position.z = camCtrl.target.z + camCtrl.radius * Math.sin(camCtrl.phi) * Math.cos(camCtrl.theta);
+            camera.lookAt(camCtrl.target);
+        }
+        updateCameraTransform();
+
+        function resetCameraView() {
+            camCtrl.theta = 0.45;
+            camCtrl.phi = 1.18;
+            camCtrl.radius = state.currentModule === 'micelle' ? 22 : 17;
+            camCtrl.target.set(0, 0, 0);
+            updateCameraTransform();
+        }
+
+        function zoomCamera(delta) {
+            camCtrl.radius += delta;
+            updateCameraTransform();
+        }
+
+        // Mouse & Touch Interaction + Raycasting for Component Inspection
+        const raycaster = new THREE.Raycaster();
+        const mouse = new THREE.Vector2();
+        let clickableMeshes = [];
+        let activeLabels = [];
+
+        renderer.domElement.addEventListener('mousedown', (e) => {
+            if (e.button === 0) camCtrl.isDragging = true;
+            if (e.button === 2) camCtrl.isPanning = true;
+            camCtrl.prevX = camCtrl.downX = e.clientX;
+            camCtrl.prevY = camCtrl.downY = e.clientY;
+        });
+
+        window.addEventListener('mousemove', (e) => {
+            if (camCtrl.isDragging) {
+                const dx = e.clientX - camCtrl.prevX;
+                const dy = e.clientY - camCtrl.prevY;
+                camCtrl.theta -= dx * 0.007;
+                camCtrl.phi -= dy * 0.007;
+                camCtrl.prevX = e.clientX;
+                camCtrl.prevY = e.clientY;
+                updateCameraTransform();
+            } else if (camCtrl.isPanning) {
+                const dx = (e.clientX - camCtrl.prevX) * 0.02;
+                const dy = (e.clientY - camCtrl.prevY) * 0.02;
+                camCtrl.target.x -= dx;
+                camCtrl.target.y += dy;
+                camCtrl.prevX = e.clientX;
+                camCtrl.prevY = e.clientY;
+                updateCameraTransform();
+            }
+        });
+
+        window.addEventListener('mouseup', (e) => {
+            const moveDist = Math.hypot(e.clientX - camCtrl.downX, e.clientY - camCtrl.downY);
+            camCtrl.isDragging = false;
+            camCtrl.isPanning = false;
+            if (moveDist < 5 && e.target === renderer.domElement) {
+                handleCanvasClick(e.clientX, e.clientY);
+            }
+        });
+
+        renderer.domElement.addEventListener('contextmenu', e => e.preventDefault());
+
+        renderer.domElement.addEventListener('wheel', (e) => {
+            e.preventDefault();
+            camCtrl.radius += e.deltaY * 0.012;
+            updateCameraTransform();
+        }, { passive: false });
+
+        // Touch Events for Mobile/Tablet Classroom Boards
+        let touchDist = 0;
+        renderer.domElement.addEventListener('touchstart', (e) => {
+            if (e.touches.length === 1) {
+                camCtrl.isDragging = true;
+                camCtrl.prevX = camCtrl.downX = e.touches[0].clientX;
+                camCtrl.prevY = camCtrl.downY = e.touches[0].clientY;
+            } else if (e.touches.length === 2) {
+                camCtrl.isDragging = false;
+                touchDist = Math.hypot(
+                    e.touches[0].clientX - e.touches[1].clientX,
+                    e.touches[0].clientY - e.touches[1].clientY
+                );
+            }
+        }, { passive: true });
+
+        renderer.domElement.addEventListener('touchmove', (e) => {
+            if (camCtrl.isDragging && e.touches.length === 1) {
+                const dx = e.touches[0].clientX - camCtrl.prevX;
+                const dy = e.touches[0].clientY - camCtrl.prevY;
+                camCtrl.theta -= dx * 0.007;
+                camCtrl.phi -= dy * 0.007;
+                camCtrl.prevX = e.touches[0].clientX;
+                camCtrl.prevY = e.touches[0].clientY;
+                updateCameraTransform();
+            } else if (e.touches.length === 2) {
+                const newDist = Math.hypot(
+                    e.touches[0].clientX - e.touches[1].clientX,
+                    e.touches[0].clientY - e.touches[1].clientY
+                );
+                camCtrl.radius -= (newDist - touchDist) * 0.04;
+                touchDist = newDist;
+                updateCameraTransform();
+            }
+        }, { passive: true });
+
+        renderer.domElement.addEventListener('touchend', () => {
+            camCtrl.isDragging = false;
+        });
+
+        // ============================================================================
+        // 3. SHARED MATERIALS & 3D HELPER BUILDERS
+        // ============================================================================
+        const rootGroup = new THREE.Group();
+        scene.add(rootGroup);
+
+        const mats = {
+            carbon: new THREE.MeshStandardMaterial({ color: 0x27272a, roughness: 0.25, metalness: 0.3 }),
+            hydrogen: new THREE.MeshStandardMaterial({ color: 0xf8fafc, roughness: 0.2, metalness: 0.1 }),
+            oxygen: new THREE.MeshStandardMaterial({ color: 0xef4444, roughness: 0.25, metalness: 0.2 }),
+            sulphur: new THREE.MeshStandardMaterial({ color: 0xfacc15, roughness: 0.3, metalness: 0.1 }),
+            electron: new THREE.MeshStandardMaterial({ color: 0x38bdf8, emissive: 0x0284c7, emissiveIntensity: 0.9, roughness: 0.1 }),
+            electronShared: new THREE.MeshStandardMaterial({ color: 0x2dd4bf, emissive: 0x14b8a6, emissiveIntensity: 1.1, roughness: 0.1 }),
+            bond: new THREE.MeshStandardMaterial({ color: 0x94a3b8, roughness: 0.35, metalness: 0.4 }),
+            doubleBond: new THREE.MeshStandardMaterial({ color: 0x38bdf8, roughness: 0.3, metalness: 0.4 }),
+            oil: new THREE.MeshPhysicalMaterial({ color: 0xf59e0b, emissive: 0x78350f, emissiveIntensity: 0.2, roughness: 0.15, metalness: 0.05, transparent: true, opacity: 0.88 }),
+            hydroHead: new THREE.MeshStandardMaterial({ color: 0x06b6d4, emissive: 0x0891b2, emissiveIntensity: 0.5, roughness: 0.2 }),
+            hydroTail: new THREE.MeshStandardMaterial({ color: 0xe2e8f0, roughness: 0.4, metalness: 0.1 }),
+            naIon: new THREE.MeshStandardMaterial({ color: 0xa855f7, emissive: 0x7e22ce, emissiveIntensity: 0.6, roughness: 0.2 }),
+            caIon: new THREE.MeshStandardMaterial({ color: 0xf97316, emissive: 0xc2410c, emissiveIntensity: 0.6, roughness: 0.3 }),
+            scum: new THREE.MeshStandardMaterial({ color: 0xd6d3d1, roughness: 0.85, metalness: 0.05 }),
+            water: new THREE.MeshStandardMaterial({ color: 0x3b82f6, transparent: true, opacity: 0.45, roughness: 0.1 }),
+            cloth: new THREE.MeshStandardMaterial({ color: 0x334155, roughness: 0.75, metalness: 0.1 })
+        };
+
+        function clearScene() {
+            while (rootGroup.children.length > 0) {
+                const child = rootGroup.children[0];
+                rootGroup.remove(child);
+            }
+            clickableMeshes = [];
+            activeLabels = [];
+            labelsContainer.innerHTML = '';
+        }
+
+        function registerInspectable(mesh, info) {
+            mesh.userData.inspect = info;
+            clickableMeshes.push(mesh);
+        }
+
+        function addFloatingLabel(targetObj, offsetVec, title, inspectInfo) {
+            const el = document.createElement('div');
+            el.className = 'label-3d';
+            el.innerHTML = title;
+            if (inspectInfo) {
+                el.onclick = (e) => {
+                    e.stopPropagation();
+                    populateInspector(inspectInfo);
+                };
+            }
+            labelsContainer.appendChild(el);
+            activeLabels.push({ el, targetObj, offset: offsetVec || new THREE.Vector3(0, 0.8, 0) });
+        }
+
+        function createCylinderBond(p1, p2, radius, mat, order = 1) {
+            const group = new THREE.Group();
+            const dir = new THREE.Vector3().subVectors(p2, p1);
+            const len = dir.length();
+            const mid = new THREE.Vector3().addVectors(p1, p2).multiplyScalar(0.5);
+            const cylGeo = new THREE.CylinderGeometry(radius, radius, len, 14);
+            const up = new THREE.Vector3(0, 1, 0);
+            const quat = new THREE.Quaternion().setFromUnitVectors(up, dir.clone().normalize());
+
+            // Perpendicular offset for double/triple bonds
+            let perp = new THREE.Vector3(0, 0, 1).cross(dir.clone().normalize());
+            if (perp.lengthSq() < 0.01) perp = new THREE.Vector3(0, 1, 0).cross(dir.clone().normalize());
+            perp.normalize();
+
+            if (order === 1) {
+                const m = new THREE.Mesh(cylGeo, mat);
+                m.position.copy(mid);
+                m.quaternion.copy(quat);
+                group.add(m);
+            } else if (order === 2) {
+                const sep = radius * 1.65;
+                [-sep, sep].forEach(s => {
+                    const m = new THREE.Mesh(cylGeo, mat);
+                    m.position.copy(mid).addScaledVector(perp, s);
+                    m.quaternion.copy(quat);
+                    group.add(m);
+                });
+            } else if (order === 3) {
+                const sep = radius * 2.1;
+                [-sep, 0, sep].forEach((s, idx) => {
+                    const m = new THREE.Mesh(cylGeo, idx === 1 ? mats.bond : mat);
+                    m.position.copy(mid).addScaledVector(perp, s);
+                    m.quaternion.copy(quat);
+                    group.add(m);
+                });
+            }
+            return group;
+        }
+
+        // ============================================================================
+        // 4. MODULE 1 BUILDER: SOAP & MICELLE CLEANSING ACTION (6-STAGE DYNAMIC)
+        // ============================================================================
+        let micelleScene = {};
+
+        function buildMicelleModule() {
+            clearScene();
+            micelleScene = {
+                soapUnits: [],
+                waterParticles: [],
+                hardIons: [],
+                flowArrows: []
+            };
+
+            // 1. Woven Cloth Fibers Base at bottom
+            const clothGroup = new THREE.Group();
+            clothGroup.position.y = -4.2;
+            const fiberGeo = new THREE.CylinderGeometry(0.32, 0.32, 18, 16);
+            for (let i = -4; i <= 4; i++) {
+                const f1 = new THREE.Mesh(fiberGeo, mats.cloth.clone());
+                f1.rotation.z = Math.PI / 2;
+                f1.position.set(0, 0, i * 0.85);
+                registerInspectable(f1, {
+                    name: "Cotton / Polyester Cloth Fiber (Substrate)",
+                    func: "Provides the textile surface where oily dirt initially sticks.",
+                    connects: "Holds the non-polar oil droplet via surface adhesion until soap micelles lift it away.",
+                    action: "Becomes completely clean in Stage 6 after mechanical agitation & water rinsing."
+                });
+                clothGroup.add(f1);
+
+                const f2 = new THREE.Mesh(fiberGeo, mats.cloth.clone());
+                f2.rotation.x = Math.PI / 2;
+                f2.position.set(i * 0.85, -0.28, 0);
+                clothGroup.add(f2);
+            }
+            rootGroup.add(clothGroup);
+            micelleScene.clothGroup = clothGroup;
+
+            // 2. Central Oily Dirt Droplet
+            const oilGeo = new THREE.SphereGeometry(2.15, 32, 32);
+            const oilMesh = new THREE.Mesh(oilGeo, mats.oil.clone());
+            oilMesh.position.set(0, -2.2, 0);
+            registerInspectable(oilMesh, {
+                name: "Oily / Greasy Dirt Droplet (Non-Polar Hydrocarbon)",
+                func: "Represents stubborn oil, sweat, or grease stuck to clothing.",
+                connects: "Insoluble in polar water; attracts the non-polar hydrophobic tails (—C₁₇H₃₅) of soap molecules.",
+                action: "Gets penetrated by soap tails in Stage 3, encapsulated inside the Micelle in Stage 4, and lifted off the cloth in Stage 5!"
+            });
+            rootGroup.add(oilMesh);
+            micelleScene.oilMesh = oilMesh;
+
+            // Inner Core Glow for Cutaway Inspection
+            const oilCoreGeo = new THREE.SphereGeometry(1.3, 24, 24);
+            const oilCoreMat = new THREE.MeshStandardMaterial({ color: 0xfde047, emissive: 0xca8a04, emissiveIntensity: 0.4, roughness: 0.3 });
+            const oilCore = new THREE.Mesh(oilCoreGeo, oilCoreMat);
+            oilMesh.add(oilCore);
+
+            // 3. Build 36 3D Amphiphilic Soap Molecules (Golden Spiral Distribution around sphere)
+            const numSoaps = state.subType === 'single_soap' ? 1 : 34;
+            for (let i = 0; i < numSoaps; i++) {
+                const phi = Math.acos(1 - 2 * (i + 0.5) / numSoaps);
+                const theta = Math.PI * (1 + Math.sqrt(5)) * i;
+                const dir = new THREE.Vector3(
+                    Math.sin(phi) * Math.cos(theta),
+                    Math.cos(phi),
+                    Math.sin(phi) * Math.sin(theta)
+                ).normalize();
+
+                const soapGroup = new THREE.Group();
+
+                // Hydrophilic Head (—COO⁻)
+                const headMesh = new THREE.Mesh(new THREE.SphereGeometry(0.36, 20, 20), mats.hydroHead.clone());
+                headMesh.position.set(0, 2.05, 0);
+                registerInspectable(headMesh, {
+                    name: "Hydrophilic Ionic Head (—COO⁻ Carboxylate Group)",
+                    func: "Water-loving (polar) negatively charged head of the soap molecule.",
+                    connects: "Stays outside in contact with polar water (H₂O) and Na⁺ ions.",
+                    action: "Creates a negatively charged outer shell around the micelle so micelles repel each other and don't clump back!"
+                });
+                soapGroup.add(headMesh);
+
+                // Wavy Hydrocarbon Tail (—C₁₇H₃₅) built with 6 zig-zag segments
+                const tailGroup = new THREE.Group();
+                const points = [];
+                for (let s = 0; s <= 6; s++) {
+                    const y = 0.25 + (s / 6) * 1.75;
+                    const zig = (s % 2 === 0 ? 0.14 : -0.14) * (s < 6 ? 1 : 0);
+                    points.push(new THREE.Vector3(zig, y, 0));
+                }
+                const curve = new THREE.CatmullRomCurve3(points);
+                const tubeGeo = new THREE.TubeGeometry(curve, 18, 0.1, 10, false);
+                const tailMesh = new THREE.Mesh(tubeGeo, mats.hydroTail.clone());
+                registerInspectable(tailMesh, {
+                    name: "Hydrophobic Hydrocarbon Tail (—C₁₇H₃₅ Chain)",
+                    func: "Water-fearing (non-polar) long carbon chain that dissolves in oil/grease.",
+                    connects: "Links the central oily dirt droplet to the outer hydrophilic ionic head.",
+                    action: "Dives deep inside the oil droplet during Stage 3 & 4 to trap the grease inside the micelle core."
+                });
+                tailGroup.add(tailMesh);
+                soapGroup.add(tailGroup);
+
+                // Associated Na+ Counter-ion
+                const naMesh = new THREE.Mesh(new THREE.SphereGeometry(0.2, 16, 16), mats.naIon.clone());
+                naMesh.position.set(0.45, 2.35, 0);
+                registerInspectable(naMesh, {
+                    name: "Sodium Counter-Ion (Na⁺)",
+                    func: "Positively charged ion released when soap (R-COONa) dissolves in water.",
+                    connects: "Hovers near the negatively charged —COO⁻ hydrophilic heads in water.",
+                    action: "In Hard Water, Ca²⁺/Mg²⁺ ions replace Na⁺ and precipitate soap as insoluble white Scum!"
+                });
+                soapGroup.add(naMesh);
+
+                // Random dispersed starting position in upper water
+                const startPos = new THREE.Vector3(
+                    (Math.random() - 0.5) * 14,
+                    3.5 + Math.random() * 4.5,
+                    (Math.random() - 0.5) * 12
+                );
+
+                rootGroup.add(soapGroup);
+                micelleScene.soapUnits.push({
+                    group: soapGroup,
+                    head: headMesh,
+                    tail: tailMesh,
+                    na: naMesh,
+                    dir: dir,
+                    startPos: startPos,
+                    randomRot: new THREE.Euler(Math.random() * 3, Math.random() * 3, Math.random() * 3)
+                });
+            }
+
+            // 4. Ambient Polar Water Molecules (H2O) & Hard Water Ions (Ca2+/Mg2+)
+            for (let i = 0; i < 45; i++) {
+                const wMesh = new THREE.Mesh(new THREE.SphereGeometry(0.16, 12, 12), mats.water);
+                wMesh.position.set(
+                    (Math.random() - 0.5) * 18,
+                    (Math.random() - 0.5) * 10,
+                    (Math.random() - 0.5) * 14
+                );
+                registerInspectable(wMesh, {
+                    name: "Polar Water Molecule (H₂O)",
+                    func: "Universal polar solvent that attracts the hydrophilic heads (—COO⁻) of soap.",
+                    connects: "Repels non-polar oil & hydrophobic tails, forcing tails inward to form a micelle.",
+                    action: "Carries the emulsified soap micelles away during rinsing (Stage 6)."
+                });
+                rootGroup.add(wMesh);
+                micelleScene.waterParticles.push({
+                    mesh: wMesh,
+                    vel: new THREE.Vector3((Math.random() - 0.5) * 0.04, (Math.random() - 0.5) * 0.04, (Math.random() - 0.5) * 0.04)
+                });
+            }
+
+            // Hard Water Ca2+ / Scum Precipitate Clumps
+            for (let i = 0; i < 18; i++) {
+                const caGroup = new THREE.Group();
+                const caIon = new THREE.Mesh(new THREE.SphereGeometry(0.28, 14, 14), mats.caIon);
+                const scumClump = new THREE.Mesh(new THREE.DodecahedronGeometry(0.48, 1), mats.scum);
+                scumClump.position.set(0.35, -0.2, 0);
+                caGroup.add(caIon);
+                caGroup.add(scumClump);
+                caGroup.position.set(
+                    (Math.random() - 0.5) * 12,
+                    -3.2 + Math.random() * 5,
+                    (Math.random() - 0.5) * 10
+                );
+                caGroup.visible = false;
+                registerInspectable(scumClump, {
+                    name: "Insoluble White Scum — (C₁₇H₃₅COO)₂Ca Precipitate",
+                    func: "Curdy white precipitate formed when soap reacts with Hard Water (Ca²⁺ / Mg²⁺ salts).",
+                    connects: "Binds soap anions into useless solid curds that stick to cloth instead of cleaning.",
+                    action: "Wastes soap and prevents lather/foam! (Detergents avoid this by using sulphonate heads)."
+                });
+                rootGroup.add(caGroup);
+                micelleScene.hardIons.push(caGroup);
+            }
+
+            // 5. Floating 3D Educational Labels
+            addFloatingLabel(oilMesh, new THREE.Vector3(0, 2.5, 0), "🟡 Oily Dirt Core (Hydrophobic)", oilMesh.userData.inspect);
+            addFloatingLabel(clothGroup, new THREE.Vector3(-4.5, 0.7, 0), "🧵 Cloth Fiber Surface", clothGroup.children[0].userData.inspect);
+            if (micelleScene.soapUnits.length > 0) {
+                addFloatingLabel(micelleScene.soapUnits[0].head, new THREE.Vector3(0, 0.7, 0), "🔵 Hydrophilic Head (—COO⁻)", micelleScene.soapUnits[0].head.userData.inspect);
+                addFloatingLabel(micelleScene.soapUnits[0].tail, new THREE.Vector3(0, 0.9, 0), "⚪ Hydrophobic Tail (—C₁₇H₃₅)", micelleScene.soapUnits[0].tail.userData.inspect);
+            }
+
+            populateInspector(micelleScene.soapUnits[0].head.userData.inspect);
+        }
+
+        function animateMicelleModule(dt, time) {
+            if (!micelleScene.oilMesh) return;
+
+            const st = state.stage;
+            const tempFactor = state.param1 / 35; // Agitation speed multiplier
+            const concRatio = Math.min(1, state.param2 / 100);
+            const hardness = state.param3;
+
+            // Single Soap Focus Subtype
+            if (state.subType === 'single_soap') {
+                micelleScene.oilMesh.visible = false;
+                micelleScene.clothGroup.visible = false;
+                const s = micelleScene.soapUnits[0];
+                if (s) {
+                    s.group.visible = true;
+                    s.group.position.set(0, -1.5, 0);
+                    s.group.scale.setScalar(2.4);
+                    s.group.rotation.set(0, time * 0.6, Math.PI / 4);
+                }
+                return;
+            } else {
+                micelleScene.oilMesh.visible = true;
+                micelleScene.clothGroup.visible = true;
+            }
+
+            // Oil Droplet Position & Shape across Stages 1 to 6
+            let targetOilY = -2.2;
+            let targetOilScale = new THREE.Vector3(1.25, 0.82, 1.25); // Flattened on cloth initially
+
+            if (st === 0) {
+                targetOilY = -2.5;
+                targetOilScale.set(1.35, 0.72, 1.35);
+            } else if (st === 1) {
+                targetOilY = -2.4;
+                targetOilScale.set(1.25, 0.8, 1.25);
+            } else if (st === 2) {
+                targetOilY = -2.0;
+                targetOilScale.set(1.1, 0.92, 1.1);
+            } else if (st === 3) {
+                targetOilY = -0.6;
+                targetOilScale.set(1.0, 1.0, 1.0); // Spherical encapsulated micelle
+            } else if (st === 4) {
+                targetOilY = 0.8 + Math.sin(time * 4 * tempFactor) * 0.35; // Agitation lifting
+                targetOilScale.set(1.0, 1.0, 1.0);
+            } else if (st === 5) {
+                targetOilY = 2.6 + Math.sin(time * 2.5) * 0.25;
+                targetOilScale.set(0.95, 0.95, 0.95);
+            }
+
+            micelleScene.oilMesh.position.y += (targetOilY - micelleScene.oilMesh.position.y) * 0.08;
+            micelleScene.oilMesh.scale.lerp(targetOilScale, 0.08);
+            if (st >= 4) {
+                micelleScene.oilMesh.position.x = Math.sin(time * 2.2 * tempFactor) * (st === 5 ? 2.2 : 0.6);
+            } else {
+                micelleScene.oilMesh.position.x *= 0.9;
+            }
+
+            const oilCenter = micelleScene.oilMesh.position;
+            const explodeOffset = state.exploded ? 1.8 : 0.0;
+
+            // Update Soap Amphiphiles
+            const activeCount = Math.floor(micelleScene.soapUnits.length * concRatio);
+            micelleScene.soapUnits.forEach((s, idx) => {
+                s.group.scale.setScalar(1.0);
+                // Cutaway filter: hide front hemisphere (z > 0.3) when Cutaway is ON
+                const isFrontHemisphere = s.dir.z > 0.25 && s.dir.x > -0.6;
+                if (st === 0 || idx >= activeCount || (state.cutaway && isFrontHemisphere && st >= 2)) {
+                    s.group.visible = false;
+                    return;
+                }
+                s.group.visible = true;
+
+                const up = new THREE.Vector3(0, 1, 0);
+                const targetQuat = new THREE.Quaternion().setFromUnitVectors(up, s.dir);
+
+                if (st === 1) {
+                    // Stage 2: Floating & dissociating in water
+                    const floatPos = s.startPos.clone().add(new THREE.Vector3(
+                        Math.sin(time * 1.5 + idx) * 0.4,
+                        Math.cos(time * 1.3 + idx) * 0.4,
+                        0
+                    ));
+                    s.group.position.lerp(floatPos, 0.06);
+                    s.group.rotation.x += 0.01 * tempFactor;
+                    s.group.rotation.y += 0.015 * tempFactor;
+                    s.na.position.set(0.65 + Math.sin(time * 3 + idx) * 0.25, 2.4, 0);
+                } else if (st === 2) {
+                    // Stage 3: Approaching oil droplet & orienting tails inward
+                    const approachPos = oilCenter.clone().addScaledVector(s.dir, 1.35 + explodeOffset);
+                    s.group.position.lerp(approachPos, 0.07);
+                    s.group.quaternion.slerp(targetQuat, 0.08);
+                    s.na.position.set(0.55, 2.55, 0);
+                } else if (st >= 3) {
+                    // Stage 4, 5, 6: Tightly locked spherical Micelle around oil core
+                    const lockDist = 0.65 + explodeOffset + Math.sin(time * 3 * tempFactor + idx) * 0.05;
+                    const micellePos = oilCenter.clone().addScaledVector(s.dir, lockDist);
+                    s.group.position.lerp(micellePos, 0.12);
+                    s.group.quaternion.slerp(targetQuat, 0.15);
+                    s.na.position.set(0.45, 2.5 + Math.sin(time * 4 + idx) * 0.15, 0);
+                }
+            });
+
+            // Hard Water Scum Visualization
+            const showScum = hardness > 15 || state.subType === 'hard_scum';
+            const numScum = state.subType === 'hard_scum' ? 18 : Math.floor((hardness / 100) * 18);
+            micelleScene.hardIons.forEach((scumGrp, idx) => {
+                scumGrp.visible = showScum && idx < numScum;
+                if (scumGrp.visible) {
+                    scumGrp.rotation.y += 0.01;
+                    scumGrp.position.y = -3.0 + Math.sin(time * 1.5 + idx) * 0.3;
+                }
+            });
+
+            // Water Brownian Motion
+            micelleScene.waterParticles.forEach((wp, i) => {
+                wp.mesh.position.addScaledVector(wp.vel, tempFactor * 1.8);
+                if (Math.abs(wp.mesh.position.x) > 9) wp.vel.x *= -1;
+                if (Math.abs(wp.mesh.position.y) > 5) wp.vel.y *= -1;
+                if (Math.abs(wp.mesh.position.z) > 7) wp.vel.z *= -1;
+            });
+        }
+
+        // ============================================================================
+        // 5. MODULE 2 BUILDER: COVALENT BONDING & 3D ELECTRON ORBITALS
+        // ============================================================================
+        let bondingScene = {};
+
+        function buildBondingModule() {
+            clearScene();
+            bondingScene = { atoms: [], sharedElectrons: [], bonds: [], rings: [] };
+
+            const mol = state.subType || 'ch4';
+            let atomConfigs = [];
+            let bondPairs = [];
+
+            if (mol === 'ch4') {
+                // Tetrahedral Methane (109.5 deg)
+                const r = 2.6;
+                atomConfigs = [
+                    { el: 'C', pos: new THREE.Vector3(0, 0, 0), rad: 0.78, mat: mats.carbon, name: "Central Carbon Atom (Z = 6, Config: 2, 4)" },
+                    { el: 'H', pos: new THREE.Vector3(0, r, 0), rad: 0.46, mat: mats.hydrogen, name: "Hydrogen Atom 1 (Z = 1, Duplet Shared)" },
+                    { el: 'H', pos: new THREE.Vector3(r * 0.94, -r * 0.33, 0), rad: 0.46, mat: mats.hydrogen, name: "Hydrogen Atom 2 (109.5° Tetrahedral)" },
+                    { el: 'H', pos: new THREE.Vector3(-r * 0.47, -r * 0.33, r * 0.81), rad: 0.46, mat: mats.hydrogen, name: "Hydrogen Atom 3 (109.5° Tetrahedral)" },
+                    { el: 'H', pos: new THREE.Vector3(-r * 0.47, -r * 0.33, -r * 0.81), rad: 0.46, mat: mats.hydrogen, name: "Hydrogen Atom 4 (109.5° Tetrahedral)" }
+                ];
+                bondPairs = [
+                    { a: 0, b: 1, order: 1 },
+                    { a: 0, b: 2, order: 1 },
+                    { a: 0, b: 3, order: 1 },
+                    { a: 0, b: 4, order: 1 }
+                ];
+            } else if (mol === 'c2h4') {
+                // Ethene (C2H4) - Double Bond Planar (120 deg)
+                atomConfigs = [
+                    { el: 'C', pos: new THREE.Vector3(-1.3, 0, 0), rad: 0.75, mat: mats.carbon, name: "Carbon-1 (sp² Hybridized, Double Bonded)" },
+                    { el: 'C', pos: new THREE.Vector3(1.3, 0, 0), rad: 0.75, mat: mats.carbon, name: "Carbon-2 (sp² Hybridized, Double Bonded)" },
+                    { el: 'H', pos: new THREE.Vector3(-2.6, 1.6, 0), rad: 0.45, mat: mats.hydrogen, name: "Hydrogen Atom (120° Trigonal Planar)" },
+                    { el: 'H', pos: new THREE.Vector3(-2.6, -1.6, 0), rad: 0.45, mat: mats.hydrogen, name: "Hydrogen Atom (120° Trigonal Planar)" },
+                    { el: 'H', pos: new THREE.Vector3(2.6, 1.6, 0), rad: 0.45, mat: mats.hydrogen, name: "Hydrogen Atom (120° Trigonal Planar)" },
+                    { el: 'H', pos: new THREE.Vector3(2.6, -1.6, 0), rad: 0.45, mat: mats.hydrogen, name: "Hydrogen Atom (120° Trigonal Planar)" }
+                ];
+                bondPairs = [
+                    { a: 0, b: 1, order: 2 },
+                    { a: 0, b: 2, order: 1 },
+                    { a: 0, b: 3, order: 1 },
+                    { a: 1, b: 4, order: 1 },
+                    { a: 1, b: 5, order: 1 }
+                ];
+            } else if (mol === 'c2h2') {
+                // Ethyne (C2H2) - Triple Bond Linear (180 deg)
+                atomConfigs = [
+                    { el: 'C', pos: new THREE.Vector3(-1.2, 0, 0), rad: 0.75, mat: mats.carbon, name: "Carbon-1 (sp Linear, Triple Bond C≡C)" },
+                    { el: 'C', pos: new THREE.Vector3(1.2, 0, 0), rad: 0.75, mat: mats.carbon, name: "Carbon-2 (sp Linear, Triple Bond C≡C)" },
+                    { el: 'H', pos: new THREE.Vector3(-3.3, 0, 0), rad: 0.45, mat: mats.hydrogen, name: "Terminal Hydrogen (180° Linear Geometry)" },
+                    { el: 'H', pos: new THREE.Vector3(3.3, 0, 0), rad: 0.45, mat: mats.hydrogen, name: "Terminal Hydrogen (180° Linear Geometry)" }
+                ];
+                bondPairs = [
+                    { a: 0, b: 1, order: 3 },
+                    { a: 0, b: 2, order: 1 },
+                    { a: 1, b: 3, order: 1 }
+                ];
+            } else if (mol === 'co2') {
+                // Carbon Dioxide (O=C=O)
+                atomConfigs = [
+                    { el: 'C', pos: new THREE.Vector3(0, 0, 0), rad: 0.75, mat: mats.carbon, name: "Central Carbon Atom (Shares 4 pairs total)" },
+                    { el: 'O', pos: new THREE.Vector3(-2.6, 0, 0), rad: 0.68, mat: mats.oxygen, name: "Oxygen Atom 1 (Z = 8, Shares 2 pairs: C=O)" },
+                    { el: 'O', pos: new THREE.Vector3(2.6, 0, 0), rad: 0.68, mat: mats.oxygen, name: "Oxygen Atom 2 (Z = 8, Shares 2 pairs: C=O)" }
+                ];
+                bondPairs = [
+                    { a: 0, b: 1, order: 2 },
+                    { a: 0, b: 2, order: 2 }
+                ];
+            } else if (mol === 's8') {
+                // Crown-shaped Sulphur Ring (S8 - NCERT Page 61 Q2)
+                const radius = 3.2;
+                for (let i = 0; i < 8; i++) {
+                    const ang = (i / 8) * Math.PI * 2;
+                    const y = (i % 2 === 0) ? 0.85 : -0.85;
+                    atomConfigs.push({
+                        el: 'S',
+                        pos: new THREE.Vector3(Math.cos(ang) * radius, y, Math.sin(ang) * radius),
+                        rad: 0.72,
+                        mat: mats.sulphur,
+                        name: `Sulphur Atom S${i + 1} (Z = 16, Config: 2,8,6 — Crown Ring)`
+                    });
+                    bondPairs.push({ a: i, b: (i + 1) % 8, order: 1 });
+                }
+            }
+
+            // Build 3D Atom Groups + Valence Orbit Rings
+            atomConfigs.forEach((cfg, idx) => {
+                const aGrp = new THREE.Group();
+                aGrp.position.copy(cfg.pos);
+
+                const nucleus = new THREE.Mesh(new THREE.SphereGeometry(cfg.rad, 28, 28), cfg.mat.clone());
+                const info = {
+                    name: cfg.name,
+                    func: cfg.el === 'C'
+                        ? "Tetravalent atom (4 valence e⁻). Cannot form C⁴⁺ or C⁴⁻; achieves octet by sharing 4 electron pairs."
+                        : cfg.el === 'H'
+                        ? "Monovalent atom (1 valence e⁻). Shares 1 pair of electrons to complete stable K-shell Duplet (2e⁻)."
+                        : cfg.el === 'O'
+                        ? "Divalent atom (6 valence e⁻). Shares 2 electron pairs to form a double covalent bond (=O)."
+                        : "Divalent Sulphur atom (6 valence e⁻). Forms 2 single covalent bonds in an 8-atom puckered Crown Ring (S₈).",
+                    connects: "Connected via overlapping valence orbital shells & shared electron pairs.",
+                    action: "Maintains strong intramolecular covalent bonds while experiencing weak intermolecular forces."
+                };
+                registerInspectable(nucleus, info);
+                aGrp.add(nucleus);
+
+                // Translucent Valence Electron Shell Torus Ring
+                const ringRad = cfg.rad * 2.15;
+                const ringGeo = new THREE.TorusGeometry(ringRad, 0.03, 12, 48);
+                const ringMat = new THREE.MeshBasicMaterial({ color: 0x38bdf8, transparent: true, opacity: 0.38 });
+                const ringMesh = new THREE.Mesh(ringGeo, ringMat);
+                ringMesh.rotation.x = Math.PI / 2;
+                aGrp.add(ringMesh);
+
+                rootGroup.add(aGrp);
+                bondingScene.atoms.push({
+                    group: aGrp,
+                    nucleus: nucleus,
+                    basePos: cfg.pos.clone(),
+                    ring: ringMesh,
+                    cfg: cfg
+                });
+
+                if (idx === 0 || (idx === 1 && mol !== 's8')) {
+                    addFloatingLabel(nucleus, new THREE.Vector3(0, cfg.rad + 0.55, 0), `${cfg.el} Atom`, info);
+                }
+            });
+
+            // Build Covalent Bond Cylinders & Orbiting Shared Electron Pairs
+            bondPairs.forEach((bp, bIdx) => {
+                const pA = atomConfigs[bp.a].pos;
+                const pB = atomConfigs[bp.b].pos;
+                const bMat = bp.order > 1 ? mats.doubleBond : mats.bond;
+                const cylGrp = createCylinderBond(pA, pB, 0.12, bMat, bp.order);
+
+                const bInfo = {
+                    name: `${bp.order === 1 ? 'Single' : bp.order === 2 ? 'Double' : 'Triple'} Covalent Bond (${bp.order * 2} Shared Electrons)`,
+                    func: `Holds atoms together by mutual sharing of ${bp.order} electron pair(s).`,
+                    connects: `Bridges ${atomConfigs[bp.a].el} and ${atomConfigs[bp.b].el} nuclei.`,
+                    action: "Shared electrons orbit both nuclei simultaneously, completing their respective octet/duplet shells."
+                };
+                cylGrp.children.forEach(c => registerInspectable(c, bInfo));
+                rootGroup.add(cylGrp);
+                bondingScene.bonds.push({ meshGroup: cylGrp, a: bp.a, b: bp.b, order: bp.order });
+
+                // Create glowing Shared Electron Pairs orbiting the bond midpoint
+                const numElectrons = bp.order * 2;
+                for (let e = 0; e < numElectrons; e++) {
+                    const eMesh = new THREE.Mesh(new THREE.SphereGeometry(0.16, 16, 16), mats.electronShared);
+                    registerInspectable(eMesh, {
+                        name: "Shared Valence Electron (e⁻)",
+                        func: "Participates in covalent bonding by being counted in the valence shell of both bonded atoms.",
+                        connects: "Circulates in the overlapping molecular orbital region between nuclei.",
+                        action: "Prevents internuclear repulsion and locks the molecular geometry."
+                    });
+                    rootGroup.add(eMesh);
+                    bondingScene.sharedElectrons.push({
+                        mesh: eMesh,
+                        a: bp.a,
+                        b: bp.b,
+                        phase: (e / numElectrons) * Math.PI * 2 + bIdx,
+                        radius: 0.45 + (e % 2) * 0.18
+                    });
+                }
+            });
+
+            if (bondingScene.atoms.length > 0) {
+                populateInspector(bondingScene.atoms[0].nucleus.userData.inspect);
+            }
+        }
+
+        function animateBondingModule(dt, time) {
+            if (!bondingScene.atoms || bondingScene.atoms.length === 0) return;
+
+            // Separation distance controlled by Stage 1 (separated) or Slider 3 or Explode button
+            let sepMultiplier = 1.0;
+            if (state.stage === 0) sepMultiplier = 1.65;
+            else if (state.stage === 1) sepMultiplier = 1.25;
+            sepMultiplier += (state.param3 / 100) * 0.8 + (state.exploded ? 0.65 : 0);
+
+            const vibAmp = (state.param1 - 50) / 8000;
+            const orbitSpeed = (state.param2 / 100) * 3.5;
+
+            bondingScene.atoms.forEach((a, idx) => {
+                const target = a.basePos.clone().multiplyScalar(sepMultiplier);
+                target.x += Math.sin(time * 8 + idx) * vibAmp;
+                target.y += Math.cos(time * 7 + idx) * vibAmp;
+                a.group.position.lerp(target, 0.1);
+                a.ring.rotation.z = time * 0.8;
+                a.ring.rotation.y = Math.sin(time * 0.5 + idx) * 0.35;
+                // Cutaway view makes nuclei semi-transparent to see interior bond axes
+                a.nucleus.material.transparent = state.cutaway;
+                a.nucleus.material.opacity = state.cutaway ? 0.45 : 1.0;
+            });
+
+            // Hide/show bond cylinders when atoms are far apart in Stage 1
+            bondingScene.bonds.forEach(b => {
+                b.meshGroup.visible = sepMultiplier < 1.45;
+            });
+
+            // Orbit Shared Electrons in figure-8 / circular paths around bond midpoints
+            bondingScene.sharedElectrons.forEach((se, idx) => {
+                const posA = bondingScene.atoms[se.a].group.position;
+                const posB = bondingScene.atoms[se.b].group.position;
+                const mid = new THREE.Vector3().addVectors(posA, posB).multiplyScalar(0.5);
+                const ang = time * orbitSpeed + se.phase;
+                se.mesh.position.set(
+                    mid.x + Math.cos(ang) * se.radius,
+                    mid.y + Math.sin(ang) * se.radius,
+                    mid.z + Math.sin(ang * 2) * (se.radius * 0.5)
+                );
+            });
+        }
+
+        // ============================================================================
+        // 6. MODULE 3 BUILDER: 3D ALLOTROPES OF CARBON (DIAMOND, GRAPHITE, C60)
+        // ============================================================================
+        let allotropeScene = {};
+
+        function buildAllotropesModule() {
+            clearScene();
+            allotropeScene = { layers: [], delocalizedElectrons: [], atoms: [] };
+
+            const type = state.subType || 'diamond';
+
+            if (type === 'diamond') {
+                // Build Tetrahedral Diamond Crystal Lattice
+                const dGroup = new THREE.Group();
+                const coords = [
+                    new THREE.Vector3(0, 0, 0),
+                    new THREE.Vector3(1.5, 1.5, 1.5),
+                    new THREE.Vector3(-1.5, -1.5, 1.5),
+                    new THREE.Vector3(1.5, -1.5, -1.5),
+                    new THREE.Vector3(-1.5, 1.5, -1.5),
+                    // Outer Second Shell
+                    new THREE.Vector3(3.0, 0, 3.0),
+                    new THREE.Vector3(0, 3.0, 3.0),
+                    new THREE.Vector3(3.0, 3.0, 0),
+                    new THREE.Vector3(-3.0, 0, 3.0),
+                    new THREE.Vector3(0, -3.0, 3.0),
+                    new THREE.Vector3(-3.0, -3.0, 0),
+                    new THREE.Vector3(3.0, -3.0, 0),
+                    new THREE.Vector3(0, -3.0, -3.0),
+                    new THREE.Vector3(3.0, 0, -3.0),
+                    new THREE.Vector3(-3.0, 3.0, 0),
+                    new THREE.Vector3(0, 3.0, -3.0),
+                    new THREE.Vector3(-3.0, 0, -3.0)
+                ];
+
+                const diamondAtomMat = new THREE.MeshPhysicalMaterial({
+                    color: 0x38bdf8,
+                    roughness: 0.1,
+                    metalness: 0.1,
+                    transmission: 0.4,
+                    transparent: true,
+                    opacity: 0.92
+                });
+
+                coords.forEach((p, idx) => {
+                    const m = new THREE.Mesh(new THREE.SphereGeometry(0.52, 24, 24), idx === 0 ? mats.carbon : diamondAtomMat);
+                    m.position.copy(p);
+                    const info = {
+                        name: `sp³ Tetrahedral Carbon Atom #${idx + 1} (Diamond Lattice)`,
+                        func: "Bonded covalently to 4 other Carbon atoms in a rigid 3-dimensional tetrahedral array (109.5°).",
+                        connects: "C—C single bond length = 154 pm in all directions.",
+                        action: "Zero free electrons (Electrical Insulator) & extreme 3D network rigidity (Hardest natural substance)."
+                    };
+                    registerInspectable(m, info);
+                    dGroup.add(m);
+                    allotropeScene.atoms.push({ mesh: m, basePos: p.clone() });
+                    if (idx === 0) {
+                        addFloatingLabel(m, new THREE.Vector3(0, 0.9, 0), "💎 Central sp³ Carbon (4 Bonds)", info);
+                    }
+                });
+
+                // Connect atoms within bond distance (~2.65 units)
+                for (let i = 0; i < coords.length; i++) {
+                    for (let j = i + 1; j < coords.length; j++) {
+                        if (coords[i].distanceTo(coords[j]) < 2.75) {
+                            const b = createCylinderBond(coords[i], coords[j], 0.14, mats.bond, 1);
+                            dGroup.add(b);
+                        }
+                    }
+                }
+                rootGroup.add(dGroup);
+                allotropeScene.mainGroup = dGroup;
+                populateInspector(allotropeScene.atoms[0].mesh.userData.inspect);
+
+            } else if (type === 'graphite') {
+                // Build 3 Stacked Hexagonal Graphene Sheets + Flowing Free Electrons
+                const layerY = [-2.7, 0, 2.7];
+                const hexR = 1.42;
+
+                layerY.forEach((yVal, lIdx) => {
+                    const layerGrp = new THREE.Group();
+                    layerGrp.position.y = yVal;
+                    const pts = [];
+
+                    // Generate honeycomb vertices
+                    for (let row = -1; row <= 1; row++) {
+                        for (let col = -1; col <= 1; col++) {
+                            const cx = col * hexR * Math.sqrt(3) + (row % 2 !== 0 ? (hexR * Math.sqrt(3)) / 2 : 0);
+                            const cz = row * hexR * 1.5;
+                            for (let k = 0; k < 6; k++) {
+                                const ang = (k / 6) * Math.PI * 2 + Math.PI / 6;
+                                const vx = cx + Math.cos(ang) * hexR;
+                                const vz = cz + Math.sin(ang) * hexR;
+                                if (!pts.some(p => Math.hypot(p.x - vx, p.z - vz) < 0.25)) {
+                                    pts.push(new THREE.Vector3(vx, 0, vz));
+                                }
+                            }
+                        }
+                    }
+
+                    pts.forEach((p, aIdx) => {
+                        const m = new THREE.Mesh(new THREE.SphereGeometry(0.36, 18, 18), mats.carbon.clone());
+                        m.position.copy(p);
+                        const info = {
+                            name: `sp² Carbon Atom — Graphite Layer ${lIdx + 1}`,
+                            func: "Each Carbon bonds to only 3 neighbors in a flat hexagonal sheet (120°).",
+                            connects: "3 valence electrons form planar covalent bonds; the 4th electron is FREE (delocalized).",
+                            action: "Weak Van der Waals forces between layers let sheets slide (slippery lubricant) & free electrons conduct electricity!"
+                        };
+                        registerInspectable(m, info);
+                        layerGrp.add(m);
+                        if (lIdx === 1 && aIdx === 0) {
+                            addFloatingLabel(m, new THREE.Vector3(0, 0.8, 0), "✏️ Hexagonal Sheet (3 Bonds/C)", info);
+                        }
+                    });
+
+                    // Connect adjacent honeycomb carbons
+                    for (let i = 0; i < pts.length; i++) {
+                        for (let j = i + 1; j < pts.length; j++) {
+                            const d = pts[i].distanceTo(pts[j]);
+                            if (d > 1.2 && d < 1.6) {
+                                const b = createCylinderBond(pts[i], pts[j], 0.09, mats.bond, 1);
+                                layerGrp.add(b);
+                            }
+                        }
+                    }
+
+                    rootGroup.add(layerGrp);
+                    allotropeScene.layers.push({ group: layerGrp, baseY: yVal });
+                });
+
+                // Delocalized Free Electrons moving between Graphite layers
+                for (let e = 0; e < 32; e++) {
+                    const eMesh = new THREE.Mesh(new THREE.SphereGeometry(0.14, 12, 12), mats.electronShared);
+                    eMesh.position.set(
+                        (Math.random() - 0.5) * 6,
+                        layerY[e % 3] + (Math.random() - 0.5) * 0.6,
+                        (Math.random() - 0.5) * 6
+                    );
+                    registerInspectable(eMesh, {
+                        name: "4th Delocalized Free Electron (Mobile Charge Carrier)",
+                        func: "Unhybridized 4th valence electron of Carbon that is free to move across the hexagonal Graphite sheet.",
+                        connects: "Flows across the pi-electron cloud when Voltage is applied.",
+                        action: "Makes Graphite an excellent non-metallic conductor of electricity!"
+                    });
+                    rootGroup.add(eMesh);
+                    allotropeScene.delocalizedElectrons.push(eMesh);
+                }
+
+                addFloatingLabel(allotropeScene.delocalizedElectrons[0], new THREE.Vector3(0, 0.5, 0), "⚡ Free 4th Electron (Conducts Current)", allotropeScene.delocalizedElectrons[0].userData.inspect);
+                populateInspector(allotropeScene.delocalizedElectrons[0].userData.inspect);
+
+            } else if (type === 'fullerene') {
+                // Build Buckminsterfullerene C60 Geodesic Cage (60 vertices via cyclic permutations of (0, ±1, ±3φ), etc.)
+                const c60Group = new THREE.Group();
+                const phi = (1 + Math.sqrt(5)) / 2;
+                const rawVerts = [];
+
+                function addPerms(a, b, c) {
+                    const perms = [[a, b, c], [b, c, a], [c, a, b]];
+                    perms.forEach(([x, y, z]) => {
+                        const sx = x === 0 ? [0] : [-x, x];
+                        const sy = y === 0 ? [0] : [-y, y];
+                        const sz = z === 0 ? [0] : [-z, z];
+                        sx.forEach(vx => sy.forEach(vy => sz.forEach(vz => {
+                            rawVerts.push(new THREE.Vector3(vx, vy, vz));
+                        })));
+                    });
+                }
+                addPerms(0, 1, 3 * phi);
+                addPerms(1, 2 + phi, 2 * phi);
+                addPerms(phi, 2, 2 * phi + 1);
+
+                const scale = 0.72;
+                rawVerts.forEach((v, idx) => {
+                    v.multiplyScalar(scale);
+                    const m = new THREE.Mesh(new THREE.SphereGeometry(0.28, 16, 16), mats.carbon.clone());
+                    m.position.copy(v);
+                    const info = {
+                        name: `Fullerene Carbon C${idx + 1} (Buckminsterfullerene C₆₀)`,
+                        func: "Part of a 60-carbon spherical geodesic cage containing 20 hexagons and 12 pentagons.",
+                        connects: "Bonded to 3 adjacent carbons via two single bonds and one double bond.",
+                        action: "Forms a hollow soccer-ball molecule discovered by Kroto, Curl & Smalley."
+                    };
+                    registerInspectable(m, info);
+                    c60Group.add(m);
+                    allotropeScene.atoms.push({ mesh: m, basePos: v.clone() });
+                });
+
+                for (let i = 0; i < rawVerts.length; i++) {
+                    for (let j = i + 1; j < rawVerts.length; j++) {
+                        const d = rawVerts[i].distanceTo(rawVerts[j]);
+                        if (d > 1.2 * scale && d < 2.2 * scale) {
+                            const b = createCylinderBond(rawVerts[i], rawVerts[j], 0.075, mats.doubleBond, 1);
+                            c60Group.add(b);
+                        }
+                    }
+                }
+
+                addFloatingLabel(c60Group, new THREE.Vector3(0, 4.1, 0), "⚽ Buckminsterfullerene (C₆₀ Cage)", allotropeScene.atoms[0].mesh.userData.inspect);
+                rootGroup.add(c60Group);
+                allotropeScene.mainGroup = c60Group;
+                populateInspector(allotropeScene.atoms[0].mesh.userData.inspect);
+            }
+        }
+
+        function animateAllotropesModule(dt, time) {
+            const type = state.subType || 'diamond';
+            const shear = state.param3 / 100; // Mechanical shear slider
+            const voltage = state.param2;     // Applied voltage slider
+            const explode = state.exploded ? 1.45 : 1.0;
+
+            if (type === 'graphite') {
+                // Shear Force slides Graphite layers horizontally over each other!
+                allotropeScene.layers.forEach((l, idx) => {
+                    const dir = idx === 0 ? -1 : idx === 2 ? 1 : 0;
+                    const slideOffset = dir * shear * 2.8 + (shear > 0.05 ? Math.sin(time * 3) * dir * 0.4 : 0);
+                    l.group.position.x += (slideOffset - l.group.position.x) * 0.1;
+                    l.group.position.y = l.baseY * explode;
+                });
+
+                // Delocalized electrons drift rapidly when Voltage > 0
+                allotropeScene.delocalizedElectrons.forEach((eMesh, idx) => {
+                    eMesh.position.x += (voltage / 12) * 0.12;
+                    eMesh.position.z += Math.sin(time * 5 + idx) * 0.03;
+                    if (eMesh.position.x > 4.2) eMesh.position.x = -4.2;
+                });
+            } else if (allotropeScene.mainGroup) {
+                allotropeScene.mainGroup.scale.lerp(new THREE.Vector3(explode, explode, explode), 0.1);
+                allotropeScene.mainGroup.rotation.y += 0.003;
+            }
+        }
+
+        // ============================================================================
+        // 7. MODULE 4 BUILDER: STRUCTURAL ISOMERS & FUNCTIONAL GROUPS 3D
+        // ============================================================================
+        let isomerScene = {};
+
+        function buildIsomersModule() {
+            clearScene();
+            isomerScene = { group: new THREE.Group(), fgMeshes: [] };
+            rootGroup.add(isomerScene.group);
+
+            const sub = state.subType || 'n_butane';
+            let atoms = [];
+            let bonds = [];
+
+            if (sub === 'n_butane') {
+                // Straight Chain Butane (C4H10)
+                atoms = [
+                    { el: 'C', p: [-3.3, -0.4, 0], fg: false, label: "C1 (Terminal Methyl —CH₃)" },
+                    { el: 'C', p: [-1.1, 0.4, 0], fg: false, label: "C2 (Methylene —CH₂—)" },
+                    { el: 'C', p: [1.1, -0.4, 0], fg: false, label: "C3 (Methylene —CH₂—)" },
+                    { el: 'C', p: [3.3, 0.4, 0], fg: false, label: "C4 (Terminal Methyl —CH₃)" },
+                    // 10 Hydrogens
+                    { el: 'H', p: [-4.3, 0.3, 0] }, { el: 'H', p: [-3.4, -1.2, 0.9] }, { el: 'H', p: [-3.4, -1.2, -0.9] },
+                    { el: 'H', p: [-1.1, 1.3, 0.9] }, { el: 'H', p: [-1.1, 1.3, -0.9] },
+                    { el: 'H', p: [1.1, -1.3, 0.9] }, { el: 'H', p: [1.1, -1.3, -0.9] },
+                    { el: 'H', p: [4.3, -0.3, 0] }, { el: 'H', p: [3.4, 1.2, 0.9] }, { el: 'H', p: [3.4, 1.2, -0.9] }
+                ];
+                bonds = [
+                    [0, 1, 1], [1, 2, 1], [2, 3, 1],
+                    [0, 4, 1], [0, 5, 1], [0, 6, 1],
+                    [1, 7, 1], [1, 8, 1],
+                    [2, 9, 1], [2, 10, 1],
+                    [3, 11, 1], [3, 12, 1], [3, 13, 1]
+                ];
+            } else if (sub === 'iso_butane') {
+                // Branched Chain Iso-butane / 2-Methylpropane (C4H10)
+                atoms = [
+                    { el: 'C', p: [0, 0, 0], fg: true, label: "Central Branched Carbon (CH)" },
+                    { el: 'C', p: [-2.2, -0.8, 0], fg: false, label: "Left Methyl Group (—CH₃)" },
+                    { el: 'C', p: [2.2, -0.8, 0], fg: false, label: "Right Methyl Group (—CH₃)" },
+                    { el: 'C', p: [0, 2.1, 0], fg: true, label: "Branched Methyl Group (—CH₃)" },
+                    // 10 Hydrogens
+                    { el: 'H', p: [0, -0.4, 1.2] },
+                    { el: 'H', p: [-3.1, -0.1, 0] }, { el: 'H', p: [-2.3, -1.6, 0.9] }, { el: 'H', p: [-2.3, -1.6, -0.9] },
+                    { el: 'H', p: [3.1, -0.1, 0] }, { el: 'H', p: [2.3, -1.6, 0.9] }, { el: 'H', p: [2.3, -1.6, -0.9] },
+                    { el: 'H', p: [0, 2.9, 1.0] }, { el: 'H', p: [0.9, 2.8, -0.6] }, { el: 'H', p: [-0.9, 2.8, -0.6] }
+                ];
+                bonds = [
+                    [0, 1, 1], [0, 2, 1], [0, 3, 1], [0, 4, 1],
+                    [1, 5, 1], [1, 6, 1], [1, 7, 1],
+                    [2, 8, 1], [2, 9, 1], [2, 10, 1],
+                    [3, 11, 1], [3, 12, 1], [3, 13, 1]
+                ];
+            } else if (sub === 'neo_pentane') {
+                // Neo-pentane / 2,2-Dimethylpropane (C5H12)
+                atoms = [
+                    { el: 'C', p: [0, 0, 0], fg: true, label: "Central Quaternary Carbon (Bonded to 4 Carbons)" },
+                    { el: 'C', p: [0, 2.2, 0], fg: false, label: "Top Methyl (—CH₃)" },
+                    { el: 'C', p: [2.1, -0.7, 0], fg: false, label: "Right Methyl (—CH₃)" },
+                    { el: 'C', p: [-1.1, -0.7, 1.8], fg: false, label: "Front-Left Methyl (—CH₃)" },
+                    { el: 'C', p: [-1.1, -0.7, -1.8], fg: false, label: "Back-Left Methyl (—CH₃)" }
+                ];
+                bonds = [[0, 1, 1], [0, 2, 1], [0, 3, 1], [0, 4, 1]];
+                // Add 3 H atoms around each outer C
+                for (let c = 1; c <= 4; c++) {
+                    const cp = new THREE.Vector3(...atoms[c].p);
+                    const dir = cp.clone().normalize();
+                    for (let k = 0; k < 3; k++) {
+                        const ang = (k / 3) * Math.PI * 2;
+                        const hp = cp.clone().add(dir.clone().multiplyScalar(0.6)).add(new THREE.Vector3(Math.cos(ang) * 0.9, (k - 1) * 0.5, Math.sin(ang) * 0.9));
+                        atoms.push({ el: 'H', p: [hp.x, hp.y, hp.z] });
+                        bonds.push([c, atoms.length - 1, 1]);
+                    }
+                }
+            } else if (sub === 'ethanol') {
+                // Ethanol (CH3-CH2-OH)
+                atoms = [
+                    { el: 'C', p: [-2.0, -0.3, 0], fg: false, label: "Methyl Carbon (CH₃—)" },
+                    { el: 'C', p: [0.2, 0.4, 0], fg: false, label: "Methylene Carbon (—CH₂—)" },
+                    { el: 'O', p: [2.1, -0.4, 0], fg: true, label: "Alcohol Oxygen Heteroatom (—OH Group)" },
+                    { el: 'H', p: [3.1, 0.2, 0], fg: true, label: "Hydroxyl Hydrogen (Acidic H in —OH)" },
+                    // Aliphatic H
+                    { el: 'H', p: [-3.0, 0.3, 0] }, { el: 'H', p: [-2.1, -1.1, 0.9] }, { el: 'H', p: [-2.1, -1.1, -0.9] },
+                    { el: 'H', p: [0.2, 1.2, 0.9] }, { el: 'H', p: [0.2, 1.2, -0.9] }
+                ];
+                bonds = [
+                    [0, 1, 1], [1, 2, 1], [2, 3, 1],
+                    [0, 4, 1], [0, 5, 1], [0, 6, 1],
+                    [1, 7, 1], [1, 8, 1]
+                ];
+            } else if (sub === 'ethanoic') {
+                // Ethanoic Acid (CH3-COOH)
+                atoms = [
+                    { el: 'C', p: [-1.9, -0.2, 0], fg: false, label: "Methyl Carbon (CH₃—)" },
+                    { el: 'C', p: [0.4, 0.1, 0], fg: true, label: "Carboxyl Carbon (—COOH)" },
+                    { el: 'O', p: [1.1, 1.9, 0], fg: true, label: "Carbonyl Oxygen (=O Double Bond)" },
+                    { el: 'O', p: [1.8, -1.2, 0], fg: true, label: "Hydroxyl Oxygen (—OH Single Bond)" },
+                    { el: 'H', p: [2.9, -0.8, 0], fg: true, label: "Acidic Proton (H⁺ released in water)" },
+                    // Methyl H
+                    { el: 'H', p: [-2.8, 0.5, 0] }, { el: 'H', p: [-2.1, -1.0, 0.9] }, { el: 'H', p: [-2.1, -1.0, -0.9] }
+                ];
+                bonds = [
+                    [0, 1, 1], [1, 2, 2], [1, 3, 1], [3, 4, 1],
+                    [0, 5, 1], [0, 6, 1], [0, 7, 1]
+                ];
+            } else if (sub === 'benzene') {
+                // Benzene Ring (C6H6)
+                const rC = 2.3;
+                const rH = 3.6;
+                for (let i = 0; i < 6; i++) {
+                    const ang = (i / 6) * Math.PI * 2;
+                    atoms.push({
+                        el: 'C',
+                        p: [Math.cos(ang) * rC, Math.sin(ang) * rC, 0],
+                        fg: i % 2 === 0,
+                        label: `Ring Carbon C${i + 1} (sp² Aromatic Benzene C₆H₆)`
+                    });
+                }
+                for (let i = 0; i < 6; i++) {
+                    const ang = (i / 6) * Math.PI * 2;
+                    atoms.push({
+                        el: 'H',
+                        p: [Math.cos(ang) * rH, Math.sin(ang) * rH, 0],
+                        fg: false
+                    });
+                    // Alternate single and double C-C bonds
+                    bonds.push([i, (i + 1) % 6, (i % 2 === 0) ? 2 : 1]);
+                    bonds.push([i, i + 6, 1]);
+                }
+            }
+
+            // Instantiate 3D Atoms
+            atoms.forEach((a, idx) => {
+                const rad = a.el === 'C' ? 0.68 : a.el === 'O' ? 0.64 : 0.42;
+                const baseMat = a.el === 'C' ? mats.carbon : a.el === 'O' ? mats.oxygen : mats.hydrogen;
+                const m = new THREE.Mesh(new THREE.SphereGeometry(rad, 24, 24), baseMat.clone());
+                m.position.set(...a.p);
+
+                const info = {
+                    name: a.label || `${a.el} Atom (#${idx + 1})`,
+                    func: a.fg
+                        ? "Key Functional Group / Branching Center that defines the IUPAC suffix & chemical reactivity!"
+                        : "Hydrocarbon chain backbone atom satisfying tetravalency/duplet.",
+                    connects: "Covalently linked within the 3D molecular framework.",
+                    action: sub.includes('butane') || sub.includes('pentane')
+                        ? "Demonstrates Structural Isomerism: identical formula, different 3D carbon skeleton!"
+                        : "Dictates physical & chemical properties of the homologous series."
+                };
+                registerInspectable(m, info);
+                isomerScene.group.add(m);
+                if (a.fg) isomerScene.fgMeshes.push(m);
+
+                if (idx === 0 || (a.el === 'O' && idx === 2)) {
+                    addFloatingLabel(m, new THREE.Vector3(0, rad + 0.5, 0), a.label || `${a.el} Atom`, info);
+                }
+            });
+
+            // Instantiate Bonds
+            bonds.forEach(([iA, iB, order]) => {
+                const pA = new THREE.Vector3(...atoms[iA].p);
+                const pB = new THREE.Vector3(...atoms[iB].p);
+                const b = createCylinderBond(pA, pB, 0.12, order === 2 ? mats.doubleBond : mats.bond, order);
+                isomerScene.group.add(b);
+            });
+
+            if (isomerScene.group.children.length > 0) {
+                populateInspector(isomerScene.group.children[0].userData.inspect);
+            }
+        }
+
+        function animateIsomersModule(dt, time) {
+            if (!isomerScene.group) return;
+            const tumble = state.param1 / 250;
+            const scaleVal = (state.param2 / 100) * (state.exploded ? 1.35 : 1.0);
+            const fgGlow = state.param3 / 100;
+
+            isomerScene.group.rotation.y += 0.004 * tumble;
+            isomerScene.group.rotation.x = Math.sin(time * 0.7) * 0.15 * tumble;
+            isomerScene.group.scale.lerp(new THREE.Vector3(scaleVal, scaleVal, scaleVal), 0.1);
+
+            isomerScene.fgMeshes.forEach(m => {
+                m.material.emissive = new THREE.Color(0x14b8a6);
+                m.material.emissiveIntensity = (0.3 + Math.sin(time * 4) * 0.25) * fgGlow;
+            });
+        }
+
+        // ============================================================================
+        // 8. UI CONTROLLERS, RAYCAST INSPECTOR & MODULE SWITCHING
+        // ============================================================================
+        function handleCanvasClick(clientX, clientY) {
+            const rect = renderer.domElement.getBoundingClientRect();
+            mouse.x = ((clientX - rect.left) / rect.width) * 2 - 1;
+            mouse.y = -((clientY - rect.top) / rect.height) * 2 + 1;
+
+            raycaster.setFromCamera(mouse, camera);
+            const intersects = raycaster.intersectObjects(clickableMeshes, false);
+
+            if (intersects.length > 0) {
+                const hit = intersects[0].object;
+                if (hit.userData && hit.userData.inspect) {
+                    highlightSelectedMesh(hit);
+                    populateInspector(hit.userData.inspect);
+                }
+            }
+        }
+
+        function highlightSelectedMesh(mesh) {
+            if (state.selectedObject && state.selectedObject.material && state.selectedObject.userData.origEmissive !== undefined) {
+                state.selectedObject.material.emissive.setHex(state.selectedObject.userData.origEmissive);
+            }
+            state.selectedObject = mesh;
+            if (mesh.material && mesh.material.emissive) {
+                mesh.userData.origEmissive = mesh.material.emissive.getHex();
+                mesh.material.emissive.setHex(0x38bdf8);
+            }
+        }
+
+        function populateInspector(info) {
+            if (!info) return;
+            document.getElementById('insp-name').textContent = info.name;
+            document.getElementById('insp-function').textContent = info.func;
+            document.getElementById('insp-connects').textContent = info.connects;
+            document.getElementById('insp-action').textContent = info.action;
+        }
+
+        function switchModule(modName) {
+            state.currentModule = modName;
+            state.stage = 0;
+            state.stageProgress = 0;
+            state.cutaway = false;
+            state.exploded = false;
+            updateToolButtonsUI();
+
+            // Update Top Tabs
+            document.querySelectorAll('.module-tab').forEach(btn => {
+                btn.classList.remove('tab-active');
+                btn.classList.add('text-slate-300');
+            });
+            const activeTab = document.getElementById(`tab-${modName}`);
+            if (activeTab) {
+                activeTab.classList.add('tab-active');
+                activeTab.classList.remove('text-slate-300');
+            }
+
+            // Set Default SubType & Build Sub-Selector Buttons
+            const mData = moduleData[modName];
+            state.subType = mData.subOptions[0].id;
+            renderSubSelectorButtons();
+
+            // Configure Sliders for this Module
+            setupSlidersForModule(mData.params);
+
+            // Rebuild 3D Scene
+            rebuildCurrentModuleScene();
+            resetCameraView();
+            updateStageUI();
+        }
+
+        function renderSubSelectorButtons() {
+            const mData = moduleData[state.currentModule];
+            const containerEl = document.getElementById('sub-selector-buttons');
+            containerEl.innerHTML = '';
+
+            mData.subOptions.forEach(opt => {
+                const btn = document.createElement('button');
+                const isSelected = state.subType === opt.id;
+                btn.className = `px-2.5 py-1.5 rounded-lg text-[11px] font-bold transition flex items-center justify-center gap-1.5 border ${
+                    isSelected
+                        ? 'bg-teal-500/25 text-teal-200 border-teal-400 shadow-sm'
+                        : 'bg-slate-800/80 text-slate-300 border-slate-700 hover:bg-slate-700'
+                }`;
+                btn.innerHTML = `<i class="fa-solid ${opt.icon}"></i><span class="truncate">${opt.label}</span>`;
+                btn.onclick = () => {
+                    state.subType = opt.id;
+                    renderSubSelectorButtons();
+                    rebuildCurrentModuleScene();
+                };
+                containerEl.appendChild(btn);
+            });
+        }
+
+        function setupSlidersForModule(pConfig) {
+            const s1 = document.getElementById('slider-param1');
+            const s2 = document.getElementById('slider-param2');
+            const s3 = document.getElementById('slider-param3');
+
+            document.getElementById('param1-label').textContent = pConfig.p1.label;
+            s1.min = pConfig.p1.min; s1.max = pConfig.p1.max; s1.value = pConfig.p1.val;
+
+            document.getElementById('param2-label').textContent = pConfig.p2.label;
+            s2.min = pConfig.p2.min; s2.max = pConfig.p2.max; s2.value = pConfig.p2.val;
+
+            document.getElementById('param3-label').textContent = pConfig.p3.label;
+            s3.min = pConfig.p3.min; s3.max = pConfig.p3.max; s3.value = pConfig.p3.val;
+
+            updateParameters();
+        }
+
+        function updateParameters() {
+            const pConfig = moduleData[state.currentModule].params;
+            state.param1 = parseFloat(document.getElementById('slider-param1').value);
+            state.param2 = parseFloat(document.getElementById('slider-param2').value);
+            state.param3 = parseFloat(document.getElementById('slider-param3').value);
+
+            document.getElementById('param1-val').textContent = `${state.param1}${pConfig.p1.unit}`;
+            document.getElementById('param2-val').textContent = `${state.param2}${pConfig.p2.unit}`;
+
+            let p3Text = `${state.param3}${pConfig.p3.unit}`;
+            if (state.currentModule === 'micelle') {
+                p3Text = state.param3 > 20 ? `${state.param3} ppm (Hard - Scum!)` : `${state.param3} ppm (Soft)`;
+            }
+            document.getElementById('param3-val').textContent = p3Text;
+        }
+
+        function rebuildCurrentModuleScene() {
+            if (state.currentModule === 'micelle') buildMicelleModule();
+            else if (state.currentModule === 'bonding') buildBondingModule();
+            else if (state.currentModule === 'allotropes') buildAllotropesModule();
+            else if (state.currentModule === 'isomers') buildIsomersModule();
+        }
+
+        function updateStageUI() {
+            const mData = moduleData[state.currentModule];
+            const stObj = mData.stages[state.stage];
+
+            document.getElementById('step-badge').textContent = `STAGE ${state.stage + 1} OF 6`;
+            document.getElementById('progress-percent').textContent = `Stage ${state.stage + 1} / 6`;
+            document.getElementById('stage-title').textContent = stObj.title;
+            document.getElementById('stage-description').innerHTML = state.eduMode ? stObj.hinglish : stObj.scientific;
+            document.getElementById('exam-tip-text').textContent = stObj.tip;
+            document.getElementById('live-formula-box').textContent = stObj.formula;
+
+            // Update Stepper Dots
+            const dots = document.querySelectorAll('.stage-btn');
+            dots.forEach((dot, idx) => {
+                if (idx === state.stage) {
+                    dot.className = 'stage-btn h-2.5 rounded-full step-dot-active transition-all';
+                } else if (idx < state.stage) {
+                    dot.className = 'stage-btn h-2.5 rounded-full bg-teal-600/70 hover:bg-teal-400 transition-all';
+                } else {
+                    dot.className = 'stage-btn h-2.5 rounded-full bg-slate-700 hover:bg-slate-500 transition-all';
+                }
+            });
+        }
+
+        function setStage(idx) {
+            state.stage = Math.max(0, Math.min(5, idx));
+            state.stageProgress = 0;
+            updateStageUI();
+        }
+
+        function nextStep() {
+            setStage((state.stage + 1) % 6);
+        }
+
+        function prevStep() {
+            setStage((state.stage + 5) % 6);
+        }
+
+        function togglePlayPause() {
+            state.isPlaying = !state.isPlaying;
+            const icon = document.getElementById('icon-play');
+            icon.className = state.isPlaying ? 'fa-solid fa-pause text-sm' : 'fa-solid fa-play text-sm';
+        }
+
+        function restartSimulation() {
+            state.stage = 0;
+            state.stageProgress = 0;
+            state.isPlaying = true;
+            document.getElementById('icon-play').className = 'fa-solid fa-pause text-sm';
+            updateStageUI();
+        }
+
+        function cycleSpeed() {
+            const speeds = [0.5, 1.0, 1.5, 2.0];
+            const nextIdx = (speeds.indexOf(state.speed) + 1) % speeds.length;
+            state.speed = speeds[nextIdx];
+            document.getElementById('btn-speed').textContent = `${state.speed.toFixed(1)}x`;
+        }
+
+        function toggleEduMode() {
+            state.eduMode = !state.eduMode;
+            const label = document.getElementById('edu-mode-label');
+            const btn = document.getElementById('btn-edu-mode');
+            if (state.eduMode) {
+                label.textContent = 'Hinglish Classroom Mode: ON';
+                btn.className = 'px-3 py-1.5 rounded-lg text-xs font-bold border transition flex items-center gap-1.5 bg-amber-500/20 border-amber-400/50 text-amber-300';
+            } else {
+                label.textContent = 'Scientific Mode: ON';
+                btn.className = 'px-3 py-1.5 rounded-lg text-xs font-bold border transition flex items-center gap-1.5 bg-sky-500/20 border-sky-400/50 text-sky-300';
+            }
+            updateStageUI();
+        }
+
+        function toggleCutaway() {
+            state.cutaway = !state.cutaway;
+            updateToolButtonsUI();
+        }
+
+        function toggleExploded() {
+            state.exploded = !state.exploded;
+            updateToolButtonsUI();
+        }
+
+        function toggleLabels() {
+            state.showLabels = !state.showLabels;
+            labelsContainer.style.display = state.showLabels ? 'block' : 'none';
+            updateToolButtonsUI();
+        }
+
+        function toggleAutoRotate() {
+            state.autoRotate = !state.autoRotate;
+            updateToolButtonsUI();
+        }
+
+        function updateToolButtonsUI() {
+            const bCut = document.getElementById('btn-cutaway');
+            bCut.innerHTML = `<i class="fa-solid fa-circle-half-stroke text-teal-400"></i><span>Cutaway: ${state.cutaway ? 'ON' : 'OFF'}</span>`;
+            bCut.className = `px-2.5 py-1.5 rounded-lg text-xs font-semibold border transition flex items-center justify-center gap-1.5 ${
+                state.cutaway ? 'bg-teal-500/25 text-teal-200 border-teal-400' : 'bg-slate-800/90 text-slate-200 border-slate-600/80'
+            }`;
+
+            const bExp = document.getElementById('btn-exploded');
+            bExp.innerHTML = `<i class="fa-solid fa-arrows-up-down-left-right text-sky-400"></i><span>Explode: ${state.exploded ? 'ON' : 'OFF'}</span>`;
+            bExp.className = `px-2.5 py-1.5 rounded-lg text-xs font-semibold border transition flex items-center justify-center gap-1.5 ${
+                state.exploded ? 'bg-sky-500/25 text-sky-200 border-sky-400' : 'bg-slate-800/90 text-slate-200 border-slate-600/80'
+            }`;
+
+            const bLab = document.getElementById('btn-labels');
+            bLab.innerHTML = `<i class="fa-solid fa-tags"></i><span>3D Labels: ${state.showLabels ? 'ON' : 'OFF'}</span>`;
+            bLab.className = `px-2.5 py-1.5 rounded-lg text-xs font-semibold border transition flex items-center justify-center gap-1.5 ${
+                state.showLabels ? 'bg-teal-500/20 text-teal-300 border-teal-500/40' : 'bg-slate-800/90 text-slate-300 border-slate-600/80'
+            }`;
+
+            const bRot = document.getElementById('btn-autorotate');
+            bRot.innerHTML = `<i class="fa-solid fa-sync"></i><span>360° Spin: ${state.autoRotate ? 'ON' : 'OFF'}</span>`;
+            bRot.className = `px-2.5 py-1.5 rounded-lg text-xs font-semibold border transition flex items-center justify-center gap-1.5 ${
+                state.autoRotate ? 'bg-teal-500/20 text-teal-300 border-teal-500/40' : 'bg-slate-800/90 text-slate-200 border-slate-600/80'
+            }`;
+        }
+
+        // Update 2D screen projections of 3D floating HTML labels
+        function updateFloatingLabels() {
+            if (!state.showLabels) return;
+            const halfW = window.innerWidth / 2;
+            const halfH = window.innerHeight / 2;
+
+            activeLabels.forEach(item => {
+                if (!item.targetObj) return;
+                const worldPos = new THREE.Vector3();
+                item.targetObj.getWorldPosition(worldPos);
+                worldPos.add(item.offset);
+                worldPos.project(camera);
+
+                if (worldPos.z > 1) {
+                    item.el.style.opacity = '0';
+                    return;
+                }
+                const x = (worldPos.x * halfW) + halfW;
+                const y = -(worldPos.y * halfH) + halfH;
+                item.el.style.opacity = '1';
+                item.el.style.left = `${x}px`;
+                item.el.style.top = `${y}px`;
+            });
+        }
+
+        // ============================================================================
+        // 9. MAIN ANIMATION LOOP & RESIZE HANDLER
+        // ============================================================================
+        const clock = new THREE.Clock();
+
+        function animate() {
+            requestAnimationFrame(animate);
+
+            const dt = clock.getDelta();
+            const elapsed = clock.getElapsedTime();
+
+            // Auto-advance stages during Play mode
+            if (state.isPlaying) {
+                state.stageProgress += dt * 0.16 * state.speed;
+                if (state.stageProgress >= 1.0) {
+                    state.stageProgress = 0;
+                    state.stage = (state.stage + 1) % 6;
+                    updateStageUI();
+                }
+            }
+
+            if (state.autoRotate && !camCtrl.isDragging) {
+                camCtrl.theta += 0.0045 * state.speed;
+                updateCameraTransform();
+            }
+
+            // Dispatch Module-specific 3D Physics & Animations
+            if (state.currentModule === 'micelle') animateMicelleModule(dt, elapsed);
+            else if (state.currentModule === 'bonding') animateBondingModule(dt, elapsed);
+            else if (state.currentModule === 'allotropes') animateAllotropesModule(dt, elapsed);
+            else if (state.currentModule === 'isomers') animateIsomersModule(dt, elapsed);
+
+            updateFloatingLabels();
+            renderer.render(scene, camera);
+        }
+
+        window.addEventListener('resize', () => {
+            camera.aspect = window.innerWidth / window.innerHeight;
+            camera.updateProjectionMatrix();
+            renderer.setSize(window.innerWidth, window.innerHeight);
+        });
+
+        window.onload = function () {
+            switchModule('micelle');
+            animate();
+        };
+    </script>
+</body>
+</html>

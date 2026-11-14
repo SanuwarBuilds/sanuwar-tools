@@ -13,6 +13,26 @@
       "enabled": true
     },
     {
+      "id": "edu_physics_lab",
+      "title": "Class 10 NCERT 3D Physics Lab — Electricity",
+      "category": "Physics",
+      "summary": "Build circuits, measure current and voltage, and watch Ohm's law come alive in an interactive 3D electricity lab made for the Class 10 NCERT syllabus.",
+      "link": "/eduhelp/labs/electricity",
+      "date": "2026-11-14",
+      "pinned": false,
+      "enabled": true
+    },
+    {
+      "id": "edu_carbon_lab",
+      "title": "Carbon and its Compounds — 3D Interactive Lab",
+      "category": "Chemistry",
+      "summary": "Explore carbon bonding, allotropes and homologous series in a hands-on 3D chemistry lab that makes Class 10 carbon compounds easier to visualise.",
+      "link": "/eduhelp/labs/carbon-compounds",
+      "date": "2026-11-14",
+      "pinned": false,
+      "enabled": true
+    },
+    {
       "id": "edu_seba",
       "title": "SEBA exam notices and results — official portal",
       "category": "Result",
