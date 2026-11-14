@@ -5,6 +5,16 @@
     selected = "All",
     kind = "all";
   const grid = $("#downloads-grid");
+  const downloadFacts = (item) => {
+    const link = url(item.link);
+    const host = link ? new URL(link).hostname.replace(/^www\./, "") : "";
+    const size = Number.isSafeInteger(item.size) && item.size > 0 ? item.size : 0;
+    const units = [[1e9, "GB"], [1e6, "MB"], [1e3, "KB"]];
+    const unit = units.find(([scale]) => size >= scale);
+    const sizeLabel = unit ? `${(size / unit[0]).toFixed(1)} ${unit[1]}` : (size ? `${size} B` : "");
+    const text = [host && `Source: ${host}`, sizeLabel].filter(Boolean).join(" · ");
+    return text ? el("p", { class: "download-facts" }, text) : null;
+  };
   const fileType = (file) => {
     let path = "";
     try {
@@ -510,15 +520,8 @@
           : []),
       ),
     ];
-    const safe = url(item.link);
-    if (safe)
-      nodes.push(
-        el(
-          "p",
-          { class: "dialog-description" },
-          `Source: ${new URL(safe).hostname}`,
-        ),
-      );
+    const facts = downloadFacts(item);
+    if (facts) nodes.push(facts);
     if (type.kind !== "file" && !item.locked && !item.private_delivery)
       nodes.push(
         el(
@@ -639,6 +642,7 @@
             el("p", { class: "download-description" }, item.description || ""),
             stamp(item),
             priceLabel(item),
+            ...(!item.is_album ? [downloadFacts(item)].filter(Boolean) : []),
             el(
               "div",
               { class: "card-bottom" },

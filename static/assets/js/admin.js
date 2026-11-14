@@ -801,6 +801,7 @@
         target.value = result.url;
         target.dataset.asset = result.asset ? JSON.stringify(result.asset) : "";
         target.dataset.uploadedAt = result.uploaded_at || "";
+        target.dataset.uploadedSize = result.size || "";
         target.dataset.uploadedUrl = result.url;
         target.dispatchEvent(new Event("input", { bubbles: true }));
         status.textContent = `${isImage ? "Cover ready" : "Uploaded"}: ${result.filename || file.name}${result.uploaded_at ? " · " + ST.dateLabel(result.uploaded_at) : ""} · Save changes to publish.`;
@@ -1093,6 +1094,9 @@
               : i.link === link.input.value
                 ? i.asset
                 : undefined,
+          size: link.input.dataset.uploadedSize && link.input.dataset.uploadedUrl === link.input.value
+            ? Number(link.input.dataset.uploadedSize)
+            : undefined,
           uploaded_at:
             link.input.dataset.uploadedUrl === link.input.value
               ? link.input.dataset.uploadedAt
@@ -1112,7 +1116,7 @@
                 name: r.name.input.value,
                 link: r.url.input.value,
                 ...(r.url.input.dataset.uploadedUrl === r.url.input.value
-                  ? { uploaded_at: r.url.input.dataset.uploadedAt }
+                  ? { uploaded_at: r.url.input.dataset.uploadedAt, size: Number(r.url.input.dataset.uploadedSize) || undefined }
                   : {}),
               }))
             : [],
@@ -2390,6 +2394,7 @@
             name: file.name,
             link: result.url,
             uploaded_at: result.uploaded_at,
+            size: result.size,
           });
           progress.style.width = `${(uploaded.length / files.files.length) * 80}%`;
         }
@@ -2402,10 +2407,11 @@
             description: `${currentFiles.length} files`,
             category: category.input.value,
             is_album: true,
-            album_files: currentFiles.map(({ name, link, uploaded_at }) => ({
+            album_files: currentFiles.map(({ name, link, uploaded_at, size }) => ({
               name,
               link,
               uploaded_at,
+              size,
             })),
             image: "",
             link: "",
@@ -2419,6 +2425,7 @@
               category: category.input.value,
               link: file.link,
               uploaded_at: file.uploaded_at,
+              size: file.size,
               is_album: false,
               album_files: [],
               image: "",

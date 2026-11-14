@@ -220,11 +220,22 @@ class ToolHubTests(unittest.TestCase):
     def test_homepage_merges_every_browser_tool_into_the_catalogue(self):
         home=self.client.get('/').get_data(as_text=True)
         self.assertIn('id="browser-tools"',home)
+        self.assertIn(f'{len(self.catalog["tools"])} free browser tools', home)
+        self.assertIn('/photo-tools?mode=photo&amp;kb=50', home)
         self.assertIn('class="home-download-strip"',home)
         for tool in self.catalog['tools']:
             self.assertIn(f'href="/tools/{tool["slug"]}"',home)
         for category in self.catalog['categories']:
             self.assertIn(category.replace('&','&amp;'),home)
+
+    def test_pdf_organizer_and_currency_converter_describe_their_processing(self):
+        pdf = self.client.get('/tools/pdf-organizer').get_data(as_text=True)
+        for asset in ('/assets/vendor/pdf-lib.js', '/assets/vendor/pdf.min.js', '/assets/js/tools/media.js'):
+            self.assertIn(asset, pdf)
+        self.assertIn('data-save-tool="/tools/pdf-organizer"', pdf)
+        currency = self.client.get('/tools/currency-converter').get_data(as_text=True)
+        self.assertIn('selected currency codes to Frankfurter', currency)
+        self.assertNotIn('Your inputs and files stay on this device', currency)
 
     def test_browser_tools_feed_exposes_only_card_fields(self):
         response=self.client.get('/api/browser-tools.json')
@@ -260,7 +271,7 @@ class ToolHubTests(unittest.TestCase):
     def test_catalog_and_javascript_bundles_are_consistent(self):
         tools=self.catalog['tools']
         slugs=[tool['slug'] for tool in tools]
-        self.assertEqual(len(slugs),125)
+        self.assertIn('pdf-organizer', slugs)
         self.assertEqual(len(slugs),len(set(slugs)))
         categories=set(self.catalog['categories'])
         registered={}

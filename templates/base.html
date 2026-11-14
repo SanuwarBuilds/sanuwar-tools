@@ -61,9 +61,10 @@
 {% if public_ui or request.path.startswith('/admin') %}<link rel="stylesheet" href="/assets/css/sanuwar.css?v=8">{% endif %}
 {% if public_ui and request.path != '/photo-tools' %}<link rel="stylesheet" href="/assets/css/neumorphism.css?v=1">{% endif %}
 {% if public_ui %}<link rel="stylesheet" href="/assets/css/nixtool.css?v=5">{% endif %}
-{% if public_ui %}<link rel="stylesheet" href="/assets/css/workbench.css?v=12">{% endif %}
+{% if public_ui %}<link rel="stylesheet" href="/assets/css/workbench.css?v=13">{% endif %}
 {% if public_ui %}<script nonce="{{ csp_nonce }}" src="/assets/js/sanuwar.js?v=6" defer></script>{% endif %}
-{% if public_ui %}<script nonce="{{ csp_nonce }}" src="/assets/js/workbench.js?v=1" defer></script>{% endif %}
+{% if public_ui %}<script nonce="{{ csp_nonce }}" src="/assets/js/workbench.js?v=1" defer></script>
+<script nonce="{{ csp_nonce }}" src="/assets/js/saved-tools.js?v=1" defer></script>{% endif %}
 {% if request.path.startswith('/admin') %}<link rel="stylesheet" href="/assets/css/admin-pro.css?v=3">{% endif %}
 </head>
 <body class="studio-theme {% if public_ui %}pro-theme v2 bp nx wb-ui {% elif request.path.startswith('/admin') %}pro-theme bp {% endif %}{% block bodyclass %}{% endblock %}">
@@ -76,14 +77,13 @@
 <nav class="wb-nav" aria-label="Main navigation">
 <a href="/tools" {% if request.path.startswith('/tools') %}class="is-active" aria-current="page"{% endif %}>Tools</a>
 <a href="/#browse-categories">Categories</a>
-<a href="/directory" {% if request.path.startswith('/directory') %}class="is-active" aria-current="page"{% endif %}>Directories</a>
-<a href="/eduhelp" {% if request.path.startswith('/eduhelp') %}class="is-active" aria-current="page"{% endif %}>Eduhelp</a>
-{% if public_config.get('downloadPage', {}).get('enabled', True) %}<a href="/downloads" {% if request.path in ('/downloads', '/download.html') %}class="is-active" aria-current="page"{% endif %}>Downloads</a>{% endif %}
+{% if photo_tools_available %}<a href="/photo-tools" {% if request.path == '/photo-tools' %}class="is-active" aria-current="page"{% endif %}>Photo tools</a>{% endif %}
 <details class="wb-more">
 <summary>More <svg aria-hidden="true" viewBox="0 0 24 24" width="12" height="12" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m6 9 6 6 6-6"/></svg></summary>
 <div class="wb-more-panel">
-<a href="/photo-tools">Photo tools <small>Resize</small></a>
-<a href="/tools">Browser tools <small>All</small></a>
+{% if public_config.get('downloadPage', {}).get('enabled', True) %}<a href="/downloads" {% if request.path in ('/downloads', '/download.html') %}aria-current="page"{% endif %}>Downloads <small>Apps &amp; files</small></a>{% endif %}
+<a href="/directory" {% if request.path.startswith('/directory') %}aria-current="page"{% endif %}>Directories</a>
+<a href="/eduhelp" {% if request.path.startswith('/eduhelp') %}aria-current="page"{% endif %}>Eduhelp</a>
 <a href="/#how-it-works">How it works</a>
 <a href="/about">About</a>
 <a href="/contact">Contact</a>
@@ -119,7 +119,8 @@
 <div class="wb-bottom-nav" aria-label="Quick navigation">
 <a href="/" {% if request.path == '/' %}class="is-active" aria-current="page"{% endif %}><svg aria-hidden="true" viewBox="0 0 24 24"><path d="m4 10 8-7 8 7v10a1 1 0 0 1-1 1h-5v-7h-4v7H5a1 1 0 0 1-1-1Z"/></svg>Home</a>
 <a href="/tools" {% if request.path.startswith('/tools') %}class="is-active" aria-current="page"{% endif %}><svg aria-hidden="true" viewBox="0 0 24 24"><rect x="3" y="3" width="7" height="7" rx="1.5"/><rect x="14" y="3" width="7" height="7" rx="1.5"/><rect x="3" y="14" width="7" height="7" rx="1.5"/><rect x="14" y="14" width="7" height="7" rx="1.5"/></svg>Tools</a>
-<a href="/#browse-categories"><svg aria-hidden="true" viewBox="0 0 24 24"><path d="M4 6h16M4 12h16M4 18h10"/></svg>Categories</a>
+{% set photo_destination = '/photo-tools' if photo_tools_available else '/#browse-categories' %}
+<a href="{{ photo_destination }}" {% if request.path == '/photo-tools' %}class="is-active" aria-current="page"{% endif %}><svg aria-hidden="true" viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="16" rx="2"/><circle cx="8" cy="9" r="1.5"/><path d="m3 17 5-4 4 3 4-5 5 5"/></svg>{{ 'Photo' if photo_tools_available else 'Categories' }}</a>
 <button type="button" id="wb-more-open" aria-haspopup="dialog" aria-controls="wb-more"><svg aria-hidden="true" viewBox="0 0 24 24"><circle cx="5" cy="12" r="1.6"/><circle cx="12" cy="12" r="1.6"/><circle cx="19" cy="12" r="1.6"/></svg>More</button>
 </div>
 <div class="wb-sheet" id="wb-more" hidden role="dialog" aria-modal="true" aria-label="More navigation">
@@ -128,7 +129,7 @@
 <span class="wb-sheet-grab" aria-hidden="true"></span>
 <div class="wb-sheet-head"><strong>More</strong><button type="button" data-wb-close aria-label="Close menu">×</button></div>
 <div class="wb-sheet-links">
-<a href="/photo-tools">Photo tools <small>Resize &amp; compress</small></a>
+<a href="/#browse-categories">Browse categories</a>
 <a href="/eduhelp">Eduhelp <small>Updates &amp; labs</small></a>
 <a href="/directory">Directories <small>Sources</small></a>
 {% if public_config.get('downloadPage', {}).get('enabled', True) %}<a href="/downloads">Downloads <small>Apps &amp; files</small></a>{% endif %}
@@ -169,7 +170,7 @@
 <nav class="wb-footer-col" aria-label="Tools">
 <h2>Tools</h2>
 <a href="/tools">Browser tools</a>
-<a href="/photo-tools">Photo tools</a>
+{% if photo_tools_available %}<a href="/photo-tools">Photo tools</a>{% endif %}
 {% if public_config.get('downloadPage', {}).get('enabled', True) %}<a href="/downloads">Downloads</a>{% endif %}
 <a href="/directory">Directories</a>
 <a href="/eduhelp">Eduhelp</a>

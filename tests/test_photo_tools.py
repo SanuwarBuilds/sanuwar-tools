@@ -28,7 +28,9 @@ class PhotoToolsTests(unittest.TestCase):
         for flag in ('enabled','visible'):
             self.config['tools'][0][flag]=False
             self.assertEqual(self.client.get('/photo-tools').status_code,404)
-            self.assertNotIn(b'Photo Tools',self.client.get('/').data)
+            home = self.client.get('/').data
+            self.assertNotIn(b'Photo Tools', home)
+            self.assertNotIn(b'Resize photo to 50 KB', home)
             self.assertEqual(self.client.get('/tools.config.json').json['tools'],[])
             self.assertNotIn(b'/photo-tools',self.client.get('/sitemap.xml').data)
             self.config['tools'][0][flag]=True

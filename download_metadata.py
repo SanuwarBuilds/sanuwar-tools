@@ -20,6 +20,10 @@ def upload_time(value):
         return None
 
 
+def download_size(value):
+    return value if type(value) is int and 0 < value <= 2**53 - 1 else None
+
+
 def album_metadata(files, previous=(), now=None):
     now = now or utc_now()
     def identity(file):

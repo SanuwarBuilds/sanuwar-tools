@@ -255,6 +255,148 @@
     render();
   });
 
+  T.register("pdf-organizer", (root) => {
+    const maxBytes = 50 * 1024 * 1024;
+    const maxPages = 150;
+    const list = el("ol", { class: "tp-pdf-pages", "aria-label": "PDF page order" });
+    const notice = el("p", { class: "tp-status", role: "status" });
+    let source = null;
+    let previewTask = null;
+    let generation = 0;
+    let pages = [];
+    let currentFile = null;
+    let saving = false;
+
+    const downloadButton = T.button("Download organized PDF", async () => {
+      if (saving || !source || !pages.length) return;
+      saving = true;
+      downloadButton.disabled = true;
+      const token = generation;
+      try {
+        const ordered = pages.slice();
+        const output = await PDFLib.PDFDocument.create();
+        const copied = await output.copyPages(source, ordered.map((page) => page.index));
+        copied.forEach((page, index) => {
+          page.setRotation(PDFLib.degrees((page.getRotation().angle + ordered[index].rotation) % 360));
+          output.addPage(page);
+        });
+        const bytes = await output.save();
+        if (token !== generation) return;
+        download(replaceExtension(currentFile.name, "pdf").replace(/\.pdf$/, "-organized.pdf"), bytes, "application/pdf");
+        notice.textContent = `PDF ready · ${copied.length} pages · ${fmtBytes(bytes.byteLength)}.`;
+      } catch (error) {
+        if (token === generation) notice.textContent = `Could not save PDF: ${error.message}`;
+      } finally {
+        if (token === generation) {
+          saving = false;
+          downloadButton.disabled = !pages.length;
+        }
+      }
+    }, "primary", { disabled: true });
+
+    const render = (focusedPage, action) => {
+      const rows = pages.map((page, position) => {
+        const number = page.index + 1;
+        const row = el("li", { class: "tp-pdf-page" }, page.thumbnail,
+          el("strong", { text: `Page ${number}` }));
+        page.canvas.style.rotate = `${page.rotation}deg`;
+        const edit = (kind, label, disabled, onClick) => T.button(label, onClick, "ghost", {
+          "data-action": kind, "aria-label": `${label} page ${number}`, disabled,
+        });
+        const move = (offset, kind) => {
+          const next = position + offset;
+          [pages[position], pages[next]] = [pages[next], pages[position]];
+          render(page, kind);
+          notice.textContent = `Page ${number} moved to position ${next + 1}.`;
+        };
+        row.append(el("div", { class: "tp-pdf-controls" },
+          edit("earlier", "Move earlier", position === 0, () => move(-1, "earlier")),
+          edit("later", "Move later", position === pages.length - 1, () => move(1, "later")),
+          edit("rotate", "Rotate", false, () => {
+            page.rotation = (page.rotation + 90) % 360;
+            render(page, "rotate");
+            notice.textContent = `Page ${number} rotation: ${page.rotation}° from original.`;
+          }),
+          edit("remove", "Remove", pages.length === 1, () => {
+            pages.splice(position, 1);
+            render(pages[Math.min(position, pages.length - 1)], "remove");
+            notice.textContent = `Page ${number} removed. ${pages.length} remaining.`;
+          })
+        ));
+        return row;
+      });
+      list.replaceChildren(...rows);
+      downloadButton.disabled = saving || !pages.length;
+      const focusedRow = rows[pages.indexOf(focusedPage)];
+      (focusedRow?.querySelector(`[data-action="${action}"]:enabled`) ||
+        focusedRow?.querySelector("button:enabled"))?.focus();
+    };
+
+    const load = async ([file]) => {
+      const token = ++generation;
+      const oldTask = previewTask;
+      previewTask = null;
+      if (oldTask) oldTask.destroy().catch(() => {});
+      source = null;
+      currentFile = file;
+      pages = [];
+      saving = false;
+      render();
+      if (file.size > maxBytes) {
+        notice.textContent = "Choose a PDF up to 50 MB.";
+        return;
+      }
+      notice.textContent = "Opening PDF…";
+      try {
+        const bytes = await file.arrayBuffer();
+        const loaded = await PDFLib.PDFDocument.load(bytes);
+        if (token !== generation) return;
+        const count = loaded.getPageCount();
+        if (!count || count > maxPages) throw new Error("Choose a PDF with 1 to 150 pages.");
+        source = loaded;
+        pages = loaded.getPageIndices().map((index) => {
+          const canvas = el("canvas", { "aria-hidden": "true", width: 130, height: 130 });
+          return { index, rotation: 0, canvas, thumbnail: el("div", { class: "tp-pdf-thumbnail" }, canvas) };
+        });
+        render();
+        notice.textContent = `${count} pages ready. Changes apply to a new copy.`;
+        const thumbnails = pages.slice();
+        const task = pdfjsLib.getDocument({ data: new Uint8Array(bytes), isEvalSupported: false });
+        previewTask = task;
+        try {
+          const preview = await task.promise;
+          for (const item of thumbnails) {
+            if (token !== generation) break;
+            const page = await preview.getPage(item.index + 1);
+            const original = page.getViewport({ scale: 1 });
+            const viewport = page.getViewport({ scale: 130 / Math.max(original.width, original.height) });
+            item.canvas.width = Math.ceil(viewport.width);
+            item.canvas.height = Math.ceil(viewport.height);
+            await page.render({ canvasContext: item.canvas.getContext("2d"), viewport }).promise;
+            page.cleanup();
+          }
+        } finally {
+          if (previewTask === task) {
+            previewTask = null;
+            await task.destroy();
+          }
+        }
+      } catch (error) {
+        if (token !== generation) return;
+        notice.textContent = source
+          ? "Some previews are unavailable. You can still organize pages by number."
+          : `Could not open PDF: ${error.message}`;
+      }
+    };
+    const drop = fileDrop({ accept: ".pdf,application/pdf", label: "Drop a PDF here or choose a file",
+      hint: "One PDF, up to 50 MB and 150 pages. Processing stays on this device.", onFiles: load });
+    // Keep the file picker keyboard-accessible and allow reopening the same file.
+    drop.input.hidden = false;
+    drop.input.classList.add("wb-visually-hidden");
+    drop.input.addEventListener("change", () => { drop.input.value = ""; });
+    root.replaceChildren(T.panel("", [drop.node, notice, list, T.actions(downloadButton)]));
+  });
+
   T.register("pdf-split", (root) => {
     root.innerHTML = `<div class="tp-panel"><div class="js-file-slot"></div><label class="tp-field"><span class="tp-label">Page ranges</span><input class="tp-input js-ranges" placeholder="1-3, 4, 5-8"></label><div class="tp-actions"><button type="button" class="tp-btn tp-btn-primary" data-run disabled>Split PDF</button><button type="button" class="tp-btn" data-all disabled>Download all as ZIP</button></div><div class="tp-file-list js-files"></div><p class="tp-hint">Leave the ranges empty to split every page into its own PDF.</p></div>`;
     let file = null;

@@ -4,28 +4,36 @@
 {% block content %}
 {% set tools = public_config.get('tools', []) %}
 {% set total_tools = tools | length %}
-{% set popular_browser = catalog.tools | selectattr('popular') | list %}
-{% set popular_shelf = popular_browser[:6] if popular_browser else catalog.tools[:6] %}
+{% set browser_total = catalog.tools | length %}
 <section class="wb-hero" aria-labelledby="hero-title">
   <div class="wrap wb-hero-inner">
     <h1 id="hero-title">Small tools. <span>Big work.</span></h1>
-    <p class="wb-hero-lede">{{ total_tools }} free browser {{ 'tool' if total_tools == 1 else 'tools' }} for everyday digital work.</p>
+    <p class="wb-hero-lede">{{ browser_total }} free browser {{ 'tool' if browser_total == 1 else 'tools' }} for everyday digital work.</p>
     <div class="wb-hero-search">
       <label class="wb-search-field" for="tool-search">
         <svg aria-hidden="true" viewBox="0 0 24 24"><circle cx="10.5" cy="10.5" r="6.5"/><path d="m16 16 4.5 4.5"/></svg>
-        <input type="search" id="tool-search" placeholder="Search {{ total_tools }} tools…" aria-label="Search tools, apps and directories" autocomplete="off">
-        <kbd>⌘K</kbd>
+        <input type="search" id="tool-search" placeholder="Search tools and directories…" aria-label="Search tools and directories" autocomplete="off">
       </label>
     </div>
-    <div class="wb-hero-hints"><span class="wb-hints-label">Popular:</span><a href="/tools/json-formatter">JSON</a><a href="/tools/base64">Base64</a><a href="/tools/qr-code-generator">QR</a><a href="/tools/uuid">UUID</a><a href="/tools/image-compressor">Image</a><a href="/tools/pdf-merge">PDF</a></div>
+    <div class="wb-hero-hints" aria-label="Quick tasks">
+      {% if photo_tools_available %}<a href="/photo-tools?mode=photo&amp;kb=50">Resize photo to 50 KB</a>{% endif %}
+      <a href="/tools/pdf-merge">Merge PDFs</a>
+      <a href="/tools/qr-code-generator">Generate a QR code</a>
+      <a href="/tools/json-formatter">Format JSON</a>
+    </div>
   </div>
+</section>
+
+<section class="wrap wb-saved-tools" data-saved-tools data-photo-available="{{ 'true' if photo_tools_available else 'false' }}" aria-label="Your tools" hidden>
+  <div data-tool-list="favorites" hidden><h2>Favorites</h2><ul></ul></div>
+  <div data-tool-list="recent" hidden><h2>Recently used</h2><ul></ul></div>
 </section>
 
 <section class="wrap wb-popular" aria-labelledby="popular-title">
   <div class="wb-section-head">
     <div class="wb-section-title">
       <span class="wb-section-icon" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M13 2 4.5 13.5H11l-1 8.5L19.5 10H13Z"/></svg></span>
-      <h2 id="popular-title">Popular Tools</h2>
+      <h2 id="popular-title">Featured tools</h2>
     </div>
     <a href="/tools">See all →</a>
   </div>
@@ -45,6 +53,7 @@
     {% endif %}
     {% endfor %}
   </div>
+  <p class="wb-featured-extra"><a class="wb-text-link" href="/tools/pdf-organizer">Organize PDF pages →</a></p>
 </section>
 
 <section class="wrap wb-library" aria-label="Library shortcuts">
@@ -86,8 +95,8 @@
 
 <section class="wrap wb-tools" id="tools" aria-labelledby="tools-title">
   <div class="wb-section-head">
-    <div><span class="wb-eyebrow">01 / Browse</span><h2 id="tools-title">Every tool. One shelf.</h2></div>
-    <p class="wb-tools-head-note">Search above or pick a category. <b id="tool-total">{{ total_tools }}</b> tools shown.</p>
+    <div><span class="wb-eyebrow">01 / Browse</span><h2 id="tools-title">Browse the toolkit</h2></div>
+    <p class="wb-tools-head-note"><b id="tool-total">{{ total_tools }}</b> results</p>
   </div>
   <span id="browser-tools" aria-hidden="true"></span>
   <div class="wb-filters">
@@ -122,7 +131,7 @@
   <div class="wb-steps">
     <article><span>01</span><h3>Choose a tool</h3><p>Search the shelf or start from a category. Every card opens the working tool.</p></article>
     <article><span>02</span><h3>Do the work</h3><p>Paste, type or drop a file. Results update in this browser tab as you go.</p></article>
-    <article><span>03</span><h3>Take the result</h3><p>Copy it, save it or download it. Your files never leave your device.</p></article>
+    <article><span>03</span><h3>Take the result</h3><p>Copy it, save it or download it. File tools process your files on this device.</p></article>
   </div>
 </section>
 
@@ -133,7 +142,7 @@
       <h2 id="about-toolkit-title">A small toolkit for everyday work.</h2>
     </div>
     <div class="wb-about-copy">
-      <p>SanuwarTools is a free, browser-based toolkit maintained by Sanuwar. The collection now includes {{ catalog.tools | length }} browser tools for text, encoding, hashes, images, PDFs, networking, security and everyday maths, plus the <a href="/photo-tools">photo resizer and compressor</a> for photo resizing and passport photos — crop images to exact pixels, DPI and KB limits for passport, PAN, voter ID and exam forms, entirely on your device.</p>
+      <p>SanuwarTools is a free, browser-based toolkit maintained by Sanuwar. The collection now includes {{ catalog.tools | length }} browser tools for text, encoding, hashes, images, PDFs, networking, security and everyday maths,{% if photo_tools_available %}, plus the <a href="/photo-tools">photo resizer and compressor</a> for photo resizing and passport photos — crop images to exact pixels, DPI and KB limits for passport, PAN, voter ID and exam forms, entirely on your device{% endif %}.</p>
       <p>Explore the <a href="#tools">browser tools</a> or the <a href="/tools">full tool page</a>, browse the <a href="/downloads">downloads library</a> for Android apps, files and albums, and open the source <a href="/directory">directories</a> for movies, anime, music and more. New modules are added as they are ready; no account is needed for public tools.</p>
     </div>
   </div>
@@ -141,4 +150,4 @@
 
 <div class="wrap">{{ ad_unit(adsense_slots.get('home', '')) }}</div>
 {% endblock %}
-{% block scripts %}<script nonce="{{ csp_nonce }}" src="/assets/js/main.js?v=6" defer></script>{% if public_config.get('downloadPage', {}).get('enabled', True) %}<script nonce="{{ csp_nonce }}" src="/assets/js/downloads.js" defer></script>{% endif %}{% endblock %}
+{% block scripts %}<script nonce="{{ csp_nonce }}" src="/assets/js/main.js?v=6" defer></script>{% if public_config.get('downloadPage', {}).get('enabled', True) %}<script nonce="{{ csp_nonce }}" src="/assets/js/downloads.js?v=2" defer></script>{% endif %}{% endblock %}

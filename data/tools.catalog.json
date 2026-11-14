@@ -1,5 +1,5 @@
 {
-  "updated": "2026-11-12",
+  "updated": "2026-11-14",
   "categories": ["Text Tools", "Developer Tools", "Encoding & Hashing", "Images & Media", "PDF & Documents", "Compression & Archives", "Networking", "Calculators", "Time & Date", "Security & Privacy", "Financial Calculators", "Health & Fitness", "Unit Converters", "Land & Property", "Sports & Games"],
   "tools": [
     {"slug": "base64", "name": "Base64 Encode / Decode", "category": "Encoding & Hashing", "icon": "64", "bundle": "text", "popular": true, "description": "Encode text to Base64 or decode Base64 back to readable text, with a URL-safe option."},
@@ -50,6 +50,7 @@
     {"slug": "image-to-pdf", "name": "Image to PDF", "category": "PDF & Documents", "icon": "IMG", "bundle": "media", "vendor": ["jspdf"], "description": "Build a PDF from JPG, PNG or WebP images with fitted pages."},
     {"slug": "markdown-to-pdf", "name": "Markdown to PDF", "category": "PDF & Documents", "icon": "M↓", "bundle": "media", "vendor": ["marked", "jspdf"], "description": "Render Markdown text or a dropped .md file into a clean PDF document."},
     {"slug": "pdf-compress", "name": "PDF Compress", "category": "PDF & Documents", "icon": "PDF↓", "bundle": "media", "vendor": ["pdf-lib", "pdfjs", "jspdf"], "description": "Optimize PDF structure or rasterize pages at a lower DPI to reduce file size."},
+    {"slug": "pdf-organizer", "name": "PDF Page Organizer", "category": "PDF & Documents", "icon": "PDF", "bundle": "media", "vendor": ["pdf-lib", "pdfjs"], "description": "Preview, reorder, rotate and remove PDF pages, then save an organized copy on your device."},
     {"slug": "pdf-split", "name": "PDF Split", "category": "PDF & Documents", "icon": "PDF✂", "bundle": "media", "vendor": ["pdf-lib"], "description": "Split one PDF into page ranges and download each part separately."},
     {"slug": "pdf-to-image", "name": "PDF to Image", "category": "PDF & Documents", "icon": "PDF→", "bundle": "media", "vendor": ["pdfjs"], "description": "Render PDF pages as PNG or JPG images at your chosen resolution."},
     {"slug": "pdf-viewer", "name": "PDF Viewer", "category": "PDF & Documents", "icon": "PDF👁", "bundle": "media", "vendor": ["pdfjs"], "description": "Open and read PDF files in a fast browser viewer with zoom and page navigation."},

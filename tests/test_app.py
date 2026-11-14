@@ -62,7 +62,7 @@ class WorkspaceTests(unittest.TestCase):
         self.assertIn('admin-pro.css?v=3',admin)
         self.assertIn('admin-body',admin)
         self.assertIn('admin-drawer-close',admin)
-        self.assertIn('admin.js?v=7',admin)
+        self.assertRegex(admin, r'/assets/js/admin\.js\?v=\d+')
 
     def test_admin_requires_authentication(self):
         self.assertEqual(self.client.get('/admin').status_code,302)
@@ -192,6 +192,22 @@ class WorkspaceTests(unittest.TestCase):
     def test_download_crud(self):
         self.login();response=self.request('/api/add_item',data={'title':'Android app','link':'https://example.com/app.apk'});self.assertEqual(response.status_code,200);item=response.json['item'];self.assertEqual(len(self.client.get('/api/downloads_data').json),1)
         self.assertEqual(self.request('/api/update_item','PUT',{'id':item['id'],'title':'Updated'}).status_code,200);self.assertEqual(self.client.get('/api/downloads_data').json[0]['title'],'Updated');self.assertEqual(self.request('/api/delete_item/'+item['id'],'DELETE',{}).status_code,200);self.assertEqual(self.client.get('/api/downloads_data').json,[])
+    def test_download_cards_use_current_source_and_size(self):
+        self.login()
+        item = self.request('/api/add_item', data={
+            'title': 'Example', 'link': 'https://example.com/app.apk', 'size': 1500,
+        }).json['item']
+        self.assertEqual(self.client.get('/api/downloads_data').json[0]['size'], 1500)
+        self.assertIn('Source: example.com · 1.5 KB', self.client.get('/downloads').get_data(as_text=True))
+        edited = self.request('/api/update_item', 'PUT', {'id': item['id'], 'title': 'Renamed'})
+        self.assertEqual(edited.json['item']['size'], 1500)
+        replaced = self.request('/api/update_item', 'PUT', {
+            'id': item['id'], 'title': 'Renamed', 'link': 'https://other.example/app.apk',
+        })
+        self.assertEqual(replaced.status_code, 200, replaced.json)
+        self.assertNotIn('size', replaced.json['item'])
+        self.assertNotIn('size', self.client.get('/api/downloads_data').json[0])
+
     def test_browser_empty_delete_removes_download(self):
         self.login()
         item = self.request('/api/add_item', data={'title':'Delete me','link':'https://example.com/file.apk'}).json['item']

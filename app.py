@@ -22,7 +22,7 @@ import monetization
 import user_auth
 import visitor_analytics
 from cover_images import thumbnail_receipt
-from download_metadata import utc_now, upload_time, album_metadata
+from download_metadata import utc_now, upload_time, album_metadata, download_size
 import cloudinary
 import cloudinary.uploader
 from flask import Flask, request, render_template, session, redirect, jsonify, url_for, send_file, send_from_directory, abort, g, has_request_context, make_response
@@ -97,10 +97,14 @@ def index():
     return render_template("index.html", catalog=catalog, public_config=config,
                            initial_downloads=[payments.public_item(item) for item in public_downloads()])
 
+def photo_tools_available(config):
+    return not any(tool.get('id') == 'builtin-photo-tools' and not is_public(tool)
+                   for tool in (config if isinstance(config, dict) else {}).get('tools', []))
+
+
 @app.get('/photo-tools')
 def photo_tools():
-    config = safe_read(TOOLS_CONFIG_REL) or {}
-    if any(tool.get('id') == 'builtin-photo-tools' and not is_public(tool) for tool in config.get('tools', [])):
+    if not photo_tools_available(safe_read(TOOLS_CONFIG_REL)):
         abort(404)
     return render_template('photo_tools.html')
 
@@ -222,6 +226,16 @@ def site_domain(value):
     except ValueError:
         return ''
     return host[4:] if host.startswith('www.') else host
+
+@app.template_filter('download_size_label')
+def download_size_label(size):
+    if not download_size(size):
+        return ''
+    for divisor, unit in ((1000**3, 'GB'), (1000**2, 'MB'), (1000, 'KB')):
+        if size >= divisor:
+            return f'{size / divisor:.1f} {unit}'
+    return f'{size} B'
+
 
 def load_eduhelp():
     data = safe_read(EDUHELP_REL)
@@ -698,7 +712,9 @@ def serve_config():
 
 @app.context_processor
 def site_context():
-    return {'public_config': public_config(safe_read(TOOLS_CONFIG_REL)), 'now_year': datetime.datetime.now().year}
+    raw = safe_read(TOOLS_CONFIG_REL)
+    return {'public_config': public_config(raw), 'photo_tools_available': photo_tools_available(raw),
+            'now_year': datetime.datetime.now().year}
 
 @app.route('/api/admin/tools.config')
 @login_required
@@ -881,6 +897,8 @@ def api_add_item():
         }
         if upload_time(data.get('uploaded_at')):
             new_item['uploaded_at'] = upload_time(data['uploaded_at'])
+        if not new_item['is_album'] and download_size(data.get('size')):
+            new_item['size'] = data['size']
         new_item['pricing'] = payments.pricing(data)
         if data.get('asset'):
             new_item['asset'] = data['asset']
@@ -927,6 +945,11 @@ def api_update_item():
                     items[i].pop('uploaded_at', None)
                 if upload_time(data.get('uploaded_at')) and (data.get('link') != item.get('link') or data.get('asset') != item.get('asset')):
                     items[i]['uploaded_at'] = upload_time(data['uploaded_at'])
+                if (items[i]['link'] != item.get('link') or
+                        ('asset' in data and data['asset'] != item.get('asset')) or items[i]['is_album']):
+                    items[i].pop('size', None)
+                if not items[i]['is_album'] and download_size(data.get('size')):
+                    items[i]['size'] = data['size']
                 items[i]['pricing'] = payments.pricing(data, item)
                 if data.get('link', item.get('link')) != item.get('link') and 'asset' not in data:
                     items[i].pop('asset', None)

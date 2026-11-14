@@ -2890,3 +2890,25 @@ body.wb-ui.wb-ui.wb-ui.wb-ui.wb-tool-page .tp-drop.is-over { background: var(--w
   body.wb-ui.wb-ui.wb-ui.wb-ui.wb-tool-page .tp-btn-sm { min-height: 34px; }
   .wb-ui .tp-chips { flex-wrap: nowrap; overflow-x: auto; }
 }
+
+.wb-home .wb-saved-tools {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(min(100%, 320px), 1fr));
+  gap: 16px;
+  margin-block: 20px;
+}
+.wb-saved-tools[hidden], .wb-save-tool[hidden], .wb-saved-tools [hidden] { display: none; }
+.wb-saved-tools > div {
+  padding: 16px 20px;
+  border: 1px solid var(--wb-line);
+  background: var(--wb-card);
+  border-radius: 16px;
+}
+.wb-saved-tools h2 { font-size: 1rem; margin: 0 0 6px; }
+.wb-saved-tools ul { display: flex; flex-wrap: wrap; gap: 4px 14px; padding: 0; margin: 0; list-style: none; }
+.wb-saved-tools a { display: inline-flex; align-items: center; min-height: 44px; font-size: .875rem; color: var(--wb-accent); text-decoration: underline; }
+.wb-save-tool { margin-top: 12px; }
+.wb-save-tool[aria-pressed="true"] { color: var(--wb-accent); }
+.wb-ui .download-facts { color: var(--wb-muted); font-size: .8125rem; margin: 0; overflow-wrap: anywhere; }
+.wb-featured-extra { margin: 12px 0 0; }
+.wb-featured-extra a { display: inline-flex; align-items: center; min-height: 44px; }
