@@ -1,6 +1,6 @@
 {% extends 'base.html' %}
 {% block bodyclass %}eduhelp-page{% endblock %}
-{% block page_styles %}<link rel="stylesheet" href="/assets/css/eduhelp.css?v=1">{% endblock %}
+{% block page_styles %}<link rel="stylesheet" href="/assets/css/eduhelp.css?v=2">{% endblock %}
 {% block content %}
 <section class="bp-hero wrap edu-hero" aria-labelledby="eduhelp-title">
   <div class="bp-hero-nav">
@@ -21,6 +21,7 @@
       <p class="bp-hero-line">Exam notices, results, admission dates, scholarships and career alerts — collected in one calm board. Every update links to the official source, so always verify the final details there.</p>
       <div class="bp-hero-actions">
         <a class="bp-cta" href="#updates">Browse {{ updates | length }} updates</a>
+        {% if 'Lab' in categories %}<a class="bp-cta-ghost" href="/eduhelp/labs">Lab library <span aria-hidden="true">→</span></a>{% endif %}
         <a class="bp-cta-ghost" href="#eduhelp-notice">Read the notice <span aria-hidden="true">→</span></a>
       </div>
       <div class="bp-console">
@@ -63,6 +64,14 @@
         <span class="edu-tag">{{ update.category }}</span>
         {% if update.date %}<time class="edu-date" datetime="{{ update.date }}">{{ update.date }}</time>{% endif %}
       </div>
+      {% if update.category == 'Lab' %}
+      <div class="edu-crumb">
+        {% if update.class_name %}<span>{{ update.class_name }}</span>{% endif %}
+        {% if update.subject %}<span>{{ update.subject }}</span>{% endif %}
+        {% if update.chapter %}<span>{{ update.chapter }}</span>{% endif %}
+        {% if update.kind %}<span>{{ update.kind }}</span>{% endif %}
+      </div>
+      {% endif %}
       <h3>
         {% if update.link %}{% set external = not update.link.startswith('/') %}<a href="{{ update.link | public_url }}"{% if external %} target="_blank" rel="noopener noreferrer"{% endif %}>{{ update.title }}</a>{% else %}{{ update.title }}{% endif %}
         {% if update.pinned %}<span class="edu-pin">Pinned</span>{% endif %}

@@ -1,0 +1,96 @@
+{% extends 'base.html' %}
+{% block bodyclass %}eduhelp-page lab-library-page{% endblock %}
+{% block page_styles %}<link rel="stylesheet" href="/assets/css/eduhelp.css?v=2">{% endblock %}
+{% block content %}
+<section class="bp-hero wrap edu-hero" aria-labelledby="lab-library-title">
+  <div class="bp-hero-nav">
+    <span><i aria-hidden="true"></i>Eduhelp · lab library</span>
+    <span>{{ total }} labs{% if updated %} · updated {{ updated }}{% endif %}</span>
+  </div>
+  <div class="bp-hero-core">
+    <div class="bp-machine">
+      <span class="bp-leds" aria-hidden="true"><i></i><i></i><i></i></span>
+      <span class="bp-machine-label" aria-hidden="true">Eduhelp · lab library</span>
+      <span class="bp-screw is-tl" aria-hidden="true"></span>
+      <span class="bp-screw is-tr" aria-hidden="true"></span>
+      <span class="bp-screw is-bl" aria-hidden="true"></span>
+      <span class="bp-screw is-br" aria-hidden="true"></span>
+      <span class="bp-etched" aria-hidden="true">L</span>
+      <span class="bp-kicker">Class → subject → chapter → 3D lab</span>
+      <h1 id="lab-library-title" class="bp-title">Lab library</h1>
+      <p class="bp-hero-line">Every interactive lab arranged by class, subject and chapter — so you always know where each 3D experiment belongs. Open a lab and explore it step by step.</p>
+      <div class="bp-hero-actions">
+        <a class="bp-cta" href="#lab-library">Browse {{ total }} labs</a>
+        <a class="bp-cta-ghost" href="/eduhelp">Back to Eduhelp <span aria-hidden="true">→</span></a>
+      </div>
+      <div class="bp-console">
+        <div class="bp-console-bar">
+          <span>Lab index · live</span>
+          <span><b>{{ total }}</b> labs · {{ classes | length }} classes</span>
+        </div>
+        <p class="lab-console-note">Choose a class below, then a subject and chapter. Each lab opens in its own tab.</p>
+      </div>
+    </div>
+  </div>
+  <div class="bp-hero-nav is-foot">
+    <span>Interactive 3D · NCERT aligned</span>
+    <span>sanuwartools.online</span>
+  </div>
+</section>
+
+<section class="bp-section wrap edu-section" id="lab-library" aria-labelledby="lab-library-heading">
+  <div class="bp-section-head">
+    <div><span class="bp-eyebrow">01 — Lab index</span><h2 id="lab-library-heading">Labs by class and chapter</h2></div>
+    <p class="bp-count"><b>{{ total }}</b> labs</p>
+  </div>
+  {% if classes %}
+  <div class="lab-tree">
+    {% for cls in classes %}
+    <section class="lab-class" aria-labelledby="lab-class-{{ loop.index }}">
+      <h2 class="lab-class-title" id="lab-class-{{ loop.index }}">{{ cls.name }}</h2>
+      {% for subject in cls.subjects %}
+      <div class="lab-subject">
+        <h3>{{ subject.name }}</h3>
+        {% for chapter in subject.chapters %}
+        <div class="lab-chapter">
+          <h4><span>Chapter</span>{{ chapter.name }}</h4>
+          <ul class="lab-list">
+            {% for lab in chapter.labs %}
+            <li class="lab-item">
+              <div class="lab-item-main">
+                <span class="edu-tag">{{ lab.kind or '3D Lab' }}</span>
+                <h5>
+                  {% if lab.link %}<a href="{{ lab.link | public_url }}">{{ lab.title }}</a>{% else %}{{ lab.title }}{% endif %}
+                </h5>
+                {% if lab.summary %}<p>{{ lab.summary }}</p>{% endif %}
+              </div>
+              {% if lab.link %}<a class="edu-open" href="{{ lab.link | public_url }}">Open lab <span aria-hidden="true">→</span></a>{% endif %}
+            </li>
+            {% endfor %}
+          </ul>
+        </div>
+        {% endfor %}
+      </div>
+      {% endfor %}
+    </section>
+    {% endfor %}
+  </div>
+  {% else %}
+  <div class="edu-empty">
+    <h3>No labs published yet.</h3>
+    <p>Interactive 3D labs will appear here once they are added.</p>
+  </div>
+  {% endif %}
+</section>
+
+<section class="bp-section wrap" id="lab-library-notice" aria-labelledby="lab-library-notice-title">
+  <div class="edu-notice">
+    <span class="edu-notice-led" aria-hidden="true"></span>
+    <div>
+      <span class="bp-eyebrow">Please read</span>
+      <h2 id="lab-library-notice-title">Before you use a lab</h2>
+      <p>{{ notice or 'Interactive labs are study aids only. Always follow your textbook, teacher instructions and the official syllabus for exams.' }}</p>
+    </div>
+  </div>
+</section>
+{% endblock %}

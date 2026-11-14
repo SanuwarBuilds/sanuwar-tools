@@ -264,10 +264,42 @@ def validate_eduhelp_document(data):
                 raise ValueError('Eduhelp links must be HTTPS URLs')
         if item.get('date') and (not isinstance(item['date'], str) or not EDUHELP_DATE.match(item['date'])):
             raise ValueError('Eduhelp dates must use YYYY-MM-DD')
+        for key, limit in (('class_name', 40), ('subject', 80), ('chapter', 120), ('kind', 40)):
+            value = item.get(key)
+            if value is None:
+                continue
+            if not isinstance(value, str) or len(value) > limit:
+                raise ValueError(f'{key.replace("_", " ").capitalize()} must be text up to {limit} characters')
+            item[key] = value.strip()
+        if item.get('category') == 'Lab' and not all(item.get(key) for key in ('class_name', 'subject', 'chapter')):
+            raise ValueError('Lab entries need a class, subject and chapter')
         for key in ('enabled', 'pinned'):
             if key in item and type(item[key]) is not bool:
                 raise ValueError(f'{key} must be true or false')
     return data
+
+def natural_key(value):
+    return [int(part) if part.isdigit() else part.casefold()
+            for part in re.split(r'(\d+)', str(value or ''))]
+
+def group_eduhelp_labs(updates):
+    grouped = {}
+    for item in updates:
+        grouped.setdefault(item.get('class_name') or 'Other', {}) \
+               .setdefault(item.get('subject') or 'General', {}) \
+               .setdefault(item.get('chapter') or 'More labs', []).append(item)
+    classes = []
+    for class_name in sorted(grouped, key=natural_key):
+        subjects = []
+        for subject in sorted(grouped[class_name], key=natural_key):
+            chapters = []
+            for chapter in sorted(grouped[class_name][subject], key=natural_key):
+                labs = sorted(grouped[class_name][subject][chapter],
+                              key=lambda item: (item.get('pinned') is not True, natural_key(item.get('title'))))
+                chapters.append({'name': chapter, 'labs': labs})
+            subjects.append({'name': subject, 'chapters': chapters})
+        classes.append({'name': class_name, 'subjects': subjects})
+    return classes
 
 @app.get('/eduhelp')
 def eduhelp():
@@ -280,6 +312,15 @@ def eduhelp():
                   if any(item.get('category') == name for item in updates)]
     return render_template('eduhelp.html', updates=updates, categories=categories,
                            notice=data.get('notice', ''), updated=data.get('updated', ''))
+
+@app.get('/eduhelp/labs')
+def eduhelp_labs():
+    data = load_eduhelp()
+    labs = [item for item in data.get('updates', [])
+            if isinstance(item, dict) and is_public(item) and item.get('category') == 'Lab']
+    return render_template('eduhelp_labs.html', classes=group_eduhelp_labs(labs),
+                           total=len(labs), notice=data.get('notice', ''),
+                           updated=data.get('updated', ''))
 
 @app.get('/eduhelp/labs/<slug>')
 def eduhelp_lab(slug):
@@ -469,7 +510,7 @@ DOWNLOADS_REL    = "data/downloads.json"
 DIRECTORY_REL    = "data/directory.json"
 EDUHELP_REL      = "data/eduhelp.json"
 TOOL_CATALOG_REL = "data/tools.catalog.json"
-EDUHELP_CATEGORIES = ('Exam', 'Result', 'Admission', 'Scholarship', 'Notice', 'Physics', 'Chemistry')
+EDUHELP_CATEGORIES = ('Exam', 'Result', 'Admission', 'Scholarship', 'Notice', 'Lab')
 EDUHELP_DATE = re.compile(r'^\d{4}-\d{2}-\d{2}$')
 EDUHELP_ID = re.compile(r'^[A-Za-z0-9_-]{1,60}$')
 EDUHELP_LABS = {

@@ -1824,8 +1824,7 @@
     "Admission",
     "Scholarship",
     "Notice",
-    "Physics",
-    "Chemistry",
+    "Lab",
   ];
   const saveEduhelp = async (next) => {
     const result = await mutate("/api/admin/eduhelp", "POST", next);
@@ -1877,7 +1876,7 @@
               el(
                 "small",
                 {},
-                `${update.category || "Notice"}${update.date ? " · " + update.date : ""}${update.pinned ? " · pinned" : ""}`,
+                `${update.category || "Notice"}${update.class_name ? " · " + update.class_name : ""}${update.subject ? " · " + update.subject : ""}${update.chapter ? " · " + update.chapter : ""}${update.date ? " · " + update.date : ""}${update.pinned ? " · pinned" : ""}`,
               ),
             ),
           ),
@@ -1949,7 +1948,7 @@
           el(
             "p",
             { class: "form-note" },
-            "Education updates shown on /eduhelp. Pinned updates stay on top; links can be HTTPS URLs or /eduhelp/labs/ pages.",
+            "Education updates shown on /eduhelp. Pinned updates stay on top; links can be HTTPS URLs or /eduhelp/labs/ pages. Lab entries need a class, subject and chapter.",
           ),
           el(
             "div",
@@ -2035,7 +2034,11 @@
       draft.date || new Date().toISOString().slice(0, 10),
       "date",
     );
-    const link = field("Official link (optional)", draft.link || "", "url");
+    const link = field("Link (HTTPS or /eduhelp/labs/…)", draft.link || "", "text");
+    const className = field("Class (labs only)", draft.class_name || "");
+    const subject = field("Subject (labs only)", draft.subject || "");
+    const chapter = field("Chapter (labs only)", draft.chapter || "");
+    const kind = field("Format (labs only)", draft.kind || "");
     const summary = field("Summary", draft.summary || "", "textarea");
     const pinned = checkbox(
       "Pin this update to the top",
@@ -2051,6 +2054,8 @@
         title.node,
         el("div", { class: "form-grid" }, category.node, date.node),
         link.node,
+        el("div", { class: "form-grid" }, className.node, subject.node),
+        el("div", { class: "form-grid" }, chapter.node, kind.node),
         summary.node,
         el("div", { class: "form-grid" }, pinned.node, enabled.node),
       ],
@@ -2066,6 +2071,10 @@
           category: category.input.value,
           summary: summary.input.value.trim(),
           link: link.input.value.trim(),
+          class_name: className.input.value.trim(),
+          subject: subject.input.value.trim(),
+          chapter: chapter.input.value.trim(),
+          kind: kind.input.value.trim(),
           date: date.input.value,
           pinned: pinned.input.checked,
           enabled: enabled.input.checked,

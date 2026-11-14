@@ -1,4 +1,4 @@
-{% set public_ui = request.path in ('/', '/downloads', '/download.html', '/photo-tools', '/signin', '/account', '/privacy', '/about', '/contact', '/tools', '/bypass', '/payment-demo', '/eduhelp') or request.path.startswith('/directory') or request.path.startswith('/tools/') or request.path.startswith('/purchase') %}
+{% set public_ui = request.path in ('/', '/downloads', '/download.html', '/photo-tools', '/signin', '/account', '/privacy', '/about', '/contact', '/tools', '/bypass', '/payment-demo', '/eduhelp', '/eduhelp/labs') or request.path.startswith('/directory') or request.path.startswith('/tools/') or request.path.startswith('/purchase') %}
 {% set default_theme = public_config.get('site', {}).get('defaultTheme', 'dark') %}
 <!doctype html>
 <html lang="en" data-theme="{{ default_theme }}">

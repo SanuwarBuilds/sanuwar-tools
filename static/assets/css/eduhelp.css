@@ -98,6 +98,25 @@ body.pro-theme.bp.eduhelp-page .edu-date {
   letter-spacing: 0.08em;
 }
 
+body.pro-theme.bp.eduhelp-page .edu-crumb {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 6px;
+  margin: -2px 0 12px;
+  color: var(--bp-faint);
+  font-family: var(--bp-mono);
+  font-size: 9px;
+  letter-spacing: 0.06em;
+  line-height: 1.6;
+}
+
+body.pro-theme.bp.eduhelp-page .edu-crumb span + span::before {
+  content: "·";
+  margin-right: 6px;
+  color: var(--bp-line-3);
+}
+
 body.pro-theme.bp.eduhelp-page .edu-card h3 {
   display: flex;
   flex-wrap: wrap;
@@ -237,10 +256,152 @@ body.pro-theme.bp.eduhelp-page .edu-empty p {
   font-size: 13px;
 }
 
+/* ---------- Lab library ------------------------------------------------ */
+body.pro-theme.bp.eduhelp-page .lab-console-note {
+  margin: 10px 4px 0;
+  color: var(--bp-faint);
+  font-family: var(--bp-mono);
+  font-size: 10px;
+  letter-spacing: 0.06em;
+  line-height: 1.7;
+}
+
+body.pro-theme.bp.eduhelp-page .lab-tree {
+  display: grid;
+  gap: 20px;
+}
+
+body.pro-theme.bp.eduhelp-page .lab-class {
+  padding: 22px 24px;
+  border: 1px solid var(--bp-line-2);
+  border-radius: 14px;
+  background: linear-gradient(180deg, var(--bp-panel-2), var(--bp-panel));
+  box-shadow: var(--bp-emboss);
+}
+
+body.pro-theme.bp.eduhelp-page .lab-class-title {
+  margin: 0 0 14px;
+  font-size: clamp(22px, 2.4vw, 28px);
+  font-weight: 500;
+  letter-spacing: -0.03em;
+}
+
+body.pro-theme.bp.eduhelp-page .lab-subject {
+  padding: 14px 0 4px;
+  border-top: 1px solid var(--bp-line);
+}
+
+body.pro-theme.bp.eduhelp-page .lab-subject:first-of-type {
+  padding-top: 0;
+  border-top: 0;
+}
+
+body.pro-theme.bp.eduhelp-page .lab-subject > h3 {
+  margin: 0 0 12px;
+  color: var(--bp-accent);
+  font-family: var(--bp-mono);
+  font-size: 10px;
+  font-weight: 600;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+}
+
+body.pro-theme.bp.eduhelp-page .lab-chapter {
+  margin: 0 0 16px;
+  padding-left: 14px;
+  border-left: 2px solid var(--bp-line-2);
+}
+
+body.pro-theme.bp.eduhelp-page .lab-chapter h4 {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  gap: 8px;
+  margin: 0 0 10px;
+  font-size: 15px;
+  font-weight: 600;
+  letter-spacing: -0.02em;
+}
+
+body.pro-theme.bp.eduhelp-page .lab-chapter h4 span {
+  color: var(--bp-faint);
+  font-family: var(--bp-mono);
+  font-size: 9px;
+  font-weight: 500;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+}
+
+body.pro-theme.bp.eduhelp-page .lab-list {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 10px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+body.pro-theme.bp.eduhelp-page .lab-item {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 14px;
+  min-width: 0;
+  padding: 14px 16px;
+  border: 1px solid var(--bp-line-2);
+  border-radius: 10px;
+  background: var(--bp-panel-2);
+  transition:
+    transform 0.2s var(--bp-ease),
+    border-color 0.2s var(--bp-ease);
+}
+
+body.pro-theme.bp.eduhelp-page .lab-item:hover {
+  transform: translateY(-1px);
+  border-color: var(--bp-line-3);
+}
+
+body.pro-theme.bp.eduhelp-page .lab-item-main {
+  min-width: 0;
+}
+
+body.pro-theme.bp.eduhelp-page .lab-item h5 {
+  margin: 8px 0 0;
+  font-size: 14px;
+  font-weight: 600;
+  letter-spacing: -0.01em;
+  line-height: 1.4;
+  overflow-wrap: anywhere;
+}
+
+body.pro-theme.bp.eduhelp-page .lab-item h5 a {
+  color: var(--bp-ink);
+  text-decoration: none;
+}
+
+body.pro-theme.bp.eduhelp-page .lab-item h5 a:hover {
+  color: var(--bp-accent);
+}
+
+body.pro-theme.bp.eduhelp-page .lab-item p {
+  margin: 6px 0 0;
+  color: var(--bp-muted);
+  font-size: 12px;
+  line-height: 1.65;
+}
+
+body.pro-theme.bp.eduhelp-page .lab-item .edu-open {
+  flex: none;
+}
+
 /* ---------- Responsive -------------------------------------------------- */
 @media (max-width: 1000px) {
   body.pro-theme.bp.eduhelp-page .edu-grid {
     grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  body.pro-theme.bp.eduhelp-page .lab-list {
+    grid-template-columns: minmax(0, 1fr);
   }
 }
 
@@ -257,5 +418,18 @@ body.pro-theme.bp.eduhelp-page .edu-empty p {
   body.pro-theme.bp.eduhelp-page .edu-notice {
     padding: 18px 16px;
     gap: 12px;
+  }
+
+  body.pro-theme.bp.eduhelp-page .lab-class {
+    padding: 18px 16px;
+  }
+
+  body.pro-theme.bp.eduhelp-page .lab-chapter {
+    padding-left: 10px;
+  }
+
+  body.pro-theme.bp.eduhelp-page .lab-item {
+    align-items: flex-start;
+    flex-direction: column;
   }
 }

@@ -20,7 +20,7 @@ class WorkspaceTests(unittest.TestCase):
             module.DIRECTORY_REL: {'notice':'Test notice','categories':[]},
             module.EDUHELP_REL: {'updated':'2026-11-14','notice':'Verify official dates.','updates':[
                 {'id':'exam','title':'Exam notice','category':'Exam','summary':'Check the official date.','link':'https://example.com/notice','date':'2026-11-14','pinned':True,'enabled':True},
-                {'id':'lab','title':'Physics lab','category':'Physics','summary':'Interactive 3D lab.','link':'/eduhelp/labs/electricity','date':'2026-11-14','enabled':True},
+                {'id':'lab','title':'Physics lab','category':'Lab','class_name':'Class 10','subject':'Physics','chapter':'Electricity','kind':'3D Interactive Lab','summary':'Interactive 3D lab.','link':'/eduhelp/labs/electricity','date':'2026-11-14','enabled':True},
                 {'id':'hidden','title':'Hidden update','category':'Notice','summary':'Private','date':'2026-11-13','enabled':False}]},
         }
         self.read = patch.object(module,'safe_read',side_effect=lambda path:copy.deepcopy(self.records.get(path)))
@@ -45,7 +45,7 @@ class WorkspaceTests(unittest.TestCase):
         self.assertEqual(response.status_code,200)
         with self.client.session_transaction() as session:self.token=session['csrf_token']
     def test_public_pages_render(self):
-        for path in ('/','/downloads','/download.html','/admin/login','/payment-demo','/purchases','/eduhelp'):
+        for path in ('/','/downloads','/download.html','/admin/login','/payment-demo','/purchases','/eduhelp','/eduhelp/labs'):
             response=self.client.get(path);self.assertEqual(response.status_code,200,path)
             self.assertNotIn(b'cdn.tailwindcss.com',response.data)
     def test_dark_theme_and_workspace_shell_assets(self):
@@ -62,7 +62,7 @@ class WorkspaceTests(unittest.TestCase):
         self.assertIn('admin-pro.css?v=3',admin)
         self.assertIn('admin-body',admin)
         self.assertIn('admin-drawer-close',admin)
-        self.assertIn('admin.js?v=6',admin)
+        self.assertIn('admin.js?v=7',admin)
 
     def test_admin_requires_authentication(self):
         self.assertEqual(self.client.get('/admin').status_code,302)
@@ -125,9 +125,17 @@ class WorkspaceTests(unittest.TestCase):
         self.assertIn('Verify official dates.', text)
         self.assertIn('Physics lab', text)
         self.assertIn('/eduhelp/labs/electricity', text)
+        self.assertIn('/eduhelp/labs">Lab library', text)
         self.assertIn('Open interactive lab', text)
         self.assertNotIn('Hidden update', text)
         self.assertIn('/eduhelp', self.client.get('/').get_data(as_text=True))
+
+    def test_eduhelp_lab_library_groups_by_class_subject_chapter(self):
+        page = self.client.get('/eduhelp/labs')
+        self.assertEqual(page.status_code, 200)
+        text = page.get_data(as_text=True)
+        for marker in ('Lab library','Class 10','Physics','Chapter','Electricity','Physics lab','/eduhelp/labs/electricity','3D Interactive Lab'):
+            self.assertIn(marker, text)
 
     def test_eduhelp_labs_serve_with_scoped_csp(self):
         for slug, marker in (('electricity','3D Physics Lab'), ('carbon-compounds','Carbon')):
@@ -153,15 +161,16 @@ class WorkspaceTests(unittest.TestCase):
         self.assertEqual(self.records[module.EDUHELP_REL]['updates'][0]['id'], 'admission')
         self.assertIn(b'Admission window opens', self.client.get('/eduhelp').data)
         lab = {'updated':'2026-11-14','updates':[
-            {'id':'lab2','title':'Carbon lab','category':'Chemistry','link':'/eduhelp/labs/carbon-compounds','date':'2026-11-14','enabled':True}]}
+            {'id':'lab2','title':'Carbon lab','category':'Lab','class_name':'Class 10','subject':'Chemistry','chapter':'Carbon and its Compounds','kind':'3D Interactive Lab','link':'/eduhelp/labs/carbon-compounds','date':'2026-11-14','enabled':True}]}
         self.assertEqual(self.request('/api/admin/eduhelp', data=lab).status_code, 200, lab)
         for bad in (
             {'updates': 'bad'},
             {'updates': [{'id':'x','title':'','category':'Exam'}]},
             {'updates': [{'id':'x','title':'T','category':'Sports'}]},
             {'updates': [{'id':'x','title':'T','category':'Exam','link':'javascript:alert(1)'}]},
-            {'updates': [{'id':'x','title':'T','category':'Physics','link':'/admin'}]},
-            {'updates': [{'id':'x','title':'T','category':'Physics','link':'/eduhelp/labs/../admin'}]},
+            {'updates': [{'id':'x','title':'T','category':'Lab','class_name':'Class 10','subject':'Physics','chapter':'Electricity','link':'/admin'}]},
+            {'updates': [{'id':'x','title':'T','category':'Lab','class_name':'Class 10','subject':'Physics','chapter':'Electricity','link':'/eduhelp/labs/../admin'}]},
+            {'updates': [{'id':'x','title':'T','category':'Lab','class_name':'Class 10','subject':'Physics'}]},
             {'updates': [{'id':'x','title':'T','category':'Exam','date':'14-11-2026'}]},
             {'updates': [{'id':'x','title':'T','category':'Exam','enabled':'false'}]},
             {'updates': [{'id':'x','title':'A','category':'Exam'},{'id':'x','title':'B','category':'Exam'}]},
