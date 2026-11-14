@@ -1,25 +1,48 @@
-<section class="bp-section wrap" id="downloads" aria-labelledby="downloads-title">
-  <div class="bp-section-head">
-    <div>
-      <span class="bp-eyebrow">{{ lib_eyebrow if lib_eyebrow is defined else '02 — Library' }}</span>
+<section class="wb-page wrap wb-downloads" id="downloads" aria-labelledby="downloads-title">
+  <header class="wb-page-head">
+    <div class="wb-page-head-copy">
+      <span class="wb-eyebrow">{{ lib_eyebrow if lib_eyebrow is defined else '02 — Library' }}</span>
       {% if lib_h1 is defined and lib_h1 %}<h1 id="downloads-title">{{ lib_title if lib_title is defined else 'Downloads' }}</h1>{% else %}<h2 id="downloads-title">{{ lib_title if lib_title is defined else 'Downloads' }}</h2>{% endif %}
-      {% if lib_lede is defined and lib_lede %}<p class="bp-section-lede">{{ lib_lede }}</p>{% endif %}
+      {% if lib_lede is defined and lib_lede %}<p class="wb-page-lede">{{ lib_lede }}</p>{% endif %}
     </div>
-    <div class="bp-head-side">
-      <a href="/purchases" class="library-purchases">Your purchases</a>
-      <div id="collection-stats" class="download-summary" aria-label="Collection summary"></div>
+    <div class="wb-page-head-side">
+      <a class="wb-text-link" href="/purchases">Your purchases <span aria-hidden="true">→</span></a>
+      <div id="collection-stats" class="wb-stats" aria-label="Collection summary"></div>
     </div>
+  </header>
+
+  <div class="wb-library-bar">
+    <label class="wb-search-field" for="download-search">
+      <svg aria-hidden="true" viewBox="0 0 24 24"><circle cx="10.5" cy="10.5" r="6.5"/><path d="m16 16 4.5 4.5"/></svg>
+      <input id="download-search" type="search" placeholder="Search downloads…" aria-label="Search downloads">
+      <kbd>/</kbd>
+    </label>
+    <label class="wb-select">
+      <span class="wb-visually-hidden">Sort downloads</span>
+      <select id="download-sort" aria-label="Sort downloads">
+        <option value="default">Newest first</option>
+        <option value="oldest">Oldest first</option>
+        <option value="alpha">Name: A–Z</option>
+      </select>
+    </label>
   </div>
-  <div class="download-controls">
-    <div class="download-search-row">
-      <label class="search-box"><span aria-hidden="true">⌕</span><input id="download-search" type="search" placeholder="Search downloads…" aria-label="Search downloads"><kbd>/</kbd></label>
-      <label class="sort-label"><select id="download-sort" aria-label="Sort downloads"><option value="default">Newest first</option><option value="oldest">Oldest first</option><option value="alpha">Name: A–Z</option></select></label>
+
+  <div class="wb-library-filters">
+    <div class="filter-tabs" role="group" aria-label="Collection type">
+      <button type="button" class="filter-tab active" data-kind="all" aria-pressed="true">All</button>
+      <button type="button" class="filter-tab" data-kind="files" aria-pressed="false">Files</button>
+      <button type="button" class="filter-tab" data-kind="albums" aria-pressed="false">Albums</button>
     </div>
-    <div class="download-filter-row">
-      <div class="collection-types" role="group" aria-label="Collection type"><button type="button" class="filter-tab active" data-kind="all" aria-pressed="true">All</button><button type="button" class="filter-tab" data-kind="files" aria-pressed="false">Files</button><button type="button" class="filter-tab" data-kind="albums" aria-pressed="false">Albums</button></div>
-      <select class="download-category-select" id="download-category" aria-label="Download category"><option value="All">Category</option></select>
-    </div>
+    <label class="wb-select">
+      <span class="wb-visually-hidden">Download category</span>
+      <select id="download-category" aria-label="Download category"><option value="All">All categories</option></select>
+    </label>
   </div>
-  <div class="collection-info"><span id="download-count" role="status">{{ initial_downloads | length }} items</span><span>Dates in India time (IST)</span></div>
-  <div class="download-grid" id="downloads-grid" aria-live="polite">{% include '_initial_downloads.html' %}</div>
+
+  <div class="wb-library-meta">
+    <span id="download-count" role="status">{{ initial_downloads | length }} items</span>
+    <span>Dates in India time (IST)</span>
+  </div>
+
+  <div class="download-grid wb-download-grid" id="downloads-grid" aria-live="polite">{% include '_initial_downloads.html' %}</div>
 </section>

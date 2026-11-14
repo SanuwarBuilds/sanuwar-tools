@@ -1,115 +1,94 @@
 {% extends 'base.html' %}
 {% from '_ad_unit.html' import ad_unit with context %}
-{% block bodyclass %}home-page{% endblock %}
+{% block bodyclass %}wb-home{% endblock %}
 {% block content %}
 {% set tools = public_config.get('tools', []) %}
 {% set total_tools = tools | length %}
 {% set popular_browser = catalog.tools | selectattr('popular') | list %}
-<section class="nx-hero" aria-labelledby="hero-title">
-  <div class="nx-hero-frame wrap">
-    <div class="nx-hero-meta">
-      <span class="nx-hero-meta-brand"><i aria-hidden="true"></i>SanuwarTools · the browser workbench</span>
-      <span>{{ total_tools }} tools · {{ catalog.categories | length }} categories · local-first</span>
+{% set popular_shelf = popular_browser[:6] if popular_browser else catalog.tools[:6] %}
+<section class="wb-hero" aria-labelledby="hero-title">
+  <div class="wrap wb-hero-inner">
+    <span class="wb-eyebrow">Free browser utilities</span>
+    <h1 id="hero-title">Small tools.<br><span>Big work.</span></h1>
+    <p class="wb-hero-lede">One calm workbench for text, code, photo resizing and passport photos, PDFs, money, land and everyday maths. Open a tool and get moving — everything runs in this tab.</p>
+    <div class="wb-hero-search">
+      <label class="wb-search-field" for="tool-search">
+        <svg aria-hidden="true" viewBox="0 0 24 24"><circle cx="10.5" cy="10.5" r="6.5"/><path d="m16 16 4.5 4.5"/></svg>
+        <input type="search" id="tool-search" placeholder="Search {{ total_tools }} tools…" aria-label="Search tools, apps and directories" autocomplete="off">
+        <kbd>/</kbd>
+      </label>
+      <a class="button button-light" href="#tools">Browse tools</a>
     </div>
-
-    <div class="nx-hero-stage">
-      <div class="nx-hero-side nx-hero-side-a" aria-hidden="true">
-        <span>No installs</span>
-        <span>No uploads</span>
-      </div>
-
-      <div class="nx-hero-content">
-        <span class="nx-kicker">Free browser utilities</span>
-        <h1 id="hero-title">Small tools.<br><span>Big work.</span></h1>
-        <p class="nx-hero-lede">One calm shelf for text, code, photo resizing and passport photos, PDFs, money, land and everyday maths. Open a tool and get moving — everything runs in this tab.</p>
-        <div class="nx-search">
-          <label class="nx-search-field" for="tool-search">
-            <svg aria-hidden="true" viewBox="0 0 24 24"><circle cx="10.5" cy="10.5" r="6.5"/><path d="m16 16 4.5 4.5"/></svg>
-            <input type="search" id="tool-search" placeholder="Search {{ total_tools }} tools…" aria-label="Search tools, apps and directories" autocomplete="off">
-            <kbd>/</kbd>
-          </label>
-          <a class="nx-search-action" href="#tools">Browse tools <span aria-hidden="true">↓</span></a>
-        </div>
-        <p class="nx-hero-proof"><span>Private by default</span><span>No account needed</span><span>Runs in your browser</span></p>
-      </div>
-
-      <div class="nx-hero-side nx-hero-side-b" aria-hidden="true">
-        <span>sanuwartools</span>
-        <span>issue 01 / 2026</span>
-      </div>
-    </div>
-
-    <div class="nx-hero-foot">
-      <span>All tools, one place</span>
-      <span class="nx-hero-foot-mark">sanuwartools.online</span>
-      <span>Scroll to explore <span aria-hidden="true">↓</span></span>
-    </div>
+    <div class="wb-hero-hints"><span>Try</span>{% for tool in popular_browser[:4] %}<a href="/tools/{{ tool.slug }}">{{ tool.name }}</a>{% endfor %}<span class="wb-hero-note">Private by default · No account needed</span></div>
   </div>
 </section>
 
-<section class="nx-popular-band" aria-labelledby="popular-title">
-  <div class="wrap">
-    <div class="nx-popular-card">
-      <div class="nx-popular-intro">
-        <span class="nx-eyebrow">Selected shelf</span>
-        <h2 id="popular-title">Popular<br>tools</h2>
-        <p>Go straight to the tools people open most.</p>
-        <a href="/tools">See every tool <span aria-hidden="true">→</span></a>
-      </div>
-      <div class="nx-popular-groups">
-        <div class="nx-popular-group">
-          <h3>Most used</h3>
-          <div class="nx-popular-links">
-            {% for tool in popular_browser[:6] %}
-            <a href="/tools/{{ tool.slug }}">{{ tool.name }}<span aria-hidden="true">↗</span></a>
-            {% endfor %}
-          </div>
-        </div>
-        <div class="nx-popular-group">
-          <h3>Also popular</h3>
-          <div class="nx-popular-links">
-            {% for tool in popular_browser[6:12] %}
-            <a href="/tools/{{ tool.slug }}">{{ tool.name }}<span aria-hidden="true">↗</span></a>
-            {% endfor %}
-          </div>
-        </div>
-      </div>
-    </div>
-    <div class="nx-ticker" aria-label="Toolkit at a glance">
-      <span>{{ total_tools }} tools</span>
-      <span>Local processing</span>
-      <span>Free forever</span>
-      <span>No sign-up</span>
-      <span>Browser first</span>
-      <span>{{ catalog.categories | length }} categories</span>
-    </div>
+<section class="wrap wb-popular" aria-labelledby="popular-title">
+  <div class="wb-section-head">
+    <div><span class="wb-eyebrow">Selected shelf</span><h2 id="popular-title">Popular tools</h2></div>
+    <a href="/tools">See every tool →</a>
+  </div>
+  <div class="wb-pop-grid">
+    {% for tool in popular_shelf %}
+    <a class="wb-pop-card" href="/tools/{{ tool.slug }}">
+      <span class="wb-pop-cat">{{ tool.category }}</span>
+      <strong>{{ tool.name }}</strong>
+      <span class="wb-pop-desc">{{ tool.description }}</span>
+      <span class="wb-pop-open">Open tool →</span>
+    </a>
+    {% endfor %}
   </div>
 </section>
 
-{% if public_config.get('downloadPage', {}).get('enabled', True) %}
-<a class="home-download-strip" href="#downloads">
-  <span class="hds-icon" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3v11m0 0 4-4m-4 4-4-4M4 17v2a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-2"/></svg></span>
-  <span class="hds-copy"><span class="hds-kicker">Library</span><strong>Downloads</strong><span class="hds-desc">Android apps, files &amp; photo albums.</span></span>
-  <span class="hds-go">Open <span aria-hidden="true">→</span></span>
-</a>
-{% endif %}
+<section class="wrap wb-library" aria-label="Library shortcuts">
+  {% if public_config.get('downloadPage', {}).get('enabled', True) %}
+  <a class="home-download-strip" href="#downloads">
+    <span class="wb-library-icon" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M12 3v11m0 0 4-4m-4 4-4-4M4 17v2a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-2"/></svg></span>
+    <span class="wb-library-copy"><small>Library</small><strong>Downloads</strong><span>Android apps, files &amp; photo albums.</span></span>
+    <span class="wb-library-go" aria-hidden="true">→</span>
+  </a>
+  {% endif %}
+  <a class="wb-library-card" href="/eduhelp/labs">
+    <span class="wb-library-icon" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M4 5.5A2.5 2.5 0 0 1 6.5 3H20v15.5a2.5 2.5 0 0 1-2.5 2.5H6.5A2.5 2.5 0 0 1 4 18.5Z"/><path d="M8 7h8M8 11h8M8 15h5"/></svg></span>
+    <span class="wb-library-copy"><small>Eduhelp</small><strong>Lab library</strong><span>Interactive 3D science labs by class, subject and chapter.</span></span>
+    <span class="wb-library-go" aria-hidden="true">→</span>
+  </a>
+</section>
 
-<section class="nx-section wrap" id="tools" aria-labelledby="tools-title">
-  <div class="nx-section-head">
-    <div>
-      <span class="nx-eyebrow">01 / Browse</span>
-      <h2 id="tools-title">Every tool.<br><em>One shelf.</em></h2>
-    </div>
-    <p class="nx-section-note">Start typing in the search above, or pick a category. <b id="tool-total">{{ total_tools }}</b> tools shown.</p>
+<section class="wrap wb-categories" id="browse-categories" aria-labelledby="categories-title">
+  <div class="wb-section-head">
+    <div><span class="wb-eyebrow">Explore</span><h2 id="categories-title">Pick a category</h2></div>
+    <a href="/tools">All tools →</a>
+  </div>
+  <div class="wb-cat-grid">
+    {% for category in catalog.categories %}
+    {% set category_count = catalog.tools | selectattr('category', 'equalto', category) | list | length %}
+    <a class="wb-cat-card" href="/tools?category={{ category | urlencode }}">
+      <span><strong>{{ category }}</strong><small>{{ category_count }} {{ 'tool' if category_count == 1 else 'tools' }}</small></span>
+      <i aria-hidden="true">→</i>
+    </a>
+    {% endfor %}
+  </div>
+</section>
+
+<section class="wrap wb-tools" id="tools" aria-labelledby="tools-title">
+  <div class="wb-section-head">
+    <div><span class="wb-eyebrow">01 / Browse</span><h2 id="tools-title">Every tool. One shelf.</h2></div>
+    <p class="wb-tools-head-note">Search above or pick a category. <b id="tool-total">{{ total_tools }}</b> tools shown.</p>
   </div>
   <span id="browser-tools" aria-hidden="true"></span>
-  <div class="nx-filter-bar">
-    <div class="nx-filter-mobile">
+  <div class="wb-filters">
+    <div class="wb-filter-select">
       <label for="category-select">Filter by category</label>
       <select id="category-select" aria-label="Filter tools by category"></select>
     </div>
-    <div class="filter-tabs" id="categories" role="group" aria-label="Filter tools"></div>
-    <a class="nx-text-link" href="/tools">Open full shelf <span aria-hidden="true">→</span></a>
+    <div class="filter-tabs" id="categories" role="group" aria-label="Filter tools">
+      <button type="button" class="filter-tab active" aria-pressed="true">All<span>{{ total_tools }}</span></button>
+      {% for category in catalog.categories %}
+      <button type="button" class="filter-tab" aria-pressed="false">{{ category }}<span>{{ catalog.tools | selectattr('category', 'equalto', category) | list | length }}</span></button>
+      {% endfor %}
+    </div>
+    <a class="wb-text-link" href="/tools">Open full shelf →</a>
   </div>
   <div class="tool-grid" id="tools-grid" aria-live="polite">{% include '_initial_tools.html' %}</div>
   <div id="widgets" class="widget-grid"></div>
@@ -122,28 +101,25 @@
 {% include '_downloads_library.html' %}
 {% endif %}
 
-<section class="nx-section wrap nx-how" id="how-it-works" aria-labelledby="flow-title">
-  <div class="nx-section-head">
-    <div>
-      <span class="nx-eyebrow">03 / Flow</span>
-      <h2 id="flow-title">Open. Work.<br><em>Done.</em></h2>
-    </div>
-    <p class="nx-section-note">No installation, no account and no waiting for an upload. The tool is the whole journey.</p>
+<section class="wrap wb-how" id="how-it-works" aria-labelledby="flow-title">
+  <div class="wb-section-head">
+    <div><span class="wb-eyebrow">03 / Flow</span><h2 id="flow-title">Open. Work. Done.</h2></div>
+    <p class="wb-tools-head-note">No installation, no account and no waiting for an upload. The tool is the whole journey.</p>
   </div>
-  <div class="nx-steps">
+  <div class="wb-steps">
     <article><span>01</span><h3>Choose a tool</h3><p>Search the shelf or start from a category. Every card opens the working tool.</p></article>
     <article><span>02</span><h3>Do the work</h3><p>Paste, type or drop a file. Results update in this browser tab as you go.</p></article>
     <article><span>03</span><h3>Take the result</h3><p>Copy it, save it or download it. Your files never leave your device.</p></article>
   </div>
 </section>
 
-<section class="nx-section wrap nx-about" id="about-toolkit" aria-labelledby="about-toolkit-title">
-  <div class="nx-about-card">
-    <div class="nx-about-title">
-      <span class="nx-eyebrow">04 / About</span>
+<section class="wrap wb-about" id="about-toolkit" aria-labelledby="about-toolkit-title">
+  <div class="wb-about-card">
+    <div>
+      <span class="wb-eyebrow">04 / About</span>
       <h2 id="about-toolkit-title">A small toolkit for everyday work.</h2>
     </div>
-    <div class="nx-about-copy">
+    <div class="wb-about-copy">
       <p>SanuwarTools is a free, browser-based toolkit maintained by Sanuwar. The collection now includes {{ catalog.tools | length }} browser tools for text, encoding, hashes, images, PDFs, networking, security and everyday maths, plus the <a href="/photo-tools">photo resizer and compressor</a> that crops images to exact pixels, DPI and KB limits for passport, PAN, voter ID and exam forms — entirely on your device.</p>
       <p>Explore the <a href="#tools">browser tools</a> or the <a href="/tools">full tool page</a>, browse the <a href="/downloads">downloads library</a> for Android apps, files and albums, and open the source <a href="/directory">directories</a> for movies, anime, music and more. New modules are added as they are ready; no account is needed for public tools.</p>
     </div>

@@ -38,10 +38,16 @@
   const openSmart = () => {
     if (smartTarget) location.assign(smartTarget.href);
   };
-  const setCategory = (value) => {
+  const setCategory = (value, syncUrl = true) => {
     category = value;
     chips.forEach((item) => item.classList.toggle("is-active", item.dataset.category === category));
     if (categorySelect) categorySelect.value = category;
+    if (syncUrl) {
+      const url = new URL(location.href);
+      if (category === "All") url.searchParams.delete("category");
+      else url.searchParams.set("category", category);
+      history.replaceState(null, "", url);
+    }
     apply();
   };
   chips.forEach((chip) => chip.addEventListener("click", () => setCategory(chip.dataset.category)));
@@ -65,5 +71,7 @@
       search.focus();
     }
   });
+  const requested = new URLSearchParams(location.search).get("category");
+  if (requested && chips.some((chip) => chip.dataset.category === requested)) setCategory(requested, false);
   updateSmart();
 })();

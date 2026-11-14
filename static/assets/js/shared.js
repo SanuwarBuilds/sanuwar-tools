@@ -186,7 +186,7 @@ window.ST = (() => {
     }
     document
       .querySelector('meta[name="theme-color"]')
-      ?.setAttribute("content", dark ? "#141618" : "#e3e4e5");
+      ?.setAttribute("content", dark ? "#0b0b0c" : "#f7f7f5");
   };
   try {
     root.dataset.theme =
