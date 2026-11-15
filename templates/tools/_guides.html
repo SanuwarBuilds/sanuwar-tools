@@ -1,0 +1,41 @@
+{% set guides = {
+  'form-file-checker': (
+    'Check whether your file meets an application form’s requirements',
+    'If a form asks for a 200 × 230 px JPG under 50 KB, select JPG and enter both dimensions and the size limit. The results show which checks pass and which need attention.',
+    'The checker can confirm the file is readable and matches the settings you enter. Check the form separately for rules such as background colour, signature appearance or document contents.'
+  ),
+  'fill-sign-pdf': (
+    'Add a signature and fill in a PDF',
+    'Choose the PDF, select the page and pick Text, Date, Tick mark, Drawn signature or Signature image. Click the preview to place the item. You can also enter its position as a percentage from the left and top.',
+    'Review placement before downloading. The exported copy contains visible marks, without a signing certificate.'
+  ),
+  'pdf-merge': (
+    'Combine PDFs into one file',
+    'Choose the PDFs you want to combine. For example, add a cover page, application form and supporting documents, then use the arrows to put them in that order before selecting Merge PDFs.',
+    'The output includes the pages of each file in the order shown. To change the order of individual pages in the result, use the PDF Page Organizer.'
+  ),
+  'pdf-compress': (
+    'Reduce PDF size for an upload limit',
+    'Try structure optimization first if your PDF includes selectable text. For a large scan, try lowering the rendering resolution and image quality, then compare the output size with the limit on your form.',
+    'Rasterizing makes pages into images and can remove text selection. Open the result to check readability before submitting it.'
+  ),
+  'pdf-organizer': (
+    'Rotate, reorder or remove pages in a PDF',
+    'Choose a PDF and look at the page thumbnails. Use Move earlier or Move later to change page order, Rotate to fix a sideways scan, and Remove to drop unwanted pages.',
+    'The downloaded file is a new copy. Keep the original if you may need to restore pages later.'
+  ),
+  'json-formatter': (
+    'Format JSON and find syntax errors',
+    'Paste JSON and select Format to indent it, Minify to remove whitespace, or Sort keys + format to make object keys easier to compare. The Try example button loads sample data.',
+    'If formatting fails, use the error message to inspect the input. Common issues include missing double quotes around keys and trailing commas.'
+  )
+} %}
+{% if tool.slug in guides %}
+{% set heading, instructions, notes = guides[tool.slug] %}
+<article class="tp-aside-card wb-tool-guide">
+  <h2>{{ heading }}</h2>
+  <p>{{ instructions }}</p>
+  <p>{{ notes }}</p>
+  {% if tool.slug == 'pdf-merge' %}<p><a class="wb-text-link" href="/tools/pdf-organizer">Open PDF Page Organizer →</a></p>{% endif %}
+</article>
+{% endif %}

@@ -603,15 +603,9 @@
         const title = el(
           "h3",
           {},
-          el(
-            "button",
-            {
-              class: "download-title",
-              type: "button",
-              onclick: () => detail(item),
-            },
-            item.title,
-          ),
+          item.download_path
+            ? el("a", { class: "download-title", href: item.download_path }, item.title)
+            : el("button", { class: "download-title", type: "button", onclick: () => detail(item) }, item.title),
         );
         const action = item.is_album
           ? el(

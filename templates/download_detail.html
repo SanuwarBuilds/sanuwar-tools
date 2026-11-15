@@ -1,0 +1,46 @@
+{% extends 'base.html' %}
+{% block bodyclass %}download-detail-page{% endblock %}
+{% block content %}
+<article class="wrap wb-info wb-download-detail">
+  <nav class="tp-crumb" aria-label="Breadcrumb">
+    <a href="/">Home</a><span aria-hidden="true">/</span>
+    <a href="/downloads">Downloads</a>
+  </nav>
+  <h1>{{ item.title }}</h1>
+  {% if item.description %}<p class="wb-info-intro">{{ item.description }}</p>
+  {% elif item.is_album %}<p class="wb-info-intro">Browse {{ item.album_files | length }} files in this album.</p>{% endif %}
+  {% set cover = item.image | default('') | public_image %}
+  {% if cover %}<img class="wb-download-detail-cover" src="{{ cover }}" alt="" width="320" loading="lazy">{% endif %}
+  {% set host = (item.link | public_url) | site_domain %}
+  {% set file_type = item.file_type %}
+  {% set size = item.size | download_size_label %}
+  {% set stamp = item.uploaded_at or item.created_at %}
+  <dl>
+    {% if item.category %}<dt>Category</dt><dd>{{ item.category }}</dd>{% endif %}
+    {% if item.version %}<dt>Version</dt><dd>{{ item.version }}</dd>{% endif %}
+    {% if file_type %}<dt>File type</dt><dd>{{ file_type }}</dd>{% endif %}
+    {% if size %}<dt>File size</dt><dd>{{ size }}</dd>{% endif %}
+    {% if host %}<dt>Download host</dt><dd>{{ host }}</dd>{% endif %}
+    {% if stamp is string and stamp %}<dt>{{ 'Uploaded' if item.uploaded_at else 'Added' }}</dt><dd><time datetime="{{ stamp }}">{{ stamp[:10] }}</time></dd>{% endif %}
+    <dt>Access</dt><dd>{{ '₹' ~ item.pricing.payable if item.locked else 'Free' }}</dd>
+  </dl>
+  {% set library_url = '/downloads?item=' ~ (item.id | urlencode) %}
+  {% if item.is_album %}
+  <section aria-labelledby="album-file-title">
+    <h2 id="album-file-title">Files in this album</h2>
+    <ul>
+      {% for file in item.album_files %}
+      <li>{{ file.name }}{% if file.link | public_url %} <a href="{{ file.link | public_url }}" rel="noopener noreferrer" target="_blank" aria-label="Download {{ file.name }}">Download</a>{% endif %}</li>
+      {% endfor %}
+    </ul>
+    <a class="button button-dark" href="{{ library_url }}">Open album</a>
+  </section>
+  {% elif item.locked or item.private_delivery %}
+    <a class="button button-dark" href="{{ library_url }}">{{ 'View purchase options' if item.locked else 'Open download options' }}</a>
+  {% elif item.link | public_url %}
+    <a class="button button-dark" href="{{ item.link | public_url }}" target="_blank" rel="noopener noreferrer" data-google-vignette="false">Download {{ item.title }}</a>
+  {% else %}
+    <p>Download unavailable.</p>
+  {% endif %}
+</article>
+{% endblock %}

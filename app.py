@@ -95,7 +95,7 @@ def index():
     catalog = load_tool_catalog()
     config['tools'] = [*config.get('tools', []), *browser_tool_cards(catalog)]
     return render_template("index.html", catalog=catalog, public_config=config,
-                           initial_downloads=[payments.public_item(item) for item in public_downloads()])
+                           initial_downloads=[public_download_item(item) for item in public_downloads()])
 
 def photo_tools_available(config):
     return not any(tool.get('id') == 'builtin-photo-tools' and not is_public(tool)
@@ -377,7 +377,29 @@ def payment_demo():
 def downloads():
     if not (safe_read(TOOLS_CONFIG_REL) or {}).get('downloadPage', {}).get('enabled', True):
         abort(404)
-    return render_template("downloads.html", initial_downloads=[payments.public_item(item) for item in public_downloads()])
+    return render_template("downloads.html", initial_downloads=[public_download_item(item) for item in public_downloads()])
+
+@app.get('/downloads/<identity>/<slug>')
+def download_detail(identity, slug):
+    if not seo.DOWNLOAD_ID.fullmatch(identity):
+        abort(404)
+    item = next((item for item in public_downloads() if item.get('id') == identity and item.get('title')), None)
+    if item is None:
+        abort(404)
+    canonical = seo.download_path(item)
+    if not canonical:
+        abort(404)
+    if request.path != canonical:
+        return redirect(canonical, code=301)
+    detail = public_download_item(item)
+    if not detail.get('is_album') and detail['link'] and security.valid_url(detail['link']):
+        from urllib.parse import urlsplit
+        extension = os.path.splitext(urlsplit(detail['link']).path)[1][1:].upper()
+        if re.fullmatch(r'[A-Z0-9]{2,8}', extension):
+            detail['file_type'] = {'APK': 'Android APK', 'AAB': 'Android App Bundle'}.get(extension, extension)
+    g.download_page = detail
+    return render_template('download_detail.html', item=detail)
+
 
 @app.route("/admin/login", methods=["GET", "POST"])
 def admin_login():
@@ -817,6 +839,12 @@ def load_downloads():
 def save_downloads(items):
     safe_write(DOWNLOADS_REL, items)
 
+def public_download_item(item):
+    public = payments.public_item(item)
+    public['download_path'] = seo.download_path(item)
+    return public
+
+
 def public_downloads():
     if (safe_read(TOOLS_CONFIG_REL) or {}).get('downloadPage', {}).get('enabled', True) is not True:
         return []
@@ -863,7 +891,7 @@ def set_content_availability(kind, identity):
 def api_downloads_data():
     """Public endpoint — returns all download items."""
     items = public_downloads()
-    return jsonify([payments.public_item(item) for item in items])
+    return jsonify([public_download_item(item) for item in items])
 
 @app.route("/api/admin/downloads")
 @login_required
@@ -1161,7 +1189,8 @@ def api_widget_vote(widget_id):
         return jsonify({"error": "Could not save or upload. Check server configuration and try again."}), 500
 
 payments.register(app, public_downloads, login_required)
-seo.install(app, lambda: safe_read(TOOLS_CONFIG_REL), lambda: safe_read(DIRECTORY_REL), load_tool_catalog)
+seo.install(app, lambda: safe_read(TOOLS_CONFIG_REL), lambda: safe_read(DIRECTORY_REL),
+            load_tool_catalog, load_downloads=public_downloads)
 monetization.install(app)
 user_auth.install(app)
 visitor_analytics.install(app, login_required, lambda: safe_read(TOOLS_CONFIG_REL), lambda: safe_read(DOWNLOADS_REL) or [])

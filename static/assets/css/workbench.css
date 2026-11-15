@@ -2913,3 +2913,13 @@ body.wb-ui.wb-ui.wb-ui.wb-ui.wb-tool-page .tp-drop.is-over { background: var(--w
 .wb-featured-extra { margin: 12px 0 0; }
 .wb-featured-extra a { display: inline-flex; align-items: center; min-height: 44px; }
 .wb-form-links { display: flex; flex-wrap: wrap; gap: 0 16px; }
+
+.wb-download-detail .tp-crumb { margin-bottom: 16px; }
+.wb-download-detail-cover { display: block; width: min(100%, 320px); height: auto; border-radius: var(--wb-radius); }
+.wb-download-detail dl { display: grid; grid-template-columns: max-content minmax(0, 1fr); gap: 6px 16px; margin-block: 20px; }
+.wb-download-detail dl dt { font-weight: 650; }
+.wb-download-detail dl dd { margin: 0; overflow-wrap: anywhere; }
+.wb-download-detail li a { margin-inline-start: 6px; }
+.wb-tool-guide { max-width: 72ch; margin-top: 24px; }
+.wb-tool-guide h2 { text-transform: none; }
+.wb-tool-guide p + p { margin-top: 10px; }

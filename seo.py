@@ -2,9 +2,11 @@
 import datetime
 import os
 import re
+import unicodedata
 from xml.etree.ElementTree import Element, SubElement, tostring
-from flask import Response, request
+from flask import Response, g, request
 import security
+from download_metadata import upload_time
 
 ORIGIN = 'https://sanuwartools.online'
 SITE_UPDATED = '2026-11-12'
@@ -82,6 +84,18 @@ LAND_FAQS = [
 ]
 
 TOOL_SEO = {
+    'form-file-checker': ('Check Photo, Signature & PDF Size for Online Forms | SanuwarTools',
+                          'Check whether a JPG, PNG, WebP or PDF meets your application form’s format, pixel dimensions and file-size limit before you upload it.'),
+    'fill-sign-pdf': ('Fill and Sign PDF Online — Add Text, Date & Signature | SanuwarTools',
+                      'Add text, dates, tick marks or a handwritten signature to a PDF. Place each item on the page preview and download the edited copy.'),
+    'pdf-merge': ('Merge PDF Files Online — Combine PDFs in Order | SanuwarTools',
+                  'Combine two or more PDFs into one file. Arrange the files in the order you want, merge them in your browser and download the result.'),
+    'pdf-compress': ('Compress PDF Online — Reduce PDF File Size | SanuwarTools',
+                     'Compare a smaller PDF with the original. Try structure optimization or lower-resolution pages to reduce file size in your browser.'),
+    'pdf-organizer': ('Reorder, Rotate & Remove PDF Pages Online | SanuwarTools',
+                      'Preview each page, move pages into order, rotate sideways scans and remove unwanted pages. Save the result as a new PDF.'),
+    'json-formatter': ('JSON Formatter & Validator — Format or Minify JSON | SanuwarTools',
+                       'Paste JSON to find syntax errors, pretty-print with spaces or tabs, sort object keys, or minify the output. Copy or download the result.'),
     'gst-calculator': ('GST Calculator — Add or Remove GST, CGST & SGST | SanuwarTools',
                        'Calculate GST at 5%, 18% or 40%, split CGST and SGST for intra-state supplies, or use IGST for inter-state supplies.'),
     'income-tax-calculator': ('Income Tax Calculator FY 2026-27 — New vs Old Regime | SanuwarTools',
@@ -102,7 +116,22 @@ TOOL_ICON_NAMES = ('photo', 'passport', 'score', 'wallet', 'tool', 'download', '
                    'text', 'convert', 'document', 'clock', 'heart', 'archive')
 
 
-def install(app, load_config, load_directory=None, load_tool_catalog=None):
+DOWNLOAD_ID = re.compile(r'[A-Za-z0-9_-]{1,120}')
+
+
+def download_path(item):
+    identity = item.get('id')
+    if not isinstance(identity, str) or not DOWNLOAD_ID.fullmatch(identity):
+        return ''
+    title = item.get('title')
+    if not isinstance(title, str) or not title.strip():
+        return ''
+    plain = unicodedata.normalize('NFKD', title).encode('ascii', 'ignore').decode().lower()
+    slug = re.sub(r'[^a-z0-9]+', '-', plain).strip('-')[:80].rstrip('-') or 'file'
+    return f'/downloads/{identity}/{slug}'
+
+
+def install(app, load_config, load_directory=None, load_tool_catalog=None, load_downloads=None):
     def directory_categories():
         data = load_directory() if load_directory else None
         if not isinstance(data, dict):
@@ -158,6 +187,18 @@ def install(app, load_config, load_directory=None, load_tool_catalog=None):
         category = None
         tool_page = None
         page = PAGES.get(path)
+        download = g.get('download_page')
+        if download is not None:
+            name = download['title']
+            version = f" {download['version']}" if download.get('version') else ''
+            album = download.get('is_album')
+            file_type = f" {download['file_type']}" if download.get('file_type') else ''
+            suffix = 'Photo & File Album' if album else f'{file_type.strip()} Download'.strip()
+            description = ' '.join((download.get('description') or '').split())
+            if not description:
+                description = (f"Browse the {len(download['album_files'])} files in {name} on SanuwarTools."
+                               if album else f"View the{file_type or ' file'} details and download options for {name}{version} on SanuwarTools.")
+            page = (f'{name}{version} — {suffix} | SanuwarTools', description[:160])
         tools = tool_catalog()
         if page is None and path in ('/tools', '/tools/'):
             if tools:
@@ -210,6 +251,12 @@ def install(app, load_config, load_directory=None, load_tool_catalog=None):
                                           'width': 1200, 'height': 630},
                    'dateModified': SITE_UPDATED,
                    'publisher': publisher}
+        if download is not None:
+            modified = upload_time(download.get('updated_at')) or upload_time(download.get('created_at'))
+            if modified:
+                webpage['dateModified'] = modified
+            else:
+                webpage.pop('dateModified')
         graph = [website, organization, webpage] if path == '/' else [organization, webpage]
         if path != '/':
             if tool_page is not None and tool_page.get('slug') == 'land-measurement-calculator':
@@ -217,6 +264,12 @@ def install(app, load_config, load_directory=None, load_tool_catalog=None):
                     {'@type': 'ListItem', 'position': 1, 'name': 'Home', 'item': ORIGIN + '/'},
                     {'@type': 'ListItem', 'position': 2, 'name': 'All tools', 'item': ORIGIN + '/tools'},
                     {'@type': 'ListItem', 'position': 3, 'name': 'Land Measurement Calculator', 'item': canonical},
+                ]
+            elif download is not None:
+                crumb_items = [
+                    {'@type': 'ListItem', 'position': 1, 'name': 'Home', 'item': ORIGIN + '/'},
+                    {'@type': 'ListItem', 'position': 2, 'name': 'Downloads', 'item': ORIGIN + '/downloads'},
+                    {'@type': 'ListItem', 'position': 3, 'name': download['title'], 'item': canonical},
                 ]
             elif category is not None:
                 crumb_name = str(category.get('name'))
@@ -315,8 +368,14 @@ def install(app, load_config, load_directory=None, load_tool_catalog=None):
     def sitemap():
         paths = ['/']
         config = load_config() or {}
+        download_dates = {}
         if config.get('downloadPage', {}).get('enabled', True) is True:
             paths.append('/downloads')
+            for item in load_downloads() if load_downloads else ():
+                path = download_path(item)
+                if path:
+                    download_dates[path] = upload_time(item.get('updated_at')) or upload_time(item.get('created_at'))
+            paths.extend(download_dates)
         if not any(tool.get('id') == 'builtin-photo-tools' and not all(tool.get(flag, True) is True for flag in ('enabled', 'visible')) for tool in config.get('tools', [])):
             paths.append('/photo-tools')
         paths.extend(['/about', '/contact', '/privacy', '/directory', '/eduhelp', '/eduhelp/labs'])
@@ -335,7 +394,9 @@ def install(app, load_config, load_directory=None, load_tool_catalog=None):
         for path in paths:
             url = SubElement(root, 'url')
             SubElement(url, 'loc').text = ORIGIN + path
-            SubElement(url, 'lastmod').text = SITE_UPDATED
+            modified = download_dates.get(path, SITE_UPDATED)
+            if modified:
+                SubElement(url, 'lastmod').text = modified
         return Response(tostring(root, encoding='utf-8', xml_declaration=True), mimetype='application/xml',
                         headers={'Cache-Control': 'no-store'})
 

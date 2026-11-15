@@ -1,4 +1,4 @@
-{% set public_ui = request.path in ('/', '/downloads', '/download.html', '/photo-tools', '/signin', '/account', '/privacy', '/about', '/contact', '/tools', '/bypass', '/payment-demo', '/eduhelp', '/eduhelp/labs') or request.path.startswith('/directory') or request.path.startswith('/tools/') or request.path.startswith('/purchase') %}
+{% set public_ui = request.path in ('/', '/downloads', '/download.html', '/photo-tools', '/signin', '/account', '/privacy', '/about', '/contact', '/tools', '/bypass', '/payment-demo', '/eduhelp', '/eduhelp/labs') or request.path.startswith('/downloads/') or request.path.startswith('/directory') or request.path.startswith('/tools/') or request.path.startswith('/purchase') %}
 {% set default_theme = public_config.get('site', {}).get('defaultTheme', 'dark') %}
 <!doctype html>
 <html lang="en" data-theme="{{ default_theme }}">
@@ -61,7 +61,7 @@
 {% if public_ui or request.path.startswith('/admin') %}<link rel="stylesheet" href="/assets/css/sanuwar.css?v=8">{% endif %}
 {% if public_ui and request.path != '/photo-tools' %}<link rel="stylesheet" href="/assets/css/neumorphism.css?v=1">{% endif %}
 {% if public_ui %}<link rel="stylesheet" href="/assets/css/nixtool.css?v=5">{% endif %}
-{% if public_ui %}<link rel="stylesheet" href="/assets/css/workbench.css?v=14">{% endif %}
+{% if public_ui %}<link rel="stylesheet" href="/assets/css/workbench.css?v=15">{% endif %}
 {% if public_ui %}<script nonce="{{ csp_nonce }}" src="/assets/js/sanuwar.js?v=6" defer></script>{% endif %}
 {% if public_ui %}<script nonce="{{ csp_nonce }}" src="/assets/js/workbench.js?v=1" defer></script>
 <script nonce="{{ csp_nonce }}" src="/assets/js/saved-tools.js?v=1" defer></script>{% endif %}

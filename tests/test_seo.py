@@ -74,11 +74,36 @@ class SearchDiscoveryTests(unittest.TestCase):
         root=fromstring(response.data)
         self.assertEqual([node.text for node in root.iter('{http://www.sitemaps.org/schemas/sitemap/0.9}loc')],
                          ['https://sanuwartools.online/','https://sanuwartools.online/downloads',
+                          'https://sanuwartools.online/downloads/free/public-album','https://sanuwartools.online/downloads/paid/paid-album',
                           'https://sanuwartools.online/photo-tools','https://sanuwartools.online/about','https://sanuwartools.online/contact','https://sanuwartools.online/privacy',
                           'https://sanuwartools.online/directory','https://sanuwartools.online/eduhelp','https://sanuwartools.online/eduhelp/labs','https://sanuwartools.online/directory/anime'])
         self.records[module.TOOLS_CONFIG_REL]['downloadPage']['enabled']=False
         self.assertNotIn(b'/downloads',self.client.get('/sitemap.xml').data)
         self.assertEqual(self.client.get('/downloads').status_code,404)
+
+    def test_download_detail_is_discoverable_and_keeps_private_delivery_hidden(self):
+        free = '/downloads/free/public-album'
+        paid = '/downloads/paid/paid-album'
+        library = self.client.get('/downloads').get_data(as_text=True)
+        self.assertIn(f'href="{free}"', library)
+        self.assertIn(f'href="{paid}"', library)
+        response = self.client.get(free, base_url='https://untrusted.example')
+        self.assertEqual(response.status_code, 200)
+        text = response.get_data(as_text=True)
+        self.assertIn(f'rel="canonical" href="https://sanuwartools.online{free}"', text)
+        self.assertIn('<h1>Public album</h1>', text)
+        self.assertIn('https://example.com/guide.pdf', text)
+        self.assertNotIn('noindex', response.headers.get('X-Robots-Tag', ''))
+        paid_page = self.client.get(paid).get_data(as_text=True)
+        self.assertIn('Premium file.zip', paid_page)
+        self.assertIn('/downloads?item=paid', paid_page)
+        self.assertNotIn('private/secret', paid_page)
+        self.assertNotIn('secret-original.zip', paid_page)
+        redirect = self.client.get('/downloads/free/outdated-title')
+        self.assertEqual((redirect.status_code, redirect.location), (301, free))
+        self.assertEqual(self.client.get('/downloads/hidden/secret-download-title').status_code, 404)
+        self.records[module.TOOLS_CONFIG_REL]['downloadPage']['enabled'] = False
+        self.assertEqual(self.client.get(free).status_code, 404)
 
     def test_robots_preserves_resources_needed_for_rendering(self):
         text=self.client.get('/robots.txt').get_data(as_text=True)
