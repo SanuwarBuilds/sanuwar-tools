@@ -2912,3 +2912,4 @@ body.wb-ui.wb-ui.wb-ui.wb-ui.wb-tool-page .tp-drop.is-over { background: var(--w
 .wb-ui .download-facts { color: var(--wb-muted); font-size: .8125rem; margin: 0; overflow-wrap: anywhere; }
 .wb-featured-extra { margin: 12px 0 0; }
 .wb-featured-extra a { display: inline-flex; align-items: center; min-height: 44px; }
+.wb-form-links { display: flex; flex-wrap: wrap; gap: 0 16px; }

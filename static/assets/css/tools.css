@@ -2427,3 +2427,41 @@ html[data-theme="dark"]:has(body.tool-page) {
 .tp-pdf-controls { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 4px; }
 .tp-pdf-controls .tp-btn { min-height: 44px; padding-inline: 4px; white-space: normal; }
 .tool-page-media .tp-drop:focus-within { outline: 2px solid var(--wb-accent); outline-offset: 3px; }
+
+.tool-page-forms .tp-field { margin-block: 12px; }
+.tool-page-forms [hidden] { display: none; }
+.tp-form-results:not(:empty) {
+  margin-top: 20px;
+  padding: 16px;
+  border: 1px solid var(--wb-line);
+  border-radius: 12px;
+  background: var(--wb-card);
+  overflow-wrap: anywhere;
+}
+.tp-form-results h2 { font-size: 1rem; margin: 0 0 8px; }
+.tp-form-results ul { padding-inline-start: 20px; margin: 0 0 10px; }
+.tp-form-results li + li { margin-top: 6px; }
+.tp-sign-page-number { align-self: center; }
+.tp-sign-pad {
+  display: block;
+  width: min(100%, 480px);
+  height: auto;
+  touch-action: none;
+  background: #fff;
+  border: 1px solid var(--wb-line-strong);
+  border-radius: 8px;
+  cursor: crosshair;
+}
+.tp-sign-sheet {
+  display: grid;
+  width: fit-content;
+  max-width: 100%;
+  margin-block: 16px;
+  border: 1px solid var(--wb-line-strong);
+  background: #fff;
+}
+.tp-sign-sheet canvas { grid-area: 1 / 1; display: block; max-width: 100%; height: auto; }
+.tp-sign-sheet canvas:last-child { cursor: crosshair; }
+.tp-sign-marks { margin: 8px 0; padding: 0; list-style: none; }
+.tp-sign-marks li { display: flex; justify-content: space-between; align-items: center; gap: 12px; overflow-wrap: anywhere; }
+.tp-sign-editor .tp-btn, .tp-form-results .tp-btn { min-height: 44px; white-space: normal; }

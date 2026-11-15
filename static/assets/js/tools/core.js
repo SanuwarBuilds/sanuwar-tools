@@ -26,7 +26,7 @@
   const panel = (title, body, className = "") => {
     const section = el("section", { class: `tp-panel ${className}`.trim() });
     if (title) section.append(el("h2", { class: "tp-panel-title", text: title }));
-    section.append(body);
+    section.append(...[body].flat());
     return section;
   };
 

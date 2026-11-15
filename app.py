@@ -531,7 +531,7 @@ EDUHELP_LABS = {
     'electricity': 'class-10-electricity.html',
     'carbon-compounds': 'carbon-compounds.html',
 }
-TOOL_BUNDLES = {"text", "media", "network", "misc", "calculators", "dls", "land"}
+TOOL_BUNDLES = {"text", "media", "forms", "network", "misc", "calculators", "dls", "land"}
 TOOL_VENDORS = {"js-yaml", "marked", "fflate", "pdf-lib", "pdfjs", "jspdf", "bcryptjs", "qrcodegen"}
 TOOL_CATEGORY_ICONS = {
     'Calculators': 'calculator',

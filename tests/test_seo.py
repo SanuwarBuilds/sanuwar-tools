@@ -237,6 +237,19 @@ class ToolHubTests(unittest.TestCase):
         self.assertIn('selected currency codes to Frankfurter', currency)
         self.assertNotIn('Your inputs and files stay on this device', currency)
 
+    def test_form_tools_are_discoverable_and_load_local_assets(self):
+        home = self.client.get('/').get_data(as_text=True)
+        checker = self.client.get('/tools/form-file-checker').get_data(as_text=True)
+        signer = self.client.get('/tools/fill-sign-pdf').get_data(as_text=True)
+        for slug, body in (('form-file-checker', checker), ('fill-sign-pdf', signer)):
+            self.assertIn(f'href="/tools/{slug}"', home)
+            self.assertIn(f'data-tool-slug="{slug}"', body)
+            self.assertIn('/assets/js/tools/forms.js', body)
+            self.assertIn('/assets/vendor/pdf-lib.js', body)
+        self.assertIn('data-photo-available="true"', checker)
+        self.assertNotIn('/assets/vendor/pdf.min.js', checker)
+        self.assertIn('/assets/vendor/pdf.min.js', signer)
+
     def test_browser_tools_feed_exposes_only_card_fields(self):
         response=self.client.get('/api/browser-tools.json')
         self.assertEqual(response.status_code,200)

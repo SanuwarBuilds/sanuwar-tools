@@ -4,24 +4,30 @@
   const core = PhotoCore;
   const params = new URLSearchParams(location.search);
   const requestedKB = Number(params.get('kb'));
-  const validKB = Number.isInteger(requestedKB) && requestedKB >= 1 && requestedKB <= 20000;
-  let initialKB = validKB && params.get('mode') !== 'signature' ? requestedKB : 0;
+  const outputFormat = { jpg: 'image/jpeg', png: 'image/png' };
+  const validDimension = (value) => Number.isInteger(value) && value >= 16 && value <= 4096;
+  let initialSettings = {};
+  for (const key of ['width', 'height']) {
+    const value = Number(params.get(key));
+    if (validDimension(value)) initialSettings[key] = value;
+  }
+  if (requestedKB >= 1 && requestedKB <= 20000) initialSettings.kb = requestedKB;
+  if (Object.hasOwn(outputFormat, params.get('format'))) initialSettings.format = outputFormat[params.get('format')];
   const mode = $('application-mode');
   mode.value = params.get('mode') === 'signature' ? 'signature' : 'photo';
   const syncMode = () => {
     const signature = mode.value === 'signature';
     $('application-hint').textContent = signature
       ? 'Choose a scan or photo of your signature. Crop it and match the dimensions on your form.'
-      : (initialKB ? 'The editor will start with a ' + initialKB + ' KB limit. Set the dimensions your form asks for.'
-        : 'Use your application form’s dimensions and file-size limit.');
+      : 'Use your application form’s dimensions and file-size limit.';
+    if (Object.keys(initialSettings).length) {
+      $('application-hint').textContent += ' The requested settings will load when you choose an image.';
+    }
     for (const id of ['camera-photo', 'photo-print-actions', 'photo-print-setting', 'photo-print-hint']) {
       $(id).hidden = signature;
     }
   };
-  mode.addEventListener('change', () => {
-    if (mode.value === 'signature') initialKB = 0;
-    syncMode();
-  });
+  mode.addEventListener('change', syncMode);
   syncMode();
 
   const presets = {
@@ -481,10 +487,11 @@
       resetView();
       if (!replacing && mode.value === 'signature') $('photo-preset').value = 'original';
       preset();
-      if (initialKB) {
-        $('photo-kb').value = initialKB;
+      if (Object.keys(initialSettings).length) {
+        for (const [key, value] of Object.entries(initialSettings)) $('photo-' + key).value = value;
+        syncQuality();
         custom();
-        initialKB = 0;
+        initialSettings = {};
         syncMode();
       }
       resetHistory();

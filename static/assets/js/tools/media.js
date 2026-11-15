@@ -144,6 +144,7 @@
       <label class="tp-field"><span class="tp-label">Output</span><select class="tp-select js-format"><option value="keep">Keep format</option><option value="image/jpeg">JPG</option><option value="image/webp">WebP</option><option value="image/png">PNG</option></select></label>
       <label class="tp-field"><span class="tp-label">JPG background</span><input class="tp-input js-background" type="color" value="#ffffff"></label>
       </div><div class="tp-actions"><button type="button" class="tp-btn tp-btn-primary" data-run disabled>Compress images</button><button type="button" class="tp-btn" data-all disabled>Download all as ZIP</button></div><div class="tp-preview js-preview"></div><div class="tp-file-list js-files"></div><p class="tp-hint">PNG export is lossless but may be larger; JPG and WebP use your quality setting.</p></div>`;
+    if (new URLSearchParams(location.search).get("format") === "webp") q(".js-format", root).value = "image/webp";
     let files = [];
     const drop = fileDrop({ accept: "image/*", multiple: true, label: "Drop photos to compress", onFiles: (list) => {
       files = list.filter((file) => file.type.startsWith("image/"));

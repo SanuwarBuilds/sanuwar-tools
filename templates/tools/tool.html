@@ -1,10 +1,12 @@
 {% extends 'base.html' %}
 {% set vendor_files = {'js-yaml': 'js-yaml.js', 'marked': 'marked.js', 'fflate': 'fflate.js', 'pdf-lib': 'pdf-lib.js', 'pdfjs': 'pdf.min.js', 'jspdf': 'jspdf.umd.min.js', 'bcryptjs': 'bcrypt.min.js', 'qrcodegen': 'qrcodegen.js'} %}
-{% set bundle_version = 4 if tool.bundle == 'calculators' else (3 if tool.bundle in ('text', 'media') else 2) %}
+{% set bundle_version = 4 if tool.bundle == 'calculators' else (4 if tool.bundle == 'media' else (3 if tool.bundle == 'text' else 2)) %}
 {% set uses_network = tool.slug == 'currency-converter' %}
 {% set tool_help = {
   'json-formatter': 'Paste JSON and select Format, Minify or Sort keys. Use Try example to see the formatter in action.',
   'qr-code-generator': 'Choose a content type, enter the details and download the PNG. Scan the result before sharing or printing it.',
+  'form-file-checker': 'Choose a file and enter the requirements shown on your form. The results show which checks pass and link to a matching tool when available.',
+  'fill-sign-pdf': 'Choose a PDF and add text, a date, a tick mark or your signature. Click a page to place the item, or use the position fields. Review each page before downloading.',
   'pdf-merge': 'Choose at least two PDFs and use the arrows to set the file order before merging.',
   'pdf-split': 'Choose one PDF and enter page ranges, or leave the field blank to save each page individually.',
   'pdf-compress': 'Choose a PDF and a compression method. The tool shows the original and output sizes before saving.',
@@ -12,9 +14,9 @@
   'image-compressor': 'Choose JPG, PNG or WebP images and adjust quality or maximum dimensions. Compare the sizes before saving.'
 } %}
 {% block bodyclass %}wb-tool-page tool-page-{{ tool.bundle }}{% endblock %}
-{% block page_styles %}<link rel="stylesheet" href="/assets/css/tools.css?v=5">{% endblock %}
+{% block page_styles %}<link rel="stylesheet" href="/assets/css/tools.css?v=6">{% endblock %}
 {% block content %}
-<section class="tp-shell wrap" data-tool-page data-tool-slug="{{ tool.slug }}">
+<section class="tp-shell wrap" data-tool-page data-tool-slug="{{ tool.slug }}"{% if tool.slug == 'form-file-checker' %} data-photo-available="{{ 'true' if photo_tools_available else 'false' }}"{% endif %}>
   <nav class="tp-crumb" aria-label="Breadcrumb"><a href="/">Home</a><span aria-hidden="true">/</span><a href="/tools">All tools</a><span aria-hidden="true">/</span><span>{{ tool.category }}</span></nav>
   <header class="tp-head">
     <span class="tp-glyph tp-glyph-art" aria-hidden="true"><img src="/assets/icons/{{ tool.icon_file }}.svg?v=soft1" alt="" width="50" height="50"></span>
@@ -60,7 +62,7 @@
 </section>
 {% endblock %}
 {% block scripts %}
-<script nonce="{{ csp_nonce }}" src="/assets/js/tools/core.js?v=1" defer></script>
+<script nonce="{{ csp_nonce }}" src="/assets/js/tools/core.js?v=2" defer></script>
 {% for vendor in tool.vendor or [] %}{% if vendor in vendor_files %}<script nonce="{{ csp_nonce }}" src="/assets/vendor/{{ vendor_files[vendor] }}?v=1" defer></script>{% endif %}{% endfor %}
 {% if tool.bundle == 'calculators' %}
 <script nonce="{{ csp_nonce }}" src="/assets/js/tools/calc-math.js?v=1" defer></script>
