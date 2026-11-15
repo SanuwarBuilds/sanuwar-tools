@@ -162,7 +162,7 @@ def install(app, load_config, load_directory=None, load_tool_catalog=None):
         if page is None and path in ('/tools', '/tools/'):
             if tools:
                 page = (f'All Tools — {len(tools)} Free Browser Utilities | SanuwarTools',
-                        f'Browse {len(tools)} free browser tools for text, hashes, images, PDFs, networking, calculators, unit converters, time and security. Every tool runs locally — no uploads, no account.')
+                        f'Browse {len(tools)} free browser tools for text, hashes, images, PDFs, networking, calculators, unit converters, time and security. Use the tools in your browser with no account.')
         if page is None and path.startswith('/tools/'):
             slug = path[len('/tools/'):]
             if '/' not in slug:
@@ -277,6 +277,8 @@ def install(app, load_config, load_directory=None, load_tool_catalog=None):
                                            'Searchable units in English, Hindi and Assamese',
                                            'Local breakdown and reference tables',
                                            'Runs locally with no uploads'] if land_tool else
+                                          ['Daily exchange rates from Frankfurter', 'No account required']
+                                          if tool_page['slug'] == 'currency-converter' else
                                           ['Runs locally in the browser', 'No account required',
                                            'No file uploads']),
                           'isPartOf': {'@id': ORIGIN + '/#website'}, 'publisher': publisher})

@@ -1,10 +1,22 @@
 {% extends 'base.html' %}
 {% set vendor_files = {'js-yaml': 'js-yaml.js', 'marked': 'marked.js', 'fflate': 'fflate.js', 'pdf-lib': 'pdf-lib.js', 'pdfjs': 'pdf.min.js', 'jspdf': 'jspdf.umd.min.js', 'bcryptjs': 'bcrypt.min.js', 'qrcodegen': 'qrcodegen.js'} %}
-{% set bundle_version = 4 if tool.bundle == 'calculators' else 2 %}
+{% set bundle_version = 4 if tool.bundle == 'calculators' else (4 if tool.bundle == 'media' else (3 if tool.bundle == 'text' else 2)) %}
+{% set uses_network = tool.slug == 'currency-converter' %}
+{% set tool_help = {
+  'json-formatter': 'Paste JSON and select Format, Minify or Sort keys. Use Try example to see the formatter in action.',
+  'qr-code-generator': 'Choose a content type, enter the details and download the PNG. Scan the result before sharing or printing it.',
+  'form-file-checker': 'Choose a file and enter the requirements shown on your form. The results show which checks pass and link to a matching tool when available.',
+  'fill-sign-pdf': 'Choose a PDF and add text, a date, a tick mark or your signature. Click a page to place the item, or use the position fields. Review each page before downloading.',
+  'pdf-merge': 'Choose at least two PDFs and use the arrows to set the file order before merging.',
+  'pdf-split': 'Choose one PDF and enter page ranges, or leave the field blank to save each page individually.',
+  'pdf-compress': 'Choose a PDF and a compression method. The tool shows the original and output sizes before saving.',
+  'pdf-organizer': 'Choose one PDF. Use the arrows to move pages, rotate them clockwise or remove pages before saving a new PDF.',
+  'image-compressor': 'Choose JPG, PNG or WebP images and adjust quality or maximum dimensions. Compare the sizes before saving.'
+} %}
 {% block bodyclass %}wb-tool-page tool-page-{{ tool.bundle }}{% endblock %}
-{% block page_styles %}<link rel="stylesheet" href="/assets/css/tools.css?v=4">{% endblock %}
+{% block page_styles %}<link rel="stylesheet" href="/assets/css/tools.css?v=6">{% endblock %}
 {% block content %}
-<section class="tp-shell wrap" data-tool-page data-tool-slug="{{ tool.slug }}">
+<section class="tp-shell wrap" data-tool-page data-tool-slug="{{ tool.slug }}"{% if tool.slug == 'form-file-checker' %} data-photo-available="{{ 'true' if photo_tools_available else 'false' }}"{% endif %}>
   <nav class="tp-crumb" aria-label="Breadcrumb"><a href="/">Home</a><span aria-hidden="true">/</span><a href="/tools">All tools</a><span aria-hidden="true">/</span><span>{{ tool.category }}</span></nav>
   <header class="tp-head">
     <span class="tp-glyph tp-glyph-art" aria-hidden="true"><img src="/assets/icons/{{ tool.icon_file }}.svg?v=soft1" alt="" width="50" height="50"></span>
@@ -12,27 +24,29 @@
       <span class="tp-badge">{{ tool.category }}</span>
       <h1>{{ tool.name }}</h1>
       <p>{{ tool.description }}</p>
-      <div class="tp-meta"><span><i aria-hidden="true"></i>Runs locally</span><span>No uploads</span><span>No sign-up</span><span>Free</span></div>
+      <div class="tp-meta"><span><i aria-hidden="true"></i>{{ 'Online exchange rates' if uses_network else 'Runs locally' }}</span><span>No sign-up</span></div>
+      <button class="tp-btn tp-btn-ghost wb-save-tool" type="button" data-save-tool="/tools/{{ tool.slug }}" data-save-name="{{ tool.name }}" aria-pressed="false" hidden>Save to favorites</button>
     </div>
   </header>
 
   <div class="tp-layout">
     <div class="tp-workspace" id="tool-root">
       <div class="tp-loading"><span></span>Loading tool…</div>
+      <noscript><p>Enable JavaScript to use this tool.</p></noscript>
     </div>
     <aside class="tp-aside">
-      <section class="tp-aside-card">
-        <h2>How it works</h2>
-        <ol class="tp-steps">
-          <li><span>01</span><p>Add your input — paste text, choose a file, or fill the fields.</p></li>
-          <li><span>02</span><p>Adjust the options. The result updates in this browser tab.</p></li>
-          <li><span>03</span><p>Copy the result or download it. Nothing is sent to a server.</p></li>
-        </ol>
-      </section>
+      {% if tool.slug in tool_help %}
+      <section class="tp-aside-card"><h2>How to use it</h2><p>{{ tool_help[tool.slug] }}</p></section>
+      {% endif %}
       <section class="tp-aside-card tp-privacy">
         <span class="tp-glyph" aria-hidden="true">▮</span>
-        <h2>Private by design</h2>
-        <p>This tool uses browser APIs only. Your files and text stay on your device.</p>
+        {% if uses_network %}
+        <h2>Exchange rate source</h2>
+        <p>Frankfurter provides daily exchange rates. The converter sends the entered amount and selected currency codes to Frankfurter.</p>
+        {% else %}
+        <h2>Local processing</h2>
+        <p>Your inputs and files stay on this device while this tool processes them.</p>
+        {% endif %}
       </section>
       {% if related %}
       <section class="tp-aside-card">
@@ -48,7 +62,7 @@
 </section>
 {% endblock %}
 {% block scripts %}
-<script nonce="{{ csp_nonce }}" src="/assets/js/tools/core.js?v=1" defer></script>
+<script nonce="{{ csp_nonce }}" src="/assets/js/tools/core.js?v=2" defer></script>
 {% for vendor in tool.vendor or [] %}{% if vendor in vendor_files %}<script nonce="{{ csp_nonce }}" src="/assets/vendor/{{ vendor_files[vendor] }}?v=1" defer></script>{% endif %}{% endfor %}
 {% if tool.bundle == 'calculators' %}
 <script nonce="{{ csp_nonce }}" src="/assets/js/tools/calc-math.js?v=1" defer></script>

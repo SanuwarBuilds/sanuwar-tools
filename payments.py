@@ -20,6 +20,8 @@ from sqlalchemy import (create_engine, MetaData, Table, Column, String, Text, In
 from sqlalchemy.exc import IntegrityError
 from sqlalchemy.pool import NullPool
 
+from download_metadata import download_size
+
 meta = MetaData()
 orders = Table('download_orders_v1', meta,
     Column('id', String(36), primary_key=True), Column('item_id', String(100), nullable=False),
@@ -94,6 +96,9 @@ def public_item(item):
     result.update(pricing=p, locked=p['mode'] == 'paid')
     result['link'] = '' if result['locked'] or private_asset(item.get('asset')) else item.get('link', '')
     result['private_delivery'] = private_asset(item.get('asset'))
+    size = download_size(item.get('size'))
+    if size and not result.get('is_album'):
+        result['size'] = size
     result['album_files'] = []
     for index, f in enumerate(item.get('album_files', [])):
         entry = {key: f[key] for key in ('name', 'added_at', 'uploaded_at', 'size') if key in f}

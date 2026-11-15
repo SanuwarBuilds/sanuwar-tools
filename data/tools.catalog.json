@@ -1,5 +1,5 @@
 {
-  "updated": "2026-11-12",
+  "updated": "2026-11-15",
   "categories": ["Text Tools", "Developer Tools", "Encoding & Hashing", "Images & Media", "PDF & Documents", "Compression & Archives", "Networking", "Calculators", "Time & Date", "Security & Privacy", "Financial Calculators", "Health & Fitness", "Unit Converters", "Land & Property", "Sports & Games"],
   "tools": [
     {"slug": "base64", "name": "Base64 Encode / Decode", "category": "Encoding & Hashing", "icon": "64", "bundle": "text", "popular": true, "description": "Encode text to Base64 or decode Base64 back to readable text, with a URL-safe option."},
@@ -46,10 +46,13 @@
     {"slug": "svg-to-png", "name": "SVG to PNG", "category": "Images & Media", "icon": "S→P", "bundle": "media", "description": "Rasterize SVG files or pasted SVG code into PNG at a custom size."},
     {"slug": "jpg-to-avif", "name": "JPG to AVIF", "category": "Images & Media", "icon": "J→A", "bundle": "media", "description": "Convert JPG images to AVIF when your browser supports AVIF encoding."},
     {"slug": "png-to-avif", "name": "PNG to AVIF", "category": "Images & Media", "icon": "P→A", "bundle": "media", "description": "Convert PNG images to AVIF with transparency, when supported."},
+    {"slug": "form-file-checker", "name": "Form File Checker", "category": "PDF & Documents", "icon": "✓", "bundle": "forms", "vendor": ["pdf-lib"], "description": "Check a photo, signature or PDF against your form's file format, dimensions and size requirements."},
+    {"slug": "fill-sign-pdf", "name": "Fill & Sign PDF", "category": "PDF & Documents", "icon": "Sign", "bundle": "forms", "vendor": ["pdf-lib", "pdfjs"], "description": "Place text, dates, tick marks and your signature directly on a PDF and save a new copy."},
     {"slug": "pdf-merge", "name": "PDF Merge", "category": "PDF & Documents", "icon": "PDF", "bundle": "media", "vendor": ["pdf-lib"], "popular": true, "description": "Combine multiple PDFs into one file and arrange their order before saving."},
     {"slug": "image-to-pdf", "name": "Image to PDF", "category": "PDF & Documents", "icon": "IMG", "bundle": "media", "vendor": ["jspdf"], "description": "Build a PDF from JPG, PNG or WebP images with fitted pages."},
     {"slug": "markdown-to-pdf", "name": "Markdown to PDF", "category": "PDF & Documents", "icon": "M↓", "bundle": "media", "vendor": ["marked", "jspdf"], "description": "Render Markdown text or a dropped .md file into a clean PDF document."},
     {"slug": "pdf-compress", "name": "PDF Compress", "category": "PDF & Documents", "icon": "PDF↓", "bundle": "media", "vendor": ["pdf-lib", "pdfjs", "jspdf"], "description": "Optimize PDF structure or rasterize pages at a lower DPI to reduce file size."},
+    {"slug": "pdf-organizer", "name": "PDF Page Organizer", "category": "PDF & Documents", "icon": "PDF", "bundle": "media", "vendor": ["pdf-lib", "pdfjs"], "description": "Preview, reorder, rotate and remove PDF pages, then save an organized copy on your device."},
     {"slug": "pdf-split", "name": "PDF Split", "category": "PDF & Documents", "icon": "PDF✂", "bundle": "media", "vendor": ["pdf-lib"], "description": "Split one PDF into page ranges and download each part separately."},
     {"slug": "pdf-to-image", "name": "PDF to Image", "category": "PDF & Documents", "icon": "PDF→", "bundle": "media", "vendor": ["pdfjs"], "description": "Render PDF pages as PNG or JPG images at your chosen resolution."},
     {"slug": "pdf-viewer", "name": "PDF Viewer", "category": "PDF & Documents", "icon": "PDF👁", "bundle": "media", "vendor": ["pdfjs"], "description": "Open and read PDF files in a fast browser viewer with zoom and page navigation."},

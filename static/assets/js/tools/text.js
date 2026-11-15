@@ -656,7 +656,7 @@
   });
 
   const jsonTool = (root) => {
-    root.innerHTML = `<div class="tp-panel"><div class="tp-cols"><label class="tp-field"><span class="tp-label">JSON input</span><textarea class="tp-textarea js-in" rows="12" placeholder='{"hello":"world"}'></textarea></label><label class="tp-field"><span class="tp-label">Formatted JSON</span><textarea class="tp-textarea is-output js-out" rows="12" readonly></textarea></label></div><div class="tp-actions"><button type="button" class="tp-btn tp-btn-primary" data-run="format">Format</button><button type="button" class="tp-btn" data-run="minify">Minify</button><button type="button" class="tp-btn" data-run="sort">Sort keys + format</button><button type="button" class="tp-btn tp-btn-ghost" data-copy>Copy</button><button type="button" class="tp-btn tp-btn-ghost" data-download>Download</button></div><label class="tp-field"><span class="tp-label">Indent</span><select class="tp-select js-indent"><option value="2">2 spaces</option><option value="4">4 spaces</option><option value="tab">Tab</option></select></label></div>`;
+    root.innerHTML = `<div class="tp-panel"><div class="tp-cols"><label class="tp-field"><span class="tp-label">JSON input</span><textarea class="tp-textarea js-in" rows="12" placeholder='{"hello":"world"}'></textarea></label><label class="tp-field"><span class="tp-label">Formatted JSON</span><textarea class="tp-textarea is-output js-out" rows="12" readonly></textarea></label></div><div class="tp-actions"><button type="button" class="tp-btn tp-btn-primary" data-run="format">Format</button><button type="button" class="tp-btn" data-run="minify">Minify</button><button type="button" class="tp-btn" data-run="sort">Sort keys + format</button><button type="button" class="tp-btn tp-btn-ghost" data-example>Try example</button><button type="button" class="tp-btn tp-btn-ghost" data-copy>Copy</button><button type="button" class="tp-btn tp-btn-ghost" data-download>Download</button></div><label class="tp-field"><span class="tp-label">Indent</span><select class="tp-select js-indent"><option value="2">2 spaces</option><option value="4">4 spaces</option><option value="tab">Tab</option></select></label></div>`;
     const sortValue = (value) => {
       if (Array.isArray(value)) return value.map(sortValue);
       if (value && typeof value === "object") return Object.fromEntries(Object.keys(value).sort().map((key) => [key, sortValue(value[key])]));
@@ -672,6 +672,13 @@
         setStatus(root, mode === "minify" ? `Valid JSON · ${JSON.stringify(data).length.toLocaleString()} bytes minified.` : "Valid JSON.", "ok");
       } catch (error) { setOutput(root, ""); setStatus(root, `Invalid JSON: ${error.message}`, "error"); }
     };
+    q("[data-example]", root).addEventListener("click", () => {
+      const input = q(".js-in", root);
+      if (input.value.trim() && !window.confirm("Replace the current input with an example?")) return;
+      input.value = '{"name":"SanuwarTools","tools":["JSON Formatter","QR Code Generator"],"free":true}';
+      run("format");
+      input.focus();
+    });
     qa("[data-run]", root).forEach((node) => node.addEventListener("click", () => run(node.dataset.run)));
     q("[data-copy]", root).addEventListener("click", () => copy(getOutput(root)));
     q("[data-download]", root).addEventListener("click", () => T.download("formatted.json", getOutput(root), "application/json"));

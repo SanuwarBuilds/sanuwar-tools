@@ -72,3 +72,9 @@ html:has(body.photo-page){scroll-behavior:auto}
     transition: border-color 0.25s ease, background-color 0.25s ease, box-shadow 0.25s ease;
   }
 }
+
+.photo-upload .photo-upload-mode {
+  width: min(100%, 260px);
+  margin: 12px auto;
+  text-align: left;
+}

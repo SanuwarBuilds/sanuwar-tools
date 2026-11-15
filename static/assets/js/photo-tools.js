@@ -2,6 +2,33 @@
 (() => {
   const $ = (id) => document.getElementById(id);
   const core = PhotoCore;
+  const params = new URLSearchParams(location.search);
+  const requestedKB = Number(params.get('kb'));
+  const outputFormat = { jpg: 'image/jpeg', png: 'image/png' };
+  const validDimension = (value) => Number.isInteger(value) && value >= 16 && value <= 4096;
+  let initialSettings = {};
+  for (const key of ['width', 'height']) {
+    const value = Number(params.get(key));
+    if (validDimension(value)) initialSettings[key] = value;
+  }
+  if (requestedKB >= 1 && requestedKB <= 20000) initialSettings.kb = requestedKB;
+  if (Object.hasOwn(outputFormat, params.get('format'))) initialSettings.format = outputFormat[params.get('format')];
+  const mode = $('application-mode');
+  mode.value = params.get('mode') === 'signature' ? 'signature' : 'photo';
+  const syncMode = () => {
+    const signature = mode.value === 'signature';
+    $('application-hint').textContent = signature
+      ? 'Choose a scan or photo of your signature. Crop it and match the dimensions on your form.'
+      : 'Use your application form’s dimensions and file-size limit.';
+    if (Object.keys(initialSettings).length) {
+      $('application-hint').textContent += ' The requested settings will load when you choose an image.';
+    }
+    for (const id of ['camera-photo', 'photo-print-actions', 'photo-print-setting', 'photo-print-hint']) {
+      $(id).hidden = signature;
+    }
+  };
+  mode.addEventListener('change', syncMode);
+  syncMode();
 
   const presets = {
     'passport-print': { name: 'Passport print · 35 × 45 mm', width: 413, height: 531, dpi: 300, kb: '', format: 'image/jpeg', note: '35 × 45 mm print layout at 300 DPI (rounded to whole pixels). This is a print preset, not a universal online-upload specification.', source: 'https://www.indembassyankara.gov.in/eoiank_pages/MTg2' },
@@ -278,14 +305,14 @@
         output.width = v.width;
         output.height = v.height;
         paint(output, v.width, v.height);
-        const blob = await core.encode(output, { ...v, kb: 0 });
+        const blob = await core.encode(output, v);
         if (!source || token !== estimateToken) return;
-        const over = Boolean(v.kb) && blob.size > v.kb * 1000;
+        $('output-bytes').textContent = `${(blob.size / 1000).toFixed(2)} KB · ${v.format === 'image/png' ? 'PNG' : 'JPG'}${v.kb ? ` · within ${v.kb} KB` : ''}`;
+      } catch (error) {
+        if (token !== estimateToken) return;
         const cell = $('output-bytes');
-        cell.textContent = `${(blob.size / 1000).toFixed(1)} KB · ${v.format === 'image/png' ? 'PNG' : v.quality + '% quality'}${v.kb ? ` · limit ${v.kb} KB` : ''}`;
-        cell.classList.toggle('over', over);
-      } catch {
-        if (token === estimateToken) $('output-bytes').textContent = 'Generate to check';
+        cell.textContent = error.message || 'Download to check';
+        cell.classList.add('over');
       }
     }, 650);
   }
@@ -434,7 +461,7 @@
     try {
       if (file.size > 16 * 1024 * 1024) throw new Error('Choose an image smaller than 16 MB.');
       if (!['image/jpeg', 'image/png', 'image/webp', 'image/bmp', 'image/gif'].includes(file.type)) throw new Error('Choose a JPG, PNG, WebP, BMP or GIF. Export HEIC/TIFF as JPG first.');
-      message('Opening your photo on this device…');
+      message('Opening your image on this device…');
       const data = await new Promise((resolve, reject) => {
         const reader = new FileReader();
         reader.onload = () => resolve(reader.result);
@@ -448,6 +475,7 @@
       if (img.naturalWidth * img.naturalHeight > 40_000_000) throw new Error('Choose an image under 40 megapixels to keep editing responsive.');
       if (img.naturalWidth < 16 || img.naturalHeight < 16) throw new Error('Choose an image at least 16 × 16 pixels.');
       const factor = Math.min(1, 4096 / Math.max(img.naturalWidth, img.naturalHeight));
+      const replacing = Boolean(source);
       source = document.createElement('canvas');
       source.width = Math.round(img.naturalWidth * factor);
       source.height = Math.round(img.naturalHeight * factor);
@@ -457,9 +485,17 @@
       $('photo-mobile-nav').hidden = false;
       $('photo-upload').hidden = true;
       resetView();
+      if (!replacing && mode.value === 'signature') $('photo-preset').value = 'original';
       preset();
+      if (Object.keys(initialSettings).length) {
+        for (const [key, value] of Object.entries(initialSettings)) $('photo-' + key).value = value;
+        syncQuality();
+        custom();
+        initialSettings = {};
+        syncMode();
+      }
       resetHistory();
-      message(`Photo ready · ${img.naturalWidth} × ${img.naturalHeight} px.${factor < 1 ? ' Editing copy scaled to a maximum of 4096 px.' : ''}`);
+      message(`Image ready · ${img.naturalWidth} × ${img.naturalHeight} px.${factor < 1 ? ' Editing copy scaled to a maximum of 4096 px.' : ''}`);
     } catch (error) {
       if (version === loadVersion) message(error instanceof DOMException ? 'This image could not be decoded. Try exporting it as JPG.' : error.message, true);
     } finally {
@@ -507,7 +543,7 @@
       if (kind === 'photo') {
         const extension = v.format === 'image/png' ? 'png' : 'jpg';
         download(blob, `${filename}-${v.width}x${v.height}.${extension}`);
-        message(`Photo ready · ${(blob.size / 1000).toFixed(2)} KB · ${v.dpi} DPI. Download started.`);
+        message(`Image ready · ${(blob.size / 1000).toFixed(2)} KB · ${v.dpi} DPI. Download started.`);
       } else {
         const layout = core.sheetLayout(v, $('photo-sheet').value);
         const sheet = document.createElement('canvas');
@@ -601,7 +637,7 @@
     $('photo-editor').hidden = true;
     $('photo-mobile-nav').hidden = true;
     $('photo-upload').hidden = false;
-    message('Photo cleared from the editor.');
+    message('Image cleared from the editor.');
   };
 
   $('rotate-left').onclick = () => { turn = (turn + 3) % 4; transform(); render(); pushHistory(); };
