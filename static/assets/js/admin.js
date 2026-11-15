@@ -164,7 +164,9 @@
     $("#nav-eduhelp-count").textContent = eduhelp.updates?.length || 0;
   }
   function navigate(view) {
+    if (!Object.hasOwn(titles, view)) view = "dashboard";
     current = view;
+    history.replaceState(null, "", `#${view}`);
     const [crumb, kicker, title, description, action] = titles[view];
     $("#view-breadcrumb").textContent = crumb;
     $("#view-eyebrow").textContent = kicker;
@@ -2568,7 +2570,8 @@
           api("/api/admin/directories"),
           api("/api/admin/eduhelp"),
         ]);
-      navigate("dashboard");
+      navigate(location.hash.slice(1) || "dashboard");
+      window.addEventListener("hashchange", () => navigate(location.hash.slice(1)));
     } catch (error) {
       empty(root, "Workspace unavailable.", error.message, load, "Try again");
     }

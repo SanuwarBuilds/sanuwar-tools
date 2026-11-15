@@ -65,12 +65,6 @@
     }
   });
   if (smartHit) smartHit.addEventListener("click", openSmart);
-  document.addEventListener("keydown", (event) => {
-    if (event.key === "/" && document.activeElement !== search) {
-      event.preventDefault();
-      search.focus();
-    }
-  });
   const requested = new URLSearchParams(location.search).get("category");
   if (requested && chips.some((chip) => chip.dataset.category === requested)) setCategory(requested, false);
   updateSmart();

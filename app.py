@@ -749,6 +749,17 @@ def serve_config():
         data = {"tools": [], "categories": ["All"], "site": {}, "socialLinks": {}, "widgets": []}
     return jsonify(public_config(data))
 
+@app.get('/api/search-index')
+def search_index():
+    from site_search import build_index
+    response = jsonify(entries=build_index(
+        safe_read(TOOLS_CONFIG_REL) or {}, load_tool_catalog(), public_downloads(),
+        load_directory(), load_eduhelp(), admin=bool(session.get('admin_logged_in')),
+        widgets=utils.load_config().get('widgets', [])))
+    response.headers['Cache-Control'] = 'private, no-store'
+    return response
+
+
 @app.context_processor
 def site_context():
     raw = safe_read(TOOLS_CONFIG_REL)

@@ -12,7 +12,7 @@
     <div class="wb-hero-search">
       <label class="wb-search-field" for="tool-search">
         <svg aria-hidden="true" viewBox="0 0 24 24"><circle cx="10.5" cy="10.5" r="6.5"/><path d="m16 16 4.5 4.5"/></svg>
-        <input type="search" id="tool-search" placeholder="Search tools and directories…" aria-label="Search tools and directories" autocomplete="off">
+        <input type="search" id="tool-search" placeholder="Search tools, downloads, files, admin…" aria-label="Search everything" aria-haspopup="dialog" aria-controls="wb-palette" autocomplete="off">
       </label>
     </div>
     <div class="wb-hero-hints" aria-label="Quick tasks">
@@ -163,4 +163,4 @@
 
 <div class="wrap">{{ ad_unit(adsense_slots.get('home', '')) }}</div>
 {% endblock %}
-{% block scripts %}<script nonce="{{ csp_nonce }}" src="/assets/js/main.js?v=6" defer></script>{% if public_config.get('downloadPage', {}).get('enabled', True) %}<script nonce="{{ csp_nonce }}" src="/assets/js/downloads.js?v=3" defer></script>{% endif %}{% endblock %}
+{% block scripts %}<script nonce="{{ csp_nonce }}" src="/assets/js/main.js?v=7" defer></script>{% if public_config.get('downloadPage', {}).get('enabled', True) %}<script nonce="{{ csp_nonce }}" src="/assets/js/downloads.js?v=4" defer></script>{% endif %}{% endblock %}

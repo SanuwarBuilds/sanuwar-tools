@@ -411,6 +411,7 @@
       type: "search",
       placeholder: "Is album mein file dhoondo…",
       "aria-label": "Search album files",
+      value: new URLSearchParams(location.search).get("file") || "",
     });
     const count = el("span", { class: "album-count", role: "status" });
     const draw = () => {

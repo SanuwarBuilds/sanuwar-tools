@@ -51,4 +51,6 @@
 
   input.addEventListener("input", apply);
   apply();
+  const requestedQuery = new URLSearchParams(location.search).get("q");
+  if (requestedQuery) { input.value = requestedQuery; input.dispatchEvent(new Event("input")); }
 })();

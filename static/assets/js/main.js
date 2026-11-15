@@ -43,7 +43,7 @@
       : external(tool.siteUrl, text, className);
   };
   const render = () => {
-    const query = $("#tool-search").value.trim().toLowerCase();
+    const query = ""; // The hero search opens the shared site search.
     const filtered = tools.filter((t) =>
       (selected === "All" || t.category === selected) &&
       `${t.name} ${t.description || ""} ${t.category || ""} ${(t.tags || []).join(" ")}`.toLowerCase().includes(query));
@@ -228,7 +228,6 @@
       /* The main catalogue remains usable if optional widgets are unavailable. */
     }
   }
-  $("#tool-search").addEventListener("input", render);
   categorySelect?.addEventListener("change", (event) => {
     selected = event.target.value;
     render();
