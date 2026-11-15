@@ -60,6 +60,15 @@
   </div>
 </section>
 
+<section class="wrap wb-how" id="guides" aria-labelledby="guides-title">
+  <div class="wb-section-head"><h2 id="guides-title">Practical guides</h2></div>
+  <div class="wb-steps">
+    {% for slug, guide in guides.items() %}
+    <article><h3><a href="/guides/{{ slug }}">{{ guide.title }}</a></h3><p>{{ guide.intro }}</p></article>
+    {% endfor %}
+  </div>
+</section>
+
 <section class="wrap wb-library" aria-label="Library shortcuts">
   {% if public_config.get('downloadPage', {}).get('enabled', True) %}
   <a class="home-download-strip" href="#downloads">
@@ -146,8 +155,8 @@
       <h2 id="about-toolkit-title">A small toolkit for everyday work.</h2>
     </div>
     <div class="wb-about-copy">
-      <p>SanuwarTools is a free, browser-based toolkit maintained by Sanuwar. The collection now includes {{ catalog.tools | length }} browser tools for text, encoding, hashes, images, PDFs, networking, security and everyday maths,{% if photo_tools_available %}, plus the <a href="/photo-tools">photo resizer and compressor</a> for photo resizing and passport photos — crop images to exact pixels, DPI and KB limits for passport, PAN, voter ID and exam forms, entirely on your device{% endif %}.</p>
-      <p>Explore the <a href="#tools">browser tools</a> or the <a href="/tools">full tool page</a>, browse the <a href="/downloads">downloads library</a> for Android apps, files and albums, and open the source <a href="/directory">directories</a> for movies, anime, music and more. New modules are added as they are ready; no account is needed for public tools.</p>
+      <p>SanuwarTools is a free, browser-based toolkit maintained by Sanuwar. The collection now includes {{ catalog.tools | length }} browser tools for text, encoding, hashes, images, PDFs, networking, security and everyday maths{% if photo_tools_available %}, plus the <a href="/photo-tools">photo resizer and compressor</a> for photo resizing and passport photos — crop images to exact pixels, DPI and KB limits for passport, PAN, voter ID and exam forms, entirely on your device{% endif %}.</p>
+      <p>Explore the <a href="#tools">browser tools</a> or the <a href="/tools">full tool page</a>, browse the <a href="/downloads">downloads library</a> for Android apps, files and albums, and explore the <a href="/directory">external resource directories</a>. New modules are added as they are ready; no account is needed for public tools.</p>
     </div>
   </div>
 </section>

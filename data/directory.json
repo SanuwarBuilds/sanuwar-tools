@@ -5,6 +5,7 @@
     {
       "id": "movies-tv",
       "slug": "movies-tv",
+      "enabled": false,
       "name": "Movies & TV Shows",
       "short": "Movies & TV",
       "icon": "film",
@@ -62,6 +63,7 @@
     {
       "id": "anime",
       "slug": "anime",
+      "enabled": false,
       "name": "Anime",
       "short": "Anime",
       "icon": "anime",
@@ -96,6 +98,7 @@
     {
       "id": "manga",
       "slug": "manga",
+      "enabled": false,
       "name": "Manga",
       "short": "Manga",
       "icon": "manga",
@@ -122,6 +125,7 @@
     {
       "id": "live-sports",
       "slug": "live-sports",
+      "enabled": false,
       "name": "Live Sports",
       "short": "Live Sports",
       "icon": "sports",
@@ -156,6 +160,7 @@
     {
       "id": "live-tv",
       "slug": "live-tv",
+      "enabled": false,
       "name": "Live TV",
       "short": "Live TV",
       "icon": "tv",
@@ -180,6 +185,7 @@
     {
       "id": "torrents",
       "slug": "torrents",
+      "enabled": false,
       "name": "Torrents",
       "short": "Torrents",
       "icon": "torrent",
@@ -206,6 +212,7 @@
     {
       "id": "games",
       "slug": "games",
+      "enabled": false,
       "name": "Games",
       "short": "Games",
       "icon": "game",
@@ -230,6 +237,7 @@
     {
       "id": "music",
       "slug": "music",
+      "enabled": false,
       "name": "Music",
       "short": "Music",
       "icon": "music",
@@ -274,6 +282,7 @@
     {
       "id": "ebooks",
       "slug": "ebooks",
+      "enabled": false,
       "name": "eBooks",
       "short": "eBooks",
       "icon": "ebook",
@@ -309,6 +318,7 @@
     {
       "id": "comics",
       "slug": "comics",
+      "enabled": false,
       "name": "Comics",
       "short": "Comics",
       "icon": "comics",
@@ -330,6 +340,7 @@
     {
       "id": "asian-drama",
       "slug": "asian-drama",
+      "enabled": false,
       "name": "Asian Drama",
       "short": "Asian Drama",
       "icon": "drama",

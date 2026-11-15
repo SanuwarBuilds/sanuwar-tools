@@ -7,6 +7,7 @@ from xml.etree.ElementTree import Element, SubElement, tostring
 from flask import Response, g, request
 import security
 from download_metadata import upload_time
+from tool_guides import GUIDES
 
 ORIGIN = 'https://sanuwartools.online'
 SITE_UPDATED = '2026-11-12'
@@ -27,8 +28,8 @@ PAGES = {
                  'Contact SanuwarTools for support, download issues, corrections, privacy requests or content concerns.'),
     '/downloads': ('Downloads — Android Apps & Files | SanuwarTools',
                    'Browse Android apps, files and albums on SanuwarTools. Preview available downloads, check versions and choose the files you need.'),
-    '/directory': ('Open Directories — Movies, Anime, Manga & More | SanuwarTools',
-                   'Browse hand-checked directories for movies, TV shows, anime, manga, live sports, live TV, torrents, games, music, eBooks, comics, Asian drama, VPNs and ad blockers.'),
+    '/directory': ('External Resource Directories | SanuwarTools',
+                   'Browse the published directories of external services and tools.'),
     '/eduhelp': ('Eduhelp — Exam, Result, Admission & Scholarship Updates | SanuwarTools',
                  'Follow education updates in one place: exam notices, board and university results, admission dates, scholarships and career alerts with links to official sources.'),
     '/eduhelp/labs': ('Interactive 3D Science Labs — Class 10 Physics & Chemistry | SanuwarTools',
@@ -187,6 +188,9 @@ def install(app, load_config, load_directory=None, load_tool_catalog=None, load_
         category = None
         tool_page = None
         page = PAGES.get(path)
+        guide = GUIDES.get(path.removeprefix('/guides/')) if path.startswith('/guides/') else None
+        if guide:
+            page = (f"{guide['title']} | SanuwarTools", guide['intro'])
         download = g.get('download_page')
         if download is not None:
             name = download['title']
@@ -378,6 +382,7 @@ def install(app, load_config, load_directory=None, load_tool_catalog=None, load_
             paths.extend(download_dates)
         if not any(tool.get('id') == 'builtin-photo-tools' and not all(tool.get(flag, True) is True for flag in ('enabled', 'visible')) for tool in config.get('tools', [])):
             paths.append('/photo-tools')
+        paths.extend('/guides/' + slug for slug in GUIDES)
         paths.extend(['/about', '/contact', '/privacy', '/directory', '/eduhelp', '/eduhelp/labs'])
         for category in directory_categories():
             slug = category.get('slug')
@@ -394,7 +399,7 @@ def install(app, load_config, load_directory=None, load_tool_catalog=None, load_
         for path in paths:
             url = SubElement(root, 'url')
             SubElement(url, 'loc').text = ORIGIN + path
-            modified = download_dates.get(path, SITE_UPDATED)
+            modified = download_dates.get(path, '2026-11-15' if path.startswith('/guides/') else SITE_UPDATED)
             if modified:
                 SubElement(url, 'lastmod').text = modified
         return Response(tostring(root, encoding='utf-8', xml_declaration=True), mimetype='application/xml',

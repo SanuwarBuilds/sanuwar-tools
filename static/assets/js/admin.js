@@ -1646,6 +1646,7 @@
     );
     const tagline = field("Tagline", draft.tagline || "");
     const description = field("Description", draft.description || "", "textarea");
+    const published = checkbox("Published", draft.enabled !== false && draft.visible !== false);
     const groups = (
       Array.isArray(draft.groups) && draft.groups.length
         ? clone(draft.groups)
@@ -1745,6 +1746,7 @@
         el("div", { class: "form-grid" }, slug.node, icon.node),
         tagline.node,
         description.node,
+        published.node,
         el(
           "div",
           { class: "dir-groups-head" },
@@ -1801,6 +1803,8 @@
           icon: icon.input.value,
           tagline: tagline.input.value.trim(),
           description: description.input.value.trim(),
+          enabled: published.input.checked,
+          ...(draft.visible === undefined ? {} : { visible: published.input.checked }),
           groups: cleanedGroups,
         };
         const categories = Array.isArray(directories.categories)

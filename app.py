@@ -18,6 +18,7 @@ import security
 from availability import is_public, public_config
 import payments
 import seo
+from tool_guides import GUIDES
 import monetization
 import user_auth
 import visitor_analytics
@@ -94,8 +95,16 @@ def index():
     config = public_config(raw if isinstance(raw, dict) else {})
     catalog = load_tool_catalog()
     config['tools'] = [*config.get('tools', []), *browser_tool_cards(catalog)]
-    return render_template("index.html", catalog=catalog, public_config=config,
+    return render_template("index.html", catalog=catalog, public_config=config, guides=GUIDES,
                            initial_downloads=[public_download_item(item) for item in public_downloads()])
+
+@app.get('/guides/<slug>')
+def tool_guide(slug):
+    guide = GUIDES.get(slug)
+    if guide is None:
+        abort(404)
+    return render_template('tool_guide.html', guide=guide)
+
 
 def photo_tools_available(config):
     return not any(tool.get('id') == 'builtin-photo-tools' and not is_public(tool)
@@ -139,6 +148,8 @@ def validate_directory_document(data):
         if slug in seen:
             raise ValueError(f'Directory URL "{slug}" is used twice')
         seen.add(slug)
+        if any(flag in category and type(category[flag]) is not bool for flag in ('enabled', 'visible')):
+            raise ValueError('Directory publication flags must be true or false')
         for key in ('short', 'tagline', 'description', 'icon'):
             if key in category and not isinstance(category[key], str):
                 raise ValueError(f'{key} must be text')
@@ -188,13 +199,16 @@ def directory_sites(category):
                       if isinstance(site, dict) and security.valid_url(site.get('url'))])
     return groups, total
 
+def public_directories(data):
+    return [category for category in data.get('categories', [])
+            if isinstance(category, dict) and category.get('slug') and category.get('name') and is_public(category)]
+
+
 @app.get('/directory')
 def directory_index():
     data = load_directory()
     directories = []
-    for category in data.get('categories', []):
-        if not isinstance(category, dict) or not category.get('slug') or not category.get('name'):
-            continue
+    for category in public_directories(data):
         _, total = directory_sites(category)
         directories.append({**category, 'site_count': total})
     if not directories:
@@ -206,13 +220,13 @@ def directory_index():
 @app.get('/directory/<slug>')
 def directory_page(slug):
     data = load_directory()
-    category = next((item for item in data.get('categories', [])
-                     if isinstance(item, dict) and item.get('slug') == slug), None)
+    categories = public_directories(data)
+    category = next((item for item in categories if item['slug'] == slug), None)
     if category is None:
         abort(404)
     groups, total = directory_sites(category)
-    others = [{**item, 'site_count': directory_sites(item)[1]} for item in data.get('categories', [])
-              if isinstance(item, dict) and item.get('slug') and item.get('slug') != slug]
+    others = [{**item, 'site_count': directory_sites(item)[1]}
+              for item in categories if item['slug'] != slug]
     return render_template('directory.html', category=category, groups=groups,
                            total_sites=total, others=others, notice=data.get('notice', ''))
 
@@ -709,6 +723,9 @@ def render_bypass(unlocked, expired, error=None, status=200):
 
 @app.route('/bypass', methods=['GET', 'POST'])
 def bypass():
+    if any(item.get('id') == 'builtin-lyrics-bypass' and not is_public(item)
+           for item in (safe_read(TOOLS_CONFIG_REL) or {}).get('tools', [])):
+        abort(404)
     expired = datetime.datetime.now() > BYPASS_EXPIRY
     if request.method == 'POST':
         if expired:
@@ -1189,7 +1206,7 @@ def api_widget_vote(widget_id):
         return jsonify({"error": "Could not save or upload. Check server configuration and try again."}), 500
 
 payments.register(app, public_downloads, login_required)
-seo.install(app, lambda: safe_read(TOOLS_CONFIG_REL), lambda: safe_read(DIRECTORY_REL),
+seo.install(app, lambda: safe_read(TOOLS_CONFIG_REL), lambda: {'categories': public_directories(load_directory())},
             load_tool_catalog, load_downloads=public_downloads)
 monetization.install(app)
 user_auth.install(app)

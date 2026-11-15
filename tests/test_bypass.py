@@ -14,6 +14,14 @@ ROOT = Path(__file__).resolve().parents[1]
 class BypassGateTests(unittest.TestCase):
     def setUp(self):
         self.client = module.app.test_client()
+        config = json.loads((ROOT / 'data' / 'tools.config.json').read_text(encoding='utf-8'))
+        self.entry = next(tool for tool in config['tools'] if tool.get('id') == 'builtin-lyrics-bypass')
+        self.entry['enabled'] = True
+        safe_read = module.safe_read
+        fixture = patch.object(module, 'safe_read', side_effect=lambda path:
+                               config if path == module.TOOLS_CONFIG_REL else safe_read(path))
+        fixture.start()
+        self.addCleanup(fixture.stop)
 
     def csrf_token(self):
         text = self.client.get('/bypass').get_data(as_text=True)
@@ -104,14 +112,14 @@ class BypassGateTests(unittest.TestCase):
         self.assertIn('Disallow: /bypass', robots)
 
     def test_homepage_card_links_to_the_gated_module(self):
-        config = json.loads((ROOT / 'data' / 'tools.config.json').read_text(encoding='utf-8'))
-        entry = next((tool for tool in config['tools'] if tool.get('id') == 'builtin-lyrics-bypass'), None)
-        self.assertIsNotNone(entry)
-        self.assertEqual(entry['route'], '/bypass')
-        self.assertTrue(entry['visible'] and entry['enabled'])
         page = self.client.get('/').get_data(as_text=True)
         self.assertIn('Lyrics Bypass', page)
         self.assertIn('href="/bypass"', page)
+
+    def test_unpublished_tool_is_unavailable(self):
+        self.entry['enabled'] = False
+        self.assertEqual(self.client.get('/bypass').status_code, 404)
+        self.assertNotIn(b'Lyrics Bypass', self.client.get('/').data)
 
 
 if __name__ == '__main__':

@@ -1,0 +1,20 @@
+{% extends 'base.html' %}
+{% block content %}
+<article class="wrap wb-info">
+  <a class="wb-text-link wb-info-back" href="/#guides">← All guides</a>
+  <h1>{{ guide.title }}</h1>
+  <p class="wb-info-intro">{{ guide.intro }}</p>
+  {% for title, paragraphs in guide.sections %}
+  <section>
+    <h2>{{ title }}</h2>
+    {% for paragraph in paragraphs %}<p>{{ paragraph }}</p>{% endfor %}
+  </section>
+  {% endfor %}
+  <section>
+    <h2>Tools in this guide</h2>
+    <ul>{% for label, path in guide.tools if path != '/photo-tools' or photo_tools_available %}
+      <li><a href="{{ path }}">{{ label }}</a></li>
+    {% endfor %}</ul>
+  </section>
+</article>
+{% endblock %}
