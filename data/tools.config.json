@@ -67,7 +67,7 @@
       "category": "Text Tools",
       "description": "Insert invisible Unicode marks into lyrics so the text reads the same but no longer matches the stored copy. Password-protected module.",
       "downloadAvailable": false,
-      "enabled": false,
+      "enabled": true,
       "featured": false,
       "icon": "tool",
       "id": "builtin-lyrics-bypass",
