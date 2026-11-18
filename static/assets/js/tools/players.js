@@ -132,6 +132,61 @@
     } catch {}
   };
 
+  const BUFFER_PRESETS = {
+    balanced: {
+      hls: { maxBufferLength: 30, maxMaxBufferLength: 90, maxBufferSize: 60 * 1024 * 1024, backBufferLength: 30 },
+      dash: { fastSwitchEnabled: true, bufferTimeAtTopQuality: 30, bufferTimeAtTopQualityLongForm: 60, stableBufferTime: 12, bufferToKeep: 20 },
+    },
+    aggressive: {
+      hls: { maxBufferLength: 60, maxMaxBufferLength: 180, maxBufferSize: 120 * 1024 * 1024, backBufferLength: 60 },
+      dash: { fastSwitchEnabled: true, bufferTimeAtTopQuality: 45, bufferTimeAtTopQualityLongForm: 90, stableBufferTime: 20, bufferToKeep: 30 },
+    },
+    saver: {
+      hls: { maxBufferLength: 15, maxMaxBufferLength: 40, maxBufferSize: 30 * 1024 * 1024, backBufferLength: 10 },
+      dash: { fastSwitchEnabled: true, bufferTimeAtTopQuality: 15, bufferTimeAtTopQualityLongForm: 20, stableBufferTime: 6, bufferToKeep: 10 },
+    },
+  };
+
+  const readBufferPref = () => {
+    try {
+      const value = localStorage.getItem("st.players.buffer");
+      return BUFFER_PRESETS[value] ? value : "balanced";
+    } catch {
+      return "balanced";
+    }
+  };
+
+  const storeBufferPref = (value) => {
+    try {
+      localStorage.setItem("st.players.buffer", value);
+    } catch {}
+  };
+
+  const readPreloadPref = () => {
+    try {
+      const value = localStorage.getItem("st.players.preload");
+      return ["auto", "metadata", "off"].includes(value) ? value : "auto";
+    } catch {
+      return "auto";
+    }
+  };
+
+  const storePreloadPref = (value) => {
+    try {
+      localStorage.setItem("st.players.preload", value);
+    } catch {}
+  };
+
+  const resolvePreload = (mode) => {
+    if (mode === "off") return "none";
+    if (mode === "metadata") return "metadata";
+    try {
+      const connection = navigator.connection || navigator.mozConnection || navigator.webkitConnection;
+      if (connection && (connection.saveData || /(^|-)2g$|(^|-)3g$/.test(connection.effectiveType || ""))) return "metadata";
+    } catch {}
+    return "auto";
+  };
+
   const readCaptionStyle = () => {
     try {
       const stored = JSON.parse(localStorage.getItem("st.players.captions") || "{}");
@@ -265,6 +320,10 @@
       sourceType: "",
       playlist: Boolean(config.playlist),
       native: readNativePref(),
+      preload: readPreloadPref(),
+      buffer: readBufferPref(),
+      bufferedAhead: 0,
+      bufferPct: 0,
     };
 
     const alertBox = el("p", { class: "pl-alert", role: "status", hidden: true });
@@ -276,7 +335,7 @@
 
     const media = document.createElement(kind);
     media.className = "pl-media";
-    media.preload = "metadata";
+    media.preload = resolvePreload(state.preload);
     media.playsInline = true;
     media.setAttribute("playsinline", "");
     if (kind === "audio") media.setAttribute("aria-label", "Audio playback");
@@ -298,11 +357,12 @@
       onclick: () => { if (media.paused) attemptPlay(); else pauseMedia(); },
     }, icon("play", 26));
     const spinner = el("span", { class: "pl-spinner", hidden: true, "aria-hidden": "true" });
+    const bufferLabel = el("span", { class: "pl-buffer-label", hidden: true, "aria-hidden": "true" });
     const liveBadge = el("span", { class: "pl-live", hidden: true, text: "LIVE" });
     const dropVeil = el("div", { class: "pl-dropveil", hidden: true }, el("strong", { text: "Drop to play" }));
 
     const screen = el("div", { class: `pl-screen pl-${kind}` });
-    screen.append(media, artwork, captionBox, bigPlay, spinner, liveBadge, dropVeil);
+    screen.append(media, artwork, captionBox, bigPlay, spinner, bufferLabel, liveBadge, dropVeil);
 
     const playButton = el("button", { type: "button", class: "pl-btn pl-btn-play", "aria-label": "Play", onclick: () => { if (media.paused) attemptPlay(); else pauseMedia(); } }, icon("play", 16));
     const prevButton = el("button", { type: "button", class: "pl-btn", "aria-label": "Previous item", onclick: () => step(-1) }, icon("prev", 15));
@@ -367,6 +427,7 @@
     const playlistWrap = el("div", { class: "pl-playlist", hidden: true });
     let cloudNote = null;
     let cloudChip = null;
+    let bufferStat = null;
 
     root.replaceChildren(el("div", { class: "pl-tool" }, loader, frame, extras, playlistWrap));
 
@@ -418,7 +479,6 @@
 
     const updateBuffer = () => {
       const duration = media.duration;
-      if (!Number.isFinite(duration) || duration <= 0) return;
       let buffered = 0;
       try {
         for (let index = 0; index < media.buffered.length; index += 1) {
@@ -428,7 +488,29 @@
           }
         }
       } catch {}
-      seek.style.setProperty("--buffer", `${Math.min(buffered / duration, 1) * 100}%`);
+      if (Number.isFinite(duration) && duration > 0) {
+        seek.style.setProperty("--buffer", `${Math.min(buffered / duration, 1) * 100}%`);
+      }
+      const ahead = buffered ? Math.max(0, buffered - media.currentTime) : 0;
+      const preset = BUFFER_PRESETS[state.buffer] || BUFFER_PRESETS.balanced;
+      const target = state.dash ? preset.dash.bufferTimeAtTopQuality : preset.hls.maxBufferLength;
+      state.bufferedAhead = ahead;
+      state.bufferPct = Math.min(100, Math.round((ahead / target) * 100));
+      if (bufferStat) {
+        bufferStat.textContent = ahead > 0.1 ? `Buffered ahead: ${ahead.toFixed(1)} s · ${state.bufferPct}%` : "Buffered ahead: 0 s";
+      }
+      if (!bufferLabel.hidden) bufferLabel.textContent = `Buffering ${state.bufferPct}%`;
+    };
+
+    const applyBufferSettings = () => {
+      const preset = BUFFER_PRESETS[state.buffer] || BUFFER_PRESETS.balanced;
+      if (state.hls) {
+        try { Object.assign(state.hls.config, preset.hls); } catch {}
+      }
+      if (state.dash) {
+        try { state.dash.updateSettings({ streaming: { buffer: { ...preset.dash } } }); } catch {}
+      }
+      updateBuffer();
     };
 
     const updateBadges = () => {
@@ -497,10 +579,12 @@
     const attachHls = (src) => {
       const nativeHls = Boolean(media.canPlayType("application/vnd.apple.mpegurl"));
       if (window.Hls && window.Hls.isSupported()) {
+        const buffer = (BUFFER_PRESETS[state.buffer] || BUFFER_PRESETS.balanced).hls;
         const hls = new window.Hls({
           enableWorker: true,
           lowLatencyMode: true,
-          backBufferLength: 90,
+          capLevelToPlayerSize: true,
+          ...buffer,
           xhrSetup: (xhr) => { xhr.withCredentials = false; },
         });
         state.hls = hls;
@@ -582,9 +666,11 @@
         return;
       }
       try {
+        const buffer = (BUFFER_PRESETS[state.buffer] || BUFFER_PRESETS.balanced).dash;
         const player = window.dashjs.MediaPlayer().create();
         state.dash = player;
         state.engineLabel = "DASH.js";
+        try { player.updateSettings({ streaming: { buffer: { ...buffer } } }); } catch {}
         player.initialize(media, src, false);
         player.on(window.dashjs.MediaPlayer.events.STREAM_INITIALIZED, () => {
           populateDashQuality();
@@ -900,11 +986,18 @@
     });
     media.addEventListener("playing", () => {
       spinner.hidden = true;
+      bufferLabel.hidden = true;
       setAlert("");
       updatePlayIcons();
     });
-    media.addEventListener("waiting", () => { spinner.hidden = false; });
-    media.addEventListener("canplay", () => { spinner.hidden = true; });
+    const showBuffering = () => {
+      spinner.hidden = false;
+      bufferLabel.hidden = false;
+      updateBuffer();
+    };
+    media.addEventListener("waiting", showBuffering);
+    media.addEventListener("stalled", showBuffering);
+    media.addEventListener("canplay", () => { spinner.hidden = true; bufferLabel.hidden = true; });
     media.addEventListener("seeked", applyCaption);
     media.addEventListener("ended", onEnded);
     media.addEventListener("error", () => {
@@ -1187,6 +1280,32 @@
       extras.append(T.panel(config.notes.title, el("div", { class: "pl-note-body" },
         ...config.notes.items.map(item => el("p", { class: "tp-hint", text: item })))));
     }
+
+    const preloadSelect = el("select", { class: "tp-select", "aria-label": "Preload mode" },
+      el("option", { value: "auto", text: "Auto", selected: state.preload === "auto" }),
+      el("option", { value: "metadata", text: "Metadata only", selected: state.preload === "metadata" }),
+      el("option", { value: "off", text: "Off", selected: state.preload === "off" }));
+    const bufferSelect = el("select", { class: "tp-select", "aria-label": "Stream buffer size" },
+      el("option", { value: "balanced", text: "Balanced", selected: state.buffer === "balanced" }),
+      el("option", { value: "aggressive", text: "Aggressive", selected: state.buffer === "aggressive" }),
+      el("option", { value: "saver", text: "Data saver", selected: state.buffer === "saver" }));
+    bufferStat = el("p", { class: "pl-buffer-stat", text: "Buffered ahead: 0 s" });
+    const bufferFields = el("div", { class: "pl-caption-controls" },
+      T.field("Preload", preloadSelect, "Auto follows the browser's data-saver and slow-network signals. Metadata fetches headers only; Off waits for play."));
+    if (config.engine === "hls" || config.engine === "dash") {
+      bufferFields.append(T.field("Stream buffer", bufferSelect, "How far ahead the HLS/DASH engine buffers. Aggressive smooths fast connections; Data saver lowers data use."));
+    }
+    preloadSelect.addEventListener("change", () => {
+      state.preload = preloadSelect.value;
+      storePreloadPref(state.preload);
+      media.preload = resolvePreload(state.preload);
+    });
+    bufferSelect.addEventListener("change", () => {
+      state.buffer = bufferSelect.value;
+      storeBufferPref(state.buffer);
+      applyBufferSettings();
+    });
+    extras.append(T.panel("Buffering", el("div", { class: "pl-buffer-body" }, bufferFields, bufferStat), "pl-buffer-panel"));
 
     const shortcutItems = [["Space / K", "Play or pause"], ["← / →", "Seek 10 s (Shift: 30 s)"], ["↑ / ↓", "Volume"], ["M", "Mute"], ["F", "Fullscreen"], ["P", "Picture-in-picture"], ["L", "Loop"], [", / .", "Slower or faster"]];
     extras.append(T.panel("Keyboard shortcuts", el("ul", { class: "pl-keys" },
