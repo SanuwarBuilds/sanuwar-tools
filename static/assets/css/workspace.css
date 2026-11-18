@@ -1,0 +1,217 @@
+/* Approved SanuwarTools workspace reference: clear, compact, task-first. */
+body.pro-theme.v2.bp.nx.wb-ui.reference-ui {
+  --wb-bg: #fff; --wb-card: #fff; --wb-card-2: #fafaff;
+  --wb-ink: #111321; --wb-ink-2: #303244; --wb-muted: #56596d; --wb-faint: #62657a;
+  --wb-line: #e0e1eb; --wb-line-strong: #c5c7d9; --wb-soft: #f2f1fc;
+  --wb-accent: #3424bd; --wb-accent-2: #5842d9; --wb-accent-wash: #eeebff;
+  --wb-header-bg: #fff; --wb-radius: 14px; --wb-radius-sm: 10px; --wb-wrap: 1440px;
+  --desk-purple: #6740ed; --desk-purple-bg: #f0eaff;
+  --desk-blue: #0874dc; --desk-blue-bg: #eaf3ff;
+  --desk-red: #db3543; --desk-red-bg: #ffedef;
+  --desk-green: #187b39; --desk-green-bg: #eaf6ed;
+  color: var(--wb-ink); background: var(--wb-bg); font-family: Inter, sans-serif;
+  -webkit-font-smoothing: antialiased;
+}
+[data-theme="dark"] body.pro-theme.v2.bp.nx.wb-ui.reference-ui {
+  --wb-bg: #14141d; --wb-card: #1c1c29; --wb-card-2: #222133;
+  --wb-ink: #f5f5ff; --wb-ink-2: #dcdced; --wb-muted: #b9b9ce; --wb-faint: #adadc3;
+  --wb-line: #38384c; --wb-line-strong: #67657f; --wb-soft: #302a48;
+  --wb-accent: #b6a6ff; --wb-accent-2: #c7baff; --wb-accent-wash: #362c54;
+  --wb-header-bg: #14141d;
+  --desk-purple: #c4a4ff; --desk-purple-bg: #35274c;
+  --desk-blue: #84baff; --desk-blue-bg: #20324b;
+  --desk-red: #ffa0a7; --desk-red-bg: #49262e;
+  --desk-green: #8bd8a0; --desk-green-bg: #223c2c;
+}
+body.reference-ui::before, body.reference-ui::after { display: none; }
+body.pro-theme.v2.bp.nx.wb-ui.reference-ui .wrap { width: min(100% - 80px, 1440px); }
+body.pro-theme.v2.bp.nx.wb-ui.reference-ui ::selection { background: var(--wb-accent-wash); color: var(--wb-ink); }
+body.pro-theme.v2.bp.nx.wb-ui.reference-ui :focus-visible { outline: 2px solid var(--wb-accent); outline-offset: 3px; }
+body.pro-theme.v2.bp.nx.wb-ui.reference-ui input { caret-color: var(--wb-accent); }
+body.pro-theme.v2.bp.nx.wb-ui.reference-ui .wb-header { background: var(--wb-header-bg); backdrop-filter: none; border-bottom: 1px solid var(--wb-line); box-shadow: none; }
+body.pro-theme.v2.bp.nx.wb-ui.reference-ui .wb-header-inner { height: 56px; gap: 24px; padding-inline: 24px; }
+body.pro-theme.v2.bp.nx.wb-ui.reference-ui .wb-brand { font-size: 26px; font-weight: 750; letter-spacing: -.04em; gap: 10px; white-space: nowrap; }
+body.pro-theme.v2.bp.nx.wb-ui.reference-ui .wb-brand-mark { width: 32px; height: 32px; padding: 0; background: transparent; border: 0; box-shadow: none; }
+body.pro-theme.v2.bp.nx.wb-ui.reference-ui .wb-brand-mark svg { width: 32px; height: 32px; fill: var(--wb-accent); }
+body.pro-theme.v2.bp.nx.wb-ui.reference-ui .wb-brand-mark svg rect:nth-child(1), body.pro-theme.v2.bp.nx.wb-ui.reference-ui .desk-footer-brand svg rect:nth-child(1) { fill: #8b5cf6; }
+body.pro-theme.v2.bp.nx.wb-ui.reference-ui .wb-brand-mark svg rect:nth-child(4), body.pro-theme.v2.bp.nx.wb-ui.reference-ui .desk-footer-brand svg rect:nth-child(4) { fill: #a184f6; }
+body.pro-theme.v2.bp.nx.wb-ui.reference-ui .wb-brand-dot { color: var(--wb-accent); }
+body.pro-theme.v2.bp.nx.wb-ui.reference-ui .wb-nav { flex: 1; justify-content: center; gap: 8px; }
+body.pro-theme.v2.bp.nx.wb-ui.reference-ui .wb-nav-control > a { color: var(--wb-ink); font-size: 14px; padding-left: 8px; }
+body.pro-theme.v2.bp.nx.wb-ui.reference-ui .wb-nav-toggle { color: var(--wb-ink); }
+body.pro-theme.v2.bp.nx.wb-ui.reference-ui .wb-actions { gap: 8px; }
+body.pro-theme.v2.bp.nx.wb-ui.reference-ui .wb-signin { background: var(--wb-accent); color: #fff; border: 1px solid var(--wb-accent); border-radius: 9px; box-shadow: none; padding: 10px 18px; min-height: 42px; font-size: 13px; font-weight: 550; }
+body.pro-theme.v2.bp.nx.wb-ui.reference-ui .wb-icon-btn, body.pro-theme.v2.bp.nx.wb-ui.reference-ui .wb-search-trigger { color: var(--wb-ink); }
+body.pro-theme.v2.bp.nx.wb-ui.reference-ui .wb-palette { --wb-card: var(--wb-bg); }
+body.pro-theme.v2.bp.nx.wb-ui.reference-ui .desk-page { padding-top: 32px; padding-bottom: 20px; }
+body.pro-theme.v2.bp.nx.wb-ui.reference-ui .desk-hero { margin-bottom: 20px; padding-inline: 22px; }
+body.pro-theme.v2.bp.nx.wb-ui.reference-ui .desk-hero h1 { font-size: clamp(30px, 3.4vw, 46px); line-height: 1.14; font-weight: 750; letter-spacing: -.035em; margin: 0; color: var(--wb-ink); text-wrap: balance; }
+body.pro-theme.v2.bp.nx.wb-ui.reference-ui .desk-hero > p { font-size: 20px; line-height: 1.4; color: var(--wb-muted); margin: 2px 0 20px; }
+body.pro-theme.v2.bp.nx.wb-ui.reference-ui .desk-search { display: flex; align-items: center; gap: 12px; min-height: 58px; border: 1px solid #9b9dbc; border-radius: 12px; padding: 6px 7px 6px 16px; background: var(--wb-card); }
+body.pro-theme.v2.bp.nx.wb-ui.reference-ui .desk-search:focus-within { border-color: var(--wb-accent); box-shadow: 0 0 0 2px var(--wb-accent-wash); }
+body.pro-theme.v2.bp.nx.wb-ui.reference-ui .desk-search label { display: flex; margin: 0; }
+body.pro-theme.v2.bp.nx.wb-ui.reference-ui .desk-search .desk-icon { background: transparent; color: var(--wb-muted); width: 24px; height: 24px; }
+body.pro-theme.v2.bp.nx.wb-ui.reference-ui .desk-search input { flex: 1; min-width: 0; width: auto; border: 0; background: transparent; padding: 8px 0; margin: 0; border-radius: 0; font: inherit; font-size: 16px; color: var(--wb-ink); box-shadow: none; }
+body.pro-theme.v2.bp.nx.wb-ui.reference-ui .desk-search input:focus { outline: none; }
+body.pro-theme.v2.bp.nx.wb-ui.reference-ui .desk-search input::placeholder { color: var(--wb-muted); opacity: 1; }
+body.pro-theme.v2.bp.nx.wb-ui.reference-ui .desk-search kbd { color: var(--wb-muted); background: var(--wb-card); border: 1px solid var(--wb-line); border-radius: 6px; padding: 4px 8px; font: inherit; font-size: 12px; white-space: nowrap; }
+body.pro-theme.v2.bp.nx.wb-ui.reference-ui .desk-search > button { min-height: 44px; padding: 8px 26px; border: 0; background: var(--wb-accent); color: #fff; border-radius: 9px; font: inherit; font-size: 15px; font-weight: 600; cursor: pointer; }
+body.pro-theme.v2.bp.nx.wb-ui.reference-ui .desk-quick { display: flex; flex-wrap: wrap; gap: 0; margin-top: 9px; }
+body.pro-theme.v2.bp.nx.wb-ui.reference-ui .desk-quick a { display: flex; align-items: center; gap: 10px; min-height: 44px; padding: 0 24px; color: var(--wb-accent); font-size: 14px; font-weight: 500; text-decoration: underline; text-underline-offset: 3px; }
+body.pro-theme.v2.bp.nx.wb-ui.reference-ui .desk-quick a:first-child { padding-left: 0; }
+body.pro-theme.v2.bp.nx.wb-ui.reference-ui .desk-quick a + a::before { content: ''; width: 1px; height: 20px; background: var(--wb-line-strong); position: relative; left: -23px; margin-right: -11px; }
+body.pro-theme.v2.bp.nx.wb-ui.reference-ui .desk-quick .desk-icon { width: 24px; height: 24px; background: transparent; }
+body.pro-theme.v2.bp.nx.wb-ui.reference-ui .desk-main-grid { display: grid; grid-template-columns: minmax(0, 1.9fr) minmax(300px, 1fr); gap: 16px; align-items: stretch; }
+body.pro-theme.v2.bp.nx.wb-ui.reference-ui .desk-panel { padding: 18px; border: 1px solid var(--wb-line); border-radius: 14px; background: var(--wb-card); min-width: 0; }
+body.pro-theme.v2.bp.nx.wb-ui.reference-ui .desk-panel-head { display: flex; align-items: center; justify-content: space-between; gap: 14px; margin-bottom: 16px; }
+body.pro-theme.v2.bp.nx.wb-ui.reference-ui .desk-panel-head h2, body.pro-theme.v2.bp.nx.wb-ui.reference-ui .desk-category-strip h2 { display: flex; align-items: center; gap: 10px; margin: 0; font: inherit; font-size: 22px; font-weight: 700; letter-spacing: -.03em; line-height: 1.3; }
+body.pro-theme.v2.bp.nx.wb-ui.reference-ui .desk-panel-head > a { display: flex; align-items: center; gap: 6px; color: var(--wb-accent); font-size: 12px; text-decoration: none; min-height: 28px; white-space: nowrap; }
+body.pro-theme.v2.bp.nx.wb-ui.reference-ui .desk-arrow { width: 18px; height: 18px; stroke: currentColor; fill: none; flex: none; }
+body.pro-theme.v2.bp.nx.wb-ui.reference-ui .desk-icon { width: 40px; height: 40px; flex: none; display: inline-grid; place-items: center; color: var(--desk-purple); background: var(--desk-purple-bg); border-radius: 9px; }
+body.pro-theme.v2.bp.nx.wb-ui.reference-ui .desk-icon svg { width: 25px; height: 25px; stroke: currentColor; stroke-width: 1.7; stroke-linecap: round; stroke-linejoin: round; fill: none; }
+body.pro-theme.v2.bp.nx.wb-ui.reference-ui .desk-icon-blue { color: var(--desk-blue); background: var(--desk-blue-bg); }
+body.pro-theme.v2.bp.nx.wb-ui.reference-ui .desk-icon-red { color: var(--desk-red); background: var(--desk-red-bg); }
+body.pro-theme.v2.bp.nx.wb-ui.reference-ui .desk-icon-green { color: var(--desk-green); background: var(--desk-green-bg); }
+body.pro-theme.v2.bp.nx.wb-ui.reference-ui .desk-panel-head .desk-icon { width: 28px; height: 28px; background: transparent; color: var(--wb-accent); }
+body.pro-theme.v2.bp.nx.wb-ui.reference-ui .desk-panel-head .desk-icon svg { width: 26px; height: 26px; }
+body.pro-theme.v2.bp.nx.wb-ui.reference-ui .desk-tool-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 10px; }
+body.pro-theme.v2.bp.nx.wb-ui.reference-ui .desk-tool-row { display: flex; align-items: center; min-width: 0; border: 1px solid var(--wb-line); border-radius: 10px; background: var(--wb-card); }
+body.pro-theme.v2.bp.nx.wb-ui.reference-ui .desk-tool-row > a { flex: 1; display: flex; align-items: center; gap: 12px; padding: 10px 12px; min-width: 0; min-height: 64px; color: var(--wb-ink); text-decoration: none; border-radius: 10px; }
+body.pro-theme.v2.bp.nx.wb-ui.reference-ui .desk-tool-row:hover { border-color: var(--wb-line-strong); background: var(--wb-card-2); }
+body.pro-theme.v2.bp.nx.wb-ui.reference-ui .desk-row-copy { display: flex; flex-direction: column; gap: 4px; flex: 1; min-width: 0; }
+body.pro-theme.v2.bp.nx.wb-ui.reference-ui .desk-row-copy strong { font-size: 16px; line-height: 1.2; font-weight: 650; letter-spacing: -.025em; overflow-wrap: anywhere; }
+body.pro-theme.v2.bp.nx.wb-ui.reference-ui .desk-row-copy small { display: block; font-size: 12px; line-height: 1.4; color: var(--wb-muted); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+body.pro-theme.v2.bp.nx.wb-ui.reference-ui .desk-tool-row .desk-arrow { color: var(--wb-muted); width: 16px; }
+body.pro-theme.v2.bp.nx.wb-ui.reference-ui .desk-workspace { background: var(--wb-soft); padding-bottom: 10px; }
+body.pro-theme.v2.bp.nx.wb-ui.reference-ui .desk-workspace .desk-panel-head { margin-bottom: 12px; }
+body.pro-theme.v2.bp.nx.wb-ui.reference-ui .desk-workspace h3 { font: inherit; font-size: 14px; font-weight: 600; color: var(--wb-muted); margin: 10px 0 8px; }
+body.pro-theme.v2.bp.nx.wb-ui.reference-ui .desk-recent-list { display: grid; gap: 8px; padding: 0; margin: 0; list-style: none; max-height: 232px; overflow: auto; overscroll-behavior: contain; }
+body.pro-theme.v2.bp.nx.wb-ui.reference-ui .desk-workspace .desk-tool-row > a { min-height: 58px; padding: 8px 10px; gap: 10px; }
+body.pro-theme.v2.bp.nx.wb-ui.reference-ui .desk-workspace .desk-icon { width: 34px; height: 34px; }
+body.pro-theme.v2.bp.nx.wb-ui.reference-ui .desk-workspace .desk-icon svg { width: 23px; height: 23px; }
+body.pro-theme.v2.bp.nx.wb-ui.reference-ui .desk-workspace .desk-row-copy strong { font-size: 15px; }
+body.pro-theme.v2.bp.nx.wb-ui.reference-ui .desk-workspace .desk-row-copy small { font-size: 11.5px; }
+body.pro-theme.v2.bp.nx.wb-ui.reference-ui .desk-star { flex: none; display: grid; place-items: center; width: 38px; min-height: 44px; padding: 8px; color: var(--wb-muted); background: none; border: 0; border-radius: 6px; cursor: pointer; }
+body.pro-theme.v2.bp.nx.wb-ui.reference-ui .desk-star svg { width: 18px; height: 18px; stroke: currentColor; stroke-width: 1.6; fill: none; }
+body.pro-theme.v2.bp.nx.wb-ui.reference-ui .desk-star[aria-pressed="true"] { color: var(--wb-accent); }
+body.pro-theme.v2.bp.nx.wb-ui.reference-ui .desk-star[aria-pressed="true"] svg { fill: var(--wb-accent-wash); }
+body.pro-theme.v2.bp.nx.wb-ui.reference-ui .desk-local-note { font-size: 10px; color: var(--wb-muted); margin: 10px 0 0; }
+body.pro-theme.v2.bp.nx.wb-ui.reference-ui .desk-category-strip { display: flex; align-items: center; flex-wrap: wrap; gap: 6px 14px; margin: 16px 0; padding: 7px 16px; border: 1px solid var(--wb-line); border-radius: 12px; background: var(--wb-card); }
+body.pro-theme.v2.bp.nx.wb-ui.reference-ui .desk-category-strip h2 { font-size: 16px; padding-right: 18px; border-right: 1px solid var(--wb-line-strong); white-space: nowrap; }
+body.pro-theme.v2.bp.nx.wb-ui.reference-ui .desk-category-strip a { display: flex; align-items: center; justify-content: center; flex: 1; gap: 7px; min-height: 42px; color: var(--wb-ink); font-size: 11.5px; text-decoration: none; white-space: nowrap; }
+body.pro-theme.v2.bp.nx.wb-ui.reference-ui .desk-category-strip .desk-icon { width: 24px; height: 24px; background: transparent; }
+body.pro-theme.v2.bp.nx.wb-ui.reference-ui .desk-category-strip .desk-icon svg { width: 22px; height: 22px; }
+body.pro-theme.v2.bp.nx.wb-ui.reference-ui .desk-library-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 16px; }
+body.pro-theme.v2.bp.nx.wb-ui.reference-ui .desk-library-grid > :only-child { grid-column: 1 / -1; }
+body.pro-theme.v2.bp.nx.wb-ui.reference-ui .desk-library-grid .desk-panel-head { margin-bottom: 12px; }
+body.pro-theme.v2.bp.nx.wb-ui.reference-ui .desk-download-list { display: grid; grid-template-columns: minmax(0, 1fr); gap: 8px; }
+body.pro-theme.v2.bp.nx.wb-ui.reference-ui .desk-download-row { display: flex; min-width: 0; width: 100%; align-items: center; gap: 12px; min-height: 46px; padding: 4px 10px; border: 1px solid var(--wb-line); border-radius: 9px; color: var(--wb-ink); text-decoration: none; background: var(--wb-card); }
+body.pro-theme.v2.bp.nx.wb-ui.reference-ui .desk-download-row:hover { border-color: var(--wb-line-strong); background: var(--wb-card-2); }
+body.pro-theme.v2.bp.nx.wb-ui.reference-ui .desk-download-row .desk-icon { width: 34px; height: 34px; }
+body.pro-theme.v2.bp.nx.wb-ui.reference-ui .desk-download-row .desk-icon svg { width: 23px; height: 23px; }
+body.pro-theme.v2.bp.nx.wb-ui.reference-ui .desk-download-row .desk-row-copy strong { font-size: 14px; }
+body.pro-theme.v2.bp.nx.wb-ui.reference-ui .desk-download-row .desk-row-copy small { font-size: 11.5px; }
+body.pro-theme.v2.bp.nx.wb-ui.reference-ui .desk-file-type { color: var(--wb-accent); background: var(--wb-accent-wash); font-size: 10px; font-weight: 550; border-radius: 5px; padding: 3px 8px; flex: none; }
+body.pro-theme.v2.bp.nx.wb-ui.reference-ui .desk-edu > .desk-tool-row + .desk-tool-row { margin-top: 10px; }
+body.pro-theme.v2.bp.nx.wb-ui.reference-ui .desk-edu > .desk-tool-row > a { min-height: 70px; }
+body.pro-theme.v2.bp.nx.wb-ui.reference-ui .desk-more-content { margin-top: 12px; border-bottom: 1px solid var(--wb-line); font-size: 12px; }
+body.pro-theme.v2.bp.nx.wb-ui.reference-ui .desk-more-content > summary { display: flex; justify-content: space-between; align-items: center; min-height: 40px; color: var(--wb-muted); cursor: pointer; list-style: none; }
+body.pro-theme.v2.bp.nx.wb-ui.reference-ui .desk-more-content > summary::-webkit-details-marker { display: none; }
+body.pro-theme.v2.bp.nx.wb-ui.reference-ui .desk-more-content[open] > summary { color: var(--wb-accent); }
+body.pro-theme.v2.bp.nx.wb-ui.reference-ui .desk-more-content[open] > summary span { transform: rotate(45deg); }
+body.pro-theme.v2.bp.nx.wb-ui.reference-ui .desk-about-content { padding: 10px 0 20px; max-width: 80ch; color: var(--wb-muted); line-height: 1.8; }
+body.pro-theme.v2.bp.nx.wb-ui.reference-ui .desk-about-content h2 { font-size: 18px; margin: 20px 0 8px; color: var(--wb-ink); }
+body.pro-theme.v2.bp.nx.wb-ui.reference-ui .desk-about-content details > summary { min-height: 44px; cursor: pointer; }
+body.pro-theme.v2.bp.nx.wb-ui.reference-ui .desk-about-content a { color: var(--wb-accent); }
+body.pro-theme.v2.bp.nx.wb-ui.reference-ui .desk-all-links { display: grid; grid-template-columns: repeat(2,minmax(0,1fr)); gap: 4px 16px; }
+body.pro-theme.v2.bp.nx.wb-ui.reference-ui .desk-all-links a { min-height: 32px; }
+body.pro-theme.v2.bp.nx.wb-ui.reference-ui .desk-extra-download { margin-right: 16px; }
+body.pro-theme.v2.bp.nx.wb-ui.reference-ui .desk-widgets:empty { display: none; }
+body.pro-theme.v2.bp.nx.wb-ui.reference-ui .desk-widgets:not(:empty) { margin-top: 20px; }
+body.pro-theme.v2.bp.nx.wb-ui.reference-ui .desk-footer { border-top: 1px solid var(--wb-line); background: var(--wb-bg); padding: 14px 0; }
+body.pro-theme.v2.bp.nx.wb-ui.reference-ui .desk-footer-inner { display: flex; align-items: center; gap: 28px; }
+body.pro-theme.v2.bp.nx.wb-ui.reference-ui .desk-footer-brand { display: flex; align-items: center; gap: 8px; color: var(--wb-ink); text-decoration: none; font-size: 20px; font-weight: 750; letter-spacing: -.04em; white-space: nowrap; }
+body.pro-theme.v2.bp.nx.wb-ui.reference-ui .desk-footer-brand > span { color: var(--wb-accent); margin-left: -8px; }
+body.pro-theme.v2.bp.nx.wb-ui.reference-ui .desk-footer-brand svg { width: 27px; height: 27px; fill: var(--wb-accent); }
+body.pro-theme.v2.bp.nx.wb-ui.reference-ui .desk-footer nav { display: flex; gap: 24px; border-left: 1px solid var(--wb-line); padding-left: 28px; }
+body.pro-theme.v2.bp.nx.wb-ui.reference-ui .desk-footer nav a { display: flex; align-items: center; min-height: 40px; color: var(--wb-ink-2); text-decoration: none; font-size: 12px; }
+body.pro-theme.v2.bp.nx.wb-ui.reference-ui .desk-footer small { margin-left: auto; font-size: 11px; color: var(--wb-muted); }
+body.pro-theme.v2.bp.nx.wb-ui.reference-ui .desk-empty { color: var(--wb-muted); font-size: 13px; padding: 16px 0; }
+@media (max-width: 1250px) {
+  body.pro-theme.v2.bp.nx.wb-ui.reference-ui .wb-header-inner { gap: 16px; }
+  body.pro-theme.v2.bp.nx.wb-ui.reference-ui .wb-nav { gap: 1px; }
+  body.pro-theme.v2.bp.nx.wb-ui.reference-ui .wb-brand { font-size: 21px; }
+  body.pro-theme.v2.bp.nx.wb-ui.reference-ui .desk-category-strip { gap: 4px 9px; }
+  body.pro-theme.v2.bp.nx.wb-ui.reference-ui .desk-category-strip h2 { font-size: 14px; padding-right: 10px; }
+  body.pro-theme.v2.bp.nx.wb-ui.reference-ui .desk-category-strip a { font-size: 10px; gap: 5px; }
+  body.pro-theme.v2.bp.nx.wb-ui.reference-ui .desk-main-grid { grid-template-columns: minmax(0,1.7fr) minmax(280px,1fr); }
+  body.pro-theme.v2.bp.nx.wb-ui.reference-ui .desk-tool-row > a { padding: 9px; gap: 8px; }
+  body.pro-theme.v2.bp.nx.wb-ui.reference-ui .desk-row-copy strong { font-size: 13px; }
+  body.pro-theme.v2.bp.nx.wb-ui.reference-ui .desk-tool-row .desk-arrow { display: none; }
+}
+@media (max-width: 1100px) {
+  body.pro-theme.v2.bp.nx.wb-ui.reference-ui .wb-header-inner { height: 60px; }
+  body.pro-theme.v2.bp.nx.wb-ui.reference-ui .desk-main-grid { grid-template-columns: minmax(0,1fr); }
+  body.pro-theme.v2.bp.nx.wb-ui.reference-ui .desk-recent-list { grid-template-columns: repeat(3,minmax(0,1fr)); max-height: none; }
+  body.pro-theme.v2.bp.nx.wb-ui.reference-ui .desk-workspace .desk-tool-row > a { gap: 8px; }
+  body.pro-theme.v2.bp.nx.wb-ui.reference-ui .desk-category-strip h2 { border: 0; flex-basis: 100%; padding: 6px 0; }
+  body.pro-theme.v2.bp.nx.wb-ui.reference-ui .desk-category-strip a { font-size: 12px; }
+  body.pro-theme.v2.bp.nx.wb-ui.reference-ui .desk-footer-inner { flex-wrap: wrap; gap: 12px 22px; }
+}
+@media (max-width: 760px) {
+  body.pro-theme.v2.bp.nx.wb-ui.reference-ui .wrap { width: calc(100% - 32px); }
+  body.pro-theme.v2.bp.nx.wb-ui.reference-ui .desk-page { padding-top: 26px; }
+  body.pro-theme.v2.bp.nx.wb-ui.reference-ui .desk-hero h1 { font-size: 32px; line-height: 1.18; max-width: 15ch; }
+  body.pro-theme.v2.bp.nx.wb-ui.reference-ui .desk-hero > p { font-size: 16px; margin-bottom: 18px; }
+  body.pro-theme.v2.bp.nx.wb-ui.reference-ui .desk-search { gap: 8px; padding-left: 12px; }
+  body.pro-theme.v2.bp.nx.wb-ui.reference-ui .desk-search > button { padding: 8px 14px; font-size: 13px; }
+  body.pro-theme.v2.bp.nx.wb-ui.reference-ui .desk-search input { font-size: 16px; }
+  body.pro-theme.v2.bp.nx.wb-ui.reference-ui .desk-search kbd { display: none; }
+  body.pro-theme.v2.bp.nx.wb-ui.reference-ui .desk-quick { display: grid; grid-template-columns: repeat(2,minmax(0,1fr)); gap: 0 12px; margin-top: 10px; }
+  body.pro-theme.v2.bp.nx.wb-ui.reference-ui .desk-quick a { padding: 0; font-size: 11px; gap: 6px; }
+  body.pro-theme.v2.bp.nx.wb-ui.reference-ui .desk-quick a + a::before { display: none; }
+  body.pro-theme.v2.bp.nx.wb-ui.reference-ui .desk-quick .desk-icon { width: 20px; height: 20px; }
+  body.pro-theme.v2.bp.nx.wb-ui.reference-ui .desk-quick .desk-icon svg { width: 19px; height: 19px; }
+  body.pro-theme.v2.bp.nx.wb-ui.reference-ui .desk-tool-grid, body.pro-theme.v2.bp.nx.wb-ui.reference-ui .desk-library-grid { grid-template-columns: minmax(0,1fr); }
+  body.pro-theme.v2.bp.nx.wb-ui.reference-ui .desk-panel { padding: 16px; }
+  body.pro-theme.v2.bp.nx.wb-ui.reference-ui .desk-panel-head h2 { font-size: 19px; }
+  body.pro-theme.v2.bp.nx.wb-ui.reference-ui .desk-panel-head > a { font-size: 11px; }
+  body.pro-theme.v2.bp.nx.wb-ui.reference-ui .desk-row-copy strong { font-size: 14px; }
+  body.pro-theme.v2.bp.nx.wb-ui.reference-ui .desk-row-copy small { font-size: 11px; }
+  body.pro-theme.v2.bp.nx.wb-ui.reference-ui .desk-tool-row > a { gap: 12px; min-height: 68px; }
+  body.pro-theme.v2.bp.nx.wb-ui.reference-ui .desk-tool-row .desk-arrow { display: block; }
+  body.pro-theme.v2.bp.nx.wb-ui.reference-ui .desk-recent-list { grid-template-columns: minmax(0,1fr); }
+  body.pro-theme.v2.bp.nx.wb-ui.reference-ui .desk-category-strip { display: grid; grid-template-columns: repeat(2,minmax(0,1fr)); padding: 14px; gap: 4px 10px; }
+  body.pro-theme.v2.bp.nx.wb-ui.reference-ui .desk-category-strip h2 { grid-column: 1 / -1; font-size: 16px; margin-bottom: 6px; }
+  body.pro-theme.v2.bp.nx.wb-ui.reference-ui .desk-category-strip a { justify-content: start; font-size: 11px; gap: 8px; }
+  body.pro-theme.v2.bp.nx.wb-ui.reference-ui .desk-download-row { gap: 8px; }
+  body.pro-theme.v2.bp.nx.wb-ui.reference-ui .desk-download-row .desk-icon { width: 30px; height: 30px; }
+  body.pro-theme.v2.bp.nx.wb-ui.reference-ui .desk-download-row .desk-arrow { width: 15px; }
+  body.pro-theme.v2.bp.nx.wb-ui.reference-ui .desk-file-type { font-size: 9px; padding: 3px 5px; }
+  body.pro-theme.v2.bp.nx.wb-ui.reference-ui .desk-footer { padding-bottom: 88px; }
+  body.pro-theme.v2.bp.nx.wb-ui.reference-ui .desk-footer-inner { gap: 10px; }
+  body.pro-theme.v2.bp.nx.wb-ui.reference-ui .desk-footer nav { border: 0; padding: 0; width: 100%; gap: 18px; flex-wrap: wrap; }
+  body.pro-theme.v2.bp.nx.wb-ui.reference-ui .desk-footer small { margin-left: 0; }
+}
+@media (prefers-reduced-motion: reduce) {
+  body.pro-theme.v2.bp.nx.wb-ui.reference-ui .desk-more-content > summary span { transition: none; }
+}
+
+body.pro-theme.v2.bp.nx.wb-ui.reference-ui .sr-only { position: absolute; width: 1px; height: 1px; padding: 0; margin: -1px; overflow: hidden; clip-path: inset(50%); white-space: nowrap; border: 0; }
+
+@media (max-width: 760px) {
+  body.pro-theme.v2.bp.nx.wb-ui.reference-ui .wb-header-inner,
+  body.pro-theme.v2.bp.nx.wb-ui.reference-ui .desk-hero { padding-inline: 0; }
+}
+
+body.pro-theme.v2.bp.nx.wb-ui.reference-ui .desk-workspace .desk-panel-head .desk-icon { width: 28px; height: 28px; }
+body.pro-theme.v2.bp.nx.wb-ui.reference-ui .desk-footer-more { position: relative; font-size: 12px; }
+body.pro-theme.v2.bp.nx.wb-ui.reference-ui .desk-footer-more > summary { min-height: 40px; display: flex; align-items: center; cursor: pointer; color: var(--wb-ink-2); list-style: none; }
+body.pro-theme.v2.bp.nx.wb-ui.reference-ui .desk-footer-more > summary::-webkit-details-marker { display: none; }
+body.pro-theme.v2.bp.nx.wb-ui.reference-ui .desk-footer-panel { position: absolute; z-index: 50; bottom: calc(100% + 12px); right: 0; width: min(680px, calc(100vw - 32px)); max-height: 60vh; overflow: auto; padding: 22px; border: 1px solid var(--wb-line); border-radius: 12px; background: var(--wb-card); box-shadow: 0 15px 35px -16px #0005; }
+body.pro-theme.v2.bp.nx.wb-ui.reference-ui .desk-footer-panel .desk-about-content { padding: 0; }
+@media(max-width: 760px) { body.pro-theme.v2.bp.nx.wb-ui.reference-ui .desk-footer-panel { right: auto; left: -190px; } }
+body.pro-theme.v2.bp.nx.wb-ui.reference-ui .desk-footer-panel .desk-all-links { display: grid; padding: 0; border: 0; gap: 4px 16px; }
+@media (max-width: 760px) {
+  body.pro-theme.v2.bp.nx.wb-ui.reference-ui .desk-footer-panel { position: fixed; bottom: 80px; left: 16px; right: 16px; width: auto; }
+}

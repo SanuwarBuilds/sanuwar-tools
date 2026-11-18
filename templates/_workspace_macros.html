@@ -1,0 +1,10 @@
+{% macro icon(name, tone='purple') -%}
+<span class="desk-icon desk-icon-{{ tone }}"><svg aria-hidden="true" viewBox="0 0 24 24"><use href="/assets/icons/workspace.svg#{{ name }}"/></svg></span>
+{%- endmacro %}
+{% macro arrow() -%}<svg class="desk-arrow" aria-hidden="true" viewBox="0 0 24 24"><use href="/assets/icons/workspace.svg#arrow"/></svg>{%- endmacro %}
+{% macro shortcut(path, name, description, symbol, tone='purple', favorite=False) -%}
+<div class="desk-tool-row">
+<a href="{{ path }}">{{ icon(symbol, tone) }}<span class="desk-row-copy"><strong>{{ name }}</strong><small>{{ description }}</small></span>{% if not favorite %}{{ arrow() }}{% endif %}</a>
+{% if favorite %}<button class="desk-star" type="button" data-workspace-favorite="{{ path }}" data-favorite-name="{{ name }}" aria-label="Save {{ name }} to favorites" aria-pressed="false"><svg aria-hidden="true" viewBox="0 0 24 24"><use href="/assets/icons/workspace.svg#star"/></svg></button>{% endif %}
+</div>
+{%- endmacro %}

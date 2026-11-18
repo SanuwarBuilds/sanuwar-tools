@@ -34,6 +34,8 @@ PAGES = {
                  'Follow education updates in one place: exam notices, board and university results, admission dates, scholarships and career alerts with links to official sources.'),
     '/eduhelp/labs': ('Interactive 3D Science Labs — Class 10 Physics & Chemistry | SanuwarTools',
                       'Explore interactive 3D science labs arranged by class, subject and chapter, including Class 10 electricity and carbon compounds experiments.'),
+    '/players': ('Online Video & Audio Players — MP4, HLS, DASH, MKV, MP3 | SanuwarTools',
+                 'Play local videos, HLS and DASH streams, MKV files, MP3 playlists, subtitles and authorized cloud links in your browser. Files stay on your device.'),
 }
 PAGE_TYPES = {
     '/': 'WebPage',
@@ -45,6 +47,7 @@ PAGE_TYPES = {
     '/directory': 'CollectionPage',
     '/eduhelp': 'CollectionPage',
     '/eduhelp/labs': 'CollectionPage',
+    '/players': 'CollectionPage',
 }
 BREADCRUMBS = {
     '/photo-tools': 'Photo Tools',
@@ -55,6 +58,7 @@ BREADCRUMBS = {
     '/directory': 'Directories',
     '/eduhelp': 'Eduhelp',
     '/eduhelp/labs': 'Lab library',
+    '/players': 'Players',
 }
 PHOTO_FAQS = [
     ('How do I resize a photo to exact pixels?',
@@ -383,7 +387,7 @@ def install(app, load_config, load_directory=None, load_tool_catalog=None, load_
         if not any(tool.get('id') == 'builtin-photo-tools' and not all(tool.get(flag, True) is True for flag in ('enabled', 'visible')) for tool in config.get('tools', [])):
             paths.append('/photo-tools')
         paths.extend('/guides/' + slug for slug in GUIDES)
-        paths.extend(['/about', '/contact', '/privacy', '/directory', '/eduhelp', '/eduhelp/labs'])
+        paths.extend(['/about', '/contact', '/privacy', '/directory', '/eduhelp', '/eduhelp/labs', '/players'])
         for category in directory_categories():
             slug = category.get('slug')
             if isinstance(slug, str) and re.fullmatch(r'[a-z0-9-]{1,80}', slug):

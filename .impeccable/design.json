@@ -1,0 +1,415 @@
+{
+  "schemaVersion": 2,
+  "generatedAt": "2026-11-17T06:48:21.147247+00:00",
+  "title": "Design System: SanuwarTools",
+  "extensions": {
+    "colorMeta": {
+      "primary": {
+        "role": "primary",
+        "displayName": "Primary",
+        "tonalRamp": [
+          "oklch(15% 0.0400 285)",
+          "oklch(25% 0.0800 285)",
+          "oklch(35% 0.1000 285)",
+          "oklch(45% 0.1000 285)",
+          "oklch(60% 0.1000 285)",
+          "oklch(75% 0.1000 285)",
+          "oklch(85% 0.0800 285)",
+          "oklch(95% 0.0400 285)"
+        ]
+      },
+      "primary-hover": {
+        "role": "primary",
+        "displayName": "Primary Hover",
+        "tonalRamp": [
+          "oklch(15% 0.0400 285)",
+          "oklch(25% 0.0800 285)",
+          "oklch(35% 0.1000 285)",
+          "oklch(45% 0.1000 285)",
+          "oklch(60% 0.1000 285)",
+          "oklch(75% 0.1000 285)",
+          "oklch(85% 0.0800 285)",
+          "oklch(95% 0.0400 285)"
+        ]
+      },
+      "canvas": {
+        "role": "neutral",
+        "displayName": "Canvas",
+        "tonalRamp": [
+          "oklch(15% 0.0032 275)",
+          "oklch(25% 0.0064 275)",
+          "oklch(35% 0.0080 275)",
+          "oklch(45% 0.0080 275)",
+          "oklch(60% 0.0080 275)",
+          "oklch(75% 0.0080 275)",
+          "oklch(85% 0.0064 275)",
+          "oklch(95% 0.0032 275)"
+        ]
+      },
+      "surface-subtle": {
+        "role": "neutral",
+        "displayName": "Surface Subtle",
+        "tonalRamp": [
+          "oklch(15% 0.0032 275)",
+          "oklch(25% 0.0064 275)",
+          "oklch(35% 0.0080 275)",
+          "oklch(45% 0.0080 275)",
+          "oklch(60% 0.0080 275)",
+          "oklch(75% 0.0080 275)",
+          "oklch(85% 0.0064 275)",
+          "oklch(95% 0.0032 275)"
+        ]
+      },
+      "ink": {
+        "role": "neutral",
+        "displayName": "Ink",
+        "tonalRamp": [
+          "oklch(15% 0.0032 275)",
+          "oklch(25% 0.0064 275)",
+          "oklch(35% 0.0080 275)",
+          "oklch(45% 0.0080 275)",
+          "oklch(60% 0.0080 275)",
+          "oklch(75% 0.0080 275)",
+          "oklch(85% 0.0064 275)",
+          "oklch(95% 0.0032 275)"
+        ]
+      },
+      "ink-secondary": {
+        "role": "neutral",
+        "displayName": "Ink Secondary",
+        "tonalRamp": [
+          "oklch(15% 0.0032 275)",
+          "oklch(25% 0.0064 275)",
+          "oklch(35% 0.0080 275)",
+          "oklch(45% 0.0080 275)",
+          "oklch(60% 0.0080 275)",
+          "oklch(75% 0.0080 275)",
+          "oklch(85% 0.0064 275)",
+          "oklch(95% 0.0032 275)"
+        ]
+      },
+      "muted": {
+        "role": "neutral",
+        "displayName": "Muted",
+        "tonalRamp": [
+          "oklch(15% 0.0032 275)",
+          "oklch(25% 0.0064 275)",
+          "oklch(35% 0.0080 275)",
+          "oklch(45% 0.0080 275)",
+          "oklch(60% 0.0080 275)",
+          "oklch(75% 0.0080 275)",
+          "oklch(85% 0.0064 275)",
+          "oklch(95% 0.0032 275)"
+        ]
+      },
+      "faint": {
+        "role": "neutral",
+        "displayName": "Faint",
+        "tonalRamp": [
+          "oklch(15% 0.0032 275)",
+          "oklch(25% 0.0064 275)",
+          "oklch(35% 0.0080 275)",
+          "oklch(45% 0.0080 275)",
+          "oklch(60% 0.0080 275)",
+          "oklch(75% 0.0080 275)",
+          "oklch(85% 0.0064 275)",
+          "oklch(95% 0.0032 275)"
+        ]
+      },
+      "line": {
+        "role": "neutral",
+        "displayName": "Line",
+        "tonalRamp": [
+          "oklch(15% 0.0032 275)",
+          "oklch(25% 0.0064 275)",
+          "oklch(35% 0.0080 275)",
+          "oklch(45% 0.0080 275)",
+          "oklch(60% 0.0080 275)",
+          "oklch(75% 0.0080 275)",
+          "oklch(85% 0.0064 275)",
+          "oklch(95% 0.0032 275)"
+        ]
+      },
+      "line-strong": {
+        "role": "neutral",
+        "displayName": "Line Strong",
+        "tonalRamp": [
+          "oklch(15% 0.0032 275)",
+          "oklch(25% 0.0064 275)",
+          "oklch(35% 0.0080 275)",
+          "oklch(45% 0.0080 275)",
+          "oklch(60% 0.0080 275)",
+          "oklch(75% 0.0080 275)",
+          "oklch(85% 0.0064 275)",
+          "oklch(95% 0.0032 275)"
+        ]
+      },
+      "workspace": {
+        "role": "neutral",
+        "displayName": "Workspace",
+        "tonalRamp": [
+          "oklch(15% 0.0032 275)",
+          "oklch(25% 0.0064 275)",
+          "oklch(35% 0.0080 275)",
+          "oklch(45% 0.0080 275)",
+          "oklch(60% 0.0080 275)",
+          "oklch(75% 0.0080 275)",
+          "oklch(85% 0.0064 275)",
+          "oklch(95% 0.0032 275)"
+        ]
+      },
+      "accent-wash": {
+        "role": "primary",
+        "displayName": "Accent Wash",
+        "tonalRamp": [
+          "oklch(15% 0.0400 285)",
+          "oklch(25% 0.0800 285)",
+          "oklch(35% 0.1000 285)",
+          "oklch(45% 0.1000 285)",
+          "oklch(60% 0.1000 285)",
+          "oklch(75% 0.1000 285)",
+          "oklch(85% 0.0800 285)",
+          "oklch(95% 0.0400 285)"
+        ]
+      },
+      "icon-purple": {
+        "role": "secondary",
+        "displayName": "Icon Purple",
+        "tonalRamp": [
+          "oklch(15% 0.0400 285)",
+          "oklch(25% 0.0800 285)",
+          "oklch(35% 0.1000 285)",
+          "oklch(45% 0.1000 285)",
+          "oklch(60% 0.1000 285)",
+          "oklch(75% 0.1000 285)",
+          "oklch(85% 0.0800 285)",
+          "oklch(95% 0.0400 285)"
+        ]
+      },
+      "icon-purple-wash": {
+        "role": "secondary",
+        "displayName": "Icon Purple Wash",
+        "tonalRamp": [
+          "oklch(15% 0.0400 285)",
+          "oklch(25% 0.0800 285)",
+          "oklch(35% 0.1000 285)",
+          "oklch(45% 0.1000 285)",
+          "oklch(60% 0.1000 285)",
+          "oklch(75% 0.1000 285)",
+          "oklch(85% 0.0800 285)",
+          "oklch(95% 0.0400 285)"
+        ]
+      },
+      "icon-blue": {
+        "role": "secondary",
+        "displayName": "Icon Blue",
+        "tonalRamp": [
+          "oklch(15% 0.0400 250)",
+          "oklch(25% 0.0800 250)",
+          "oklch(35% 0.1000 250)",
+          "oklch(45% 0.1000 250)",
+          "oklch(60% 0.1000 250)",
+          "oklch(75% 0.1000 250)",
+          "oklch(85% 0.0800 250)",
+          "oklch(95% 0.0400 250)"
+        ]
+      },
+      "icon-blue-wash": {
+        "role": "secondary",
+        "displayName": "Icon Blue Wash",
+        "tonalRamp": [
+          "oklch(15% 0.0400 250)",
+          "oklch(25% 0.0800 250)",
+          "oklch(35% 0.1000 250)",
+          "oklch(45% 0.1000 250)",
+          "oklch(60% 0.1000 250)",
+          "oklch(75% 0.1000 250)",
+          "oklch(85% 0.0800 250)",
+          "oklch(95% 0.0400 250)"
+        ]
+      },
+      "icon-red": {
+        "role": "secondary",
+        "displayName": "Icon Red",
+        "tonalRamp": [
+          "oklch(15% 0.0400 25)",
+          "oklch(25% 0.0800 25)",
+          "oklch(35% 0.1000 25)",
+          "oklch(45% 0.1000 25)",
+          "oklch(60% 0.1000 25)",
+          "oklch(75% 0.1000 25)",
+          "oklch(85% 0.0800 25)",
+          "oklch(95% 0.0400 25)"
+        ]
+      },
+      "icon-red-wash": {
+        "role": "secondary",
+        "displayName": "Icon Red Wash",
+        "tonalRamp": [
+          "oklch(15% 0.0400 25)",
+          "oklch(25% 0.0800 25)",
+          "oklch(35% 0.1000 25)",
+          "oklch(45% 0.1000 25)",
+          "oklch(60% 0.1000 25)",
+          "oklch(75% 0.1000 25)",
+          "oklch(85% 0.0800 25)",
+          "oklch(95% 0.0400 25)"
+        ]
+      },
+      "icon-green": {
+        "role": "secondary",
+        "displayName": "Icon Green",
+        "tonalRamp": [
+          "oklch(15% 0.0400 145)",
+          "oklch(25% 0.0800 145)",
+          "oklch(35% 0.1000 145)",
+          "oklch(45% 0.1000 145)",
+          "oklch(60% 0.1000 145)",
+          "oklch(75% 0.1000 145)",
+          "oklch(85% 0.0800 145)",
+          "oklch(95% 0.0400 145)"
+        ]
+      },
+      "icon-green-wash": {
+        "role": "secondary",
+        "displayName": "Icon Green Wash",
+        "tonalRamp": [
+          "oklch(15% 0.0400 145)",
+          "oklch(25% 0.0800 145)",
+          "oklch(35% 0.1000 145)",
+          "oklch(45% 0.1000 145)",
+          "oklch(60% 0.1000 145)",
+          "oklch(75% 0.1000 145)",
+          "oklch(85% 0.0800 145)",
+          "oklch(95% 0.0400 145)"
+        ]
+      }
+    },
+    "typographyMeta": {
+      "display": {
+        "displayName": "Task headline",
+        "purpose": "Homepage task invitation."
+      },
+      "headline": {
+        "displayName": "Panel heading",
+        "purpose": "Section titles."
+      },
+      "title": {
+        "displayName": "Task title",
+        "purpose": "Scannable task names."
+      },
+      "body": {
+        "displayName": "Body",
+        "purpose": "Search and general interface copy."
+      },
+      "label": {
+        "displayName": "Supporting label",
+        "purpose": "Task descriptions and metadata."
+      }
+    },
+    "shadows": [
+      {
+        "name": "footer-popover",
+        "value": "0 15px 35px -16px #0005",
+        "purpose": "Expandable footer links panel."
+      },
+      {
+        "name": "search-focus",
+        "value": "0 0 0 2px var(--wb-accent-wash)",
+        "purpose": "Compound search focus feedback."
+      }
+    ],
+    "motion": [],
+    "breakpoints": [
+      {
+        "name": "compact-desktop",
+        "value": "1250px"
+      },
+      {
+        "name": "stack-main",
+        "value": "1100px"
+      },
+      {
+        "name": "mobile",
+        "value": "760px"
+      }
+    ],
+    "notes": [
+      "Tonal ramps are synthesized panel metadata, not additional application tokens.",
+      "Existing shared hover navigation owns motion; no new motion token is introduced.",
+      "Source inspection only; no detector or runtime pipeline execution is claimed."
+    ]
+  },
+  "components": [
+    {
+      "name": "Search action",
+      "kind": "button",
+      "refersTo": "button-primary",
+      "description": "Primary action in the homepage search.",
+      "html": "<button class=\"ds-search-action\">Search</button>",
+      "css": ".ds-search-action{font-family:Inter,sans-serif;background:var(--wb-accent,#3424bd);color:#fff;padding:8px 26px;min-height:44px;border:0;border-radius:9px;font-size:15px;font-weight:600;cursor:pointer}.ds-search-action:hover{filter:brightness(.96)}.ds-search-action:focus-visible{outline:2px solid var(--wb-accent,#3424bd);outline-offset:3px;}"
+    },
+    {
+      "name": "Search field",
+      "kind": "input",
+      "refersTo": "search-field",
+      "description": "Compound search styling; preview shows the text field.",
+      "html": "<input class=\"ds-search-field\" type=\"search\" aria-label=\"Search everything\" placeholder=\"Search tools, files, downloads and more\u2026\">",
+      "css": ".ds-search-field{font-family:Inter,sans-serif;width:100%;min-height:58px;padding:6px 16px;border:1px solid #9b9dbc;border-radius:12px;background:var(--wb-card,#fff);color:var(--wb-ink,#111321);font-size:16px}.ds-search-field:hover{border-color:var(--wb-line-strong,#c5c7d9)}.ds-search-field:focus-visible{outline:2px solid var(--wb-accent-wash,#eeebff);border-color:var(--wb-accent,#3424bd);outline-offset:0}"
+    },
+    {
+      "name": "Task row",
+      "kind": "card",
+      "refersTo": "tool-row",
+      "description": "Compact linked task with a clear title and secondary description.",
+      "html": "<a class=\"ds-tool-row\" href=\"#\"><strong>PDF Merge</strong><small>Combine multiple PDF files into one.</small></a>",
+      "css": ".ds-tool-row{font-family:Inter,sans-serif;display:flex;flex-direction:column;gap:4px;min-height:64px;padding:10px 12px;border:1px solid var(--wb-line,#e0e1eb);border-radius:10px;background:var(--wb-card,#fff);color:var(--wb-ink,#111321);text-decoration:none}.ds-tool-row strong{font-size:16px;font-weight:650;line-height:1.2}.ds-tool-row small{font-size:12px;line-height:1.4;color:var(--wb-muted,#56596d)}.ds-tool-row:hover{border-color:var(--wb-line-strong,#c5c7d9);background:var(--wb-card-2,#fafaff)}.ds-tool-row:focus-visible{outline:2px solid var(--wb-accent,#3424bd);outline-offset:3px;}"
+    },
+    {
+      "name": "Public navigation link",
+      "kind": "nav",
+      "refersTo": "",
+      "description": "Direct links sit alongside existing hover-menu toggles.",
+      "html": "<nav class=\"ds-nav\" aria-label=\"Main navigation\"><a href=\"#\">Tools</a><a href=\"#\">Eduhelp</a><a href=\"#\">Downloads</a></nav>",
+      "css": ".ds-nav{display:flex;gap:8px;font-family:Inter,sans-serif;}.ds-nav a{display:flex;align-items:center;min-height:44px;padding:0 8px;font-size:14px;color:var(--wb-ink,#111321);text-decoration:none}.ds-nav a:hover{color:var(--wb-accent,#3424bd)}.ds-nav a:focus-visible{outline:2px solid var(--wb-accent,#3424bd);outline-offset:3px;}"
+    },
+    {
+      "name": "File type label",
+      "kind": "chip",
+      "refersTo": "",
+      "description": "Compact file-format cue accompanying real download content.",
+      "html": "<span class=\"ds-file-type\">PDF</span>",
+      "css": ".ds-file-type{font-family:Inter,sans-serif;display:inline-block;background:var(--wb-accent-wash,#eeebff);color:var(--wb-accent,#3424bd);font-size:10px;font-weight:550;border-radius:5px;padding:3px 8px}"
+    },
+    {
+      "name": "Favorite star",
+      "kind": "button",
+      "refersTo": "",
+      "description": "Accessible saved-state control in Your workspace.",
+      "html": "<button class=\"ds-star\" aria-label=\"Save PDF Merge to favorites\" aria-pressed=\"false\"><svg viewBox=\"0 0 24 24\" aria-hidden=\"true\"><path d=\"m12 3 2.8 5.7 6.2.9-4.5 4.4 1.1 6.2L12 17.3l-5.6 2.9 1.1-6.2L3 9.6l6.2-.9Z\"/></svg></button>",
+      "css": ".ds-star{width:38px;min-height:44px;padding:8px;border:0;border-radius:6px;background:transparent;color:var(--wb-muted,#56596d);cursor:pointer}.ds-star svg{width:18px;height:18px;fill:none;stroke:currentColor;stroke-width:1.6}.ds-star:hover{color:var(--wb-accent,#3424bd)}.ds-star[aria-pressed=\"true\"]{color:var(--wb-accent,#3424bd)}.ds-star[aria-pressed=\"true\"] svg{fill:var(--wb-accent-wash,#eeebff)}.ds-star:focus-visible{outline:2px solid var(--wb-accent,#3424bd);outline-offset:3px;}"
+    }
+  ],
+  "narrative": {
+    "northStar": "The Everyday Workspace",
+    "overview": "A clear, compact workspace for choosing a useful task and getting started. White surfaces, restrained indigo actions, readable Inter type and colored task symbols make the catalogue easy to scan. The user-approved homepage reference establishes the current visual authority and supersedes the former hardware-plaque design.",
+    "keyCharacteristics": [
+      "Search is immediately available.",
+      "Thin borders and tonal grouping define sections.",
+      "Compact task rows pair a colored symbol with direct labels.",
+      "Shared public chrome stays consistent across routes."
+    ],
+    "rules": [],
+    "dos": [
+      "Do use the workspace tokens for public surfaces and keep visible keyboard focus.",
+      "Do pair task icons with readable text labels.",
+      "Do preserve real catalogue links and truthful empty states.",
+      "Do honor an explicitly saved dark preference."
+    ],
+    "donts": [
+      "Don't revive the superseded orange hardware, scanline or embossed-plaque treatment.",
+      "Don't replace catalogue content with invented downloads, counts or testimonials.",
+      "Don't apply the public workspace override to the admin layout."
+    ]
+  }
+}

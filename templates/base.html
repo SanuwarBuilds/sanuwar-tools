@@ -1,7 +1,7 @@
-{% set public_ui = request.path in ('/', '/downloads', '/download.html', '/photo-tools', '/signin', '/account', '/privacy', '/about', '/contact', '/tools', '/bypass', '/payment-demo', '/eduhelp', '/eduhelp/labs') or request.path.startswith('/guides/') or request.path.startswith('/downloads/') or request.path.startswith('/directory') or request.path.startswith('/tools/') or request.path.startswith('/purchase') %}
+{% set public_ui = request.path in ('/', '/downloads', '/download.html', '/photo-tools', '/signin', '/account', '/privacy', '/about', '/contact', '/tools', '/bypass', '/payment-demo', '/eduhelp', '/eduhelp/labs', '/players') or request.path.startswith('/guides/') or request.path.startswith('/downloads/') or request.path.startswith('/directory') or request.path.startswith('/tools/') or request.path.startswith('/players/') or request.path.startswith('/purchase') %}
 {% set default_theme = public_config.get('site', {}).get('defaultTheme', 'dark') %}
 <!doctype html>
-<html lang="en" data-theme="{{ default_theme }}">
+<html lang="en" data-theme="{{ 'light' if public_ui else default_theme }}">
 <head>
 <meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
 <meta name="csrf-token" content="{{ csrf_token }}">
@@ -66,18 +66,19 @@
 <link rel="stylesheet" href="/assets/css/site-search.css?v=3">
 <script nonce="{{ csp_nonce }}" src="/assets/js/site-search.js?v=1" defer></script>
 <script nonce="{{ csp_nonce }}" src="/assets/js/tools/smart-search.js?v=1" defer></script>
-<script nonce="{{ csp_nonce }}" src="/assets/js/workbench.js?v=4" defer></script>
+<script nonce="{{ csp_nonce }}" src="/assets/js/workbench.js?v=5" defer></script>
+{% if public_ui %}<link rel="stylesheet" href="/assets/css/workspace.css?v=1">{% endif %}
 {% if public_ui %}
-<script nonce="{{ csp_nonce }}" src="/assets/js/saved-tools.js?v=1" defer></script>{% endif %}
+<script nonce="{{ csp_nonce }}" src="/assets/js/saved-tools.js?v=2" defer></script>{% endif %}
 {% if request.path.startswith('/admin') %}<link rel="stylesheet" href="/assets/css/admin-pro.css?v=3">{% endif %}
 </head>
-<body class="studio-theme {% if public_ui %}pro-theme v2 bp nx wb-ui {% elif request.path.startswith('/admin') %}pro-theme bp {% endif %}{% block bodyclass %}{% endblock %}">
+<body class="studio-theme {% if public_ui %}pro-theme v2 bp nx wb-ui reference-ui {% elif request.path.startswith('/admin') %}pro-theme bp {% endif %}{% block bodyclass %}{% endblock %}">
 <a class="skip-link" href="#main">Skip to content</a>
 {% block header %}
 {% if public_ui %}
 <header class="wb-header">
 <div class="wb-header-inner wrap">
-<a class="wb-brand" href="/" aria-label="SanuwarTools home"><span class="wb-brand-mark" aria-hidden="true"><svg viewBox="0 0 24 24"><circle cx="8" cy="8" r="4"/><circle cx="16" cy="8" r="4"/><circle cx="8" cy="16" r="4"/><circle cx="16" cy="16" r="4"/></svg></span><span>{{ public_config.get('site', {}).get('name', 'SanuwarTools') }}<span class="wb-brand-dot">.</span></span></a>
+<a class="wb-brand" href="/" aria-label="SanuwarTools home"><span class="wb-brand-mark" aria-hidden="true"><svg viewBox="0 0 24 24"><rect x="1" y="1" width="10" height="10" rx="5"/><rect x="13" y="1" width="10" height="10" rx="5"/><rect x="1" y="13" width="10" height="10" rx="5"/><rect x="13" y="13" width="10" height="10" rx="5"/></svg></span><span>{{ public_config.get('site', {}).get('name', 'SanuwarTools') }}<span class="wb-brand-dot">.</span></span></a>
 {% include '_header_navigation.html' %}
 <div class="wb-actions">
 <button type="button" class="wb-search-trigger" id="wb-search-open" aria-label="Search everything" aria-haspopup="dialog" aria-controls="wb-palette">
@@ -118,6 +119,7 @@
 <div class="wb-sheet-links">
 <a href="/#browse-categories">Browse categories</a>
 <a href="/eduhelp">Eduhelp <small>Updates &amp; labs</small></a>
+<a href="/players">Players <small>Video, audio &amp; streams</small></a>
 <a href="/directory">Directories <small>Sources</small></a>
 {% if public_config.get('downloadPage', {}).get('enabled', True) %}<a href="/downloads">Downloads <small>Apps &amp; files</small></a>{% endif %}
 <a href="/#how-it-works">How it works</a>
@@ -146,40 +148,7 @@
 </div>
 {% block footer %}
 {% if public_ui %}
-<footer class="wb-footer">
-<div class="wrap">
-<div class="wb-footer-grid">
-<div class="wb-footer-brand">
-<a class="wb-brand" href="/" aria-label="SanuwarTools home"><span class="wb-brand-mark" aria-hidden="true"><svg viewBox="0 0 24 24"><circle cx="8" cy="8" r="4"/><circle cx="16" cy="8" r="4"/><circle cx="8" cy="16" r="4"/><circle cx="16" cy="16" r="4"/></svg></span><span>SanuwarTools<span class="wb-brand-dot">.</span></span></a>
-<p>{{ public_config.get('site', {}).get('tagline', 'All my tools, one place.') }} A small, carefully built collection of browser tools, photo utilities, labs and files.</p>
-{% set social = public_config.get('socialLinks', {}) %}{% if social %}<div class="wb-footer-social">{% for label, link in social.items() %}{% if link | public_url %}<a href="{{ link | public_url }}" target="_blank" rel="noopener noreferrer">{{ label | capitalize }}</a>{% endif %}{% endfor %}</div>{% endif %}
-</div>
-<nav class="wb-footer-col" aria-label="Tools">
-<h2>Tools</h2>
-<a href="/tools">Browser tools</a>
-{% if photo_tools_available %}<a href="/photo-tools">Photo tools</a>{% endif %}
-{% if public_config.get('downloadPage', {}).get('enabled', True) %}<a href="/downloads">Downloads</a>{% endif %}
-<a href="/directory">Directories</a>
-<a href="/eduhelp">Eduhelp</a>
-</nav>
-<nav class="wb-footer-col" aria-label="Company">
-<h2>Company</h2>
-<a href="/about">About</a>
-<a href="/contact">Contact</a>
-<a href="/#how-it-works">How it works</a>
-<a href="/privacy">Privacy</a>
-{% if adsense_client %}<a id="privacy-choices" href="/privacy" hidden>Privacy &amp; cookie settings</a>{% endif %}
-</nav>
-<nav class="wb-footer-col" aria-label="Account">
-<h2>Account</h2>
-<a href="{{ '/account' if visitor else '/signin' }}">{{ 'My account' if visitor else 'Sign in' }}</a>
-<a href="/purchases">Purchases</a>
-<a href="/admin">Admin</a>
-</nav>
-</div>
-<div class="wb-footer-bottom"><span>© {{ now_year }} SanuwarTools · Made with care by Sanuwar.</span><span>Built for the browser · Local-first.</span></div>
-</div>
-</footer>
+{% include '_workspace_footer.html' %}
 {% else %}
 <footer class="wrap site-footer"><div><a class="brand" href="/"><span class="brand-symbol" aria-hidden="true">s</span><span>SanuwarTools<span class="brand-dot">.</span></span></a><p>{{ public_config.get('site', {}).get('tagline', 'All my tools, one place.') }}</p></div><nav aria-label="Footer"><a href="/eduhelp">Eduhelp</a><a href="/#tools">Tools</a>{% if public_config.get('downloadPage', {}).get('enabled', True) %}<a href="/downloads">Downloads</a>{% endif %}{% for label, link in public_config.get('socialLinks', {}).items() %}{% if link | public_url %}<a href="{{ link | public_url }}" target="_blank" rel="noopener noreferrer">{{ label | capitalize }}</a>{% endif %}{% endfor %}<a href="/about">About</a><a href="/contact">Contact</a><a href="/privacy">Privacy</a>{% if adsense_client %}<a id="privacy-choices" href="/privacy" hidden>Privacy &amp; cookie settings</a>{% endif %}<a href="/admin">Admin</a></nav><p class="copyright">Made with care by Sanuwar.<br>© {{ now_year }} SanuwarTools</p></footer>
 {% endif %}

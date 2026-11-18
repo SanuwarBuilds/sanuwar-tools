@@ -218,6 +218,7 @@
     }
     if (kind === "downloads") return tools.filter(item => ["Download", "Album", "File"].includes(item.category));
     if (kind === "eduhelp") return tools.filter(item => item.category === "Eduhelp" || item.href.startsWith("/eduhelp/labs"));
+    if (kind === "players") return tools.filter(item => (item.keywords || "").includes("Players") || item.href === "/players");
     const pages = tools.filter(item => ["Page", "Admin", "Widget"].includes(item.category));
     return pages.filter(item => !["/", "/tools", "/downloads", "/directory", "/eduhelp", "/eduhelp/labs"].includes(item.href));
   };
@@ -352,7 +353,7 @@
         closePalette();
         return;
       }
-      $$(".wb-more[open]").forEach((details) => { details.open = false; });
+      $$(".wb-more[open], .desk-footer-more[open]").forEach((details) => { details.open = false; });
     }
   });
 
@@ -378,6 +379,12 @@
       event.preventDefault();
       first.focus();
     }
+  });
+
+  $$(".desk-footer-more").forEach(details => {
+    document.addEventListener("click", event => {
+      if (details.open && !details.contains(event.target)) details.open = false;
+    });
   });
 
   /* ---------- Small conveniences ----------------------------------------- */

@@ -1,0 +1,10 @@
+<details class="desk-footer-more" id="how-it-works">
+<summary>Guides &amp; more</summary><div class="desk-footer-panel">
+<div class="desk-about-content">
+<p>SanuwarTools brings {{ catalog.tools | length }} free browser tools, {% if photo_tools_available %}<a href="/photo-tools">Photo Tools</a> — a photo resizer and compressor for photo resizing and passport photos, {% endif %}downloads and learning resources into one place. Search for a task, open a tool, then copy or save the result. File-processing tools work on your device.</p>
+<h2>Practical guides</h2><ul>{% for slug, guide in guides.items() %}<li><a href="/guides/{{ slug }}">{{ guide.title }}</a></li>{% endfor %}</ul>
+<details id="browser-tools"><summary>Browse every tool</summary><nav class="desk-all-links" aria-label="All tool categories">{% for category in catalog.categories %}<a href="/tools?category={{ category | urlencode }}">{{ category }}</a>{% endfor %}</nav><div class="desk-all-links">{% for tool in public_config.get('tools', []) %}{% set internal = tool.route is string and tool.route.startswith('/') and not tool.route.startswith('//') %}<a href="{{ tool.route if internal else (tool.siteUrl | public_url) }}">{{ tool.name }}</a>{% endfor %}</div></details>
+{% for item in initial_downloads if item not in home_downloads %}<a class="desk-extra-download" href="{{ item.download_path or ('/downloads?item=' ~ (item.id | urlencode)) }}">{{ item.title }}</a>{% endfor %}
+<p>{% for label, link in public_config.get('socialLinks', {}).items() %}{% if link | public_url %}<a class="desk-extra-download" href="{{ link | public_url }}" target="_blank" rel="noopener noreferrer">{{ label | capitalize }}</a>{% endif %}{% endfor %}</p>
+</div></div>
+</details>

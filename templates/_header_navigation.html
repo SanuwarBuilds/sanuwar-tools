@@ -1,10 +1,10 @@
 <nav class="wb-nav" aria-label="Main navigation">
-{% set nav_items = [('tools', 'Tools', '/tools'), ('categories', 'Categories', '/#browse-categories'), ('directories', 'Directories', '/directory'), ('eduhelp', 'Eduhelp', '/eduhelp'), ('downloads', 'Downloads', '/downloads'), ('more', 'More', '/about')] %}
+{% set nav_items = [('tools', 'Tools', '/tools'), ('categories', 'Categories', '/#browse-categories'), ('directories', 'Directories', '/directory'), ('eduhelp', 'Eduhelp', '/eduhelp'), ('players', 'Players', '/players'), ('downloads', 'Downloads', '/downloads'), ('more', 'More', '/about')] %}
 {% for key, label, href in nav_items %}
 {% if key != 'downloads' or public_config.get('downloadPage', {}).get('enabled', True) %}
 <div class="wb-nav-item" data-nav-menu="{{ key }}">
 <div class="wb-nav-control">
-<a href="{{ href }}"{% if request.path == href or (key in ('tools', 'directories', 'eduhelp') and request.path.startswith(href ~ '/')) %} class="is-active" aria-current="page"{% endif %}>{{ label }}</a>
+<a href="{{ href }}"{% if request.path == href or (key in ('tools', 'directories', 'eduhelp', 'players') and request.path.startswith(href ~ '/')) %} class="is-active" aria-current="page"{% endif %}>{{ label }}</a>
 <button type="button" class="wb-nav-toggle" aria-label="Show {{ label | lower }}" aria-expanded="false" aria-controls="nav-panel-{{ key }}"><svg aria-hidden="true" viewBox="0 0 16 16" width="12" height="12" fill="none" stroke="currentColor" stroke-width="1.8"><path d="m4 6 4 4 4-4"/></svg></button>
 </div>
 <div class="wb-nav-panel" id="nav-panel-{{ key }}" hidden aria-label="{{ label }}">

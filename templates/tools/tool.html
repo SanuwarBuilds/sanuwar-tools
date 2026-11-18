@@ -1,8 +1,19 @@
 {% extends 'base.html' %}
-{% set vendor_files = {'js-yaml': 'js-yaml.js', 'marked': 'marked.js', 'fflate': 'fflate.js', 'pdf-lib': 'pdf-lib.js', 'pdfjs': 'pdf.min.js', 'jspdf': 'jspdf.umd.min.js', 'bcryptjs': 'bcrypt.min.js', 'qrcodegen': 'qrcodegen.js'} %}
-{% set bundle_version = 4 if tool.bundle == 'calculators' else (4 if tool.bundle == 'media' else (3 if tool.bundle == 'text' else 2)) %}
+{% set vendor_files = {'js-yaml': 'js-yaml.js', 'marked': 'marked.js', 'fflate': 'fflate.js', 'pdf-lib': 'pdf-lib.js', 'pdfjs': 'pdf.min.js', 'jspdf': 'jspdf.umd.min.js', 'bcryptjs': 'bcrypt.min.js', 'qrcodegen': 'qrcodegen.js', 'hlsjs': 'hls.min.js', 'dashjs': 'dash.all.min.js'} %}
+{% set bundle_version = 1 if tool.bundle == 'players' else (4 if tool.bundle == 'calculators' else (4 if tool.bundle == 'media' else (3 if tool.bundle == 'text' else 2))) %}
+{% set streaming_players = ['m3u8-player', 'dash-player', 'cloud-video-player'] %}
 {% set uses_network = tool.slug == 'currency-converter' %}
 {% set tool_help = {
+  'online-video-player': 'Choose a video from this device or paste a direct link, then press play. Space pauses, arrows seek and the dock holds speed, loop, picture-in-picture and screenshot controls.',
+  'mp4-player': 'Drop an MP4 or paste a link that ends in .mp4. For the widest compatibility, use H.264 video with AAC audio.',
+  'm3u8-player': 'Paste an .m3u8 playlist link. Adaptive playback starts automatically; pick a resolution in the quality menu or leave it on Auto.',
+  'dash-player': 'Paste an .mpd manifest link. The player switches quality automatically unless you choose a resolution from the menu.',
+  'mkv-player': 'Drop an MKV file or paste a link and try playback. If the picture or sound fails, check the Codec check table to see which tracks this browser supports.',
+  'local-video-player': 'Drop one or more videos to build a queue. Use the playlist controls to switch files, shuffle or repeat.',
+  'mp3-player': 'Drop several audio files, then use the playlist to move between them. The spectrum visualizer reads local file audio on your device.',
+  'online-audio-player': 'Choose a local audio file or paste a direct audio link. Use the speed menu for lectures and podcasts.',
+  'subtitle-player': 'Open a video, then drop a .srt or .vtt subtitle file. Adjust the delay slider if captions run early or late, and change size or position.',
+  'cloud-video-player': 'Paste a share link from Google Drive, Dropbox or OneDrive. The file must be shared so that anyone with the link can view it.',
   'json-formatter': 'Paste JSON and select Format, Minify or Sort keys. Use Try example to see the formatter in action.',
   'qr-code-generator': 'Choose a content type, enter the details and download the PNG. Scan the result before sharing or printing it.',
   'form-file-checker': 'Choose a file and enter the requirements shown on your form. The results show which checks pass and link to a matching tool when available.',
@@ -14,7 +25,7 @@
   'image-compressor': 'Choose JPG, PNG or WebP images and adjust quality or maximum dimensions. Compare the sizes before saving.'
 } %}
 {% block bodyclass %}wb-tool-page tool-page-{{ tool.bundle }}{% endblock %}
-{% block page_styles %}<link rel="stylesheet" href="/assets/css/tools.css?v=6">{% endblock %}
+{% block page_styles %}<link rel="stylesheet" href="/assets/css/tools.css?v=6">{% if tool.bundle == 'players' %}<link rel="stylesheet" href="/assets/css/players.css?v=2">{% endif %}{% endblock %}
 {% block content %}
 <section class="tp-shell wrap" data-tool-page data-tool-slug="{{ tool.slug }}"{% if tool.slug == 'form-file-checker' %} data-photo-available="{{ 'true' if photo_tools_available else 'false' }}"{% endif %}>
   <nav class="tp-crumb" aria-label="Breadcrumb"><a href="/">Home</a><span aria-hidden="true">/</span><a href="/tools">All tools</a><span aria-hidden="true">/</span><span>{{ tool.category }}</span></nav>
@@ -43,6 +54,9 @@
         {% if uses_network %}
         <h2>Exchange rate source</h2>
         <p>Frankfurter provides daily exchange rates. The converter sends the entered amount and selected currency codes to Frankfurter.</p>
+        {% elif tool.slug in streaming_players %}
+        <h2>Streaming source</h2>
+        <p>The player fetches the link you paste, so that server can see the request. Local files are never uploaded.</p>
         {% else %}
         <h2>Local processing</h2>
         <p>Your inputs and files stay on this device while this tool processes them.</p>

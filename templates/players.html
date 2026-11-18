@@ -1,0 +1,46 @@
+{% extends 'base.html' %}
+{% block bodyclass %}wb-players-page{% endblock %}
+{% block page_styles %}<link rel="stylesheet" href="/assets/css/players.css?v=2">{% endblock %}
+{% block content %}
+{% set streaming = ['m3u8-player', 'dash-player', 'cloud-video-player'] %}
+<section class="pl-hub wrap" aria-labelledby="players-title">
+  <header class="pl-hub-hero">
+    <span class="pl-hub-kicker">Player suite</span>
+    <h1 id="players-title">Every player. <em>One shelf.</em></h1>
+    <p>Video, audio, HLS, DASH, MKV, subtitles and authorized cloud links. Your files are opened in the browser, not uploaded, and nothing needs an account or an install.</p>
+    <div class="pl-hub-stats">
+      <div class="pl-hub-stat"><strong>{{ players | length }}</strong><span>players</span></div>
+      <div class="pl-hub-stat"><strong>0</strong><span>uploads</span></div>
+      <div class="pl-hub-stat"><strong>HLS · DASH</strong><span>stream engines</span></div>
+      <div class="pl-hub-stat"><strong>SRT · VTT</strong><span>captions</span></div>
+    </div>
+    <div class="pl-hub-actions">
+      <a class="pl-hub-cta" href="/tools/online-video-player">Open the video player <span aria-hidden="true">→</span></a>
+      <a class="pl-hub-cta is-ghost" href="/tools?category=Players">See them inside all tools</a>
+    </div>
+  </header>
+
+  <div class="pl-hub-grid">
+    {% for tool in players %}
+    <a class="pl-hub-card" href="/tools/{{ tool.slug }}">
+      <span class="pl-hub-card-top">
+        <span class="pl-hub-icon" aria-hidden="true">{{ tool.icon }}</span>
+        <span class="pl-hub-tag">{{ 'Streaming' if tool.slug in streaming else 'Local' }}</span>
+      </span>
+      <strong>{{ tool.name }}</strong>
+      <p>{{ tool.description }}</p>
+      <span class="pl-hub-open">Open player <span aria-hidden="true">→</span></span>
+    </a>
+    {% endfor %}
+  </div>
+
+  <aside class="pl-hub-note">
+    <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 3 4.5 6v5.4c0 4.4 3.1 8.1 7.5 9.6 4.4-1.5 7.5-5.2 7.5-9.6V6z"/><path d="m9 12 2.1 2.1L15.4 10"/></svg>
+    <div>
+      <strong>Private by default.</strong>
+      <p>Local files are decoded on this device and never leave it. Streaming players fetch only the link you paste; nothing is stored on our servers. Only play media you own or are allowed to access.</p>
+    </div>
+  </aside>
+</section>
+{% endblock %}
+{% block scripts %}{% endblock %}

@@ -1,166 +1,85 @@
 {% extends 'base.html' %}
 {% from '_ad_unit.html' import ad_unit with context %}
-{% block bodyclass %}wb-home{% endblock %}
+{% from '_workspace_macros.html' import icon, arrow, shortcut %}
+{% block bodyclass %}wb-home desk-home{% endblock %}
 {% block content %}
-{% set tools = public_config.get('tools', []) %}
-{% set total_tools = tools | length %}
-{% set browser_total = catalog.tools | length %}
-<section class="wb-hero" aria-labelledby="hero-title">
-  <div class="wrap wb-hero-inner">
-    <h1 id="hero-title">Small tools. <span>Big work.</span></h1>
-    <p class="wb-hero-lede">{{ browser_total }} free browser {{ 'tool' if browser_total == 1 else 'tools' }} for everyday digital work.</p>
-    <div class="wb-hero-search">
-      <label class="wb-search-field" for="tool-search">
-        <svg aria-hidden="true" viewBox="0 0 24 24"><circle cx="10.5" cy="10.5" r="6.5"/><path d="m16 16 4.5 4.5"/></svg>
-        <input type="search" id="tool-search" placeholder="Search tools, downloads, files, admin…" aria-label="Search everything" aria-haspopup="dialog" aria-controls="wb-palette" autocomplete="off">
-      </label>
-    </div>
-    <div class="wb-hero-hints" aria-label="Quick tasks">
-      {% if photo_tools_available %}<a href="/photo-tools?mode=photo&amp;kb=50">Resize photo to 50 KB</a>{% endif %}
-      <a href="/tools/pdf-merge">Merge PDFs</a>
-      <a href="/tools/qr-code-generator">Generate a QR code</a>
-      <a href="/tools/json-formatter">Format JSON</a>
-    </div>
+<div class="desk-page wrap">
+<section class="desk-hero" aria-labelledby="hero-title">
+  <h1 id="hero-title">What would you like to do?</h1>
+  <p>Useful tools. One simple workspace.</p>
+  <div class="desk-search">
+    <label for="tool-search">{{ icon('search') }}<span class="sr-only">Search everything</span></label>
+    <input type="search" id="tool-search" placeholder="Search tools, files, downloads and more…" aria-label="Search everything" aria-haspopup="dialog" aria-controls="wb-palette" autocomplete="off">
+    <kbd data-wb-kbd>⌘ K</kbd><button type="button" data-site-search-open>Search</button>
+  </div>
+  <nav class="desk-quick" aria-label="Quick tasks">
+    {% if photo_tools_available %}<a href="/photo-tools?mode=photo&amp;kb=50" title="Resize photo to 50 KB">{{ icon('image', 'blue') }}Resize a photo</a>{% endif %}
+    <a href="/tools/pdf-merge">{{ icon('pdf', 'red') }}Merge PDFs</a>
+    <a href="/tools/qr-code-generator">{{ icon('qr') }}Create a QR code</a>
+    <a href="/tools/form-file-checker">{{ icon('check', 'green') }}Check a form file</a>
+  </nav>
+</section>
+
+<div class="desk-main-grid">
+<section class="desk-panel desk-popular" id="tools" aria-labelledby="popular-title">
+  <div class="desk-panel-head"><h2 id="popular-title">Popular tools</h2><a href="/tools">View all tools {{ arrow() }}</a></div>
+  <div class="desk-tool-grid">
+    {% if photo_tools_available %}{{ shortcut('/photo-tools', 'Photo resizer', 'Resize images to any dimension quickly.', 'image', 'blue') }}{% else %}{{ shortcut('/tools/image-compressor', 'Image Compressor', 'Reduce the size of JPG, PNG and WebP images.', 'image', 'blue') }}{% endif %}
+    {{ shortcut('/tools/pdf-merge', 'PDF Merge', 'Combine multiple PDF files into one.', 'pdf', 'red') }}
+    {{ shortcut('/tools/qr-code-generator', 'QR Code Generator', 'Create QR codes for links, text and more.', 'qr') }}
+    {{ shortcut('/tools/json-formatter', 'JSON Formatter', 'Format, validate and beautify JSON data.', 'braces', 'green') }}
+    {{ shortcut('/tools/form-file-checker', 'Form File Checker', 'Check file type, dimensions and size for a form.', 'check', 'blue') }}
+    {{ shortcut('/tools/fill-sign-pdf', 'Fill & Sign PDF', 'Add text, signatures and details to a PDF.', 'pen') }}
   </div>
 </section>
 
-<section class="wrap wb-saved-tools" data-saved-tools data-photo-available="{{ 'true' if photo_tools_available else 'false' }}" aria-label="Your tools" hidden>
-  <div data-tool-list="favorites" hidden><h2>Favorites</h2><ul></ul></div>
-  <div data-tool-list="recent" hidden><h2>Recently used</h2><ul></ul></div>
-</section>
+<aside class="desk-panel desk-workspace" data-saved-tools data-photo-available="{{ 'true' if photo_tools_available else 'false' }}" aria-labelledby="workspace-title" aria-description="Saved in this browser. No sign-in needed.">
+  <div class="desk-panel-head"><h2 id="workspace-title">{{ icon('folder') }}Your workspace</h2></div>
+  <div data-workspace-default><h3>Quick access</h3><div class="desk-recent-list">
+    {{ shortcut('/tools/image-compressor', 'Image Compressor', 'Make images smaller, right in your browser.', 'image', 'green', True) }}
+    {{ shortcut('/tools/pdf-organizer', 'PDF Organizer', 'Reorder, rotate, split or remove PDF pages.', 'pdf', 'red', True) }}
+    {{ shortcut('/tools/gst-calculator', 'GST Calculator', 'Add or remove GST from an amount.', 'calculator', 'blue', True) }}
+  </div></div>
+  <div data-tool-list="recent" hidden><h3>Recently used</h3><ul class="desk-recent-list"></ul></div>
+  <div data-tool-list="favorites" hidden><h3>Favorites</h3><ul class="desk-recent-list"></ul></div>
 
-<section class="wrap wb-popular" aria-labelledby="popular-title">
-  <div class="wb-section-head">
-    <div class="wb-section-title">
-      <span class="wb-section-icon" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M13 2 4.5 13.5H11l-1 8.5L19.5 10H13Z"/></svg></span>
-      <h2 id="popular-title">Featured tools</h2>
-    </div>
-    <a href="/tools">See all →</a>
-  </div>
-  <div class="wb-pop-grid">
-    {% set popular_icons = {'json-formatter': 'tool', 'base64': 'key', 'qr-code-generator': 'text', 'image-compressor': 'photo'} %}
-    {% for slug in ['json-formatter', 'base64', 'qr-code-generator', 'image-compressor'] %}
-    {% set tool = catalog.tools | selectattr('slug', 'equalto', slug) | list | first %}
-    {% if tool %}
-    <a class="wb-pop-card" href="/tools/{{ tool.slug }}">
-      <span class="wb-pop-icon"><img src="/assets/icons/{{ popular_icons.get(slug, 'tool') }}.svg" alt="" width="30" height="30" loading="lazy"></span>
-      <span class="wb-pop-body">
-        <strong>{{ tool.name }}</strong>
-        <span class="wb-pop-desc">{{ tool.description }}</span>
-        <span class="wb-pop-meta"><span class="wb-pop-cat">{{ tool.category }}</span><span class="wb-pop-open" aria-hidden="true">→</span></span>
-      </span>
-    </a>
-    {% endif %}
-    {% endfor %}
-  </div>
-  <div class="wb-featured-extra wb-form-links">
-    <a class="wb-text-link" href="/tools/form-file-checker">Check a file for your form →</a>
-    <a class="wb-text-link" href="/tools/fill-sign-pdf">Fill &amp; sign a PDF →</a>
-    <a class="wb-text-link" href="/tools/pdf-organizer">Organize PDF pages →</a>
-  </div>
-</section>
+</aside>
+</div>
 
-<section class="wrap wb-how" id="guides" aria-labelledby="guides-title">
-  <div class="wb-section-head"><h2 id="guides-title">Practical guides</h2></div>
-  <div class="wb-steps">
-    {% for slug, guide in guides.items() %}
-    <article><h3><a href="/guides/{{ slug }}">{{ guide.title }}</a></h3><p>{{ guide.intro }}</p></article>
-    {% endfor %}
-  </div>
-</section>
+<nav class="desk-category-strip" id="browse-categories" aria-label="Browse by category">
+<h2>Browse by category</h2>
+{% for name, symbol, tone in [('Images & Media','image','purple'),('PDF & Documents','pdf','red'),('Developer Tools','code','purple'),('Calculators','calculator','green'),('Text Tools','text','blue')] %}
+<a href="/tools?category={{ name | urlencode }}">{{ icon(symbol, tone) }}<span>{{ name }}</span></a>
+{% endfor %}
+<a href="/tools">{{ icon('grid') }}<span>All categories</span></a>
+</nav>
 
-<section class="wrap wb-library" aria-label="Library shortcuts">
-  {% if public_config.get('downloadPage', {}).get('enabled', True) %}
-  <a class="home-download-strip" href="#downloads">
-    <span class="wb-library-icon" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M12 3v11m0 0 4-4m-4 4-4-4M4 17v2a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-2"/></svg></span>
-    <span class="wb-library-copy"><small>Library</small><strong>Downloads</strong><span>Android apps, files &amp; photo albums.</span></span>
-    <span class="wb-library-go" aria-hidden="true">→</span>
-  </a>
-  {% endif %}
-  <a class="wb-library-card" href="/eduhelp/labs">
-    <span class="wb-library-icon" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M4 5.5A2.5 2.5 0 0 1 6.5 3H20v15.5a2.5 2.5 0 0 1-2.5 2.5H6.5A2.5 2.5 0 0 1 4 18.5Z"/><path d="M8 7h8M8 11h8M8 15h5"/></svg></span>
-    <span class="wb-library-copy"><small>Eduhelp</small><strong>Lab library</strong><span>Interactive 3D science labs by class, subject and chapter.</span></span>
-    <span class="wb-library-go" aria-hidden="true">→</span>
-  </a>
-</section>
-
-<section class="wrap wb-categories" id="browse-categories" aria-labelledby="categories-title">
-  <div class="wb-section-head">
-    <div class="wb-section-title">
-      <span class="wb-section-icon" aria-hidden="true"><svg viewBox="0 0 24 24"><rect x="3" y="3" width="7" height="7" rx="1.6"/><rect x="14" y="3" width="7" height="7" rx="1.6"/><rect x="3" y="14" width="7" height="7" rx="1.6"/><rect x="14" y="14" width="7" height="7" rx="1.6"/></svg></span>
-      <h2 id="categories-title">Browse by Category</h2>
-    </div>
-    <a href="/tools">See all →</a>
-  </div>
-  <div class="wb-cat-grid">
-    {% set category_icons = {'Developer Tools': 'tool', 'Images & Media': 'photo', 'PDF & Documents': 'document', 'Text Tools': 'text', 'Calculators': 'calculator', 'Security & Privacy': 'shield'} %}
-    {% for category in category_icons %}
-    {% set category_count = catalog.tools | selectattr('category', 'equalto', category) | list | length %}
-    {% if category_count %}
-    <a class="wb-cat-card" href="/tools?category={{ category | urlencode }}">
-      <span class="wb-cat-icon"><img src="/assets/icons/{{ category_icons.get(category, 'tool') }}.svg" alt="" width="28" height="28" loading="lazy"></span>
-      <span><strong>{{ category }}</strong><small>{{ category_count }} {{ 'tool' if category_count == 1 else 'tools' }}</small></span>
-    </a>
-    {% endif %}
-    {% endfor %}
-  </div>
-</section>
-
-<section class="wrap wb-tools" id="tools" aria-labelledby="tools-title">
-  <div class="wb-section-head">
-    <div><span class="wb-eyebrow">01 / Browse</span><h2 id="tools-title">Browse the toolkit</h2></div>
-    <p class="wb-tools-head-note"><b id="tool-total">{{ total_tools }}</b> results</p>
-  </div>
-  <span id="browser-tools" aria-hidden="true"></span>
-  <div class="wb-filters">
-    <div class="wb-filter-select">
-      <label for="category-select">Filter by category</label>
-      <select id="category-select" aria-label="Filter tools by category"></select>
-    </div>
-    <div class="filter-tabs" id="categories" role="group" aria-label="Filter tools">
-      <button type="button" class="filter-tab active" aria-pressed="true">All<span>{{ total_tools }}</span></button>
-      {% for category in catalog.categories %}
-      <button type="button" class="filter-tab" aria-pressed="false">{{ category }}<span>{{ catalog.tools | selectattr('category', 'equalto', category) | list | length }}</span></button>
-      {% endfor %}
-    </div>
-    <a class="wb-text-link" href="/tools">Open full shelf →</a>
-  </div>
-  <div class="tool-grid" id="tools-grid" aria-live="polite">{% include '_initial_tools.html' %}</div>
-  <div id="widgets" class="widget-grid"></div>
-</section>
-
+<div class="desk-library-grid">
 {% if public_config.get('downloadPage', {}).get('enabled', True) %}
-{% set lib_eyebrow = '02 / Archive' %}
-{% set lib_title = 'Downloads' %}
-{% set lib_lede = 'Android apps, files and albums in one searchable library. Preview the contents and versions before you download.' %}
-{% include '_downloads_library.html' %}
+<section class="desk-panel desk-downloads" id="downloads" aria-labelledby="downloads-title">
+  <div class="desk-panel-head"><h2 id="downloads-title">{{ icon('download') }}Downloads</h2><a href="/downloads">View all downloads {{ arrow() }}</a></div>
+  <div class="desk-download-list">
+  {% for item in home_downloads %}
+    {% set is_pdf = item.category == 'Documents' %}
+    <a class="desk-download-row" href="{{ item.download_path or ('/downloads?item=' ~ (item.id | urlencode)) }}">
+      {{ icon('pdf' if is_pdf else ('game' if 'ludo' in item.title | lower else 'remote'), 'red' if is_pdf else 'blue') }}
+      <span class="desk-row-copy"><strong>{{ item.title }}</strong><small>{{ item.description or ('Browse the files in this album.' if item.is_album else ('View this document and download details.' if is_pdf else 'View the latest available version and details.')) }}</small></span>
+      <span class="desk-file-type">{{ item.home_file_type }}</span>
+      <svg class="desk-arrow" aria-hidden="true" viewBox="0 0 24 24"><use href="/assets/icons/workspace.svg#download"/></svg>
+    </a>
+  {% else %}<p class="desk-empty">No downloads published yet. New files will appear here.</p>{% endfor %}
+  </div>
+</section>
 {% endif %}
-
-<section class="wrap wb-how" id="how-it-works" aria-labelledby="flow-title">
-  <div class="wb-section-head">
-    <div><span class="wb-eyebrow">03 / Flow</span><h2 id="flow-title">Open. Work. Done.</h2></div>
-    <p class="wb-tools-head-note">No installation, no account and no waiting for an upload. The tool is the whole journey.</p>
-  </div>
-  <div class="wb-steps">
-    <article><span>01</span><h3>Choose a tool</h3><p>Search the shelf or start from a category. Every card opens the working tool.</p></article>
-    <article><span>02</span><h3>Do the work</h3><p>Paste, type or drop a file. Results update in this browser tab as you go.</p></article>
-    <article><span>03</span><h3>Take the result</h3><p>Copy it, save it or download it. File tools process your files on this device.</p></article>
-  </div>
+<section class="desk-panel desk-edu" aria-labelledby="eduhelp-title">
+  <div class="desk-panel-head"><h2 id="eduhelp-title">{{ icon('education') }}Eduhelp</h2><a href="/eduhelp">Explore Eduhelp {{ arrow() }}</a></div>
+  {{ shortcut('/eduhelp', 'Study resources', 'Exam updates, study notes and education resources.', 'books', 'green') }}
+  {{ shortcut('/eduhelp/labs', 'Interactive science labs', 'Explore science through hands-on virtual labs.', 'lab') }}
 </section>
+</div>
 
-<section class="wrap wb-about" id="about-toolkit" aria-labelledby="about-toolkit-title">
-  <div class="wb-about-card">
-    <div>
-      <span class="wb-eyebrow">04 / About</span>
-      <h2 id="about-toolkit-title">A small toolkit for everyday work.</h2>
-    </div>
-    <div class="wb-about-copy">
-      <p>SanuwarTools is a free, browser-based toolkit maintained by Sanuwar. The collection now includes {{ catalog.tools | length }} browser tools for text, encoding, hashes, images, PDFs, networking, security and everyday maths{% if photo_tools_available %}, plus the <a href="/photo-tools">photo resizer and compressor</a> for photo resizing and passport photos — crop images to exact pixels, DPI and KB limits for passport, PAN, voter ID and exam forms, entirely on your device{% endif %}.</p>
-      <p>Explore the <a href="#tools">browser tools</a> or the <a href="/tools">full tool page</a>, browse the <a href="/downloads">downloads library</a> for Android apps, files and albums, and explore the <a href="/directory">external resource directories</a>. New modules are added as they are ready; no account is needed for public tools.</p>
-    </div>
-  </div>
-</section>
-
-<div class="wrap">{{ ad_unit(adsense_slots.get('home', '')) }}</div>
+<div class="widget-grid desk-widgets" id="widgets"></div>
+{{ ad_unit(adsense_slots.get('home', '')) }}
+</div>
 {% endblock %}
-{% block scripts %}<script nonce="{{ csp_nonce }}" src="/assets/js/main.js?v=7" defer></script>{% if public_config.get('downloadPage', {}).get('enabled', True) %}<script nonce="{{ csp_nonce }}" src="/assets/js/downloads.js?v=4" defer></script>{% endif %}{% endblock %}
+{% block scripts %}<script nonce="{{ csp_nonce }}" src="/assets/js/main.js?v=8" defer></script>{% endblock %}

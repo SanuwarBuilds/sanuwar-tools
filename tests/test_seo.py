@@ -79,7 +79,7 @@ class SearchDiscoveryTests(unittest.TestCase):
                           'https://sanuwartools.online/photo-tools',
                           *(f'https://sanuwartools.online/guides/{slug}' for slug in GUIDES),
                           'https://sanuwartools.online/about','https://sanuwartools.online/contact','https://sanuwartools.online/privacy',
-                          'https://sanuwartools.online/directory','https://sanuwartools.online/eduhelp','https://sanuwartools.online/eduhelp/labs','https://sanuwartools.online/directory/anime'])
+                          'https://sanuwartools.online/directory','https://sanuwartools.online/eduhelp','https://sanuwartools.online/eduhelp/labs','https://sanuwartools.online/players','https://sanuwartools.online/directory/anime'])
         self.records[module.TOOLS_CONFIG_REL]['downloadPage']['enabled']=False
         self.assertNotIn(b'/downloads',self.client.get('/sitemap.xml').data)
         self.assertEqual(self.client.get('/downloads').status_code,404)
@@ -181,7 +181,7 @@ class SearchDiscoveryTests(unittest.TestCase):
         self.assertEqual(response.status_code,200)
         self.assertEqual(response.get_data(as_text=True),seo.INDEXNOW_KEY)
         sitemap=self.client.get('/sitemap.xml').data.decode()
-        self.assertEqual(sitemap.count('<lastmod>'+seo.SITE_UPDATED+'</lastmod>'),10)
+        self.assertEqual(sitemap.count('<lastmod>'+seo.SITE_UPDATED+'</lastmod>'),11)
 
     def test_directory_hub_and_category_pages_are_indexable(self):
         hub=self.client.get('/directory')
@@ -271,7 +271,7 @@ class ToolHubTests(unittest.TestCase):
         self.assertIn('id="browser-tools"',home)
         self.assertIn(f'{len(self.catalog["tools"])} free browser tools', home)
         self.assertIn('/photo-tools?mode=photo&amp;kb=50', home)
-        self.assertIn('class="home-download-strip"',home)
+        self.assertIn('desk-downloads',home)
         for tool in self.catalog['tools']:
             self.assertIn(f'href="/tools/{tool["slug"]}"',home)
         for category in self.catalog['categories']:

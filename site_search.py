@@ -8,6 +8,7 @@ PAGES = [
     ('Directories', '/directory', 'Movies anime music websites'),
     ('Eduhelp', '/eduhelp', 'Exams results admission notes study'),
     ('Lab library', '/eduhelp/labs', 'Interactive science physics chemistry biology labs'),
+    ('Players', '/players', 'Video audio player HLS DASH MKV MP3 subtitles cloud streaming'),
     ('How it works', '/#how-it-works', 'Help using the toolkit'),
     ('About', '/about', 'About SanuwarTools'),
     ('Contact', '/contact', 'Support feedback report a problem'),

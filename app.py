@@ -95,8 +95,16 @@ def index():
     config = public_config(raw if isinstance(raw, dict) else {})
     catalog = load_tool_catalog()
     config['tools'] = [*config.get('tools', []), *browser_tool_cards(catalog)]
+    downloads = [public_download_item(item) for item in public_downloads()]
+    from urllib.parse import urlsplit
+    for item in downloads:
+        extension = os.path.splitext(urlsplit(item.get('link') or '').path)[1][1:].upper()
+        item['home_file_type'] = ('ALBUM' if item.get('is_album') else
+                                  extension if re.fullmatch(r'[A-Z0-9]{2,8}', extension) else item.get('category') or 'FILE')
+    featured_order = {'remote': 0, 'ludo king': 1, 'remote controller guide bangla': 2}
+    home_downloads = sorted(downloads, key=lambda item: featured_order.get(str(item.get('title', '')).lower(), 3))[:3]
     return render_template("index.html", catalog=catalog, public_config=config, guides=GUIDES,
-                           initial_downloads=[public_download_item(item) for item in public_downloads()])
+                           initial_downloads=downloads, home_downloads=home_downloads)
 
 @app.get('/guides/<slug>')
 def tool_guide(slug):
@@ -567,9 +575,10 @@ EDUHELP_LABS = {
     'electricity': 'class-10-electricity.html',
     'carbon-compounds': 'carbon-compounds.html',
 }
-TOOL_BUNDLES = {"text", "media", "forms", "network", "misc", "calculators", "dls", "land"}
-TOOL_VENDORS = {"js-yaml", "marked", "fflate", "pdf-lib", "pdfjs", "jspdf", "bcryptjs", "qrcodegen"}
+TOOL_BUNDLES = {"text", "media", "forms", "network", "misc", "calculators", "dls", "land", "players"}
+TOOL_VENDORS = {"js-yaml", "marked", "fflate", "pdf-lib", "pdfjs", "jspdf", "bcryptjs", "qrcodegen", "hlsjs", "dashjs"}
 TOOL_CATEGORY_ICONS = {
+    'Players': 'film',
     'Calculators': 'calculator',
     'Encoding & Hashing': 'key',
     'Developer Tools': 'tool',
@@ -587,6 +596,7 @@ TOOL_CATEGORY_ICONS = {
     'Land & Property': 'convert',
 }
 TOOL_CATEGORY_ORDER = [
+    'Players',
     'Text Tools',
     'Developer Tools',
     'Encoding & Hashing',
@@ -680,6 +690,14 @@ def tools_hub():
     if not catalog['tools']:
         abort(404)
     return render_template('tools/hub.html', catalog=catalog)
+
+@app.get('/players')
+def players_hub():
+    catalog = load_tool_catalog()
+    players = [tool for tool in catalog['tools'] if tool['category'] == 'Players']
+    if not players:
+        abort(404)
+    return render_template('players.html', players=players, catalog=catalog)
 
 @app.get('/api/browser-tools.json')
 def browser_tools_feed():

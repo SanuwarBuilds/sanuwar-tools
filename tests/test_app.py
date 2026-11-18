@@ -48,9 +48,9 @@ class WorkspaceTests(unittest.TestCase):
         for path in ('/','/downloads','/download.html','/admin/login','/payment-demo','/purchases','/eduhelp','/eduhelp/labs'):
             response=self.client.get(path);self.assertEqual(response.status_code,200,path)
             self.assertNotIn(b'cdn.tailwindcss.com',response.data)
-    def test_dark_theme_and_workspace_shell_assets(self):
+    def test_light_theme_and_workspace_shell_assets(self):
         home=self.client.get('/').get_data(as_text=True)
-        self.assertIn('data-theme="dark"',home)
+        self.assertIn('data-theme="light"',home)
         self.assertIn('theme-init.js?v=2',home)
         self.assertIn('sanuwar.css?v=8',home)
         login=self.client.get('/admin/login').get_data(as_text=True)

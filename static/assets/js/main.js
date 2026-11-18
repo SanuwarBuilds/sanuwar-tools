@@ -228,6 +228,7 @@
       /* The main catalogue remains usable if optional widgets are unavailable. */
     }
   }
+  if (!grid) { await widgets(); return; }
   categorySelect?.addEventListener("change", (event) => {
     selected = event.target.value;
     render();

@@ -1,7 +1,17 @@
 {
   "updated": "2026-11-15",
-  "categories": ["Text Tools", "Developer Tools", "Encoding & Hashing", "Images & Media", "PDF & Documents", "Compression & Archives", "Networking", "Calculators", "Time & Date", "Security & Privacy", "Financial Calculators", "Health & Fitness", "Unit Converters", "Land & Property", "Sports & Games"],
+  "categories": ["Players", "Text Tools", "Developer Tools", "Encoding & Hashing", "Images & Media", "PDF & Documents", "Compression & Archives", "Networking", "Calculators", "Time & Date", "Security & Privacy", "Financial Calculators", "Health & Fitness", "Unit Converters", "Land & Property", "Sports & Games"],
   "tools": [
+    {"slug": "online-video-player", "name": "Online Video Player", "category": "Players", "icon": "▶", "bundle": "players", "popular": true, "description": "Play a local video or a direct video link with custom controls, speed, picture-in-picture and screenshots."},
+    {"slug": "mp4-player", "name": "MP4 Player", "category": "Players", "icon": "MP4", "bundle": "players", "description": "Open MP4 videos from this device or a link and play them in a clean browser player."},
+    {"slug": "m3u8-player", "name": "M3U8 / HLS Player", "category": "Players", "icon": "HLS", "bundle": "players", "vendor": ["hlsjs"], "description": "Play live and on-demand HLS streams from .m3u8 playlists with adaptive quality."},
+    {"slug": "dash-player", "name": "DASH Player", "category": "Players", "icon": "DASH", "bundle": "players", "vendor": ["dashjs"], "description": "Play MPEG-DASH streams from .mpd manifests with quality and audio-track controls."},
+    {"slug": "mkv-player", "name": "MKV Player", "category": "Players", "icon": "MKV", "bundle": "players", "description": "Try Matroska .mkv files in the browser and see which codecs your device can decode."},
+    {"slug": "local-video-player", "name": "Play Local Video", "category": "Players", "icon": "LOC", "bundle": "players", "description": "Drop one or more videos from this device and play them in order without uploading anything."},
+    {"slug": "mp3-player", "name": "MP3 Player Online", "category": "Players", "icon": "MP3", "bundle": "players", "description": "Build a local MP3 playlist with shuffle, repeat and a live beat visualizer."},
+    {"slug": "online-audio-player", "name": "Online Audio Player", "category": "Players", "icon": "AUD", "bundle": "players", "description": "Play an audio file or direct audio link with a waveform-style visualizer and speed control."},
+    {"slug": "subtitle-player", "name": "Subtitle Player", "category": "Players", "icon": "SUB", "bundle": "players", "description": "Play a video with SRT or VTT subtitles, adjust timing and resize captions as they run."},
+    {"slug": "cloud-video-player", "name": "Cloud Video Player", "category": "Players", "icon": "☁", "bundle": "players", "description": "Turn an authorized Google Drive, Dropbox or OneDrive share link into a playable media link."},
     {"slug": "base64", "name": "Base64 Encode / Decode", "category": "Encoding & Hashing", "icon": "64", "bundle": "text", "popular": true, "description": "Encode text to Base64 or decode Base64 back to readable text, with a URL-safe option."},
     {"slug": "base64-file-converter", "name": "Base64 File Converter", "category": "Encoding & Hashing", "icon": "⇄", "bundle": "text", "description": "Turn any file into a Base64 data URL, or decode a data URL back into a file."},
     {"slug": "css-beautifier-minifier", "name": "CSS Beautifier / Minifier", "category": "Developer Tools", "icon": "{}", "bundle": "text", "description": "Format CSS into readable rules or minify it for production."},
