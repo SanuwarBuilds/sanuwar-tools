@@ -1,6 +1,6 @@
 {% extends 'base.html' %}
 {% set vendor_files = {'js-yaml': 'js-yaml.js', 'marked': 'marked.js', 'fflate': 'fflate.js', 'pdf-lib': 'pdf-lib.js', 'pdfjs': 'pdf.min.js', 'jspdf': 'jspdf.umd.min.js', 'bcryptjs': 'bcrypt.min.js', 'qrcodegen': 'qrcodegen.js', 'hlsjs': 'hls.min.js', 'dashjs': 'dash.all.min.js'} %}
-{% set bundle_version = 1 if tool.bundle == 'players' else (4 if tool.bundle == 'calculators' else (4 if tool.bundle == 'media' else (3 if tool.bundle == 'text' else 2))) %}
+{% set bundle_version = 3 if tool.bundle == 'players' else (4 if tool.bundle == 'calculators' else (4 if tool.bundle == 'media' else (3 if tool.bundle == 'text' else 2))) %}
 {% set streaming_players = ['m3u8-player', 'dash-player', 'cloud-video-player'] %}
 {% set uses_network = tool.slug == 'currency-converter' %}
 {% set tool_help = {
@@ -25,7 +25,7 @@
   'image-compressor': 'Choose JPG, PNG or WebP images and adjust quality or maximum dimensions. Compare the sizes before saving.'
 } %}
 {% block bodyclass %}wb-tool-page tool-page-{{ tool.bundle }}{% endblock %}
-{% block page_styles %}<link rel="stylesheet" href="/assets/css/tools.css?v=6">{% if tool.bundle == 'players' %}<link rel="stylesheet" href="/assets/css/players.css?v=2">{% endif %}{% endblock %}
+{% block page_styles %}<link rel="stylesheet" href="/assets/css/tools.css?v=6">{% if tool.bundle == 'players' %}<link rel="stylesheet" href="/assets/css/players.css?v=4">{% endif %}{% endblock %}
 {% block content %}
 <section class="tp-shell wrap" data-tool-page data-tool-slug="{{ tool.slug }}"{% if tool.slug == 'form-file-checker' %} data-photo-available="{{ 'true' if photo_tools_available else 'false' }}"{% endif %}>
   <nav class="tp-crumb" aria-label="Breadcrumb"><a href="/">Home</a><span aria-hidden="true">/</span><a href="/tools">All tools</a><span aria-hidden="true">/</span><span>{{ tool.category }}</span></nav>
@@ -47,7 +47,7 @@
     </div>
     <aside class="tp-aside">
       {% if tool.slug in tool_help %}
-      <section class="tp-aside-card"><h2>How to use it</h2><p>{{ tool_help[tool.slug] }}</p></section>
+      <section class="tp-aside-card"><h2>How to use it</h2><p>{{ tool_help[tool.slug] }}</p>{% if tool.bundle == 'players' %}<p>The screen button in the dock switches to your browser's built-in player controls, and the choice is remembered.</p>{% endif %}</section>
       {% endif %}
       <section class="tp-aside-card tp-privacy">
         <span class="tp-glyph" aria-hidden="true">▮</span>

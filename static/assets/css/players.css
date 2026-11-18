@@ -690,3 +690,24 @@ html[data-theme="dark"] .pl-hub-tag { background: #1d2027; border-color: #2b303a
 #tool-root .pl-extras .pl-range::-webkit-slider-runnable-track { background: #d9dde5; }
 #tool-root .pl-extras .pl-range::-moz-range-track { background: #d9dde5; }
 #tool-root .pl-extras .pl-range::-moz-range-progress { background: var(--pl-accent); }
+
+/* Native browser controls mode (dock toggle) */
+.pl-screen.is-native .pl-dock,
+.pl-screen.is-native .pl-bigplay,
+.pl-screen.is-native .pl-spinner { display: none; }
+.pl-screen.is-native .pl-cue.is-bottom { bottom: 58px; }
+.pl-screen.is-native .pl-viz { bottom: 20px; }
+.pl-screen.pl-audio.is-native { display: block; min-height: 248px; }
+.pl-screen.pl-audio.is-native .pl-media {
+  display: block;
+  position: absolute;
+  left: 14px;
+  right: 14px;
+  bottom: 12px;
+  width: calc(100% - 28px);
+  height: 54px;
+  background: transparent;
+  z-index: 9;
+}
+.pl-screen.pl-audio.is-native .pl-artwork { padding-bottom: 118px; }
+.pl-screen.pl-audio.is-native .pl-viz { bottom: 76px; }

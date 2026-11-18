@@ -12,6 +12,7 @@
     muted: { paths: ["M4 9.4v5.2h3.4L12 18.4V5.6L7.4 9.4z", "M16 9.6l4.8 4.8M20.8 9.6 16 14.4"] },
     full: { paths: ["M4 9V4h5", "M20 9V4h-5", "M4 15v5h5", "M20 15v5h-5"] },
     exitfull: { paths: ["M9 4v5H4", "M15 4v5h5", "M9 20v-5H4", "M15 20v-5h5"] },
+    native: { paths: ["M3.4 5.2h17.2v13.6H3.4z", "M3.4 14.6h17.2", "M6.8 17.2h3.4"] },
     pip: { paths: ["M3.6 5.6h16.8v12.8H3.6z", "M12.4 12.4h6.4v3.8h-6.4z"] },
     camera: { paths: ["M3.6 7.4h4.2L9.4 5.2h5.2l1.6 2.2h4.2v11.2H3.6z", "M12 10.2a3.1 3.1 0 1 0 0 6.2 3.1 3.1 0 0 0 0-6.2z"] },
     loop: { paths: ["M4.6 10.2A7.4 7.4 0 0 1 17 6.5", "M19.4 13.8A7.4 7.4 0 0 1 7 17.5", "M17.2 3.6v3.1h-3.1", "M6.8 20.4v-3.1h3.1"] },
@@ -114,6 +115,20 @@
   const storeVolume = (value) => {
     try {
       localStorage.setItem("st.players.volume", String(Math.round(value * 100) / 100));
+    } catch {}
+  };
+
+  const readNativePref = () => {
+    try {
+      return localStorage.getItem("st.players.native") === "1";
+    } catch {
+      return false;
+    }
+  };
+
+  const storeNativePref = (value) => {
+    try {
+      localStorage.setItem("st.players.native", value ? "1" : "0");
     } catch {}
   };
 
@@ -249,6 +264,7 @@
       sourceLabel: "",
       sourceType: "",
       playlist: Boolean(config.playlist),
+      native: readNativePref(),
     };
 
     const alertBox = el("p", { class: "pl-alert", role: "status", hidden: true });
@@ -298,6 +314,7 @@
     const speedButton = el("button", { type: "button", class: "pl-btn pl-btn-text", "aria-label": "Playback speed", text: "1×" });
     const loopButton = el("button", { type: "button", class: "pl-btn", "aria-label": "Loop video", "aria-pressed": "false", onclick: () => toggleLoop() }, icon("loop", 16));
     const pipButton = el("button", { type: "button", class: "pl-btn", "aria-label": "Picture in picture", onclick: () => togglePip() }, icon("pip", 16));
+    const nativeButton = el("button", { type: "button", class: "pl-btn", "aria-label": "Use browser controls", title: "Switch between this player and your browser's built-in controls", "aria-pressed": "false" }, icon("native", 16));
     const shotButton = el("button", { type: "button", class: "pl-btn", "aria-label": "Save a frame as PNG", onclick: () => captureFrame() }, icon("camera", 16));
     const fullButton = el("button", { type: "button", class: "pl-btn", "aria-label": "Fullscreen", onclick: () => toggleFullscreen() }, icon("full", 16));
     const changeButton = el("button", { type: "button", class: "pl-btn", "aria-label": "Open another source", onclick: () => showLoader() }, icon("upload", 16));
@@ -312,7 +329,7 @@
     left.append(el("div", { class: "pl-volume-group" }, muteButton, volume), timeLabel);
     const right = el("div", { class: "pl-group pl-group-end" }, quality, liveBadge, speedButton, loopButton);
     if (kind === "video") right.append(shotButton);
-    right.append(pipButton, fullButton, changeButton);
+    right.append(pipButton, nativeButton, fullButton, changeButton);
     if (config.subtitles) {
       const capButton = el("button", { type: "button", class: "pl-btn", "aria-label": "Caption settings", onclick: () => captionPanel.scrollIntoView({ behavior: "smooth", block: "center" }) }, icon("captions", 16));
       right.insertBefore(capButton, changeButton);
@@ -322,6 +339,22 @@
 
     const dock = el("div", { class: "pl-dock" }, controls, speedMenu);
     screen.append(dock);
+
+    const applyNativeControls = (enabled) => {
+      state.native = Boolean(enabled);
+      media.controls = state.native;
+      screen.classList.toggle("is-native", state.native);
+      nativeButton.classList.toggle("is-on", state.native);
+      nativeButton.setAttribute("aria-pressed", state.native ? "true" : "false");
+      nativeButton.setAttribute("aria-label", state.native ? "Use custom controls" : "Use browser controls");
+      speedMenu.hidden = true;
+    };
+    nativeButton.addEventListener("click", () => {
+      applyNativeControls(!state.native);
+      storeNativePref(state.native);
+      if (state.native) frame.focus({ preventScroll: true });
+    });
+    applyNativeControls(state.native);
 
     const statusLine = el("div", { class: "pl-meta" });
     const titleLine = el("div", { class: "pl-titlebar" },
@@ -897,9 +930,13 @@
       updateVolumeIcons();
     });
 
-    media.addEventListener("click", () => { if (media.paused) attemptPlay(); else media.pause(); });
-    media.addEventListener("dblclick", toggleFullscreen);
+    media.addEventListener("click", () => {
+      if (state.native) return;
+      if (media.paused) attemptPlay(); else media.pause();
+    });
+    media.addEventListener("dblclick", () => { if (!state.native) toggleFullscreen(); });
     screen.addEventListener("click", (event) => {
+      if (state.native) return;
       if (!event.target.closest("button, input, select")) frame.focus({ preventScroll: true });
     });
     screen.addEventListener("dragover", (event) => {
