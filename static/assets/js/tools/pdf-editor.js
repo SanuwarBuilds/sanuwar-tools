@@ -16,6 +16,28 @@
     a.y <= b.y + b.height && a.y + a.height >= b.y;
   const checkbox = (label, control) => el("label", { class: "pe-check" }, control, label);
 
+  function editingIcon(tool) {
+    const paths = {
+      replace: "M5 4h14M12 4v16m-4 0h8",
+      pan: "M8 13V6a2 2 0 0 1 4 0v5-7a2 2 0 0 1 4 0v7-4a2 2 0 0 1 4 0v8a6 6 0 0 1-6 6h-2a5 5 0 0 1-4-2l-4-5a2 2 0 0 1 3-2l1 1Z",
+      text: "M3 5h13M9.5 5v14m-4 0h8m6-6v8m-4-4h8",
+      highlight: "m4 15 4 4L21 6l-4-4L4 15Zm0 0-1 5 5-1M10 22h11",
+      redact: "M3 7h18v4H3zm0 6h18v4H3z",
+    };
+    const ns = "http://www.w3.org/2000/svg";
+    const svg = document.createElementNS(ns, "svg");
+    svg.setAttribute("viewBox", "0 0 24 24");
+    svg.setAttribute("aria-hidden", "true");
+    svg.setAttribute("fill", "none");
+    svg.setAttribute("stroke", "currentColor");
+    svg.setAttribute("stroke-linejoin", "round");
+    svg.setAttribute("stroke-linecap", "round");
+    const path = document.createElementNS(ns, "path");
+    path.setAttribute("d", paths[tool]);
+    svg.append(path);
+    return svg;
+  }
+
   function bounds(x1, y1, x2, y2) {
     const x = clamp(Math.min(x1, x2));
     const y = clamp(Math.min(y1, y2));
@@ -494,16 +516,32 @@
     const fontNotice = el("p", { class: "pe-font-notice", role: "status", hidden: true });
     const inlineApply = el("button", { type: "submit", class: "tp-btn tp-btn-primary" }, "Apply");
     const inlineCancel = button("Cancel", cancelInline, "ghost");
+    inlineCancel.classList.add("pe-inline-cancel");
     const chooseFont = button("Font options", () => {
       closeInline();
       (regionCanUseFont() ? family : visualReplacement).focus();
     }, "ghost", { hidden: true });
-    const inlineEdit = el("form", { class: "pe-inline-edit", hidden: true },
+    const mobileEditor = window.matchMedia("(max-width: 720px)");
+    const closeSheet = button("×", cancelInline, "ghost", { "aria-label": "Close edit" });
+    const inlineEdit = el("form", { class: "pe-inline-edit", "aria-label": "Edit text", hidden: true },
+      el("div", { class: "pe-sheet-heading" }, el("strong", { text: "Edit text" }), closeSheet),
       inlineValue, inlineNotice, actions(inlineApply, chooseFont, inlineCancel));
     const sheet = el("div", { class: "pe-sheet" }, preview);
     const workArea = el("div", { class: "pe-preview", tabindex: 0, role: "region", "aria-label": "PDF preview" }, sheet, inlineEdit);
     const matchBadge = el("span", { class: "pe-match-badge", text: "Closest match", hidden: true });
     const stage = el("div", { class: "pe-stage-column" }, workArea, matchBadge);
+    const thumbnailList = el("div", { class: "pe-thumbnails", role: "group", "aria-label": "Page thumbnails" });
+    const thumbnails = new Map();
+    const visibleThumbnails = new Set();
+    let paintingThumbnail = false;
+    const thumbObserver = new IntersectionObserver((entries) => {
+      for (const entry of entries) {
+        const id = Number(entry.target.dataset.pageId);
+        if (entry.isIntersecting) visibleThumbnails.add(id);
+        else visibleThumbnails.delete(id);
+      }
+      void paintNextThumbnail();
+    }, { root: thumbnailList, rootMargin: "80px 0px" });
     const toolHelp = el("p", { class: "tp-hint" });
     const exportNote = el("p", { class: "tp-hint pe-export-note" });
     const history = [];
@@ -524,6 +562,7 @@
     let originalRegions = [];
     let regions = [];
     let selected = -1;
+    let hovered = -1;
     let active = "replace";
     let image;
     let drag;
@@ -581,6 +620,93 @@
       tell(from === history ? "Edit undone." : "Edit restored.");
     }
 
+    function copyThumbnail(entry, source, rotation = 0) {
+      const sideways = rotation % 180 !== 0;
+      const factor = 176 / Math.max(source.width, source.height);
+      const width = Math.max(1, Math.round(source.width * factor));
+      const height = Math.max(1, Math.round(source.height * factor));
+      entry.canvas.width = sideways ? height : width;
+      entry.canvas.height = sideways ? width : height;
+      const context = entry.canvas.getContext("2d");
+      context.fillStyle = "#fff";
+      context.fillRect(0, 0, entry.canvas.width, entry.canvas.height);
+      context.translate(entry.canvas.width / 2, entry.canvas.height / 2);
+      context.rotate(rotation * Math.PI / 180);
+      context.drawImage(source, -width / 2, -height / 2, width, height);
+      entry.ready = true;
+    }
+
+    async function paintNextThumbnail() {
+      if (!pdf || busy || paintingThumbnail) return;
+      const page = pages.find((item) => {
+        const entry = thumbnails.get(item.id);
+        return entry && visibleThumbnails.has(item.id) && !entry.ready && !entry.failed && item.id !== currentId;
+      });
+      if (!page) return;
+      const entry = thumbnails.get(page.id);
+      const document = pdf;
+      paintingThumbnail = true;
+      let source;
+      try {
+        if (page.original) {
+          source = (await renderPdfPage(document, page.original, 176)).canvas;
+        } else {
+          source = canvasFor(blankSize[0], blankSize[1]);
+        }
+        if (pdf === document && entry.button.isConnected && page.id !== currentId) {
+          const currentPage = pages.find((item) => item.id === page.id);
+          copyThumbnail(entry, source, currentPage.rotation);
+          entry.rotation = currentPage.rotation;
+        }
+      } catch {
+        entry.failed = true;
+      } finally {
+        if (source) releaseCanvas(source);
+        paintingThumbnail = false;
+        void paintNextThumbnail();
+      }
+    }
+
+    function syncThumbnails() {
+      const ids = new Set(pages.map((page) => page.id));
+      for (const [id, entry] of thumbnails) {
+        if (!ids.has(id)) {
+          thumbObserver.unobserve(entry.button);
+          entry.button.remove();
+          releaseCanvas(entry.canvas);
+          thumbnails.delete(id);
+          visibleThumbnails.delete(id);
+        }
+      }
+      pages.forEach((page, i) => {
+        let entry = thumbnails.get(page.id);
+        if (!entry) {
+          const canvas = canvasFor(1, 1);
+          canvas.setAttribute("aria-hidden", "true");
+          const label = el("span", { class: "pe-thumb-number" });
+          const control = button("", () => navigate(pages.findIndex((item) => item.id === page.id)), "ghost",
+            { class: "pe-thumb", "data-page-id": page.id });
+          control.replaceChildren(el("span", { class: "pe-thumb-paper", "aria-hidden": "true" }, canvas), label);
+          entry = { button: control, canvas, label, ready: false, rotation: page.rotation };
+          thumbnails.set(page.id, entry);
+          thumbObserver.observe(control);
+        }
+        if (entry.rotation !== page.rotation) {
+          entry.rotation = page.rotation;
+          entry.ready = false;
+        }
+        entry.label.textContent = String(i + 1);
+        entry.button.setAttribute("aria-label", "Open page " + (i + 1));
+        if (page.id === currentId) entry.button.setAttribute("aria-current", "page");
+        else entry.button.removeAttribute("aria-current");
+        entry.button.disabled = busy;
+        if (thumbnailList.children[i] !== entry.button) {
+          thumbnailList.insertBefore(entry.button, thumbnailList.children[i] || null);
+        }
+      });
+      void paintNextThumbnail();
+    }
+
     function draw(outline) {
       const page = current();
       if (!page || !base) return;
@@ -594,16 +720,22 @@
         const context = composed.getContext("2d");
         context.drawImage(patchedCanvas || base, 0, 0, width, height);
         paint(composed, visualMarks(page.marks), baseScale);
+        const thumb = thumbnails.get(page.id);
+        if (thumb && !outline) copyThumbnail(thumb, composed, angle);
         if (active === "replace") {
           context.lineWidth = Math.max(1, 1.4 * baseScale);
           for (const [i, item] of regions.entries()) {
-            if (i !== selected && (!matchesSearch(item) || item.width * width < 5)) continue;
-            context.strokeStyle = i === selected ? "#4c2bd8" : "#7657dc66";
+            if (i !== selected && (i !== hovered && !textFind.value.trim() || !matchesSearch(item) || item.width * width < 5)) continue;
+            context.strokeStyle = i === selected ? "#177a50" : "#3a8b6555";
+            if (i === selected) {
+              context.fillStyle = "#96e3af40";
+              context.fillRect(item.x * width, item.y * height, item.width * width, item.height * height);
+            }
             context.strokeRect(item.x * width, item.y * height, item.width * width, item.height * height);
           }
         }
         if (outline) {
-          context.strokeStyle = "#4c2bd8";
+          context.strokeStyle = "#177a50";
           context.lineWidth = 2;
           context.setLineDash([6, 4]);
           context.strokeRect(outline.x * width, outline.y * height, outline.width * width, outline.height * height);
@@ -621,6 +753,7 @@
     }
 
     function updateRegions() {
+      hovered = -1;
       const marks = current()?.marks || [];
       const destructive = marks.filter((mark) => mark.kind === "replace" || mark.kind === "redact");
       const covered = (region, mark) => {
@@ -698,6 +831,13 @@
     function positionInline() {
       const item = regions[selected];
       if (!item || !base) { closeInline(); return; }
+      if (mobileEditor.matches) {
+        ["width", "left", "top"].forEach((property) => inlineEdit.style.removeProperty(property));
+        const viewport = window.visualViewport;
+        const lowerInset = viewport ? Math.max(0, window.innerHeight - viewport.height - viewport.offsetTop) : 0;
+        inlineEdit.style.setProperty("--pe-keyboard", lowerInset + "px");
+        return;
+      }
       const canvas = preview.getBoundingClientRect();
       const area = workArea.getBoundingClientRect();
       const displayPoint = (x, y) => ({
@@ -707,12 +847,14 @@
       const pointB = displayPoint(item.x + item.width, item.y + item.height);
       const left = canvas.left - area.left + workArea.scrollLeft + Math.min(pointA[0], pointB[0]) * canvas.width;
       const top = canvas.top - area.top + workArea.scrollTop + Math.min(pointA[1], pointB[1]) * canvas.height;
-      const width = Math.min(workArea.clientWidth - 16, Math.max(220, Math.abs(pointA[0] - pointB[0]) * canvas.width));
+      const width = Math.min(workArea.clientWidth - 16, Math.max(360, Math.abs(pointA[0] - pointB[0]) * canvas.width));
       inlineEdit.style.width = width + "px";
       inlineEdit.style.left = Math.max(workArea.scrollLeft + 8,
         Math.min(left, workArea.scrollLeft + workArea.clientWidth - width - 8)) + "px";
-      inlineEdit.style.top = Math.max(workArea.scrollTop + 8,
-        Math.min(top - 4, workArea.scrollTop + workArea.clientHeight - inlineEdit.offsetHeight - 8)) + "px";
+      const below = top + Math.abs(pointA[1] - pointB[1]) * canvas.height + 9;
+      const bottom = workArea.scrollTop + workArea.clientHeight - 8;
+      const position = below + inlineEdit.offsetHeight <= bottom ? below : top - inlineEdit.offsetHeight - 9;
+      inlineEdit.style.top = Math.max(workArea.scrollTop + 8, position) + "px";
     }
 
     function openInline() {
@@ -744,6 +886,10 @@
     workArea.addEventListener("scroll", () => { if (!inlineEdit.hidden) positionInline(); }, { passive: true });
     const observe = new ResizeObserver(() => { if (!inlineEdit.hidden) positionInline(); });
     observe.observe(workArea);
+    const repositionEditor = () => { if (!inlineEdit.hidden) positionInline(); };
+    mobileEditor.addEventListener("change", repositionEditor);
+    window.visualViewport?.addEventListener("resize", repositionEditor);
+    window.visualViewport?.addEventListener("scroll", repositionEditor);
 
     function newMark(box, replacing, reverse = false) {
       const text = textValue.value.trim();
@@ -905,7 +1051,7 @@
       change(updated, updated[Math.min(offset, updated.length - 1)].id);
       await showPage();
     }, "ghost");
-    const save = button("Download edited PDF", async () => {
+    const save = button("Download PDF", async () => {
       if (busy || !pdf) return;
       busy = true;
       refresh(false);
@@ -919,12 +1065,22 @@
         tell("Edited PDF downloaded." + (details.length ? " " + details.join(" · ") + "." : ""));
       } catch (failure) { tell("Could not export: " + error(failure)); }
       finally { busy = false; refresh(false); }
-    });
+    }, "primary", { "aria-label": "Download edited PDF" });
 
     const zoomOut = button("−", () => adjustZoom(-25), "ghost", { "aria-label": "Zoom out" });
     const zoomIn = button("+", () => adjustZoom(25), "ghost", { "aria-label": "Zoom in" });
     const fitPage = button("Fit", () => setZoom("fit"), "ghost", { "aria-label": "Fit page width" });
-    const toolButtons = kinds.map(([kind, label]) => button(label, () => selectTool(kind), "ghost", { "aria-pressed": "false" }));
+    const primaryKinds = ["replace", "pan", "text", "highlight", "redact"];
+    const toolButtons = primaryKinds.map((kind) => {
+      const label = kinds.find(([item]) => item === kind)[1];
+      const control = button(label, () => selectTool(kind), "ghost", { "aria-pressed": "false" });
+      control.prepend(editingIcon(kind));
+      return [kind, control];
+    });
+    const mobileKinds = ["replace", "pan", "highlight"];
+    const otherTools = select([]);
+    otherTools.setAttribute("aria-label", "More tools");
+    otherTools.addEventListener("change", () => { if (otherTools.value) selectTool(otherTools.value); });
     const replaceOptions = el("div", { class: "pe-options" }, field("Find text", textFind), field("Text on this page", regionsList),
       actions(field("Scan language", language), scan));
     const textField = field("Text", textValue);
@@ -941,17 +1097,24 @@
     const fontControls = el("div", { class: "pe-fields" }, field("Font", family), field("Size (pt)", size), field("Alignment", alignment));
     const colorField = field("Color", color);
     const fillField = field("Replacement background", background);
-    const inspector = el("section", { class: "pe-inspector" }, el("h2", { text: "Edit page" }), toolHelp,
-      replaceOptions, signatureField, textField, imageField, shapeField, urlField, fontControls, styleOptions, visualChoice, fontNotice,
-      el("div", { class: "pe-fields" }, colorField, fillField), actions(apply, center), positionOptions);
-    const editor = el("div", { class: "pe-workspace" },
-      el("div", { class: "pe-top" }, fileName, actions(changeFile, undo, redo, save)),
-      el("div", { class: "pe-command-bar" },
-        el("div", { class: "pe-tools", role: "group", "aria-label": "Editing tools" }, toolButtons),
-        el("div", { class: "pe-zoom", role: "group", "aria-label": "Page zoom" }, zoomOut, zoom, zoomIn, fitPage)),
-      el("div", { class: "pe-desk" }, stage, inspector), exportNote,
-      el("section", { class: "pe-pages" }, el("h2", { text: "Pages" }), field("Go to page", pageList),
+    const inspectorTitle = el("h2", { text: "Text appearance" });
+    const toolPage = root.closest("[data-tool-page]");
+    const favorite = toolPage?.querySelector("[data-save-tool]");
+    const inspector = el("section", { class: "pe-inspector" }, inspectorTitle, fontControls,
+      el("div", { class: "pe-fields" }, colorField, fillField), toolHelp, styleOptions, fontNotice,
+      replaceOptions, signatureField, textField, imageField, shapeField, urlField, visualChoice, actions(apply, center), positionOptions);
+    const zoomBar = el("div", { class: "pe-zoom", role: "group", "aria-label": "Page zoom" }, zoomOut, zoom, zoomIn, fitPage);
+    stage.append(zoomBar);
+    const pagesPanel = el("section", { class: "pe-page-rail" }, el("h2", { text: "Pages" }), thumbnailList,
+      el("details", { class: "pe-page-actions" }, el("summary", { text: "Manage pages" }), field("Go to page", pageList),
         actions(prev, next, earlier, later, rotate, add, remove), pageSummary));
+    const editor = el("div", { class: "pe-workspace" },
+      el("div", { class: "pe-top" },
+        el("div", { class: "pe-document-title" }, el("h2", { text: "PDF Editor" }), fileName),
+        el("div", { class: "tp-actions pe-file-actions" }, changeFile, undo, redo), save),
+      el("div", { class: "pe-command-bar" },
+        el("div", { class: "pe-tools", role: "group", "aria-label": "Editing tools" }, toolButtons.map(([, control]) => control), otherTools)),
+      el("div", { class: "pe-desk" }, pagesPanel, stage, inspector), exportNote);
     root.replaceChildren(panel("", [upload, notice, editor]));
     upload.addEventListener("dragover", (event) => {
       if (busy) return;
@@ -977,7 +1140,9 @@
       changeFile.disabled = busy;
       editor.hidden = !pdf || !page;
       upload.hidden = !editor.hidden;
+      toolPage?.classList.toggle("pe-document-open", !editor.hidden);
       if (editor.hidden) return;
+      if (favorite && favorite.parentElement !== inspector) inspector.append(favorite);
       const offset = index();
       fileName.textContent = file.name;
       const pageLabels = pages.map((item, i) => "Page " + (i + 1) + (item.original ? "" : " · Blank"));
@@ -987,6 +1152,7 @@
       }
       pageList.value = String(currentId);
       pageList.disabled = busy;
+      syncThumbnails();
       matchBadge.hidden = !page.marks.some((mark) => mark.closest);
       pageSummary.textContent = pageLabels[offset] + " of " + pages.length + " · " + page.marks.length + " edits";
       [prev, earlier].forEach((control) => { control.disabled = busy || offset <= 0; });
@@ -999,10 +1165,22 @@
       fitPage.disabled = busy || !base;
       undo.disabled = busy || !history.length;
       redo.disabled = busy || !future.length;
-      toolButtons.forEach((control, i) => {
-        control.setAttribute("aria-pressed", String(kinds[i][0] === active));
+      const visibleKinds = mobileEditor.matches ? mobileKinds : primaryKinds;
+      toolButtons.forEach(([kind, control]) => {
+        control.setAttribute("aria-pressed", String(kind === active));
+        control.hidden = !visibleKinds.includes(kind);
         control.disabled = busy;
       });
+      const toolbar = mobileEditor.matches ? "compact" : "wide";
+      if (otherTools.dataset.layout !== toolbar) {
+        otherTools.dataset.layout = toolbar;
+        otherTools.replaceChildren(el("option", { value: "", text: mobileEditor.matches ? "More" : "More tools" }),
+          ...kinds.filter(([kind]) => !visibleKinds.includes(kind)).map(([kind, label]) =>
+            el("option", { value: kind, text: label })));
+      }
+      otherTools.value = visibleKinds.includes(active) ? "" : active;
+      otherTools.disabled = busy;
+      inspectorTitle.textContent = wantsText() ? "Text appearance" : "Tool settings";
       const instructions = {
         replace: "Tap text to edit. Drag to move around the page or pinch to zoom.",
         pan: "Drag to move around the page. Pinch or use the zoom controls to change its size.",
@@ -1172,15 +1350,26 @@
       };
     }
 
-    function hitText(event) {
+    function regionAt(event) {
       const [x, y] = point(event);
       const matches = regions.map((item, i) => ({ ...item, i })).filter((item) =>
         matchesSearch(item) && item.x <= x && item.x + item.width >= x && item.y <= y && item.y + item.height >= y);
       matches.sort((first, second) => first.width * first.height - second.width * second.height);
-      chooseRegion(matches[0]?.i ?? -1);
-      if (matches.length) openInline();
+      return matches[0]?.i ?? -1;
+    }
+
+    function hitText(event) {
+      const match = regionAt(event);
+      chooseRegion(match);
+      if (match >= 0) openInline();
       else if (current()?.original && !textFind.value && !scans.has(current().original)) void runPageOcr(true);
     }
+
+    preview.addEventListener("pointerleave", () => {
+      if (hovered === -1) return;
+      hovered = -1;
+      draw();
+    });
 
     let animation = 0;
     preview.addEventListener("pointerdown", (event) => {
@@ -1237,6 +1426,14 @@
         if (event.pointerType === "touch") {
           const remainder = dy - (workArea.scrollTop - prior);
           if (Math.abs(remainder) > 1) window.scrollBy(0, remainder);
+        }
+        return;
+      }
+      if (!drag && active === "replace" && base && !busy && event.pointerType === "mouse") {
+        const nextHover = regionAt(event);
+        if (nextHover !== hovered) {
+          hovered = nextHover;
+          draw();
         }
         return;
       }
@@ -1343,6 +1540,7 @@
         tell(error(failure));
       } finally { busy = false; refresh(false); }
     });
+    mobileEditor.addEventListener("change", () => refresh(false));
     refresh(false);
   });
 })();
