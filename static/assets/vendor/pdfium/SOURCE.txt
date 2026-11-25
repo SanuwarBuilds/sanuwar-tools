@@ -1,0 +1,4 @@
+@embedpdf/pdfium 2.15.1 browser distribution
+Package: https://www.npmjs.com/package/@embedpdf/pdfium/v/2.15.1
+Source: https://github.com/embedpdf/embed-pdf-viewer/tree/v2
+Documentation: https://www.embedpdf.com/docs/pdfium/introduction

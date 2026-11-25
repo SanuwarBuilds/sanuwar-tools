@@ -5,9 +5,10 @@
   const { canvasFor, releaseCanvas, toBlob, loadImage, openPdf, renderPdfPage, paintMasks, recognize } = T.localFiles;
   const kinds = [
     ["replace", "Edit text"], ["text", "Add text"], ["image", "Image"], ["signature", "Signature"],
-    ["highlight", "Highlight"], ["shape", "Shape"], ["redact", "Redact"],
+    ["highlight", "Highlight"], ["underline", "Underline"], ["strike", "Strike out"],
+    ["link", "Link"], ["whiteout", "Whiteout"], ["shape", "Shape"], ["redact", "Redact"],
   ];
-  const fontFamilies = { sans: "sans-serif", serif: "serif", mono: "monospace", script: "cursive" };
+  const fontFamilies = { sans: "sans-serif", serif: "serif", mono: "monospace", script: "cursive", original: "sans-serif" };
   const blankSize = [595.28, 841.89];
   const mod = (angle) => ((angle % 360) + 360) % 360;
   const clamp = (value) => Math.min(1, Math.max(0, value));
@@ -19,6 +20,62 @@
     const x = clamp(Math.min(x1, x2));
     const y = clamp(Math.min(y1, y2));
     return { x, y, width: clamp(Math.max(x1, x2)) - x, height: clamp(Math.max(y1, y2)) - y };
+  }
+
+  function nativeClient() {
+    const worker = new Worker("/assets/js/tools/pdf-native-worker.js?v=1", { type: "module" });
+    const requests = new Map();
+    let sequence = 0;
+    let closed = false;
+    function close() {
+      if (closed) return;
+      closed = true;
+      worker.terminate();
+      for (const request of requests.values()) request.reject(new Error("Native text editing is unavailable."));
+      requests.clear();
+    }
+    worker.addEventListener("error", close);
+    worker.addEventListener("message", ({ data }) => {
+      const request = requests.get(data.id);
+      if (!request) return;
+      requests.delete(data.id);
+      clearTimeout(request.timeout);
+      if (data.error) request.reject(new Error(data.error));
+      else request.resolve(data.result);
+    });
+    return {
+      close,
+      call(type, payload, transfer = []) {
+        if (closed) return Promise.reject(new Error("Native text editing is unavailable."));
+        return new Promise((resolve, reject) => {
+          const id = ++sequence;
+          const timeout = setTimeout(close, 22000);
+          requests.set(id, { resolve, reject: (error) => { clearTimeout(timeout); reject(error); }, timeout });
+          worker.postMessage({ id, type, payload }, transfer);
+        });
+      },
+    };
+  }
+
+  function findNativeRegions(objects, viewport, canvas, fallback) {
+    const native = objects.flatMap((object) => {
+      const [left, bottom, right, top] = object.bounds;
+      const [x1, y1, x2, y2] = viewport.convertToViewportRectangle([left, bottom, right, top]);
+      const pad = viewport.scale * 0.8;
+      const box = bounds((Math.min(x1, x2) - pad) / canvas.width, (Math.min(y1, y2) - pad) / canvas.height,
+        (Math.max(x1, x2) + pad) / canvas.width, (Math.max(y1, y2) + pad) / canvas.height);
+      if (!box.width || !box.height) return [];
+      const { matrix } = object;
+      const output = pdfjsLib.Util.transform(viewport.transform, matrix);
+      return [{ ...box, text: object.text, sourceText: object.text, object: object.object,
+        originalFont: object.font, originalColor: object.color,
+        size: object.size * Math.hypot(matrix[2], matrix[3]), angle: Math.atan2(output[1], output[0]) }];
+    });
+    const area = (a, b) => Math.max(0, Math.min(a.x + a.width, b.x + b.width) - Math.max(a.x, b.x)) *
+      Math.max(0, Math.min(a.y + a.height, b.y + b.height) - Math.max(a.y, b.y));
+    // PDF.js still provides a selection for nested text and other non-editable objects.
+    return [...native, ...fallback.filter((item) => native.reduce((sum, region) => sum + area(item, region), 0) <
+      item.width * item.height * 0.38)].sort((a, b) => (a.y - b.y) || (a.x - b.x));
   }
 
   function textRegions(content, viewport, canvas) {
@@ -75,6 +132,15 @@
         if (mark.kind === "highlight") {
           context.globalAlpha = 0.33;
           context.fillRect(x, y, width, height);
+        } else if (mark.kind === "whiteout") {
+          context.fillRect(x, y, width, height);
+        } else if (["underline", "strike", "link"].includes(mark.kind)) {
+          const vertical = mark.kind === "strike" ? y + height / 2 : y + height;
+          context.fillRect(x, vertical - Math.max(1, scale), width, Math.max(1, scale * 1.2));
+          if (mark.kind === "link" && canvas.dataset.preview) {
+            context.strokeStyle = mark.color;
+            context.strokeRect(x, y, width, height);
+          }
         } else if (mark.kind === "image" || mark.image) {
           const sideways = Math.abs(Math.sin(mark.angle || 0)) > 0.7;
           const fitWidth = sideways ? height : width;
@@ -110,7 +176,8 @@
           const lines = mark.text.split(/\r?\n/);
           const size = Math.max(1, Math.min(mark.size * scale, textHeight / (lines.length * 1.12)));
           const family = fontFamilies[mark.family];
-          context.font = (mark.kind === "signature" ? "italic " : "") + size + "px " + family;
+          const style = (mark.italic || mark.kind === "signature" ? "italic " : "") + (mark.bold ? "bold " : "");
+          context.font = style + size + "px " + family;
           context.textBaseline = "middle";
           context.textAlign = mark.align;
           const tx = { left: -textWidth / 2, center: 0, right: textWidth / 2 }[mark.align];
@@ -139,10 +206,10 @@
     for (const [index, mark] of page.marks.entries()) {
       if (!["text", "replace"].includes(mark.kind) || !mark.text ||
         page.marks.slice(index + 1).some((later) => overlaps(mark, later))) continue;
-      const name = {
-        sans: PDFLib.StandardFonts.Helvetica, serif: PDFLib.StandardFonts.TimesRoman,
-        mono: PDFLib.StandardFonts.Courier, script: PDFLib.StandardFonts.TimesRomanItalic,
-      }[mark.family];
+      const fontSet = mark.family === "serif" ? ["TimesRoman", "TimesRomanBold", "TimesRomanItalic", "TimesRomanBoldItalic"]
+        : mark.family === "mono" ? ["Courier", "CourierBold", "CourierOblique", "CourierBoldOblique"]
+          : ["Helvetica", "HelveticaBold", "HelveticaOblique", "HelveticaBoldOblique"];
+      const name = PDFLib.StandardFonts[fontSet[Number(mark.bold) + 2 * Number(mark.italic || mark.family === "script")]];
       if (!fonts.has(name)) fonts.set(name, await document.embedFont(name));
       const font = fonts.get(name);
       const lines = mark.text.split(/\r?\n/);
@@ -192,26 +259,78 @@
     }
   }
 
-  async function writePdf(file, pdf, pages, onProgress) {
+  function addLinks(document, page, marks, viewport, width, height) {
+    for (const mark of marks.filter((item) => item.kind === "link")) {
+      const point = (x, y) => viewport
+        ? viewport.convertToPdfPoint(x * viewport.width, y * viewport.height)
+        : [x * width, (1 - y) * height];
+      const a = point(mark.x, mark.y);
+      const b = point(mark.x + mark.width, mark.y + mark.height);
+      const name = PDFLib.PDFName.of;
+      const annotation = document.context.obj({
+        Type: "Annot", Subtype: "Link",
+        Rect: [Math.min(a[0], b[0]), Math.min(a[1], b[1]), Math.max(a[0], b[0]), Math.max(a[1], b[1])],
+        Border: [0, 0, 0], A: { S: "URI", URI: PDFLib.PDFString.of(mark.url) },
+      });
+      let references = page.node.lookupMaybe(name("Annots"), PDFLib.PDFArray);
+      if (!references) {
+        references = document.context.obj([]);
+        page.node.set(name("Annots"), references);
+      }
+      references.push(document.context.register(annotation));
+    }
+  }
+
+  async function materializeText(client, pages, onProgress) {
+    const candidates = pages.flatMap((page) => {
+      const patches = page.marks.filter((mark) => mark.kind === "replace");
+      if (!page.original || !patches.length || patches.some((mark) => mark.object == null || /[\r\n]/.test(mark.text))) return [];
+      // Text written into the source sits underneath new markup. Keep the order
+      // from the preview if an earlier markup intersects a later replacement.
+      if (page.marks.some((mark, index) => mark.kind === "replace" &&
+        page.marks.slice(0, index).some((prior) => prior.kind !== "replace" && overlaps(prior, mark)))) return [];
+      const edits = [...new Map(patches.map((mark) => [mark.object, mark])).values()].map(({ object, sourceText, text,
+        size, color, align, family, bold, italic }) => ({ object, sourceText, text, size, color, align, family, bold, italic }));
+      return [{ index: page.original - 1, edits }];
+    });
+    if (!client || !candidates.length) return { bytes: null, applied: [] };
+    onProgress("Writing selectable PDF text…");
+    try { return await client.call("save", candidates); }
+    catch { return { bytes: null, applied: [] }; }
+  }
+
+  async function writePdf(file, pdf, pages, client, onProgress) {
     const redact = pages.some((page) => page.marks.some((mark) => mark.kind === "redact"));
-    const replace = pages.some((page) => page.marks.some((mark) => mark.kind === "replace"));
-    const source = redact ? null : await PDFLib.PDFDocument.load(await file.arrayBuffer(), { updateMetadata: false });
-    if (replace && source) {
+    const { bytes, applied } = redact ? { bytes: null, applied: [] } : await materializeText(client, pages, onProgress);
+    const changed = new Set(applied.map((index) => index + 1));
+    const replacements = (page) => page.marks.some((mark) => mark.kind === "replace");
+    const ordered = pages.length === pdf.numPages && pages.every((page, index) => page.original === index + 1);
+    const flattenReplacement = pages.some((page) => replacements(page) && !changed.has(page.original));
+    if (bytes && ordered && pages.every((page) => !page.rotation &&
+      page.marks.every((mark) => mark.kind === "replace" && changed.has(page.original)))) {
+      return { bytes, native: changed.size, flattened: 0 };
+    }
+    const source = redact ? null : await PDFLib.PDFDocument.load(bytes || await file.arrayBuffer(), { updateMetadata: false });
+    if (flattenReplacement && source) {
       // A link can refer to a source page that was replaced. Exclude annotations before copying.
       for (const page of source.getPages()) page.node.delete(PDFLib.PDFName.of("Annots"));
     }
-    const result = await PDFLib.PDFDocument.create();
+    const preserve = ordered && !redact && !flattenReplacement;
+    const result = preserve ? source : await PDFLib.PDFDocument.create();
     const fonts = new Map();
     const copyIndices = pages.filter((page) => page.original && !redact &&
-      !page.marks.some((mark) => mark.kind === "replace")).map((page) => page.original - 1);
-    const copies = copyIndices.length ? await result.copyPages(source, copyIndices) : [];
+      (!replacements(page) || changed.has(page.original))).map((page) => page.original - 1);
+    const copies = !preserve && copyIndices.length ? await result.copyPages(source, copyIndices) : [];
+    let flattened = 0;
     let copyIndex = 0;
     for (const [index, page] of pages.entries()) {
       onProgress("Exporting page " + (index + 1) + " of " + pages.length + "…");
-      const flatten = page.original && (redact || page.marks.some((mark) => mark.kind === "replace"));
-      const target = !page.original ? result.addPage(blankSize)
-        : flatten ? null : result.addPage(copies[copyIndex++]);
-      if (flatten || page.marks.length) {
+      const flatten = page.original && (redact || (replacements(page) && !changed.has(page.original)));
+      const marks = changed.has(page.original) ? page.marks.filter((mark) => mark.kind !== "replace") : page.marks;
+      if (flatten) flattened += 1;
+      const target = !page.original ? result.addPage(blankSize) : flatten ? null
+        : preserve ? result.getPage(page.original - 1) : result.addPage(copies[copyIndex++]);
+      if (flatten || marks.length) {
         let rendered;
         if (page.original && flatten) rendered = await renderPdfPage(pdf, page.original, 2350);
         else if (page.original) {
@@ -226,13 +345,14 @@
         const { canvas, viewport, width, height } = rendered;
         try {
           const scale = canvas.width / width;
-          const text = redact ? new Map() : await getNativeText(result, page, fonts);
-          paint(canvas, page.marks, scale, text);
+          const text = redact ? new Map() : await getNativeText(result, { marks }, fonts);
+          paint(canvas, marks, scale, text);
           const image = await result.embedPng(await (await toBlob(canvas, "image/png")).arrayBuffer());
           const outputPage = target || result.addPage([width, height]);
           if (target && viewport) drawOverlay(target, image, viewport);
           else outputPage.drawImage(image, { x: 0, y: 0, width, height });
           drawSelectableText(outputPage, text, rendered, Boolean(target && viewport));
+          if (!redact) addLinks(result, outputPage, marks, target && viewport, width, height);
           outputPage.setRotation(PDFLib.degrees(mod(outputPage.getRotation().angle + page.rotation)));
         } finally {
           releaseCanvas(canvas);
@@ -241,7 +361,7 @@
         target.setRotation(PDFLib.degrees(mod(target.getRotation().angle + page.rotation)));
       }
     }
-    return result.save();
+    return { bytes: await result.save({ updateFieldAppearances: false }), native: changed.size, flattened };
   }
 
   T.register("pdf-editor", (root) => {
@@ -252,6 +372,11 @@
     const pageList = select([]);
     const pageSummary = el("p", { class: "tp-hint", role: "status" });
     const regionsList = select([]);
+    const textFind = input({ type: "search", placeholder: "Find text on this page" });
+    const zoom = select([["Fit width", "fit"], ["75%", "75"], ["100%", "100"], ["125%", "125"], ["150%", "150"], ["200%", "200"]], "fit");
+    const urlInput = input({ type: "url", placeholder: "https://example.com" });
+    const bold = el("input", { type: "checkbox" });
+    const italic = el("input", { type: "checkbox" });
     const language = select([["English", "eng"], ["Hindi", "hin"], ["Bangla", "ben"],
       ["Hindi + English", "hin+eng"], ["Bangla + English", "ben+eng"]], "eng");
     const textValue = T.textarea("", { rows: 3, maxlength: 2000, placeholder: "Enter text" });
@@ -259,16 +384,21 @@
     const color = input({ type: "color", value: "#131722", class: "pe-color" });
     const background = input({ type: "color", value: "#ffffff", class: "pe-color" });
     const shape = select([["Rectangle", "rectangle"], ["Ellipse", "ellipse"], ["Line", "line"]], "rectangle");
-    const family = select([["Sans-serif", "sans"], ["Serif", "serif"], ["Monospace", "mono"], ["Script", "script"]], "sans");
+    const family = select([["Match original", "original"], ["Sans-serif", "sans"], ["Serif", "serif"], ["Monospace", "mono"], ["Script", "script"]], "sans");
     const alignment = select([["Left", "left"], ["Center", "center"], ["Right", "right"]], "left");
     const signatureImage = el("input", { type: "checkbox" });
     for (const [control, label] of [[pageList, "Go to page"], [regionsList, "Text on this page"], [language, "Scan language"],
-      [shape, "Shape"], [family, "Font"], [alignment, "Alignment"]]) {
+      [shape, "Shape"], [family, "Font"], [alignment, "Alignment"], [zoom, "Zoom"]]) {
       control.setAttribute("aria-label", label);
     }
     const preview = canvasFor(1, 1);
     preview.setAttribute("aria-label", "PDF page preview");
-    const workArea = el("div", { class: "pe-preview" }, preview);
+    const inlineValue = input({ "aria-label": "Edit text directly on the page", maxlength: 2000 });
+    const inlineApply = el("button", { type: "submit", class: "tp-btn tp-btn-primary" }, "Apply");
+    const inlineCancel = button("Cancel", cancelInline, "ghost");
+    const inlineEdit = el("form", { class: "pe-inline-edit", hidden: true },
+      inlineValue, actions(inlineApply, inlineCancel));
+    const workArea = el("div", { class: "pe-preview" }, preview, inlineEdit);
     const toolHelp = el("p", { class: "tp-hint" });
     const exportNote = el("p", { class: "tp-hint pe-export-note" });
     const history = [];
@@ -279,6 +409,9 @@
     let nextId = 0;
     let file;
     let pdf;
+    let client;
+    let nativeReady;
+    const objectRegions = new Map();
     let base;
     let baseScale = 1;
     let originalRegions = [];
@@ -287,6 +420,7 @@
     let active = "replace";
     let image;
     let drag;
+    let tap;
     let busy = false;
 
     const current = () => pages.find((page) => page.id === currentId);
@@ -306,6 +440,7 @@
     }
 
     function commit(mark) {
+      closeInline();
       change(pages.map((page) => page.id === currentId ? { ...page, marks: [...page.marks, mark] } : page));
       selected = -1;
       updateRegions();
@@ -315,6 +450,7 @@
 
     async function revisit(from, to) {
       if (!from.length || busy) return;
+      closeInline();
       to.push(snapshot());
       const previous = from.pop();
       const rerender = currentId !== previous.id || !base;
@@ -336,13 +472,14 @@
       const height = base.height;
       const composed = canvasFor(width, height);
       try {
+        composed.dataset.preview = "true";
         const context = composed.getContext("2d");
         context.drawImage(base, 0, 0);
         paint(composed, page.marks, baseScale);
         if (active === "replace") {
           context.lineWidth = Math.max(1, 1.4 * baseScale);
           for (const [i, item] of regions.entries()) {
-            if (i !== selected && item.width * width < 5) continue;
+            if (i !== selected && (!matchesSearch(item) || item.width * width < 5)) continue;
             context.strokeStyle = i === selected ? "#4c2bd8" : "#7657dc66";
             context.strokeRect(item.x * width, item.y * height, item.width * width, item.height * height);
           }
@@ -359,6 +496,7 @@
         display.translate(preview.width / 2, preview.height / 2);
         display.rotate(angle * Math.PI / 180);
         display.drawImage(composed, -width / 2, -height / 2);
+        if (!inlineEdit.hidden) positionInline();
       } finally {
         releaseCanvas(composed);
       }
@@ -382,33 +520,102 @@
       refreshRegions();
     }
 
+    const matchesSearch = (item) => item.text.toLocaleLowerCase().includes(textFind.value.trim().toLocaleLowerCase());
+
     function refreshRegions() {
-      regionsList.replaceChildren(el("option", { value: "", text: regions.length ? "Choose text on this page" : "No text selected" }),
-        ...regions.map((item, i) => el("option", { value: i, text: item.text.slice(0, 110) })));
+      const items = regions.flatMap((item, i) => (i === selected || matchesSearch(item))
+        ? [el("option", { value: i, text: item.text.slice(0, 110) })] : []);
+      regionsList.replaceChildren(el("option", { value: "", text: items.length ? "Choose text on this page"
+        : textFind.value ? "No matching text" : "No selectable text" }), ...items);
       regionsList.value = selected < 0 ? "" : String(selected);
     }
 
     function chooseRegion(value) {
+      closeInline();
       selected = value;
       regionsList.value = value < 0 ? "" : String(value);
       if (value >= 0) {
         const item = regions[value];
         textValue.value = item.text;
+        family.value = item.family || (item.object != null ? "original" : "sans");
+        color.value = item.color || item.originalColor || "#131722";
+        bold.checked = Boolean(item.bold);
+        italic.checked = Boolean(item.italic);
         size.value = Math.max(4, Math.min(120, Math.round(item.size * 2) / 2));
       }
       refresh();
     }
 
     function selectTool(kind) {
+      closeInline();
       active = kind;
       selected = -1;
       regionsList.value = "";
       textValue.value = "";
       alignment.value = kind === "signature" ? "center" : "left";
-      family.value = kind === "signature" ? "script" : "sans";
-      color.value = kind === "highlight" ? "#ffe15a" : "#131722";
+      family.value = kind === "signature" ? "script" : kind === "replace" ? "original" : "sans";
+      bold.checked = italic.checked = false;
+      color.value = kind === "highlight" ? "#ffe15a" : kind === "whiteout" ? "#ffffff" : kind === "link" ? "#1b52cb" : "#131722";
       refresh();
     }
+
+    function closeInline(restoreFocus = false) {
+      if (inlineEdit.hidden) return;
+      inlineEdit.hidden = true;
+      if (restoreFocus) regionsList.focus({ preventScroll: true });
+    }
+
+    function cancelInline() {
+      textValue.value = regions[selected]?.text || "";
+      closeInline(true);
+    }
+
+    function positionInline() {
+      const item = regions[selected];
+      if (!item || !base) { closeInline(); return; }
+      const canvas = preview.getBoundingClientRect();
+      const area = workArea.getBoundingClientRect();
+      const displayPoint = (x, y) => ({
+        90: [1 - y, x], 180: [1 - x, 1 - y], 270: [y, 1 - x],
+      }[current().rotation] || [x, y]);
+      const pointA = displayPoint(item.x, item.y);
+      const pointB = displayPoint(item.x + item.width, item.y + item.height);
+      const left = canvas.left - area.left + workArea.scrollLeft + Math.min(pointA[0], pointB[0]) * canvas.width;
+      const top = canvas.top - area.top + workArea.scrollTop + Math.min(pointA[1], pointB[1]) * canvas.height;
+      const width = Math.min(workArea.clientWidth - 16, Math.max(220, Math.abs(pointA[0] - pointB[0]) * canvas.width));
+      inlineEdit.style.width = width + "px";
+      inlineEdit.style.left = Math.max(workArea.scrollLeft + 8,
+        Math.min(left, workArea.scrollLeft + workArea.clientWidth - width - 8)) + "px";
+      inlineEdit.style.top = Math.max(workArea.scrollTop + 8, top - 4) + "px";
+    }
+
+    function openInline() {
+      const item = regions[selected];
+      if (!item || busy || active !== "replace" || /[\r\n]/.test(item.text)) return;
+      inlineValue.value = textValue.value;
+      inlineEdit.hidden = false;
+      positionInline();
+      inlineValue.focus({ preventScroll: true });
+      inlineValue.select();
+    }
+
+    inlineEdit.addEventListener("submit", (event) => {
+      event.preventDefault();
+      if (selected < 0 || busy) return;
+      textValue.value = inlineValue.value;
+      apply.click();
+    });
+    inlineValue.addEventListener("input", () => { textValue.value = inlineValue.value; });
+    inlineValue.addEventListener("keydown", (event) => {
+      if (event.key === "Escape") {
+        event.preventDefault();
+        cancelInline();
+      }
+    });
+    textValue.addEventListener("input", () => { if (!inlineEdit.hidden) inlineValue.value = textValue.value; });
+    workArea.addEventListener("scroll", () => { if (!inlineEdit.hidden) positionInline(); }, { passive: true });
+    const observe = new ResizeObserver(() => { if (!inlineEdit.hidden) positionInline(); });
+    observe.observe(workArea);
 
     function newMark(box, replacing, reverse = false) {
       const text = textValue.value.trim();
@@ -416,7 +623,13 @@
       if (wantsText() && !text && active !== "replace") throw new Error("Enter text before placing it on the page.");
       if (wantsText() && !size.reportValidity()) throw new Error("Enter a font size between 4 and 120.");
       if (wantsImage() && !image) throw new Error("Choose an image file first.");
-      return { ...box, kind: active, text, size: Number(size.value), family: family.value, color: color.value,
+      let url;
+      if (active === "link") {
+        try { url = new URL(urlInput.value.trim()); } catch { throw new Error("Enter a full HTTP or HTTPS link."); }
+        if (!["https:", "http:"].includes(url.protocol)) throw new Error("Enter a full HTTP or HTTPS link.");
+      }
+      return { ...box, kind: active, text, url: url?.href, size: Number(size.value), family: family.value, color: color.value,
+        bold: bold.checked, italic: italic.checked,
         background: background.value, image: wantsImage() ? image : null, shape: shape.value, align: alignment.value,
         angle: replacing?.angle ?? -current().rotation * Math.PI / 180, reverse };
     }
@@ -504,30 +717,37 @@
       busy = true;
       refresh(false);
       try {
-        const bytes = await writePdf(file, pdf, pages, tell);
+        const result = await writePdf(file, pdf, pages, client, tell);
         const name = T.safeName(file.name.replace(/\.pdf$/i, ""), "document");
-        T.download(name + "-edited.pdf", bytes, "application/pdf");
-        tell("Edited PDF downloaded.");
+        T.download(name + "-edited.pdf", result.bytes, "application/pdf");
+        const details = [];
+        if (result.native) details.push(result.native + (result.native === 1 ? " page kept" : " pages kept") + " as selectable PDF text");
+        if (result.flattened) details.push(result.flattened + (result.flattened === 1 ? " page was flattened" : " pages were flattened"));
+        tell("Edited PDF downloaded." + (details.length ? " " + details.join(" · ") + "." : ""));
       } catch (failure) { tell("Could not export: " + error(failure)); }
       finally { busy = false; refresh(false); }
     });
 
     const toolButtons = kinds.map(([kind, label]) => button(label, () => selectTool(kind), "ghost", { "aria-pressed": "false" }));
-    const replaceOptions = el("div", { class: "pe-options" }, field("Text on this page", regionsList),
+    const replaceOptions = el("div", { class: "pe-options" }, field("Find text", textFind), field("Text on this page", regionsList),
       actions(field("Scan language", language), scan));
     const textField = field("Text", textValue);
     const imageField = field("Choose image or signature", imageInput);
     const shapeField = field("Shape", shape);
+    const urlField = field("Link URL", urlInput);
+    const styleOptions = el("div", { class: "pe-fields" }, checkbox("Bold", bold), checkbox("Italic", italic));
     const signatureField = checkbox("Use an image of my signature", signatureImage);
     const fontControls = el("div", { class: "pe-fields" }, field("Font", family), field("Size (pt)", size), field("Alignment", alignment));
     const colorField = field("Color", color);
     const fillField = field("Replacement background", background);
     const inspector = el("section", { class: "pe-inspector" }, el("h2", { text: "Edit page" }), toolHelp,
-      replaceOptions, signatureField, textField, imageField, shapeField, fontControls,
+      replaceOptions, signatureField, textField, imageField, shapeField, urlField, fontControls, styleOptions,
       el("div", { class: "pe-fields" }, colorField, fillField), actions(apply, center), positionOptions);
     const editor = el("div", { class: "pe-workspace" },
       el("div", { class: "pe-top" }, fileName, actions(undo, redo, save)),
-      el("div", { class: "pe-tools", role: "group", "aria-label": "Editing tools" }, toolButtons),
+      el("div", { class: "pe-command-bar" },
+        el("div", { class: "pe-tools", role: "group", "aria-label": "Editing tools" }, toolButtons),
+        field("Zoom", zoom)),
       el("div", { class: "pe-desk" }, workArea, inspector), exportNote,
       el("section", { class: "pe-pages" }, el("h2", { text: "Pages" }), field("Go to page", pageList),
         actions(prev, next, earlier, later, rotate, add, remove), pageSummary));
@@ -535,6 +755,7 @@
 
     function refresh(repaint = true) {
       const page = current();
+      if (busy) closeInline();
       pdfInput.disabled = busy;
       editor.hidden = !pdf || !page;
       if (editor.hidden) return;
@@ -560,11 +781,15 @@
         control.disabled = busy;
       });
       const instructions = {
-        replace: "Click outlined text or select it from the list. Replaced areas use the background color you choose.",
+        replace: "Click text in the preview or find it below. Type your correction, then apply it.",
         text: "Enter text and drag a box on the page to place it.",
         image: "Choose an image and drag to place it on the page.",
         signature: "Type your name or choose a signature image, then drag to place it.",
         highlight: "Drag across the area you want to highlight.",
+        underline: "Drag across the text to underline it.",
+        strike: "Drag across the text to strike it out.",
+        link: "Enter a URL, then drag a clickable area on the page.",
+        whiteout: "Paint over an area with a solid color. Use Redact to remove private content.",
         shape: "Choose a shape and drag to draw it.",
         redact: "Drag a box over private details. Redaction exports every page as an image and removes underlying text and links.",
       };
@@ -572,14 +797,20 @@
       workArea.dataset.selecting = String(active === "replace");
       const marks = pages.flatMap((item) => item.marks);
       const hasRedaction = marks.some((mark) => mark.kind === "redact");
+      const visualFallback = marks.some((mark) => mark.kind === "replace" && (mark.object == null || /[\r\n]/.test(mark.text)));
       const hasReplacement = marks.some((mark) => mark.kind === "replace");
       exportNote.hidden = !hasRedaction && !hasReplacement;
       exportNote.textContent = hasRedaction
         ? "Redaction exports every page as a flattened image without selectable text, links or form fields."
-        : "Original content on replaced pages is flattened. New text supported by built-in PDF fonts stays selectable. This copy omits links and form fields.";
+        : visualFallback
+          ? "This edit uses a visual replacement. Its page may be flattened when you download."
+          : "Supported text edits stay selectable. If a font or text block cannot be edited directly, the affected page is flattened on export.";
       replaceOptions.hidden = active !== "replace";
-      fillField.hidden = active !== "replace";
+      fillField.hidden = active !== "replace" || (selected >= 0 && regions[selected]?.object != null);
       textField.hidden = fontControls.hidden = !wantsText();
+      styleOptions.hidden = !wantsText();
+      family.options[0].hidden = active !== "replace";
+      urlField.hidden = active !== "link";
       signatureField.hidden = active !== "signature";
       imageField.hidden = !wantsImage();
       shapeField.hidden = active !== "shape";
@@ -590,7 +821,8 @@
       scan.disabled = busy || !page.original || !base;
       apply.disabled = busy || selected < 0;
       center.disabled = busy || !base;
-      [regionsList, textValue, size, color, background, shape, family, alignment, signatureImage, imageInput, language]
+      [regionsList, textFind, textValue, size, color, background, shape, family, alignment, signatureImage, imageInput,
+        language, italic, bold, urlInput, zoom]
         .forEach((control) => { control.disabled = busy; });
       if (repaint) draw();
     }
@@ -602,6 +834,7 @@
       if (base) releaseCanvas(base);
       base = null;
       originalRegions = [];
+      textFind.value = "";
       updateRegions();
       refresh(false);
       tell("Rendering page…");
@@ -612,7 +845,15 @@
           base = rendered.canvas;
           baseScale = rendered.viewport.scale;
           const source = await pdf.getPage(page.original);
-          originalRegions = scans.get(page.original) || textRegions(await source.getTextContent(), rendered.viewport, base);
+          const extracted = textRegions(await source.getTextContent(), rendered.viewport, base);
+          if (!scans.has(page.original) && client && await nativeReady) {
+            if (!objectRegions.has(page.original)) {
+              try { objectRegions.set(page.original, await client.call("page", page.original - 1)); }
+              catch { objectRegions.set(page.original, []); }
+            }
+          }
+          originalRegions = scans.get(page.original) ||
+            findNativeRegions(objectRegions.get(page.original) || [], rendered.viewport, base, extracted);
         } else {
           baseScale = 1.5;
           base = canvasFor(Math.ceil(blankSize[0] * baseScale), Math.ceil(blankSize[1] * baseScale));
@@ -655,9 +896,12 @@
       const [x, y] = point(event);
       if (active === "replace") {
         const matches = regions.map((item, i) => ({ ...item, i })).filter((item) =>
-          item.x <= x && item.x + item.width >= x && item.y <= y && item.y + item.height >= y);
+          matchesSearch(item) && item.x <= x && item.x + item.width >= x && item.y <= y && item.y + item.height >= y);
         matches.sort((first, second) => first.width * first.height - second.width * second.height);
         chooseRegion(matches[0]?.i ?? -1);
+        if (!matches.length) return;
+        if (event.pointerType === "mouse") openInline();
+        else tap = { id: event.pointerId, x: event.clientX, y: event.clientY };
       } else {
         drag = { id: event.pointerId, point: [x, y] };
         preview.setPointerCapture(event.pointerId);
@@ -671,6 +915,12 @@
       animation = requestAnimationFrame(() => { if (drag) draw(outline); });
     });
     preview.addEventListener("pointerup", (event) => {
+      if (tap?.id === event.pointerId) {
+        const distance = Math.hypot(event.clientX - tap.x, event.clientY - tap.y);
+        tap = null;
+        if (distance <= 8) openInline();
+        return;
+      }
       if (drag?.id !== event.pointerId) return;
       cancelAnimationFrame(animation);
       const end = point(event);
@@ -684,10 +934,25 @@
       try { commit(newMark(box, null, reverse)); }
       catch (failure) { tell(error(failure)); draw(); }
     });
+    preview.addEventListener("pointercancel", () => { tap = null; });
     preview.addEventListener("lostpointercapture", () => {
       if (drag) { drag = null; draw(); }
     });
 
+    textFind.addEventListener("input", () => { closeInline(); selected = -1; refreshRegions(); refresh(); });
+    zoom.addEventListener("change", () => {
+      if (zoom.value === "fit") preview.style.removeProperty("width");
+      else preview.style.width = zoom.value + "%";
+      workArea.classList.toggle("is-zoomed", zoom.value !== "fit");
+      if (!inlineEdit.hidden) positionInline();
+    });
+    textValue.addEventListener("keydown", (event) => {
+      if (event.key === "Enter" && (event.metaKey || event.ctrlKey) && !apply.hidden && !apply.disabled) {
+        event.preventDefault();
+        apply.click();
+      }
+    });
+    window.addEventListener("pagehide", (event) => { if (!event.persisted) client?.close(); });
     regionsList.addEventListener("change", () => chooseRegion(regionsList.value === "" ? -1 : Number(regionsList.value)));
     pageList.addEventListener("change", () => navigate(pages.findIndex((page) => page.id === Number(pageList.value))));
     signatureImage.addEventListener("change", () => refresh(false));
@@ -714,6 +979,17 @@
         await pdf?.destroy();
         pdf = incoming;
         file = candidate;
+        client?.close();
+        objectRegions.clear();
+        try {
+          const worker = nativeClient();
+          client = worker;
+          nativeReady = candidate.arrayBuffer().then((buffer) => worker.call("open", buffer, [buffer]))
+            .catch(() => { worker.close(); return false; });
+        } catch {
+          client = null;
+          nativeReady = Promise.resolve(false);
+        }
         history.length = future.length = 0;
         scans.clear();
         image = null;

@@ -336,6 +336,20 @@ class ToolHubTests(unittest.TestCase):
         self.assertEqual(heic.status_code, 200)
         self.assertIn("script-src 'self' 'wasm-unsafe-eval'", heic.headers[header])
 
+    def test_pdf_editor_native_engine_uses_an_isolated_wasm_worker(self):
+        header = 'Content-Security-Policy'
+        with self.client.get('/tools/pdf-editor') as editor:
+            self.assertEqual(editor.status_code, 200)
+            self.assertIn('/assets/js/tools/pdf-editor.js', editor.get_data(as_text=True))
+            self.assertNotIn("'wasm-unsafe-eval'", editor.headers[header])
+        with self.client.get('/assets/js/tools/pdf-native-worker.js') as worker:
+            self.assertEqual(worker.status_code, 200)
+            self.assertIn("script-src 'self' 'wasm-unsafe-eval'", worker.headers[header])
+            self.assertIn("connect-src 'self'", worker.headers[header])
+        with self.client.get('/assets/vendor/pdfium/pdfium.wasm') as wasm:
+            self.assertEqual(wasm.status_code, 200)
+            self.assertEqual(wasm.mimetype, 'application/wasm')
+
     def test_sitemap_includes_hub_and_every_tool(self):
         root=fromstring(self.client.get('/sitemap.xml').data)
         locs=[node.text for node in root.iter('{http://www.sitemaps.org/schemas/sitemap/0.9}loc')]

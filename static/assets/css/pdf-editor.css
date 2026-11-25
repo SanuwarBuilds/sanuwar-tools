@@ -135,3 +135,38 @@
 
 .pe-position summary { cursor: pointer; font-size: 0.9rem; }
 .pe-position form { margin-top: 8px; }
+
+.pe-command-bar {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) 110px;
+  align-items: start;
+  gap: 10px;
+  padding: 10px 0;
+  border-block: 1px solid var(--bp-line);
+}
+
+.pe-command-bar .pe-tools { border: 0; padding: 0; }
+.pe-preview.is-zoomed { display: block; overflow: auto; }
+.pe-preview.is-zoomed canvas { max-width: none; margin-inline: auto; }
+
+@media (max-width: 560px) {
+  .pe-command-bar { grid-template-columns: minmax(0, 1fr); }
+  .pe-command-bar > .tp-field { max-width: 135px; }
+}
+
+.pe-preview { position: relative; }
+
+.pe-inline-edit {
+  position: absolute;
+  z-index: 2;
+  display: grid;
+  gap: 6px;
+  padding: 7px;
+  border: 1px solid var(--bp-accent);
+  border-radius: 9px;
+  background: var(--bp-panel);
+  box-shadow: 0 6px 20px #1213212b;
+}
+
+.pe-inline-edit > .tp-actions { margin: 0; justify-content: end; }
+.pe-inline-edit .tp-btn { min-height: 34px; }

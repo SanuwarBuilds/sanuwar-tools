@@ -171,7 +171,7 @@ def install(app):
                 "img-src 'self' data: blob:; font-src 'self'; connect-src 'self'; "
                 "object-src 'none'; base-uri 'self'; frame-ancestors 'none'; form-action 'self'")
             response.headers['Cache-Control'] = 'no-store'
-        if request.path == '/assets/vendor/ocr/worker.min.js':
+        if request.path in ('/assets/vendor/ocr/worker.min.js', '/assets/js/tools/pdf-native-worker.js'):
             response.headers['Content-Security-Policy'] = (
                 "default-src 'none'; script-src 'self' 'wasm-unsafe-eval'; connect-src 'self'")
         if (request.path in ('/players', '/tools') or request.path.startswith('/players/') or request.path.startswith('/tools/')) and response.status_code == 200 and response.mimetype == 'text/html':
