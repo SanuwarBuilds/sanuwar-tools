@@ -97,13 +97,7 @@ function readRegions(index) {
   }));
 }
 
-function stockFont(family, name, bold, italic) {
-  const original = name.toLowerCase();
-  if (family === "original") {
-    family = /courier|mono|consolas|menlo/.test(original) ? "mono" : /times|serif|garamond|georgia/.test(original) ? "serif" : "sans";
-    bold ||= /bold|black|heavy|demi|semibold/.test(original);
-    italic ||= /italic|oblique/.test(original);
-  }
+function stockFont(family, bold, italic) {
   if (family === "serif") return bold ? (italic ? "Times-BoldItalic" : "Times-Bold") : (italic ? "Times-Italic" : "Times-Roman");
   const base = family === "mono" ? "Courier" : "Helvetica";
   return base + (bold ? (italic ? "-BoldOblique" : "-Bold") : italic ? "-Oblique" : "");
@@ -159,12 +153,9 @@ function replacePage(document, index, edits) {
       for (const plan of plans) {
         const { edit, matrix, bounds, font, size, color } = plan;
         if (!edit.text) continue;
-        const name = stockFont(edit.family, fontName(font), edit.bold, edit.italic);
-        const candidates = [
-          ...(edit.family === "original" && !edit.bold && !edit.italic
-            ? [() => engine.FPDFPageObj_CreateTextObj(document, font, size)] : []),
-          () => engine.FPDFPageObj_NewTextObj(document, name, size),
-        ];
+        const candidates = edit.family === "original"
+          ? [() => engine.FPDFPageObj_CreateTextObj(document, font, size)]
+          : [() => engine.FPDFPageObj_NewTextObj(document, stockFont(edit.family, edit.bold, edit.italic || edit.family === "script"), size)];
         for (const make of candidates) {
           const replacement = make();
           if (!replacement) continue;

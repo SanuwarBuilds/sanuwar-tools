@@ -4,7 +4,7 @@
   const { el, field, panel, input, select, button, actions } = T;
   const { canvasFor, releaseCanvas, toBlob, loadImage, openPdf, renderPdfPage, paintMasks, recognize } = T.localFiles;
   const kinds = [
-    ["replace", "Edit text"], ["text", "Add text"], ["image", "Image"], ["signature", "Signature"],
+    ["replace", "Edit text"], ["pan", "Pan"], ["text", "Add text"], ["image", "Image"], ["signature", "Signature"],
     ["highlight", "Highlight"], ["underline", "Underline"], ["strike", "Strike out"],
     ["link", "Link"], ["whiteout", "Whiteout"], ["shape", "Shape"], ["redact", "Redact"],
   ];
@@ -23,7 +23,7 @@
   }
 
   function nativeClient() {
-    const worker = new Worker("/assets/js/tools/pdf-native-worker.js?v=1", { type: "module" });
+    const worker = new Worker("/assets/js/tools/pdf-native-worker.js?v=2", { type: "module" });
     const requests = new Map();
     let sequence = 0;
     let closed = false;
@@ -110,6 +110,7 @@
       .map(({ text, bbox }) => ({
         ...bounds(bbox.x0 / canvas.width, (bbox.y0 - 2) / canvas.height, bbox.x1 / canvas.width, (bbox.y1 + 2) / canvas.height),
         text: text.trim(),
+        ocr: true,
         size: Math.max(5, 0.85 * (bbox.y1 - bbox.y0)),
         angle: 0,
       }));
@@ -281,33 +282,41 @@
     }
   }
 
-  async function materializeText(client, pages, onProgress) {
+  const nativeMarks = (marks) => marks.filter((mark) => mark.kind === "replace" && !mark.visual);
+  const visualMarks = (marks) => marks.filter((mark) => mark.kind !== "replace" || mark.visual);
+
+  async function materializeText(client, pages) {
     const candidates = pages.flatMap((page) => {
-      const patches = page.marks.filter((mark) => mark.kind === "replace");
-      if (!page.original || !patches.length || patches.some((mark) => mark.object == null || /[\r\n]/.test(mark.text))) return [];
-      // Text written into the source sits underneath new markup. Keep the order
-      // from the preview if an earlier markup intersects a later replacement.
-      if (page.marks.some((mark, index) => mark.kind === "replace" &&
-        page.marks.slice(0, index).some((prior) => prior.kind !== "replace" && overlaps(prior, mark)))) return [];
+      const patches = nativeMarks(page.marks);
+      if (!page.original || !patches.length) return [];
       const edits = [...new Map(patches.map((mark) => [mark.object, mark])).values()].map(({ object, sourceText, text,
         size, color, align, family, bold, italic }) => ({ object, sourceText, text, size, color, align, family, bold, italic }));
       return [{ index: page.original - 1, edits }];
     });
-    if (!client || !candidates.length) return { bytes: null, applied: [] };
-    onProgress("Writing selectable PDF text…");
-    try { return await client.call("save", candidates); }
-    catch { return { bytes: null, applied: [] }; }
+    if (!candidates.length) return { bytes: null, applied: [] };
+    if (!client) throw new Error("The PDF text engine is unavailable. Reopen the PDF and try again.");
+    const result = await client.call("save", candidates);
+    const failed = candidates.find(({ index }) => !result.applied.includes(index));
+    if (failed) throw new Error("Page " + (failed.index + 1) + " cannot save this text in the selected font. Pick another font or use a visual replacement.");
+    return result;
+  }
+
+  async function usePatchedPdf(bytes, callback) {
+    const task = pdfjsLib.getDocument({ data: bytes.slice(), isEvalSupported: false });
+    try { return await callback(await task.promise); }
+    finally { await task.destroy(); }
   }
 
   async function writePdf(file, pdf, pages, client, onProgress) {
     const redact = pages.some((page) => page.marks.some((mark) => mark.kind === "redact"));
-    const { bytes, applied } = redact ? { bytes: null, applied: [] } : await materializeText(client, pages, onProgress);
+    onProgress("Writing selectable PDF text…");
+    const { bytes, applied } = await materializeText(client, pages);
     const changed = new Set(applied.map((index) => index + 1));
-    const replacements = (page) => page.marks.some((mark) => mark.kind === "replace");
+    const replacements = (page) => page.marks.some((mark) => mark.kind === "replace" && mark.visual);
     const ordered = pages.length === pdf.numPages && pages.every((page, index) => page.original === index + 1);
-    const flattenReplacement = pages.some((page) => replacements(page) && !changed.has(page.original));
-    if (bytes && ordered && pages.every((page) => !page.rotation &&
-      page.marks.every((mark) => mark.kind === "replace" && changed.has(page.original)))) {
+    const flattenReplacement = pages.some(replacements);
+    if (bytes && !redact && ordered && pages.every((page) => !page.rotation &&
+      page.marks.every((mark) => mark.kind === "replace" && !mark.visual && changed.has(page.original)))) {
       return { bytes, native: changed.size, flattened: 0 };
     }
     const source = redact ? null : await PDFLib.PDFDocument.load(bytes || await file.arrayBuffer(), { updateMetadata: false });
@@ -319,20 +328,24 @@
     const result = preserve ? source : await PDFLib.PDFDocument.create();
     const fonts = new Map();
     const copyIndices = pages.filter((page) => page.original && !redact &&
-      (!replacements(page) || changed.has(page.original))).map((page) => page.original - 1);
+      !replacements(page)).map((page) => page.original - 1);
     const copies = !preserve && copyIndices.length ? await result.copyPages(source, copyIndices) : [];
     let flattened = 0;
     let copyIndex = 0;
     for (const [index, page] of pages.entries()) {
       onProgress("Exporting page " + (index + 1) + " of " + pages.length + "…");
-      const flatten = page.original && (redact || (replacements(page) && !changed.has(page.original)));
-      const marks = changed.has(page.original) ? page.marks.filter((mark) => mark.kind !== "replace") : page.marks;
+      const flatten = page.original && (redact || replacements(page));
+      const marks = visualMarks(page.marks);
       if (flatten) flattened += 1;
       const target = !page.original ? result.addPage(blankSize) : flatten ? null
         : preserve ? result.getPage(page.original - 1) : result.addPage(copies[copyIndex++]);
       if (flatten || marks.length) {
         let rendered;
-        if (page.original && flatten) rendered = await renderPdfPage(pdf, page.original, 2350);
+        if (page.original && flatten) {
+          rendered = changed.has(page.original)
+            ? await usePatchedPdf(bytes, (patched) => renderPdfPage(patched, page.original, 2350))
+            : await renderPdfPage(pdf, page.original, 2350);
+        }
         else if (page.original) {
           const sourcePage = await pdf.getPage(page.original);
           const actual = sourcePage.getViewport({ scale: 1 });
@@ -390,7 +403,7 @@
     const color = input({ type: "color", value: "#131722", class: "pe-color" });
     const background = input({ type: "color", value: "#ffffff", class: "pe-color" });
     const shape = select([["Rectangle", "rectangle"], ["Ellipse", "ellipse"], ["Line", "line"]], "rectangle");
-    const family = select([["Match original", "original"], ["Sans-serif", "sans"], ["Serif", "serif"], ["Monospace", "mono"], ["Script", "script"]], "sans");
+    const family = select([["Keep original font", "original"], ["Sans-serif", "sans"], ["Serif", "serif"], ["Monospace", "mono"], ["Script", "script"]], "sans");
     const alignment = select([["Left", "left"], ["Center", "center"], ["Right", "right"]], "left");
     const signatureImage = el("input", { type: "checkbox" });
     for (const [control, label] of [[pageList, "Go to page"], [regionsList, "Text on this page"], [language, "Scan language"],
@@ -400,11 +413,18 @@
     const preview = canvasFor(1, 1);
     preview.setAttribute("aria-label", "PDF page preview");
     const inlineValue = input({ "aria-label": "Edit text directly on the page", maxlength: 2000 });
+    const inlineNotice = el("p", { class: "pe-inline-notice", role: "status", hidden: true });
+    const fontNotice = el("p", { class: "pe-font-notice", role: "status", hidden: true });
     const inlineApply = el("button", { type: "submit", class: "tp-btn tp-btn-primary" }, "Apply");
     const inlineCancel = button("Cancel", cancelInline, "ghost");
+    const chooseFont = button("Font options", () => {
+      closeInline();
+      (regionCanUseFont() ? family : visualReplacement).focus();
+    }, "ghost", { hidden: true });
     const inlineEdit = el("form", { class: "pe-inline-edit", hidden: true },
-      inlineValue, actions(inlineApply, inlineCancel));
-    const workArea = el("div", { class: "pe-preview" }, preview, inlineEdit);
+      inlineValue, inlineNotice, actions(inlineApply, chooseFont, inlineCancel));
+    const sheet = el("div", { class: "pe-sheet" }, preview);
+    const workArea = el("div", { class: "pe-preview", tabindex: 0, role: "region", "aria-label": "PDF preview" }, sheet, inlineEdit);
     const toolHelp = el("p", { class: "tp-hint" });
     const exportNote = el("p", { class: "tp-hint pe-export-note" });
     const history = [];
@@ -419,6 +439,7 @@
     let nativeReady;
     const objectRegions = new Map();
     let base;
+    let patchedCanvas;
     let baseScale = 1;
     let originalRegions = [];
     let regions = [];
@@ -426,9 +447,13 @@
     let active = "replace";
     let image;
     let drag;
-    let tap;
+    let moving;
+    let pinch;
+    const pointers = new Map();
+    let zoomPercent = 100;
     let busy = false;
 
+    const regionCanUseFont = () => regions[selected]?.object != null;
     const current = () => pages.find((page) => page.id === currentId);
     const index = () => pages.findIndex((page) => page.id === currentId);
     const wantsImage = () => active === "image" || (active === "signature" && signatureImage.checked);
@@ -464,7 +489,7 @@
       currentId = previous.id;
       selected = -1;
       updateRegions();
-      if (rerender) await showPage();
+      if (rerender || nativeMarks(current()?.marks || []).length || patchedCanvas) await showPage();
       else refresh();
       tell(from === history ? "Edit undone." : "Edit restored.");
     }
@@ -480,8 +505,8 @@
       try {
         composed.dataset.preview = "true";
         const context = composed.getContext("2d");
-        context.drawImage(base, 0, 0);
-        paint(composed, page.marks, baseScale);
+        context.drawImage(patchedCanvas || base, 0, 0, width, height);
+        paint(composed, visualMarks(page.marks), baseScale);
         if (active === "replace") {
           context.lineWidth = Math.max(1, 1.4 * baseScale);
           for (const [i, item] of regions.entries()) {
@@ -538,6 +563,9 @@
 
     function chooseRegion(value) {
       closeInline();
+      fontNotice.hidden = true;
+      inlineNotice.hidden = true;
+      visualReplacement.checked = Boolean(regions[value]?.visual);
       selected = value;
       regionsList.value = value < 0 ? "" : String(value);
       if (value >= 0) {
@@ -592,13 +620,16 @@
       inlineEdit.style.width = width + "px";
       inlineEdit.style.left = Math.max(workArea.scrollLeft + 8,
         Math.min(left, workArea.scrollLeft + workArea.clientWidth - width - 8)) + "px";
-      inlineEdit.style.top = Math.max(workArea.scrollTop + 8, top - 4) + "px";
+      inlineEdit.style.top = Math.max(workArea.scrollTop + 8,
+        Math.min(top - 4, workArea.scrollTop + workArea.clientHeight - inlineEdit.offsetHeight - 8)) + "px";
     }
 
     function openInline() {
       const item = regions[selected];
       if (!item || busy || active !== "replace" || /[\r\n]/.test(item.text)) return;
       inlineValue.value = textValue.value;
+      inlineNotice.hidden = true;
+      chooseFont.hidden = true;
       inlineEdit.hidden = false;
       positionInline();
       inlineValue.focus({ preventScroll: true });
@@ -634,7 +665,9 @@
         try { url = new URL(urlInput.value.trim()); } catch { throw new Error("Enter a full HTTP or HTTPS link."); }
         if (!["https:", "http:"].includes(url.protocol)) throw new Error("Enter a full HTTP or HTTPS link.");
       }
-      return { ...box, kind: active, text, url: url?.href, size: Number(size.value), family: family.value, color: color.value,
+      const displayedSize = replacing && Math.max(4, Math.min(120, Math.round(replacing.size * 2) / 2));
+      const fontSize = displayedSize === Number(size.value) ? replacing.size : Number(size.value);
+      return { ...box, kind: active, text, url: url?.href, size: fontSize, family: family.value, color: color.value,
         bold: bold.checked, italic: italic.checked,
         background: background.value, image: wantsImage() ? image : null, shape: shape.value, align: alignment.value,
         angle: replacing?.angle ?? -current().rotation * Math.PI / 180, reverse };
@@ -665,10 +698,48 @@
       finally { busy = false; refresh(); }
     }, "ghost");
 
-    const apply = button("Apply replacement", () => {
-      if (selected < 0) return;
-      try { commit(newMark(regions[selected], regions[selected])); }
-      catch (failure) { tell(error(failure)); }
+    const apply = button("Apply replacement", async () => {
+      if (selected < 0 || busy) return;
+      const region = regions[selected];
+      const inlineWasOpen = !inlineEdit.hidden;
+      try {
+        const mark = newMark(region, region);
+        if (region.object == null && !region.ocr && !visualReplacement.checked) {
+          throw new Error("This text block cannot be edited in its original font. Select Use visual replacement to edit its appearance.");
+        }
+        if (region.ocr || visualReplacement.checked) {
+          mark.visual = true;
+          if (mark.family === "original") throw new Error("Choose a font for the visual replacement.");
+          commit(mark);
+          return;
+        }
+        if (/[\r\n]/.test(mark.text)) throw new Error("Use one line for direct text editing.");
+        busy = true;
+        refresh(false);
+        tell("Checking the PDF font…");
+        const page = current();
+        const { bytes } = await materializeText(client, [{ ...page, marks: [...page.marks, mark] }]);
+        const rendered = await usePatchedPdf(bytes, (patched) => renderPdfPage(patched, page.original, 1450));
+        if (patchedCanvas) releaseCanvas(patchedCanvas);
+        patchedCanvas = rendered.canvas;
+        fontNotice.hidden = true;
+        commit(mark);
+      } catch (failure) {
+        const message = error(failure);
+        fontNotice.textContent = message;
+        fontNotice.hidden = false;
+        tell(message);
+        if (inlineWasOpen) {
+          inlineNotice.textContent = message;
+          inlineNotice.hidden = false;
+          chooseFont.hidden = false;
+          inlineEdit.hidden = false;
+          positionInline();
+        }
+      } finally {
+        busy = false;
+        refresh(false);
+      }
     });
     const center = button("Place at center", () => {
       try { commit(newMark(bounds(...originalPoint(0.25, 0.4), ...originalPoint(0.75, 0.6)))); }
@@ -734,6 +805,9 @@
       finally { busy = false; refresh(false); }
     });
 
+    const zoomOut = button("−", () => adjustZoom(-25), "ghost", { "aria-label": "Zoom out" });
+    const zoomIn = button("+", () => adjustZoom(25), "ghost", { "aria-label": "Zoom in" });
+    const fitPage = button("Fit", () => setZoom("fit"), "ghost", { "aria-label": "Fit page width" });
     const toolButtons = kinds.map(([kind, label]) => button(label, () => selectTool(kind), "ghost", { "aria-pressed": "false" }));
     const replaceOptions = el("div", { class: "pe-options" }, field("Find text", textFind), field("Text on this page", regionsList),
       actions(field("Scan language", language), scan));
@@ -743,17 +817,23 @@
     const urlField = field("Link URL", urlInput);
     const styleOptions = el("div", { class: "pe-fields" }, checkbox("Bold", bold), checkbox("Italic", italic));
     const signatureField = checkbox("Use an image of my signature", signatureImage);
+    const visualReplacement = el("input", { type: "checkbox" });
+    const visualChoice = checkbox("Use visual replacement", visualReplacement);
+    visualReplacement.addEventListener("change", () => {
+      if (visualReplacement.checked && family.value === "original") family.value = "sans";
+      refresh(false);
+    });
     const fontControls = el("div", { class: "pe-fields" }, field("Font", family), field("Size (pt)", size), field("Alignment", alignment));
     const colorField = field("Color", color);
     const fillField = field("Replacement background", background);
     const inspector = el("section", { class: "pe-inspector" }, el("h2", { text: "Edit page" }), toolHelp,
-      replaceOptions, signatureField, textField, imageField, shapeField, urlField, fontControls, styleOptions,
+      replaceOptions, signatureField, textField, imageField, shapeField, urlField, fontControls, styleOptions, visualChoice, fontNotice,
       el("div", { class: "pe-fields" }, colorField, fillField), actions(apply, center), positionOptions);
     const editor = el("div", { class: "pe-workspace" },
       el("div", { class: "pe-top" }, fileName, actions(changeFile, undo, redo, save)),
       el("div", { class: "pe-command-bar" },
         el("div", { class: "pe-tools", role: "group", "aria-label": "Editing tools" }, toolButtons),
-        field("Zoom", zoom)),
+        el("div", { class: "pe-zoom", role: "group", "aria-label": "Page zoom" }, zoomOut, zoom, zoomIn, fitPage)),
       el("div", { class: "pe-desk" }, workArea, inspector), exportNote,
       el("section", { class: "pe-pages" }, el("h2", { text: "Pages" }), field("Go to page", pageList),
         actions(prev, next, earlier, later, rotate, add, remove), pageSummary));
@@ -777,6 +857,7 @@
     function refresh(repaint = true) {
       const page = current();
       if (busy) closeInline();
+      inlineValue.disabled = inlineApply.disabled = busy;
       pdfInput.disabled = busy;
       changeFile.disabled = busy;
       editor.hidden = !pdf || !page;
@@ -797,6 +878,9 @@
       add.disabled = busy || pages.length >= 100;
       remove.disabled = busy || pages.length <= 1;
       rotate.disabled = save.disabled = busy || !base;
+      zoomOut.disabled = busy || zoomPercent <= 50;
+      zoomIn.disabled = busy || zoomPercent >= 400;
+      fitPage.disabled = busy || !base;
       undo.disabled = busy || !history.length;
       redo.disabled = busy || !future.length;
       toolButtons.forEach((control, i) => {
@@ -804,7 +888,8 @@
         control.disabled = busy;
       });
       const instructions = {
-        replace: "Click text in the preview or find it below. Type your correction, then apply it.",
+        replace: "Tap text to edit. Drag to move around the page or pinch to zoom.",
+        pan: "Drag to move around the page. Pinch or use the zoom controls to change its size.",
         text: "Enter text and drag a box on the page to place it.",
         image: "Choose an image and drag to place it on the page.",
         signature: "Type your name or choose a signature image, then drag to place it.",
@@ -818,34 +903,40 @@
       };
       toolHelp.textContent = instructions[active];
       workArea.dataset.selecting = String(active === "replace");
+      workArea.dataset.panning = String(active === "pan");
       const marks = pages.flatMap((item) => item.marks);
       const hasRedaction = marks.some((mark) => mark.kind === "redact");
-      const visualFallback = marks.some((mark) => mark.kind === "replace" && (mark.object == null || /[\r\n]/.test(mark.text)));
+      const visualFallback = marks.some((mark) => mark.kind === "replace" && mark.visual);
       const hasReplacement = marks.some((mark) => mark.kind === "replace");
       exportNote.hidden = !hasRedaction && !hasReplacement;
       exportNote.textContent = hasRedaction
         ? "Redaction exports every page as a flattened image without selectable text, links or form fields."
         : visualFallback
           ? "This edit uses a visual replacement. Its page may be flattened when you download."
-          : "Supported text edits stay selectable. If a font or text block cannot be edited directly, the affected page is flattened on export.";
+          : "Direct text edits stay selectable. Keep original font uses the PDF’s existing font.";
       replaceOptions.hidden = active !== "replace";
-      fillField.hidden = active !== "replace" || (selected >= 0 && regions[selected]?.object != null);
+      const region = regions[selected];
+      visualChoice.hidden = active !== "replace" || !region || region.ocr;
+      visualReplacement.disabled = busy;
+      fillField.hidden = active !== "replace" || (region?.object != null && !visualReplacement.checked);
       textField.hidden = fontControls.hidden = !wantsText();
       styleOptions.hidden = !wantsText();
-      family.options[0].hidden = active !== "replace";
+      family.options[0].hidden = active !== "replace" || region?.object == null || visualReplacement.checked;
+      const keepFont = family.value === "original";
+      bold.disabled = italic.disabled = busy || keepFont;
       urlField.hidden = active !== "link";
       signatureField.hidden = active !== "signature";
       imageField.hidden = !wantsImage();
       shapeField.hidden = active !== "shape";
-      colorField.hidden = active === "redact" || wantsImage();
+      colorField.hidden = active === "redact" || active === "pan" || wantsImage();
       apply.hidden = active !== "replace";
-      center.hidden = active === "replace" || active === "redact";
-      positionOptions.hidden = active === "replace";
+      center.hidden = ["replace", "redact", "pan"].includes(active);
+      positionOptions.hidden = active === "replace" || active === "pan";
       scan.disabled = busy || !page.original || !base;
       apply.disabled = busy || selected < 0;
       center.disabled = busy || !base;
       [regionsList, textFind, textValue, size, color, background, shape, family, alignment, signatureImage, imageInput,
-        language, italic, bold, urlInput, zoom]
+        language, urlInput, zoom]
         .forEach((control) => { control.disabled = busy; });
       if (repaint) draw();
     }
@@ -853,9 +944,11 @@
     async function showPage() {
       busy = true;
       selected = -1;
-      drag = null;
+      drag = moving = pinch = null;
+      pointers.clear();
       if (base) releaseCanvas(base);
-      base = null;
+      if (patchedCanvas) releaseCanvas(patchedCanvas);
+      patchedCanvas = base = null;
       originalRegions = [];
       textFind.value = "";
       updateRegions();
@@ -877,6 +970,10 @@
           }
           originalRegions = scans.get(page.original) ||
             findNativeRegions(objectRegions.get(page.original) || [], rendered.viewport, base, extracted);
+          if (nativeMarks(page.marks).length) {
+            const { bytes } = await materializeText(client, [page]);
+            patchedCanvas = (await usePatchedPdf(bytes, (patched) => renderPdfPage(patched, page.original, 1450))).canvas;
+          }
         } else {
           baseScale = 1.5;
           base = canvasFor(Math.ceil(blankSize[0] * baseScale), Math.ceil(blankSize[1] * baseScale));
@@ -887,7 +984,11 @@
         updateRegions();
         tell("");
       } catch (failure) { tell(error(failure)); }
-      finally { busy = false; refresh(); }
+      finally {
+        busy = false;
+        refresh();
+        workArea.scrollTo(0, 0);
+      }
     }
 
     function move(direction) {
@@ -914,34 +1015,124 @@
       return originalPoint(x, y);
     };
 
-    preview.addEventListener("pointerdown", (event) => {
-      if (!base || busy || drag || event.button !== 0) return;
+    function setZoom(value, center, location) {
+      const rect = workArea.getBoundingClientRect();
+      const canvas = preview.getBoundingClientRect();
+      const focus = center || { x: rect.left + workArea.clientWidth / 2, y: rect.top + workArea.clientHeight / 2 };
+      const anchor = location || {
+        x: clamp((focus.x - canvas.left) / Math.max(1, canvas.width)),
+        y: clamp((focus.y - canvas.top) / Math.max(1, canvas.height)),
+      };
+      zoomPercent = value === "fit" ? 100 : Math.max(50, Math.min(400, Math.round(Number(value))));
+      sheet.style.width = zoomPercent + "%";
+      const displayed = value === "fit" ? value : String(zoomPercent);
+      zoom.querySelector("[data-custom-zoom]")?.remove();
+      if (![...zoom.options].some((option) => option.value === displayed)) {
+        zoom.append(el("option", { value: displayed, "data-custom-zoom": true, text: displayed + "%" }));
+      }
+      zoom.value = displayed;
+      const resized = preview.getBoundingClientRect();
+      workArea.scrollLeft += resized.left + anchor.x * resized.width - focus.x;
+      workArea.scrollTop += resized.top + anchor.y * resized.height - focus.y;
+      zoomOut.disabled = zoomPercent <= 50;
+      zoomIn.disabled = zoomPercent >= 400;
+      if (!inlineEdit.hidden) positionInline();
+    }
+
+    function adjustZoom(delta) {
+      setZoom(zoomPercent + delta);
+    }
+
+    function touchPair() {
+      const [a, b] = [...pointers.values()];
+      return {
+        x: (a.x + b.x) / 2, y: (a.y + b.y) / 2,
+        distance: Math.hypot(a.x - b.x, a.y - b.y),
+      };
+    }
+
+    function hitText(event) {
       const [x, y] = point(event);
-      if (active === "replace") {
-        const matches = regions.map((item, i) => ({ ...item, i })).filter((item) =>
-          matchesSearch(item) && item.x <= x && item.x + item.width >= x && item.y <= y && item.y + item.height >= y);
-        matches.sort((first, second) => first.width * first.height - second.width * second.height);
-        chooseRegion(matches[0]?.i ?? -1);
-        if (!matches.length) return;
-        if (event.pointerType === "mouse") openInline();
-        else tap = { id: event.pointerId, x: event.clientX, y: event.clientY };
-      } else {
-        drag = { id: event.pointerId, point: [x, y] };
+      const matches = regions.map((item, i) => ({ ...item, i })).filter((item) =>
+        matchesSearch(item) && item.x <= x && item.x + item.width >= x && item.y <= y && item.y + item.height >= y);
+      matches.sort((first, second) => first.width * first.height - second.width * second.height);
+      chooseRegion(matches[0]?.i ?? -1);
+      if (matches.length) openInline();
+    }
+
+    let animation = 0;
+    preview.addEventListener("pointerdown", (event) => {
+      if (!base || busy || event.button !== 0) return;
+      const pointer = { x: event.clientX, y: event.clientY };
+      if (event.pointerType === "touch") {
+        pointers.set(event.pointerId, pointer);
+        preview.setPointerCapture(event.pointerId);
+        if (pointers.size > 1) {
+          if (pointers.size === 2) {
+            const center = touchPair();
+            const rect = preview.getBoundingClientRect();
+            pinch = { ...center, percent: zoomPercent, anchor: {
+              x: clamp((center.x - rect.left) / rect.width),
+              y: clamp((center.y - rect.top) / rect.height),
+            } };
+            drag = moving = null;
+            closeInline();
+            draw();
+          }
+          return;
+        }
+        if (pinch) return;
+      }
+      if (active === "replace" && event.pointerType !== "touch") {
+        hitText(event);
+      } else if (active === "pan" || active === "replace") {
+        moving = { id: event.pointerId, ...pointer, dragged: false };
+        preview.setPointerCapture(event.pointerId);
+      } else if (!drag) {
+        drag = { id: event.pointerId, point: point(event) };
         preview.setPointerCapture(event.pointerId);
       }
     });
-    let animation = 0;
     preview.addEventListener("pointermove", (event) => {
+      if (pointers.has(event.pointerId)) pointers.set(event.pointerId, { x: event.clientX, y: event.clientY });
+      if (pinch) {
+        if (pointers.size === 2) {
+          const center = touchPair();
+          const factor = center.distance / Math.max(1, pinch.distance);
+          setZoom(pinch.percent * factor, center, pinch.anchor);
+        }
+        return;
+      }
+      if (moving?.id === event.pointerId) {
+        const dx = moving.x - event.clientX;
+        const dy = moving.y - event.clientY;
+        if (!moving.dragged && Math.hypot(dx, dy) < 7) return;
+        moving = { id: event.pointerId, x: event.clientX, y: event.clientY, dragged: true };
+        closeInline();
+        const prior = workArea.scrollTop;
+        workArea.scrollLeft += dx;
+        workArea.scrollTop += dy;
+        if (event.pointerType === "touch") {
+          const remainder = dy - (workArea.scrollTop - prior);
+          if (Math.abs(remainder) > 1) window.scrollBy(0, remainder);
+        }
+        return;
+      }
       if (drag?.id !== event.pointerId) return;
       const outline = bounds(...drag.point, ...point(event));
       cancelAnimationFrame(animation);
       animation = requestAnimationFrame(() => { if (drag) draw(outline); });
     });
     preview.addEventListener("pointerup", (event) => {
-      if (tap?.id === event.pointerId) {
-        const distance = Math.hypot(event.clientX - tap.x, event.clientY - tap.y);
-        tap = null;
-        if (distance <= 8) openInline();
+      pointers.delete(event.pointerId);
+      if (pinch) {
+        if (pointers.size === 0) pinch = null;
+        return;
+      }
+      if (moving?.id === event.pointerId) {
+        const tap = !moving.dragged;
+        moving = null;
+        if (tap && active === "replace") hitText(event);
         return;
       }
       if (drag?.id !== event.pointerId) return;
@@ -957,18 +1148,17 @@
       try { commit(newMark(box, null, reverse)); }
       catch (failure) { tell(error(failure)); draw(); }
     });
-    preview.addEventListener("pointercancel", () => { tap = null; });
-    preview.addEventListener("lostpointercapture", () => {
-      if (drag) { drag = null; draw(); }
-    });
+    function cancelPointer(event) {
+      pointers.delete(event.pointerId);
+      if (pointers.size === 0) pinch = null;
+      if (moving?.id === event.pointerId) moving = null;
+      if (drag?.id === event.pointerId) { drag = null; draw(); }
+    }
+    preview.addEventListener("pointercancel", cancelPointer);
+    preview.addEventListener("lostpointercapture", cancelPointer);
 
     textFind.addEventListener("input", () => { closeInline(); selected = -1; refreshRegions(); refresh(); });
-    zoom.addEventListener("change", () => {
-      if (zoom.value === "fit") preview.style.removeProperty("width");
-      else preview.style.width = zoom.value + "%";
-      workArea.classList.toggle("is-zoomed", zoom.value !== "fit");
-      if (!inlineEdit.hidden) positionInline();
-    });
+    zoom.addEventListener("change", () => setZoom(zoom.value));
     textValue.addEventListener("keydown", (event) => {
       if (event.key === "Enter" && (event.metaKey || event.ctrlKey) && !apply.hidden && !apply.disabled) {
         event.preventDefault();
@@ -978,6 +1168,7 @@
     window.addEventListener("pagehide", (event) => { if (!event.persisted) client?.close(); });
     regionsList.addEventListener("change", () => chooseRegion(regionsList.value === "" ? -1 : Number(regionsList.value)));
     pageList.addEventListener("change", () => navigate(pages.findIndex((page) => page.id === Number(pageList.value))));
+    family.addEventListener("change", () => refresh(false));
     signatureImage.addEventListener("change", () => refresh(false));
     imageInput.addEventListener("change", async () => {
       image = null;
@@ -1022,6 +1213,7 @@
           id: ++nextId, original: i + 1, rotation: 0, marks: [],
         }));
         currentId = pages[0].id;
+        setZoom("fit");
         await showPage();
       } catch (failure) {
         if (incoming && incoming !== pdf) await incoming.destroy();

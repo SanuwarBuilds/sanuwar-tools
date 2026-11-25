@@ -53,18 +53,23 @@
 }
 
 .pe-preview {
-  display: grid;
-  place-items: center;
+  position: relative;
   min-width: 0;
-  padding: clamp(10px, 2vw, 24px);
+  min-height: 140px;
+  max-height: min(72dvh, 790px);
+  overflow: auto;
+  overflow-anchor: none;
+  padding: clamp(8px, 1.5vw, 18px);
   border: 1px solid var(--bp-line);
   border-radius: 12px;
   background: var(--bp-panel-3);
 }
 
+.pe-sheet { width: 100%; margin-inline: auto; }
+
 .pe-preview canvas {
   display: block;
-  max-width: 100%;
+  width: 100%;
   height: auto;
   background: #fff;
   box-shadow: 0 3px 12px #10132326;
@@ -72,10 +77,9 @@
   touch-action: none;
 }
 
-.pe-preview[data-selecting="true"] canvas {
-  cursor: text;
-  touch-action: pan-y;
-}
+.pe-preview[data-selecting="true"] canvas { cursor: text; }
+.pe-preview[data-panning="true"] canvas { cursor: grab; }
+.pe-preview[data-panning="true"] canvas:active { cursor: grabbing; }
 
 .pe-inspector, .pe-pages {
   display: grid;
@@ -138,7 +142,7 @@
 
 .pe-command-bar {
   display: grid;
-  grid-template-columns: minmax(0, 1fr) 110px;
+  grid-template-columns: minmax(0, 1fr) auto;
   align-items: start;
   gap: 10px;
   padding: 10px 0;
@@ -146,15 +150,14 @@
 }
 
 .pe-command-bar .pe-tools { border: 0; padding: 0; }
-.pe-preview.is-zoomed { display: block; overflow: auto; }
-.pe-preview.is-zoomed canvas { max-width: none; margin-inline: auto; }
+.pe-zoom { display: flex; align-items: center; flex-wrap: wrap; gap: 5px; }
+.pe-zoom .tp-select { max-width: 118px; }
+.pe-zoom .tp-btn { min-width: 42px; }
 
 @media (max-width: 560px) {
   .pe-command-bar { grid-template-columns: minmax(0, 1fr); }
   .pe-command-bar > .tp-field { max-width: 135px; }
 }
-
-.pe-preview { position: relative; }
 
 .pe-inline-edit {
   position: absolute;
@@ -168,5 +171,12 @@
   box-shadow: 0 6px 20px #1213212b;
 }
 
-.pe-inline-edit > .tp-actions { margin: 0; justify-content: end; }
+.pe-inline-edit > .tp-actions { margin: 0; justify-content: end; flex-wrap: wrap; }
 .pe-inline-edit .tp-btn { min-height: 34px; }
+
+.pe-workspace .pe-inline-edit input.tp-input { font-size: 16px; }
+.pe-font-notice, .pe-inline-notice { margin: 0; font-size: 13px; color: var(--bp-ink); }
+@media (max-width: 640px) {
+  .pe-preview { max-height: 57dvh; }
+  .pe-zoom .tp-select { min-height: 42px; }
+}
