@@ -59,4 +59,24 @@ GUIDES = {
         ],
         'tools': [('QR Code Generator', '/tools/qr-code-generator')],
     },
+    'compress-photos-for-sharing': {
+        'title': 'Make photos smaller for email and web',
+        'intro': 'Use the right pixel width and file format, then check the result against your attachment limit.',
+        'updated': '2026-11-25',
+        'sections': [
+            ('Pick a width for the way the photo will be used', [
+                'Keep the original file for printing or later edits. For a photo that will appear at about 800 pixels wide on a web page, try a 1,600-pixel export for sharper display on high-density screens.',
+                'For example, set Max width to 1600 for a 4000 × 3000 photo. The result will be 1600 × 1200, with the original aspect ratio preserved. Enter 0 to leave the dimensions unchanged.',
+            ]),
+            ('Choose a format and compare two exports', [
+                'Drop the original into Image Compressor. Pick JPG for a photo that you want to email or send to someone whose app format support is unknown. Start at 80% quality and press Compress images. Check the output size shown in the results.',
+                'Try WebP if the receiving site accepts it. For screenshots or logos that need transparent backgrounds, choose PNG or WebP. JPG replaces transparency with the selected background colour, and the quality slider does not control PNG export.',
+            ]),
+            ('Fit the attachment limit without losing legibility', [
+                'If the limit is 500 KB and the result is still too large, lower quality in small steps or reduce the width from 1,600 to 1,200 pixels. Use the original each time to avoid recompressing a copy.',
+                'Open the saved file and zoom in on text, faces or other details you need to preserve. For a form with exact pixel and file size rules, verify the exported file in Form File Checker before uploading.',
+            ]),
+        ],
+        'tools': [('Image Compressor', '/tools/image-compressor'), ('Form File Checker', '/tools/form-file-checker')],
+    },
 }

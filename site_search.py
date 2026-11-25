@@ -1,6 +1,7 @@
 """Explicit, public metadata for the site's unified navigation search."""
 from urllib.parse import quote, urlencode, urlsplit, unquote
 from availability import is_public
+from tool_guides import GUIDES
 
 PAGES = [
     ('Home', '/', 'Tools and downloads'),
@@ -46,6 +47,8 @@ def build_index(config, catalog, downloads, directory, eduhelp, admin=False, wid
 
     for name, href, description in PAGES:
         add(name, href, 'Page', description)
+    for slug, guide in GUIDES.items():
+        add(guide['title'], '/guides/' + slug, 'Guide', guide['intro'])
     for category in catalog.get('categories', []):
         add(category, '/tools?' + urlencode({'category': category}), 'Category', 'Browse ' + category.lower())
     for tool in catalog.get('tools', []):

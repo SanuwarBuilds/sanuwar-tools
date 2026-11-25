@@ -54,6 +54,18 @@
 <a href="/tools">{{ icon('grid') }}<span>All categories</span></a>
 </nav>
 
+<section class="desk-panel desk-guides" id="guides" aria-labelledby="guides-title">
+  <div class="desk-panel-head"><h2 id="guides-title">{{ icon('books', 'green') }}Practical guides</h2></div>
+  <div class="desk-tool-grid">
+    {% for slug, guide in guides.items() %}
+    <a class="desk-download-row desk-guide-row" href="{{ url_for('tool_guide', slug=slug) }}">
+      <span class="desk-row-copy"><strong>{{ guide.title }}</strong><small>{{ guide.intro }}</small></span>
+      {{ arrow() }}
+    </a>
+    {% endfor %}
+  </div>
+</section>
+
 <div class="desk-library-grid">
 {% if public_config.get('downloadPage', {}).get('enabled', True) %}
 <section class="desk-panel desk-downloads" id="downloads" aria-labelledby="downloads-title">

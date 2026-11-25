@@ -215,3 +215,14 @@ body.pro-theme.v2.bp.nx.wb-ui.reference-ui .desk-footer-panel .desk-all-links { 
 @media (max-width: 760px) {
   body.pro-theme.v2.bp.nx.wb-ui.reference-ui .desk-footer-panel { position: fixed; bottom: 80px; left: 16px; right: 16px; width: auto; }
 }
+
+body.pro-theme.v2.bp.nx.wb-ui.reference-ui .desk-guides {
+  margin-bottom: 16px;
+  scroll-margin-top: 84px;
+}
+body.pro-theme.v2.bp.nx.wb-ui.reference-ui .desk-guide-row {
+  padding: 12px;
+}
+body.pro-theme.v2.bp.nx.wb-ui.reference-ui .desk-guide-row small {
+  white-space: normal;
+}

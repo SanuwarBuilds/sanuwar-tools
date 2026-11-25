@@ -259,6 +259,8 @@ def install(app, load_config, load_directory=None, load_tool_catalog=None, load_
                                           'width': 1200, 'height': 630},
                    'dateModified': SITE_UPDATED,
                    'publisher': publisher}
+        if guide is not None:
+            webpage['dateModified'] = guide.get('updated', '2026-11-15')
         if download is not None:
             modified = upload_time(download.get('updated_at')) or upload_time(download.get('created_at'))
             if modified:
@@ -386,7 +388,8 @@ def install(app, load_config, load_directory=None, load_tool_catalog=None, load_
             paths.extend(download_dates)
         if not any(tool.get('id') == 'builtin-photo-tools' and not all(tool.get(flag, True) is True for flag in ('enabled', 'visible')) for tool in config.get('tools', [])):
             paths.append('/photo-tools')
-        paths.extend('/guides/' + slug for slug in GUIDES)
+        guide_dates = {'/guides/' + slug: guide.get('updated', '2026-11-15') for slug, guide in GUIDES.items()}
+        paths.extend(guide_dates)
         paths.extend(['/about', '/contact', '/privacy', '/directory', '/eduhelp', '/eduhelp/labs', '/players'])
         for category in directory_categories():
             slug = category.get('slug')
@@ -403,7 +406,7 @@ def install(app, load_config, load_directory=None, load_tool_catalog=None, load_
         for path in paths:
             url = SubElement(root, 'url')
             SubElement(url, 'loc').text = ORIGIN + path
-            modified = download_dates.get(path, '2026-11-15' if path.startswith('/guides/') else SITE_UPDATED)
+            modified = download_dates.get(path, guide_dates.get(path, SITE_UPDATED))
             if modified:
                 SubElement(url, 'lastmod').text = modified
         return Response(tostring(root, encoding='utf-8', xml_declaration=True), mimetype='application/xml',
