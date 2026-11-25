@@ -1,9 +1,15 @@
 {% extends 'base.html' %}
-{% set vendor_files = {'js-yaml': 'js-yaml.js', 'marked': 'marked.js', 'fflate': 'fflate.js', 'pdf-lib': 'pdf-lib.js', 'pdfjs': 'pdf.min.js', 'jspdf': 'jspdf.umd.min.js', 'bcryptjs': 'bcrypt.min.js', 'qrcodegen': 'qrcodegen.js', 'hlsjs': 'hls.min.js', 'dashjs': 'dash.all.min.js'} %}
+{% set vendor_files = {'js-yaml': 'js-yaml.js', 'marked': 'marked.js', 'fflate': 'fflate.js', 'pdf-lib': 'pdf-lib.js', 'pdfjs': 'pdf.min.js', 'jspdf': 'jspdf.umd.min.js', 'bcryptjs': 'bcrypt.min.js', 'qrcodegen': 'qrcodegen.js', 'hlsjs': 'hls.min.js', 'dashjs': 'dash.all.min.js', 'tesseract': 'ocr/tesseract.min.js'} %}
 {% set bundle_version = 4 if tool.bundle == 'players' else (4 if tool.bundle == 'calculators' else (4 if tool.bundle == 'media' else (3 if tool.bundle == 'text' else 2))) %}
 {% set streaming_players = ['m3u8-player', 'dash-player', 'cloud-video-player'] %}
 {% set uses_network = tool.slug == 'currency-converter' %}
 {% set tool_help = {
+  'application-file-pack': 'Choose any of the three files and enter the requirements shown on your application. Save passing files individually or together in a ZIP.',
+  'image-to-text': 'Choose the language and a sharp screenshot or scan. Review and edit the extracted text before copying or downloading it.',
+  'screenshot-pdf-redactor': 'Draw black boxes over the private details on each page. Review every page, then save a flattened copy.',
+  'pdf-page-size-margins': 'Choose a PDF, paper size and margin. The page content is scaled proportionally and centred.',
+  'heic-to-jpg': 'Choose HEIC or HEIF photos, set JPEG quality, then convert. Save JPGs individually or in a ZIP.',
+  'study-timer-revision-planner': 'Set an exam date, add tasks by date and use the timer for focus and break sessions. Your progress is saved in this browser.',
   'online-video-player': 'Choose a video from this device or paste a direct link, then press play. Space pauses, arrows seek and the dock holds speed, loop, picture-in-picture and screenshot controls.',
   'mp4-player': 'Drop an MP4 or paste a link that ends in .mp4. For the widest compatibility, use H.264 video with AAC audio.',
   'm3u8-player': 'Paste an .m3u8 playlist link. Adaptive playback starts automatically; pick a resolution in the quality menu or leave it on Auto.',
@@ -25,7 +31,7 @@
   'image-compressor': 'Choose JPG, PNG or WebP images and adjust quality or maximum dimensions. Compare the sizes before saving.'
 } %}
 {% block bodyclass %}wb-tool-page tool-page-{{ tool.bundle }}{% endblock %}
-{% block page_styles %}<link rel="stylesheet" href="/assets/css/tools.css?v=6">{% if tool.bundle == 'players' %}<link rel="stylesheet" href="/assets/css/players.css?v=5">{% endif %}{% endblock %}
+{% block page_styles %}<link rel="stylesheet" href="/assets/css/tools.css?v=6">{% if tool.bundle in ['file-workbench', 'study-planner'] %}<link rel="stylesheet" href="/assets/css/file-workbench.css?v=1">{% endif %}{% if tool.bundle == 'players' %}<link rel="stylesheet" href="/assets/css/players.css?v=5">{% endif %}{% endblock %}
 {% block content %}
 <section class="tp-shell wrap" data-tool-page data-tool-slug="{{ tool.slug }}"{% if tool.slug == 'form-file-checker' %} data-photo-available="{{ 'true' if photo_tools_available else 'false' }}"{% endif %}>
   <nav class="tp-crumb" aria-label="Breadcrumb"><a href="/">Home</a><span aria-hidden="true">/</span><a href="/tools">All tools</a><span aria-hidden="true">/</span><span>{{ tool.category }}</span></nav>

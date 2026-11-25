@@ -1,0 +1,5 @@
+heic-to 1.6.7
+This is the upstream dist/csp/heic-to.min.js file, distributed under the LGPL.
+License: LICENSE
+Source and build instructions: https://github.com/hoppergee/heic-to/tree/v1.6.7
+Bundled libheif source: https://github.com/strukturag/libheif/tree/v1.23.7

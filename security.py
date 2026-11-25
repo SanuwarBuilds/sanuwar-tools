@@ -171,9 +171,13 @@ def install(app):
                 "img-src 'self' data: blob:; font-src 'self'; connect-src 'self'; "
                 "object-src 'none'; base-uri 'self'; frame-ancestors 'none'; form-action 'self'")
             response.headers['Cache-Control'] = 'no-store'
-        if (request.path in ('/players', '/tools') or request.path.startswith('/players/') or request.path.startswith('/tools/')) and response.status_code == 200 and response.mimetype == 'text/html':
+        if request.path == '/assets/vendor/ocr/worker.min.js':
             response.headers['Content-Security-Policy'] = (
-                "default-src 'self'; script-src 'self'; style-src 'self' 'unsafe-inline'; "
+                "default-src 'none'; script-src 'self' 'wasm-unsafe-eval'; connect-src 'self'")
+        if (request.path in ('/players', '/tools') or request.path.startswith('/players/') or request.path.startswith('/tools/')) and response.status_code == 200 and response.mimetype == 'text/html':
+            wasm = " 'wasm-unsafe-eval'" if request.path == '/tools/heic-to-jpg' else ''
+            response.headers['Content-Security-Policy'] = (
+                f"default-src 'self'; script-src 'self'{wasm}; style-src 'self' 'unsafe-inline'; "
                 "img-src 'self' https: data: blob:; font-src 'self'; "
                 "connect-src 'self' https: https://api.frankfurter.app https://api.frankfurter.dev; "
                 "worker-src 'self' blob:; media-src 'self' https: data: blob:; "

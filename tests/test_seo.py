@@ -322,6 +322,20 @@ class ToolHubTests(unittest.TestCase):
             self.assertIn("worker-src 'self' blob:",csp)
             self.assertIn('blob:',csp.split('img-src')[1].split(';')[0])
 
+    def test_image_codecs_scope_wasm_to_the_required_context(self):
+        header = 'Content-Security-Policy'
+        ocr = self.client.get('/tools/image-to-text')
+        self.assertEqual(ocr.status_code, 200)
+        self.assertNotIn("'wasm-unsafe-eval'", ocr.headers[header])
+        self.assertIn('/assets/vendor/ocr/tesseract.min.js', ocr.get_data(as_text=True))
+        with self.client.get('/assets/vendor/ocr/worker.min.js') as worker:
+            self.assertEqual(worker.status_code, 200)
+            self.assertIn("script-src 'self' 'wasm-unsafe-eval'", worker.headers[header])
+            self.assertIn("connect-src 'self'", worker.headers[header])
+        heic = self.client.get('/tools/heic-to-jpg')
+        self.assertEqual(heic.status_code, 200)
+        self.assertIn("script-src 'self' 'wasm-unsafe-eval'", heic.headers[header])
+
     def test_sitemap_includes_hub_and_every_tool(self):
         root=fromstring(self.client.get('/sitemap.xml').data)
         locs=[node.text for node in root.iter('{http://www.sitemaps.org/schemas/sitemap/0.9}loc')]

@@ -1,0 +1,6 @@
+Tesseract.js v6.0.1 (tesseract.min.js, worker.min.js):
+https://github.com/naptha/tesseract.js/tree/v6.0.1
+Tesseract.js-core v6.0.0 (tesseract-core-lstm.js and .wasm):
+https://github.com/naptha/tesseract.js-core/tree/v6.0.0
+Tesseract fast English, Hindi and Bengali models (gzip-compressed locally):
+https://github.com/tesseract-ocr/tessdata_fast/tree/4.1.0
