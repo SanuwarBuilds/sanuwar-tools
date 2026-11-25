@@ -69,7 +69,8 @@
 <script nonce="{{ csp_nonce }}" src="/assets/js/workbench.js?v=5" defer></script>
 {% if public_ui %}<link rel="stylesheet" href="/assets/css/workspace.css?v=2">{% endif %}
 {% if public_ui %}
-<script nonce="{{ csp_nonce }}" src="/assets/js/saved-tools.js?v=2" defer></script>{% endif %}
+<script nonce="{{ csp_nonce }}" src="/assets/js/saved-tools.js?v=3" defer></script>{% endif %}
+{% if public_ui %}<link rel="stylesheet" href="/assets/css/tool-studio.css?v=1">{% endif %}
 {% if request.path.startswith('/admin') %}<link rel="stylesheet" href="/assets/css/admin-pro.css?v=3">{% endif %}
 </head>
 <body class="studio-theme {% if public_ui %}pro-theme v2 bp nx wb-ui reference-ui {% elif request.path.startswith('/admin') %}pro-theme bp {% endif %}{% block bodyclass %}{% endblock %}">

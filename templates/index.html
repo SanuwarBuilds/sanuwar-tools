@@ -1,58 +1,53 @@
 {% extends 'base.html' %}
 {% from '_ad_unit.html' import ad_unit with context %}
 {% from '_workspace_macros.html' import icon, arrow, shortcut %}
-{% block bodyclass %}wb-home desk-home{% endblock %}
+{% block bodyclass %}wb-home desk-home st-directory-home{% endblock %}
 {% block content %}
 <div class="desk-page wrap">
-<section class="desk-hero" aria-labelledby="hero-title">
-  <h1 id="hero-title">What would you like to do?</h1>
-  <p>Useful tools. One simple workspace.</p>
-  <div class="desk-search">
+<section class="st-directory-search" aria-labelledby="hero-title">
+  <h1 id="hero-title">Find a tool</h1>
+  <div class="st-search-box" data-site-search-open>
     <label for="tool-search">{{ icon('search') }}<span class="sr-only">Search everything</span></label>
-    <input type="search" id="tool-search" placeholder="Search tools, files, downloads and more…" aria-label="Search everything" aria-haspopup="dialog" aria-controls="wb-palette" autocomplete="off">
-    <kbd data-wb-kbd>⌘ K</kbd><button type="button" data-site-search-open>Search</button>
+    <input type="search" id="tool-search" placeholder="Search tools, guides, and downloads" aria-label="Search everything" aria-haspopup="dialog" aria-controls="wb-palette" autocomplete="off">
+    <button type="button" aria-label="Open search" data-site-search-open><kbd data-wb-kbd>⌘ K</kbd></button>
   </div>
-  <nav class="desk-quick" aria-label="Quick tasks">
-    {% if photo_tools_available %}<a href="/photo-tools?mode=photo&amp;kb=50" title="Resize photo to 50 KB">{{ icon('image', 'blue') }}Resize a photo</a>{% endif %}
-    <a href="/tools/pdf-merge">{{ icon('pdf', 'red') }}Merge PDFs</a>
-    <a href="/tools/qr-code-generator">{{ icon('qr') }}Create a QR code</a>
-    <a href="/tools/form-file-checker">{{ icon('check', 'green') }}Check a form file</a>
+</section>
+
+<div class="st-directory-layout">
+  <nav class="st-category-nav" id="browse-categories" aria-label="Browse by category">
+    <a class="st-category-current" href="/tools">{{ icon('grid') }}<span>All tools</span></a>
+    {% for category, label, symbol in [('PDF & Documents','PDF & Documents','pdf'),('Images & Media','Photo & Image','image'),('Calculators','Calculators','calculator'),('Developer Tools','Developer Tools','code'),('Security & Privacy','Privacy & Security','check')] %}
+    <a href="/tools?category={{ category | urlencode }}">{{ icon(symbol) }}<span>{{ label }}</span></a>
+    {% endfor %}
+    <div class="st-category-resources">
+      {% if public_config.get('downloadPage', {}).get('enabled', True) %}<a href="/downloads">{{ icon('download') }}<span>Downloads</span></a>{% endif %}
+      <a href="/eduhelp">{{ icon('education') }}<span>Eduhelp</span></a>
+    </div>
   </nav>
-</section>
 
-<div class="desk-main-grid">
-<section class="desk-panel desk-popular" id="tools" aria-labelledby="popular-title">
-  <div class="desk-panel-head"><h2 id="popular-title">Popular tools</h2><a href="/tools">View all tools {{ arrow() }}</a></div>
-  <div class="desk-tool-grid">
-    {% if photo_tools_available %}{{ shortcut('/photo-tools', 'Photo resizer', 'Resize images to any dimension quickly.', 'image', 'blue') }}{% else %}{{ shortcut('/tools/image-compressor', 'Image Compressor', 'Reduce the size of JPG, PNG and WebP images.', 'image', 'blue') }}{% endif %}
-    {{ shortcut('/tools/pdf-merge', 'PDF Merge', 'Combine multiple PDF files into one.', 'pdf', 'red') }}
-    {{ shortcut('/tools/qr-code-generator', 'QR Code Generator', 'Create QR codes for links, text and more.', 'qr') }}
-    {{ shortcut('/tools/json-formatter', 'JSON Formatter', 'Format, validate and beautify JSON data.', 'braces', 'green') }}
-    {{ shortcut('/tools/form-file-checker', 'Form File Checker', 'Check file type, dimensions and size for a form.', 'check', 'blue') }}
-    {{ shortcut('/tools/fill-sign-pdf', 'Fill & Sign PDF', 'Add text, signatures and details to a PDF.', 'pen') }}
-  </div>
-</section>
-
-<aside class="desk-panel desk-workspace" data-saved-tools data-photo-available="{{ 'true' if photo_tools_available else 'false' }}" aria-labelledby="workspace-title" aria-description="Saved in this browser. No sign-in needed.">
-  <div class="desk-panel-head"><h2 id="workspace-title">{{ icon('folder') }}Your workspace</h2></div>
-  <div data-workspace-default><h3>Quick access</h3><div class="desk-recent-list">
-    {{ shortcut('/tools/image-compressor', 'Image Compressor', 'Make images smaller, right in your browser.', 'image', 'green', True) }}
-    {{ shortcut('/tools/pdf-organizer', 'PDF Organizer', 'Reorder, rotate, split or remove PDF pages.', 'pdf', 'red', True) }}
-    {{ shortcut('/tools/gst-calculator', 'GST Calculator', 'Add or remove GST from an amount.', 'calculator', 'blue', True) }}
-  </div></div>
-  <div data-tool-list="recent" hidden><h3>Recently used</h3><ul class="desk-recent-list"></ul></div>
-  <div data-tool-list="favorites" hidden><h3>Favorites</h3><ul class="desk-recent-list"></ul></div>
-
-</aside>
+  <section id="tools" class="st-directory-main" aria-labelledby="popular-title">
+    <div class="st-section-header"><h2 id="popular-title">Popular tools</h2><a href="/tools">View all tools {{ arrow() }}</a></div>
+    <div class="st-popular-grid">
+      {{ shortcut('/tools/pdf-editor', 'PDF Editor', 'Edit text and pages', 'pen') }}
+      {{ shortcut('/tools/application-file-pack', 'Application File Pack', 'Prepare photo, signature, and PDF', 'folder') }}
+      {% if photo_tools_available %}{{ shortcut('/photo-tools?mode=photo&kb=50', 'Photo Resizer', 'Resize to your required size', 'image') }}{% else %}{{ shortcut('/tools/image-compressor', 'Image Compressor', 'Reduce image file size', 'image') }}{% endif %}
+      {{ shortcut('/tools/image-to-text', 'Image to Text', 'Extract text from images', 'text') }}
+      {{ shortcut('/tools/pdf-merge', 'PDF Merge', 'Combine PDF files', 'pdf') }}
+      {{ shortcut('/tools/qr-code-generator', 'QR Code Generator', 'Create a QR code', 'qr') }}
+    </div>
+    <nav class="st-resource-strip" aria-label="More resources">
+      {% if public_config.get('downloadPage', {}).get('enabled', True) %}<a href="/downloads">{{ icon('download') }}<span>Downloads</span>{{ arrow() }}</a>{% endif %}
+      <a href="#guides">{{ icon('books') }}<span>Practical guides</span>{{ arrow() }}</a>
+      <a href="/eduhelp">{{ icon('education') }}<span>Eduhelp</span>{{ arrow() }}</a>
+    </nav>
+  </section>
 </div>
 
-<nav class="desk-category-strip" id="browse-categories" aria-label="Browse by category">
-<h2>Browse by category</h2>
-{% for name, symbol, tone in [('Images & Media','image','purple'),('PDF & Documents','pdf','red'),('Developer Tools','code','purple'),('Calculators','calculator','green'),('Text Tools','text','blue')] %}
-<a href="/tools?category={{ name | urlencode }}">{{ icon(symbol, tone) }}<span>{{ name }}</span></a>
-{% endfor %}
-<a href="/tools">{{ icon('grid') }}<span>All categories</span></a>
-</nav>
+<aside class="desk-panel desk-workspace st-saved-workspace" data-saved-tools data-photo-available="{{ 'true' if photo_tools_available else 'false' }}" aria-labelledby="workspace-title" hidden>
+  <h2 id="workspace-title">Your workspace</h2>
+  <div data-tool-list="recent" hidden><h3>Recently used</h3><ul class="desk-recent-list"></ul></div>
+  <div data-tool-list="favorites" hidden><h3>Favorites</h3><ul class="desk-recent-list"></ul></div>
+</aside>
 
 <section class="desk-panel desk-guides" id="guides" aria-labelledby="guides-title">
   <div class="desk-panel-head"><h2 id="guides-title">{{ icon('books', 'green') }}Practical guides</h2></div>

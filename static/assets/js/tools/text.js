@@ -656,7 +656,26 @@
   });
 
   const jsonTool = (root) => {
-    root.innerHTML = `<div class="tp-panel"><div class="tp-cols"><label class="tp-field"><span class="tp-label">JSON input</span><textarea class="tp-textarea js-in" rows="12" placeholder='{"hello":"world"}'></textarea></label><label class="tp-field"><span class="tp-label">Formatted JSON</span><textarea class="tp-textarea is-output js-out" rows="12" readonly></textarea></label></div><div class="tp-actions"><button type="button" class="tp-btn tp-btn-primary" data-run="format">Format</button><button type="button" class="tp-btn" data-run="minify">Minify</button><button type="button" class="tp-btn" data-run="sort">Sort keys + format</button><button type="button" class="tp-btn tp-btn-ghost" data-example>Try example</button><button type="button" class="tp-btn tp-btn-ghost" data-copy>Copy</button><button type="button" class="tp-btn tp-btn-ghost" data-download>Download</button></div><label class="tp-field"><span class="tp-label">Indent</span><select class="tp-select js-indent"><option value="2">2 spaces</option><option value="4">4 spaces</option><option value="tab">Tab</option></select></label></div>`;
+    root.innerHTML = `<div class="tp-panel st-json-workspace">
+      <div class="st-json-toolbar">
+        <div class="tp-actions" role="group" aria-label="JSON operations">
+          <button type="button" class="tp-btn tp-btn-primary" data-run="format">Format</button>
+          <button type="button" class="tp-btn" data-run="minify">Minify</button>
+          <button type="button" class="tp-btn" data-run="sort">Sort keys + format</button>
+        </div>
+        <label class="tp-field"><span class="tp-label">Indent</span><select class="tp-select js-indent"><option value="2">2 spaces</option><option value="4">4 spaces</option><option value="tab">Tab</option></select></label>
+      </div>
+      <div class="tp-cols">
+        <div class="st-json-pane">
+          <label class="tp-field"><span class="tp-label">JSON input</span><textarea class="tp-textarea js-in" rows="12" placeholder='{"hello":"world"}'></textarea></label>
+          <div class="tp-actions"><button type="button" class="tp-btn tp-btn-ghost" data-example>Try example</button></div>
+        </div>
+        <div class="st-json-pane">
+          <label class="tp-field"><span class="tp-label">Formatted JSON</span><textarea class="tp-textarea is-output js-out" rows="12" readonly></textarea></label>
+          <div class="tp-actions"><button type="button" class="tp-btn tp-btn-ghost" data-copy>Copy</button><button type="button" class="tp-btn tp-btn-ghost" data-download>Download</button></div>
+        </div>
+      </div>
+    </div>`;
     const sortValue = (value) => {
       if (Array.isArray(value)) return value.map(sortValue);
       if (value && typeof value === "object") return Object.fromEntries(Object.keys(value).sort().map((key) => [key, sortValue(value[key])]));

@@ -148,7 +148,7 @@
   });
 
   const makeTable = (columns) => {
-    const wrap = el("div", { class: "tp-table-wrap" });
+    const wrap = el("div", { class: "tp-table-wrap", tabindex: 0, role: "region", "aria-label": "Network reference table" });
     const table = el("table", { class: "tp-table" }, el("thead", {}, el("tr", {}, ...columns.map((column) => el("th", { text: column })))), el("tbody"));
     wrap.append(table);
     return { wrap, body: table.querySelector("tbody") };

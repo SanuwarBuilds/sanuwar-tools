@@ -2,18 +2,19 @@
 name: SanuwarTools
 description: A clear workspace for useful browser tools and resources.
 colors:
-  primary: "#3424bd"
-  primary-hover: "#5842d9"
-  canvas: "#fff"
-  surface-subtle: "#fafaff"
-  ink: "#111321"
-  ink-secondary: "#303244"
-  muted: "#56596d"
-  faint: "#62657a"
-  line: "#e0e1eb"
-  line-strong: "#c5c7d9"
-  workspace: "#f2f1fc"
-  accent-wash: "#eeebff"
+  primary: "#155b42"
+  primary-hover: "#104731"
+  canvas: "#f6f7f3"
+  paper: "#fff"
+  surface-subtle: "#f0f3ee"
+  ink: "#15251e"
+  ink-secondary: "#15251e"
+  muted: "#4d5e55"
+  faint: "#4d5e55"
+  line: "#d8e0d9"
+  line-strong: "#a9bab0"
+  workspace: "#f0f3ee"
+  accent-wash: "#e2efe4"
   icon-purple: "#6740ed"
   icon-purple-wash: "#f0eaff"
   icon-blue: "#0874dc"
@@ -64,21 +65,21 @@ spacing:
 components:
   button-primary:
     backgroundColor: "{colors.primary}"
-    textColor: "{colors.canvas}"
+    textColor: "{colors.paper}"
     rounded: "{rounded.action}"
     padding: "8px 26px"
     height: "44px"
   search-field:
-    backgroundColor: "{colors.canvas}"
+    backgroundColor: "{colors.paper}"
     textColor: "{colors.ink}"
     rounded: "{rounded.search}"
     padding: "6px 7px 6px 16px"
   panel:
-    backgroundColor: "{colors.canvas}"
+    backgroundColor: "{colors.paper}"
     rounded: "{rounded.panel}"
     padding: "{spacing.panel}"
   tool-row:
-    backgroundColor: "{colors.canvas}"
+    backgroundColor: "{colors.paper}"
     textColor: "{colors.ink}"
     rounded: "{rounded.row}"
     padding: "10px 12px"
@@ -90,41 +91,23 @@ components:
 
 **Creative North Star: "The Everyday Workspace"**
 
-A clear, compact workspace for choosing a useful task and getting started. White surfaces, restrained indigo actions, readable Inter type and colored task symbols make the catalogue easy to scan. The user-approved homepage reference establishes the current visual authority and supersedes the former hardware-plaque design.
+SanuwarTools opens to a search-first directory on an off-white canvas with forest-green actions. The home page gives equal access to search and browsing. Individual tools prioritize their controls, inputs and results.
 
-**Key Characteristics:**
-- Search is immediately available.
-- Thin borders and tonal grouping define sections.
-- Compact task rows pair a colored symbol with direct labels.
-- Shared public chrome stays consistent across routes.
-
-This document records the implemented public workspace. Its authoritative source is `static/assets/css/workspace.css`, loaded last for public pages under `body.pro-theme.v2.bp.nx.wb-ui.reference-ui`. The approved reference is `.impeccable/mocks/approved-homepage.png`. Page strategy belongs in `.impeccable/surfaces/homepage.md`.
+The shared public chrome is in `static/assets/css/workspace.css`. The current directory and tool layouts are in `static/assets/css/tool-studio.css`.
 
 ## Colors
 
-### Primary
-
-Indigo identifies the primary action, links, brand dot and keyboard focus. Its wash supplies selection and saved-star feedback.
-
-### Secondary
-
-Purple, blue, red and green task symbols sit on matching pale washes. These colors identify task families and remain accompanied by text.
-
-### Neutral
-
-White is the default public canvas and card surface. Dark ink supports headings, muted slate supports descriptions, and pale cool lines separate compact rows. The workspace uses a lavender-tinted ground to group personal shortcuts.
-
-Dark mode overrides the same CSS variables: canvas `#14141d`, card `#1c1c29`, ink `#f5f5ff`, line `#38384c`, primary `#b6a6ff`, workspace `#302a48`. Public routes initially select light; persisted user dark choice remains supported. These are theme overrides, not a second component system.
+Green identifies primary actions, keyboard focus and the selected category. Pale sage marks previews, active controls and result panels. White separates work surfaces from the page canvas. Dark mode uses the same roles with a deep green canvas and a light green accent.
 
 ## Typography
 
-Inter with a sans-serif fallback serves every role. The display headline uses a tight, balanced setting; titles use semibold compact copy and descriptions stay visibly secondary. The frontmatter records the desktop hierarchy. Section headings become 19px and tool titles 14px at the mobile breakpoint; the hero becomes 30px. Keep interface copy direct and in English.
+Inter serves interface labels and headings. Use monospace for editable code, output and technical data. Page title, controls and help copy have distinct sizes so the active work is easy to find.
 
 ## Layout
 
-The public content wrap is capped at 1440px with 40px side gutters. Panels use 18px padding and 16px grid gaps. The homepage pairs a two-column popular-tools panel with a narrower workspace (1.9:1); download and education panels form equal columns. Header height is 56px.
+The home page puts search first, categories on the left and six tools in a three-column grid. The resource strip links to downloads, guides and Eduhelp. On mobile the category rail scrolls horizontally and tool cards use two columns.
 
-At 1250px, the header and task rows compact and the main split becomes 1.7:1. At 1100px, the main grid becomes one column, recent shortcuts use three columns, the category heading moves above its links, and the footer wraps. Header height becomes 60px. At 760px, gutters become 16px; tool, library and recent grids become one column, panels use 16px padding and categories use two columns. The search keyboard hint is hidden and quick links wrap. The footer reserves room for existing mobile navigation; its Guides & more panel becomes fixed above that navigation.
+Tool pages put help and related links below the workspace. Documents and players use a wider stage. Calculators keep data entry and results in a focused column. Text tools distinguish source and output. QR brings settings and preview side by side. OCR separates file and language from text output. Application File Pack shows photo and signature requirements together. The study planner places its timer beside revision targets. Side-by-side work surfaces stack on small screens.
 
 ## Elevation & Depth
 
@@ -136,10 +119,10 @@ Panels have gently rounded corners, rows are slightly tighter, and primary actio
 
 ## Components
 
-- **Primary action:** indigo fill, white text, 44px minimum search-button height, compact corners. Keyboard focus uses a 2px indigo outline offset by 3px.
-- **Search:** a 58px minimum-height outlined compound field, icon, optional keyboard hint and separate Search button. It opens the existing shared global search dialog; it does not create a competing search engine.
+- **Primary action:** forest-green fill, white text, 44px minimum search-button height, compact corners. Keyboard focus uses a 2px green outline offset by 3px.
+- **Search:** an outlined field with a search icon and keyboard shortcut hint. It opens the existing shared global search dialog; it does not create a competing search engine.
 - **Task row:** colored SVG symbol, strong task name, muted one-line description and optional arrow. Hover strengthens the border and uses the subtle surface token.
-- **Workspace:** pale lavender panel with quick access until recently used entries exist. Favorites use a real star toggle with `aria-pressed`; descriptions distinguish recent and saved entries.
+- **Workspace:** an optional panel for recent and saved tools. Favorites use a real star toggle with `aria-pressed`; descriptions distinguish recent and saved entries.
 - **Navigation:** shared brand, public hover menus, theme control and sign-in/account action. Existing animated hover menus and mobile navigation remain functional authorities.
 - **Downloads:** compact rows with actual public title, description, type label and download symbol. Empty collections receive a truthful message.
 - **Footer disclosure:** Guides & more retains the complete tool and guide links inside an expandable panel.

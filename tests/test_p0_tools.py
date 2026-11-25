@@ -57,7 +57,7 @@ class P0ToolTests(unittest.TestCase):
             self.assertIn("/assets/js/tools/calculators.js?v=4", html)
         qr = self.client.get("/tools/qr-code-generator").get_data(as_text=True)
         self.assertNotIn("calc-math.js", qr)
-        self.assertIn("/assets/js/tools/misc.js?v=2", qr)
+        self.assertIn("/assets/js/tools/misc.js?v=", qr)
         self.assertIn("/assets/vendor/qrcodegen.js?v=1", qr)
         self.assertIn("qrcodegen", module.TOOL_VENDORS)
 

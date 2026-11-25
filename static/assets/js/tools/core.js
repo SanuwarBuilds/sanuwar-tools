@@ -123,7 +123,7 @@
   const fileDrop = (opts = {}) => {
     const fileInput = el("input", { type: "file", accept: opts.accept || "", hidden: true, multiple: Boolean(opts.multiple) });
     const name = el("span", { class: "tp-drop-name" });
-    const zone = el("label", { class: "tp-drop" },
+    const zone = el("label", { class: "tp-drop tp-drop-keyboard", tabindex: 0, role: "button" },
       el("span", { class: "tp-drop-icon", "aria-hidden": "true", text: opts.icon || "⇪" }),
       el("strong", { text: opts.label || "Drop a file here or click to browse" }),
       el("span", { class: "tp-hint", text: opts.hint || "Your file stays on this device." }),
@@ -134,6 +134,12 @@
       name.textContent = files.map((file) => file.name).join(" · ");
       opts.onFiles?.(files, fileInput);
     };
+    zone.addEventListener("keydown", (event) => {
+      if (event.target === zone && (event.key === "Enter" || event.key === " ")) {
+        event.preventDefault();
+        fileInput.click();
+      }
+    });
     fileInput.addEventListener("change", () => read([...fileInput.files]));
     zone.addEventListener("dragover", (event) => { event.preventDefault(); zone.classList.add("is-over"); });
     zone.addEventListener("dragleave", () => zone.classList.remove("is-over"));

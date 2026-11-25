@@ -101,8 +101,8 @@
         }));
       }
       if (isWorkspace) {
-        shelf.hidden = false;
         const defaults = shelf.querySelector("[data-workspace-default]");
+        shelf.hidden = !defaults && !shelf.querySelector("[data-tool-list]:not([hidden])");
         if (defaults) defaults.hidden = !shelf.querySelector('[data-tool-list="recent"]').hidden;
         shelf.querySelectorAll("[data-workspace-favorite]").forEach(toggle => {
           const favorite = saved.favorites.some(item => item.path === toggle.dataset.workspaceFavorite);

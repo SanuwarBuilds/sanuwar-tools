@@ -1,5 +1,5 @@
 {% extends 'base.html' %}
-{% block bodyclass %}wb-tool-page tool-page-land{% endblock %}
+{% block bodyclass %}wb-tool-page tool-page-land st-tool st-tool-compute{% endblock %}
 {% block page_styles %}<link rel="stylesheet" href="/assets/css/tools.css?v=4"><link rel="stylesheet" href="/assets/css/land.css?v=3">{% endblock %}
 {% block content %}
 <section class="tp-shell wrap lm-shell" data-tool-page data-tool-slug="land-measurement-calculator">
@@ -11,15 +11,15 @@
   </div>
   <nav class="tp-crumb" aria-label="Breadcrumb"><a href="/">Home</a><span aria-hidden="true">/</span><a href="/tools">All tools</a><span aria-hidden="true">/</span><span aria-current="page">Land Measurement Calculator</span></nav>
 
-  <header class="lm-hero">
+  <header class="st-tool-title">
     <div>
-      <span class="lm-kicker">Land &amp; Property · India</span>
+
       <h1>Indian Land Measurement Calculator</h1>
       <p class="lm-lede">Convert Bigha, Katha, Lessa, Biswa, Kanal, Marla, Guntha and standard units using the local standard for your state. Built for Assam, with region-aware references across India.</p>
-      <div class="lm-hero-meta"><span>Runs locally</span><span>No uploads</span><span>English · हिन्दी · অসমীয়া</span><span>Free</span></div>
+
     </div>
     <button class="tp-btn tp-btn-ghost wb-save-tool" type="button" data-save-tool="/tools/{{ tool.slug }}" data-save-name="{{ tool.name }}" aria-pressed="false" hidden>Save to favorites</button>
-    <div class="lm-hero-art" aria-hidden="true"></div>
+
   </header>
 
   <div class="lm-toolbar-anchor">

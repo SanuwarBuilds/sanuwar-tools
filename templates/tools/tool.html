@@ -1,6 +1,6 @@
 {% extends 'base.html' %}
 {% set vendor_files = {'js-yaml': 'js-yaml.js', 'marked': 'marked.js', 'fflate': 'fflate.js', 'pdf-lib': 'pdf-lib.js', 'pdfjs': 'pdf.min.js', 'jspdf': 'jspdf.umd.min.js', 'bcryptjs': 'bcrypt.min.js', 'qrcodegen': 'qrcodegen.js', 'hlsjs': 'hls.min.js', 'dashjs': 'dash.all.min.js', 'tesseract': 'ocr/tesseract.min.js'} %}
-{% set bundle_version = 3 if tool.bundle in ['file-workbench', 'pdf-editor'] else 4 if tool.bundle == 'players' else (4 if tool.bundle == 'calculators' else (4 if tool.bundle == 'media' else (3 if tool.bundle == 'text' else 2))) %}
+{% set bundle_version = 4 if tool.bundle in ['file-workbench', 'pdf-editor', 'text'] else 3 if tool.bundle in ['misc', 'network'] else 4 if tool.bundle == 'players' else 4 if tool.bundle in ['calculators', 'media'] else 2 %}
 {% set streaming_players = ['m3u8-player', 'dash-player', 'cloud-video-player'] %}
 {% set uses_network = tool.slug == 'currency-converter' %}
 {% set tool_help = {
@@ -31,20 +31,34 @@
   'pdf-organizer': 'Choose one PDF. Use the arrows to move pages, rotate them clockwise or remove pages before saving a new PDF.',
   'image-compressor': 'Choose JPG, PNG or WebP images and adjust quality or maximum dimensions. Compare the sizes before saving.'
 } %}
-{% block bodyclass %}wb-tool-page tool-page-{{ tool.bundle }}{% endblock %}
+{% set file_tools = ['image-to-text', 'application-file-pack', 'screenshot-pdf-redactor', 'heic-to-jpg', 'pdf-page-size-margins', 'form-file-checker', 'fill-sign-pdf', 'base64-file-converter', 'zip', 'unzip', 'untar', 'checksum'] %}
+{% if tool.bundle == 'players' %}
+{% set surface = 'playback' %}
+{% elif tool.bundle == 'pdf-editor' or tool.slug in ['fill-sign-pdf', 'screenshot-pdf-redactor', 'pdf-organizer', 'pdf-viewer'] %}
+{% set surface = 'document' %}
+{% elif tool.bundle in ['calculators', 'dls', 'network'] %}
+{% set surface = 'compute' %}
+{% elif tool.slug in file_tools or tool.bundle in ['media', 'file-workbench'] %}
+{% set surface = 'file' %}
+{% elif tool.bundle == 'text' %}
+{% set surface = 'text' %}
+{% elif tool.bundle == 'study-planner' %}
+{% set surface = 'planning' %}
+{% else %}
+{% set surface = 'utility' %}
+{% endif %}
+{% block bodyclass %}wb-tool-page tool-page-{{ tool.bundle }} st-tool st-tool-{{ surface }}{% endblock %}
 {% block page_styles %}<link rel="stylesheet" href="/assets/css/tools.css?v=6">{% if tool.bundle in ['file-workbench', 'study-planner'] %}<link rel="stylesheet" href="/assets/css/file-workbench.css?v=1">{% endif %}{% if tool.bundle == 'pdf-editor' %}<link rel="stylesheet" href="/assets/css/pdf-editor.css?v=2">{% endif %}{% if tool.bundle == 'players' %}<link rel="stylesheet" href="/assets/css/players.css?v=5">{% endif %}{% endblock %}
 {% block content %}
 <section class="tp-shell wrap" data-tool-page data-tool-slug="{{ tool.slug }}"{% if tool.slug == 'form-file-checker' %} data-photo-available="{{ 'true' if photo_tools_available else 'false' }}"{% endif %}>
-  <nav class="tp-crumb" aria-label="Breadcrumb"><a href="/">Home</a><span aria-hidden="true">/</span><a href="/tools">All tools</a><span aria-hidden="true">/</span><span>{{ tool.category }}</span></nav>
-  <header class="tp-head">
-    <span class="tp-glyph tp-glyph-art" aria-hidden="true"><img src="/assets/icons/{{ tool.icon_file }}.svg?v=soft1" alt="" width="50" height="50"></span>
-    <div>
-      <span class="tp-badge">{{ tool.category }}</span>
+  <nav class="tp-crumb" aria-label="Breadcrumb"><a href="/">Home</a><span aria-hidden="true">/</span><a href="/tools">All tools</a><span aria-hidden="true">/</span><a href="/tools?category={{ tool.category | urlencode }}">{{ tool.category }}</a></nav>
+  <header class="st-tool-title">
+    <span class="st-tool-icon" aria-hidden="true"><img src="/assets/icons/{{ tool.icon_file }}.svg?v=soft1" alt="" width="40" height="40"></span>
+    <div class="st-tool-title-copy">
       <h1>{{ tool.name }}</h1>
       <p>{{ tool.description }}</p>
-      <div class="tp-meta"><span><i aria-hidden="true"></i>{{ 'Online exchange rates' if uses_network else 'Runs locally' }}</span><span>No sign-up</span></div>
-      <button class="tp-btn tp-btn-ghost wb-save-tool" type="button" data-save-tool="/tools/{{ tool.slug }}" data-save-name="{{ tool.name }}" aria-pressed="false" hidden>Save to favorites</button>
     </div>
+    <button class="tp-btn tp-btn-ghost wb-save-tool" type="button" data-save-tool="/tools/{{ tool.slug }}" data-save-name="{{ tool.name }}" aria-pressed="false" hidden>Save to favorites</button>
   </header>
 
   <div class="tp-layout">
@@ -52,12 +66,12 @@
       <div class="tp-loading"><span></span>Loading tool…</div>
       <noscript><p>Enable JavaScript to use this tool.</p></noscript>
     </div>
-    <aside class="tp-aside">
+    <aside class="tp-aside st-tool-support" aria-label="Tool help and related tools">
       {% if tool.slug in tool_help %}
       <section class="tp-aside-card"><h2>How to use it</h2><p>{{ tool_help[tool.slug] }}</p>{% if tool.bundle == 'players' %}<p>The screen button in the dock switches to your browser's built-in player controls, and the choice is remembered.</p>{% endif %}</section>
       {% endif %}
       <section class="tp-aside-card tp-privacy">
-        <span class="tp-glyph" aria-hidden="true">▮</span>
+
         {% if uses_network %}
         <h2>Exchange rate source</h2>
         <p>Frankfurter provides daily exchange rates. The converter sends the entered amount and selected currency codes to Frankfurter.</p>
@@ -84,7 +98,7 @@
 </section>
 {% endblock %}
 {% block scripts %}
-<script nonce="{{ csp_nonce }}" src="/assets/js/tools/core.js?v=2" defer></script>
+<script nonce="{{ csp_nonce }}" src="/assets/js/tools/core.js?v=3" defer></script>
 {% for vendor in tool.vendor or [] %}{% if vendor in vendor_files %}<script nonce="{{ csp_nonce }}" src="/assets/vendor/{{ vendor_files[vendor] }}?v=1" defer></script>{% endif %}{% endfor %}
 {% if tool.bundle in ['file-workbench', 'pdf-editor'] %}
 <script nonce="{{ csp_nonce }}" src="/assets/js/tools/local-files.js?v=1" defer></script>

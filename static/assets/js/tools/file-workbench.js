@@ -149,7 +149,9 @@
     const zip = runZip(passing, "application-file-pack.zip", notice);
     let busy = false;
     const run = el("button", { type: "submit", class: "tp-btn tp-btn-primary", disabled: true }, "Prepare & check files");
-    const form = el("form", {}, rows.map((row) => row.section), actions(run, zip), notice);
+    const form = el("form", { class: "st-pack" },
+      el("div", { class: "st-pack-files" }, rows.map((row) => row.section)),
+      el("div", { class: "st-pack-actions" }, actions(run, zip), notice));
     const sync = () => {
       run.disabled = busy || !rows.some((row) => row.file.files.length);
       zip.disabled = busy || !passing().length;
@@ -248,9 +250,11 @@
       output.value = "";
       notice.textContent = "";
     });
-    root.replaceChildren(panel("Extract text", [controls, actions(run), notice, field("Recognized text", output),
-      actions(T.copyButton(() => output.value, "Copy text"),
-        T.downloadButton("Download TXT", () => output.value, "recognized-text.txt", "text/plain;charset=utf-8", "ghost"))]));
+    root.replaceChildren(el("div", { class: "st-ocr" },
+      panel("Image and language", [controls, actions(run), notice], "st-ocr-source"),
+      panel("", [field("Recognized text", output),
+        actions(T.copyButton(() => output.value, "Copy text"),
+          T.downloadButton("Download TXT", () => output.value, "recognized-text.txt", "text/plain;charset=utf-8", "ghost"))], "st-ocr-result")));
   });
 
   T.register("heic-to-jpg", (root) => {

@@ -369,6 +369,12 @@
     const imageInput = input({ type: "file", accept: ".jpg,.jpeg,.png,.webp,.bmp" });
     const notice = el("p", { class: "pe-status", role: "status" });
     const fileName = el("strong", { class: "pe-filename" });
+    const upload = el("div", { class: "st-editor-upload" },
+      el("div", { class: "st-editor-upload-copy" },
+        el("h2", { text: "Open a PDF" }),
+        el("p", { class: "tp-hint", text: "Choose or drop a PDF. Up to 40 MB and 100 pages." })),
+      field("PDF file", pdfInput));
+    const changeFile = button("Change file", () => pdfInput.click(), "ghost");
     const pageList = select([]);
     const pageSummary = el("p", { class: "tp-hint", role: "status" });
     const regionsList = select([]);
@@ -744,20 +750,37 @@
       replaceOptions, signatureField, textField, imageField, shapeField, urlField, fontControls, styleOptions,
       el("div", { class: "pe-fields" }, colorField, fillField), actions(apply, center), positionOptions);
     const editor = el("div", { class: "pe-workspace" },
-      el("div", { class: "pe-top" }, fileName, actions(undo, redo, save)),
+      el("div", { class: "pe-top" }, fileName, actions(changeFile, undo, redo, save)),
       el("div", { class: "pe-command-bar" },
         el("div", { class: "pe-tools", role: "group", "aria-label": "Editing tools" }, toolButtons),
         field("Zoom", zoom)),
       el("div", { class: "pe-desk" }, workArea, inspector), exportNote,
       el("section", { class: "pe-pages" }, el("h2", { text: "Pages" }), field("Go to page", pageList),
         actions(prev, next, earlier, later, rotate, add, remove), pageSummary));
-    root.replaceChildren(panel("", [field("PDF file", pdfInput), notice, editor]));
+    root.replaceChildren(panel("", [upload, notice, editor]));
+    upload.addEventListener("dragover", (event) => {
+      if (busy) return;
+      event.preventDefault();
+      upload.classList.add("is-over");
+    });
+    upload.addEventListener("dragleave", (event) => {
+      if (!upload.contains(event.relatedTarget)) upload.classList.remove("is-over");
+    });
+    upload.addEventListener("drop", (event) => {
+      event.preventDefault();
+      upload.classList.remove("is-over");
+      if (busy || !event.dataTransfer?.files?.length) return;
+      pdfInput.files = event.dataTransfer.files;
+      pdfInput.dispatchEvent(new Event("change"));
+    });
 
     function refresh(repaint = true) {
       const page = current();
       if (busy) closeInline();
       pdfInput.disabled = busy;
+      changeFile.disabled = busy;
       editor.hidden = !pdf || !page;
+      upload.hidden = !editor.hidden;
       if (editor.hidden) return;
       const offset = index();
       fileName.textContent = file.name;
