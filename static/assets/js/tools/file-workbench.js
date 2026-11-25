@@ -6,11 +6,10 @@
   const pdfAccept = ".pdf,application/pdf";
   const vendor = "/assets/vendor";
   const MiB = 1024 ** 2;
-  const documentLimit = 40 * MiB;
   const mm = 72 / 25.4;
   const paperSizes = { a4: [210, 297], letter: [215.9, 279.4], legal: [215.9, 355.6] };
 
-  if (window.pdfjsLib) pdfjsLib.GlobalWorkerOptions.workerSrc = vendor + "/pdf.worker.min.js";
+  const { guardFile, canvasFor, releaseCanvas, toBlob, loadImage, openPdf, renderPdfPage, paintMasks, recognize } = T.localFiles;
 
   const live = () => el("p", { class: "fw-status", role: "status" });
   const hint = (text) => el("p", { class: "tp-hint", text });
@@ -19,69 +18,6 @@
   const stem = (file) => safeName(file.name.replace(/\.[^.]+$/, ""), "file");
   const errorText = (error) => error?.message || (typeof error === "string" && error) || "Could not process this file.";
   const picker = (accept, multiple = false) => input({ type: "file", accept, multiple });
-
-  const guardFile = (file, limit = documentLimit) => {
-    if (!file.size || file.size > limit) throw new Error("Choose a non-empty file up to " + fmtBytes(limit) + ".");
-  };
-
-  const canvasFor = (width, height) => el("canvas", { width, height });
-  const releaseCanvas = (canvas) => { canvas.width = 0; canvas.height = 0; };
-  const toBlob = (canvas, type, quality) => new Promise((resolve, reject) => {
-    canvas.toBlob((blob) => blob?.type === type ? resolve(blob) : reject(new Error("This browser could not encode " + type + ".")), type, quality);
-  });
-
-  async function loadImage(file) {
-    guardFile(file);
-    const header = new Uint8Array(await file.slice(0, 12).arrayBuffer());
-    const ascii = new TextDecoder().decode(header);
-    const type = header[0] === 0xff && header[1] === 0xd8 ? "image/jpeg"
-      : header[0] === 0x89 && ascii.slice(1, 4) === "PNG" ? "image/png"
-      : ascii.startsWith("RIFF") && ascii.slice(8, 12) === "WEBP" ? "image/webp"
-      : ascii.startsWith("BM") ? "image/bmp" : "";
-    if (!type) throw new Error("Choose a JPG, PNG, WebP or BMP image.");
-    const url = URL.createObjectURL(new Blob([file], { type }));
-    try {
-      const image = new Image();
-      image.src = url;
-      await image.decode();
-      if (image.naturalWidth * image.naturalHeight > 40_000_000) {
-        throw new Error("Choose an image under 40 megapixels.");
-      }
-      return image;
-    } finally {
-      URL.revokeObjectURL(url);
-    }
-  }
-
-  async function openPdf(file) {
-    guardFile(file);
-    const task = pdfjsLib.getDocument({ data: await file.arrayBuffer(), isEvalSupported: false });
-    try {
-      const pdf = await task.promise;
-      if (pdf.numPages > 100) throw new Error("Choose a PDF with up to 100 pages.");
-      return pdf;
-    } catch (error) {
-      await task.destroy();
-      throw error;
-    }
-  }
-
-  async function renderPdfPage(pdf, pageNumber, longestEdge) {
-    const page = await pdf.getPage(pageNumber);
-    const actual = page.getViewport({ scale: 1 });
-    const scale = Math.min(3, longestEdge / Math.max(actual.width, actual.height));
-    const viewport = page.getViewport({ scale });
-    const canvas = canvasFor(Math.max(1, Math.ceil(viewport.width)), Math.max(1, Math.ceil(viewport.height)));
-    try {
-      await page.render({ viewport, canvasContext: canvas.getContext("2d"), background: "#fff" }).promise;
-      return { canvas, width: actual.width, height: actual.height };
-    } catch (error) {
-      releaseCanvas(canvas);
-      throw error;
-    } finally {
-      page.cleanup();
-    }
-  }
 
   async function writeRasterPdf(pdf, longestEdge, quality, onPage, masks) {
     const output = await PDFLib.PDFDocument.create();
@@ -281,37 +217,19 @@
     const controls = el("fieldset", { class: "fw-controls" }, grid(field("Screenshot or scan", file), field("Text language", language)));
     const run = button("Extract text", async () => {
       if (!file.files[0]) return;
-      let worker;
-      let stage = "";
       controls.disabled = true;
       run.disabled = true;
       output.value = "";
       notice.textContent = "Preparing image…";
       try {
         const image = await loadImage(file.files[0]);
-        const ocr = location.origin + vendor + "/ocr";
-        let reportError;
-        const failure = new Promise((resolve, reject) => { reportError = reject; });
-        const options = {
-          errorHandler: reportError,
-          workerPath: ocr + "/worker.min.js",
-          corePath: ocr + "/tesseract-core-lstm.js",
-          langPath: ocr,
-          workerBlobURL: false,
-          logger: ({ status, progress }) => {
-            if (stage === status && progress !== 1 && status !== "recognizing text") return;
-            stage = status;
-            notice.textContent = status === "recognizing text" ? "Recognizing text… " + Math.round(progress * 100) + "%" : "Preparing OCR…";
-          },
-        };
-        worker = await Promise.race([Tesseract.createWorker(language.value.split("+"), 1, options), failure]);
         const canvas = canvasFor(image.naturalWidth, image.naturalHeight);
         try {
           const context = canvas.getContext("2d");
           context.fillStyle = "#fff";
           context.fillRect(0, 0, canvas.width, canvas.height);
           context.drawImage(image, 0, 0);
-          const { data } = await worker.recognize(canvas);
+          const data = await recognize(canvas, language.value, (message) => { notice.textContent = message; });
           output.value = data.text.trim();
           notice.textContent = output.value ? "Text ready. Review it before copying." : "No text detected. Try a sharper image or a different language.";
         } finally {
@@ -320,10 +238,8 @@
       } catch (error) {
         notice.textContent = errorText(error);
       } finally {
-        try { await worker?.terminate(); } finally {
-          controls.disabled = false;
-          run.disabled = !file.files.length;
-        }
+        controls.disabled = false;
+        run.disabled = !file.files.length;
       }
     });
     run.disabled = true;
@@ -460,18 +376,6 @@
     root.replaceChildren(panel("Set paper size", [form,
       hint("Page text and artwork stay in the print layout. Form fields, comments, links and interactive features may be omitted.")]));
   });
-
-  function paintMasks(canvas, masks) {
-    const context = canvas.getContext("2d");
-    context.fillStyle = "#000";
-    for (const { x, y, width, height } of masks) {
-      const left = Math.floor(x * canvas.width);
-      const top = Math.floor(y * canvas.height);
-      const right = Math.ceil((x + width) * canvas.width);
-      const bottom = Math.ceil((y + height) * canvas.height);
-      context.fillRect(left, top, right - left, bottom - top);
-    }
-  }
 
   T.register("screenshot-pdf-redactor", (root) => {
     const file = picker(imageAccept + "," + pdfAccept);

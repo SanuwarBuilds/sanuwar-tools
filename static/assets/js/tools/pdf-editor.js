@@ -1,0 +1,735 @@
+"use strict";
+(() => {
+  const T = window.SANU_TOOLS;
+  const { el, field, panel, input, select, button, actions } = T;
+  const { canvasFor, releaseCanvas, toBlob, loadImage, openPdf, renderPdfPage, paintMasks, recognize } = T.localFiles;
+  const kinds = [
+    ["replace", "Edit text"], ["text", "Add text"], ["image", "Image"], ["signature", "Signature"],
+    ["highlight", "Highlight"], ["shape", "Shape"], ["redact", "Redact"],
+  ];
+  const fontFamilies = { sans: "sans-serif", serif: "serif", mono: "monospace", script: "cursive" };
+  const blankSize = [595.28, 841.89];
+  const mod = (angle) => ((angle % 360) + 360) % 360;
+  const clamp = (value) => Math.min(1, Math.max(0, value));
+  const overlaps = (a, b) => a.x <= b.x + b.width && a.x + a.width >= b.x &&
+    a.y <= b.y + b.height && a.y + a.height >= b.y;
+  const checkbox = (label, control) => el("label", { class: "pe-check" }, control, label);
+
+  function bounds(x1, y1, x2, y2) {
+    const x = clamp(Math.min(x1, x2));
+    const y = clamp(Math.min(y1, y2));
+    return { x, y, width: clamp(Math.max(x1, x2)) - x, height: clamp(Math.max(y1, y2)) - y };
+  }
+
+  function textRegions(content, viewport, canvas) {
+    return content.items.flatMap((item) => {
+      if (!item.str?.trim()) return [];
+      const [a, b, c, d, x, y] = pdfjsLib.Util.transform(viewport.transform, item.transform);
+      const length = Math.hypot(a, b);
+      const height = Math.hypot(c, d);
+      if (!length || !height) return [];
+      const ux = a / length;
+      const uy = b / length;
+      const advance = item.width * viewport.scale;
+      const font = content.styles[item.fontName] || {};
+      const ascent = Math.max(font.ascent || 0, 0.96);
+      const descent = Math.max(-(font.descent || 0), 0.25);
+      const points = [-0.75, advance + 0.75].flatMap((along) => [-height * ascent, height * descent].map((down) => [
+        (x + ux * along - uy * down) / canvas.width,
+        (y + uy * along + ux * down) / canvas.height,
+      ]));
+      const xs = points.map(([horizontal]) => horizontal);
+      const ys = points.map(([, vertical]) => vertical);
+      const box = bounds(Math.min(...xs), Math.min(...ys), Math.max(...xs), Math.max(...ys));
+      if (!box.width || !box.height) return [];
+      return [{ ...box, text: item.str, size: height / viewport.scale, angle: Math.atan2(uy, ux) }];
+    });
+  }
+
+  function scanRegions(data, canvas) {
+    return (data.blocks || []).flatMap((block) => block.paragraphs)
+      .flatMap((paragraph) => paragraph.lines)
+      .filter((line) => line.text.trim())
+      .map(({ text, bbox }) => ({
+        ...bounds(bbox.x0 / canvas.width, (bbox.y0 - 2) / canvas.height, bbox.x1 / canvas.width, (bbox.y1 + 2) / canvas.height),
+        text: text.trim(),
+        size: Math.max(5, 0.85 * (bbox.y1 - bbox.y0)),
+        angle: 0,
+      }));
+  }
+
+  function paint(canvas, marks, scale, nativeText = new Map()) {
+    const context = canvas.getContext("2d");
+    for (const mark of marks) {
+      if (mark.kind === "redact") {
+        paintMasks(canvas, [mark]);
+        continue;
+      }
+      const x = mark.x * canvas.width;
+      const y = mark.y * canvas.height;
+      const width = mark.width * canvas.width;
+      const height = mark.height * canvas.height;
+      context.save();
+      try {
+        context.fillStyle = mark.color;
+        if (mark.kind === "highlight") {
+          context.globalAlpha = 0.33;
+          context.fillRect(x, y, width, height);
+        } else if (mark.kind === "image" || mark.image) {
+          const sideways = Math.abs(Math.sin(mark.angle || 0)) > 0.7;
+          const fitWidth = sideways ? height : width;
+          const fitHeight = sideways ? width : height;
+          const fit = Math.min(fitWidth / mark.image.naturalWidth, fitHeight / mark.image.naturalHeight);
+          const w = mark.image.naturalWidth * fit;
+          const h = mark.image.naturalHeight * fit;
+          context.translate(x + width / 2, y + height / 2);
+          context.rotate(mark.angle || 0);
+          context.drawImage(mark.image, -w / 2, -h / 2, w, h);
+        } else if (mark.kind === "shape") {
+          context.strokeStyle = mark.color;
+          context.lineWidth = Math.max(1, 2 * scale);
+          context.beginPath();
+          if (mark.shape === "ellipse") context.ellipse(x + width / 2, y + height / 2, width / 2, height / 2, 0, 0, Math.PI * 2);
+          else if (mark.shape === "line") {
+            context.moveTo(x, mark.reverse ? y + height : y);
+            context.lineTo(x + width, mark.reverse ? y : y + height);
+          } else context.rect(x, y, width, height);
+          context.stroke();
+        } else {
+          if (mark.kind === "replace") {
+            context.fillStyle = mark.background;
+            context.fillRect(Math.floor(x), Math.floor(y), Math.ceil(x + width) - Math.floor(x), Math.ceil(y + height) - Math.floor(y));
+            context.fillStyle = mark.color;
+          }
+          if (nativeText.has(mark)) continue;
+          const sideways = Math.abs(Math.sin(mark.angle || 0)) > 0.7;
+          const textWidth = sideways ? height : width;
+          const textHeight = sideways ? width : height;
+          context.translate(x + width / 2, y + height / 2);
+          context.rotate(mark.angle || 0);
+          const lines = mark.text.split(/\r?\n/);
+          const size = Math.max(1, Math.min(mark.size * scale, textHeight / (lines.length * 1.12)));
+          const family = fontFamilies[mark.family];
+          context.font = (mark.kind === "signature" ? "italic " : "") + size + "px " + family;
+          context.textBaseline = "middle";
+          context.textAlign = mark.align;
+          const tx = { left: -textWidth / 2, center: 0, right: textWidth / 2 }[mark.align];
+          lines.forEach((line, index) => {
+            context.fillText(line, tx, (index - (lines.length - 1) / 2) * size * 1.12, textWidth);
+          });
+        }
+      } finally {
+        context.restore();
+      }
+    }
+  }
+
+  function drawOverlay(page, image, viewport) {
+    const [x, y] = viewport.convertToPdfPoint(0, viewport.height);
+    const [rightX, rightY] = viewport.convertToPdfPoint(viewport.width, viewport.height);
+    const [topX, topY] = viewport.convertToPdfPoint(0, 0);
+    page.drawImage(image, {
+      x, y, width: Math.hypot(rightX - x, rightY - y), height: Math.hypot(topX - x, topY - y),
+      rotate: PDFLib.radians(Math.atan2(rightY - y, rightX - x)),
+    });
+  }
+
+  async function getNativeText(document, page, fonts) {
+    const result = new Map();
+    for (const [index, mark] of page.marks.entries()) {
+      if (!["text", "replace"].includes(mark.kind) || !mark.text ||
+        page.marks.slice(index + 1).some((later) => overlaps(mark, later))) continue;
+      const name = {
+        sans: PDFLib.StandardFonts.Helvetica, serif: PDFLib.StandardFonts.TimesRoman,
+        mono: PDFLib.StandardFonts.Courier, script: PDFLib.StandardFonts.TimesRomanItalic,
+      }[mark.family];
+      if (!fonts.has(name)) fonts.set(name, await document.embedFont(name));
+      const font = fonts.get(name);
+      const lines = mark.text.split(/\r?\n/);
+      try {
+        lines.forEach((line) => font.encodeText(line));
+        result.set(mark, { font, lines });
+      } catch {
+        // Canvas supports scripts outside the built-in PDF fonts.
+      }
+    }
+    return result;
+  }
+
+  function drawSelectableText(page, marks, rendered, overlay) {
+    const { canvas, viewport, width, height } = rendered;
+    const point = (x, y) => overlay
+      ? viewport.convertToPdfPoint(x / canvas.width * viewport.width, y / canvas.height * viewport.height)
+      : [x / canvas.width * width, (1 - y / canvas.height) * height];
+    for (const [mark, { font, lines }] of marks) {
+      const angle = mark.angle || 0;
+      const cos = Math.cos(angle);
+      const sin = Math.sin(angle);
+      const sideways = Math.abs(sin) > 0.7;
+      const boxWidth = mark.width * canvas.width;
+      const boxHeight = mark.height * canvas.height;
+      const availableWidth = sideways ? boxHeight : boxWidth;
+      const availableHeight = sideways ? boxWidth : boxHeight;
+      const widest = Math.max(...lines.map((line) => font.widthOfTextAtSize(line, 1)), 1);
+      const size = Math.min(mark.size * canvas.width / width, availableHeight / (lines.length * 1.12), availableWidth / widest);
+      if (size <= 0) continue;
+      const cx = mark.x * canvas.width + boxWidth / 2;
+      const cy = mark.y * canvas.height + boxHeight / 2;
+      const [zeroX, zeroY] = point(cx, cy);
+      const [directionX, directionY] = point(cx + cos, cy + sin);
+      const pixel = Math.hypot(directionX - zeroX, directionY - zeroY);
+      const rotation = PDFLib.radians(Math.atan2(directionY - zeroY, directionX - zeroX));
+      const rgb = mark.color.match(/[a-f0-9]{2}/gi).map((component) => Number.parseInt(component, 16) / 255);
+      lines.forEach((line, index) => {
+        if (!line.length) return;
+        const span = font.widthOfTextAtSize(line, size);
+        const horizontal = { left: -availableWidth / 2, center: -span / 2, right: availableWidth / 2 - span }[mark.align];
+        const vertical = (index - (lines.length - 1) / 2) * size * 1.12 +
+          font.heightAtSize(size, { descender: false }) / 2;
+        const [x, y] = point(cx + cos * horizontal - sin * vertical, cy + sin * horizontal + cos * vertical);
+        page.drawText(line, { x, y, rotate: rotation, size: size * pixel, font, color: PDFLib.rgb(...rgb) });
+      });
+    }
+  }
+
+  async function writePdf(file, pdf, pages, onProgress) {
+    const redact = pages.some((page) => page.marks.some((mark) => mark.kind === "redact"));
+    const replace = pages.some((page) => page.marks.some((mark) => mark.kind === "replace"));
+    const source = redact ? null : await PDFLib.PDFDocument.load(await file.arrayBuffer(), { updateMetadata: false });
+    if (replace && source) {
+      // A link can refer to a source page that was replaced. Exclude annotations before copying.
+      for (const page of source.getPages()) page.node.delete(PDFLib.PDFName.of("Annots"));
+    }
+    const result = await PDFLib.PDFDocument.create();
+    const fonts = new Map();
+    const copyIndices = pages.filter((page) => page.original && !redact &&
+      !page.marks.some((mark) => mark.kind === "replace")).map((page) => page.original - 1);
+    const copies = copyIndices.length ? await result.copyPages(source, copyIndices) : [];
+    let copyIndex = 0;
+    for (const [index, page] of pages.entries()) {
+      onProgress("Exporting page " + (index + 1) + " of " + pages.length + "…");
+      const flatten = page.original && (redact || page.marks.some((mark) => mark.kind === "replace"));
+      const target = !page.original ? result.addPage(blankSize)
+        : flatten ? null : result.addPage(copies[copyIndex++]);
+      if (flatten || page.marks.length) {
+        let rendered;
+        if (page.original && flatten) rendered = await renderPdfPage(pdf, page.original, 2350);
+        else if (page.original) {
+          const sourcePage = await pdf.getPage(page.original);
+          const actual = sourcePage.getViewport({ scale: 1 });
+          const viewport = sourcePage.getViewport({ scale: Math.min(3, 2350 / Math.max(actual.width, actual.height)) });
+          rendered = { canvas: canvasFor(Math.ceil(viewport.width), Math.ceil(viewport.height)),
+            viewport, width: actual.width, height: actual.height };
+        } else {
+          rendered = { canvas: canvasFor(1191, 1684), width: blankSize[0], height: blankSize[1] };
+        }
+        const { canvas, viewport, width, height } = rendered;
+        try {
+          const scale = canvas.width / width;
+          const text = redact ? new Map() : await getNativeText(result, page, fonts);
+          paint(canvas, page.marks, scale, text);
+          const image = await result.embedPng(await (await toBlob(canvas, "image/png")).arrayBuffer());
+          const outputPage = target || result.addPage([width, height]);
+          if (target && viewport) drawOverlay(target, image, viewport);
+          else outputPage.drawImage(image, { x: 0, y: 0, width, height });
+          drawSelectableText(outputPage, text, rendered, Boolean(target && viewport));
+          outputPage.setRotation(PDFLib.degrees(mod(outputPage.getRotation().angle + page.rotation)));
+        } finally {
+          releaseCanvas(canvas);
+        }
+      } else if (target) {
+        target.setRotation(PDFLib.degrees(mod(target.getRotation().angle + page.rotation)));
+      }
+    }
+    return result.save();
+  }
+
+  T.register("pdf-editor", (root) => {
+    const pdfInput = input({ type: "file", accept: ".pdf,application/pdf" });
+    const imageInput = input({ type: "file", accept: ".jpg,.jpeg,.png,.webp,.bmp" });
+    const notice = el("p", { class: "pe-status", role: "status" });
+    const fileName = el("strong", { class: "pe-filename" });
+    const pageList = select([]);
+    const pageSummary = el("p", { class: "tp-hint", role: "status" });
+    const regionsList = select([]);
+    const language = select([["English", "eng"], ["Hindi", "hin"], ["Bangla", "ben"],
+      ["Hindi + English", "hin+eng"], ["Bangla + English", "ben+eng"]], "eng");
+    const textValue = T.textarea("", { rows: 3, maxlength: 2000, placeholder: "Enter text" });
+    const size = input({ type: "number", min: 4, max: 120, step: 0.5, value: 18 });
+    const color = input({ type: "color", value: "#131722", class: "pe-color" });
+    const background = input({ type: "color", value: "#ffffff", class: "pe-color" });
+    const shape = select([["Rectangle", "rectangle"], ["Ellipse", "ellipse"], ["Line", "line"]], "rectangle");
+    const family = select([["Sans-serif", "sans"], ["Serif", "serif"], ["Monospace", "mono"], ["Script", "script"]], "sans");
+    const alignment = select([["Left", "left"], ["Center", "center"], ["Right", "right"]], "left");
+    const signatureImage = el("input", { type: "checkbox" });
+    for (const [control, label] of [[pageList, "Go to page"], [regionsList, "Text on this page"], [language, "Scan language"],
+      [shape, "Shape"], [family, "Font"], [alignment, "Alignment"]]) {
+      control.setAttribute("aria-label", label);
+    }
+    const preview = canvasFor(1, 1);
+    preview.setAttribute("aria-label", "PDF page preview");
+    const workArea = el("div", { class: "pe-preview" }, preview);
+    const toolHelp = el("p", { class: "tp-hint" });
+    const exportNote = el("p", { class: "tp-hint pe-export-note" });
+    const history = [];
+    const future = [];
+    const scans = new Map();
+    let pages = [];
+    let currentId;
+    let nextId = 0;
+    let file;
+    let pdf;
+    let base;
+    let baseScale = 1;
+    let originalRegions = [];
+    let regions = [];
+    let selected = -1;
+    let active = "replace";
+    let image;
+    let drag;
+    let busy = false;
+
+    const current = () => pages.find((page) => page.id === currentId);
+    const index = () => pages.findIndex((page) => page.id === currentId);
+    const wantsImage = () => active === "image" || (active === "signature" && signatureImage.checked);
+    const wantsText = () => active === "text" || active === "replace" || (active === "signature" && !wantsImage());
+    const tell = (message) => { notice.textContent = message; };
+    const error = (failure) => failure?.message || (typeof failure === "string" ? failure : "The PDF could not be processed.");
+
+    function snapshot() { return { pages, id: currentId }; }
+    function change(updated, id = currentId) {
+      history.push(snapshot());
+      if (history.length > 60) history.shift();
+      future.length = 0;
+      pages = updated;
+      currentId = id;
+    }
+
+    function commit(mark) {
+      change(pages.map((page) => page.id === currentId ? { ...page, marks: [...page.marks, mark] } : page));
+      selected = -1;
+      updateRegions();
+      refresh();
+      tell(mark.kind === "replace" ? "Text replacement added." : "Edit added to the page.");
+    }
+
+    async function revisit(from, to) {
+      if (!from.length || busy) return;
+      to.push(snapshot());
+      const previous = from.pop();
+      const rerender = currentId !== previous.id || !base;
+      pages = previous.pages;
+      currentId = previous.id;
+      selected = -1;
+      updateRegions();
+      if (rerender) await showPage();
+      else refresh();
+      tell(from === history ? "Edit undone." : "Edit restored.");
+    }
+
+    function draw(outline) {
+      const page = current();
+      if (!page || !base) return;
+      const angle = page.rotation;
+      const sideways = angle % 180 !== 0;
+      const width = base.width;
+      const height = base.height;
+      const composed = canvasFor(width, height);
+      try {
+        const context = composed.getContext("2d");
+        context.drawImage(base, 0, 0);
+        paint(composed, page.marks, baseScale);
+        if (active === "replace") {
+          context.lineWidth = Math.max(1, 1.4 * baseScale);
+          for (const [i, item] of regions.entries()) {
+            if (i !== selected && item.width * width < 5) continue;
+            context.strokeStyle = i === selected ? "#4c2bd8" : "#7657dc66";
+            context.strokeRect(item.x * width, item.y * height, item.width * width, item.height * height);
+          }
+        }
+        if (outline) {
+          context.strokeStyle = "#4c2bd8";
+          context.lineWidth = 2;
+          context.setLineDash([6, 4]);
+          context.strokeRect(outline.x * width, outline.y * height, outline.width * width, outline.height * height);
+        }
+        preview.width = sideways ? height : width;
+        preview.height = sideways ? width : height;
+        const display = preview.getContext("2d");
+        display.translate(preview.width / 2, preview.height / 2);
+        display.rotate(angle * Math.PI / 180);
+        display.drawImage(composed, -width / 2, -height / 2);
+      } finally {
+        releaseCanvas(composed);
+      }
+    }
+
+    function updateRegions() {
+      const marks = current()?.marks || [];
+      const destructive = marks.filter((mark) => mark.kind === "replace" || mark.kind === "redact");
+      const covered = (region, mark) => {
+        const x = region.x + region.width / 2;
+        const y = region.y + region.height / 2;
+        return x >= mark.x && x <= mark.x + mark.width && y >= mark.y && y <= mark.y + mark.height;
+      };
+      regions = originalRegions.filter((region) => !destructive.some((mark) =>
+        mark.kind === "redact" ? overlaps(region, mark) : covered(region, mark)));
+      destructive.forEach((mark, i) => {
+        if (mark.kind === "replace" && mark.text && !destructive.slice(i + 1).some((later) => overlaps(mark, later))) {
+          regions.push(mark);
+        }
+      });
+      refreshRegions();
+    }
+
+    function refreshRegions() {
+      regionsList.replaceChildren(el("option", { value: "", text: regions.length ? "Choose text on this page" : "No text selected" }),
+        ...regions.map((item, i) => el("option", { value: i, text: item.text.slice(0, 110) })));
+      regionsList.value = selected < 0 ? "" : String(selected);
+    }
+
+    function chooseRegion(value) {
+      selected = value;
+      regionsList.value = value < 0 ? "" : String(value);
+      if (value >= 0) {
+        const item = regions[value];
+        textValue.value = item.text;
+        size.value = Math.max(4, Math.min(120, Math.round(item.size * 2) / 2));
+      }
+      refresh();
+    }
+
+    function selectTool(kind) {
+      active = kind;
+      selected = -1;
+      regionsList.value = "";
+      textValue.value = "";
+      alignment.value = kind === "signature" ? "center" : "left";
+      family.value = kind === "signature" ? "script" : "sans";
+      color.value = kind === "highlight" ? "#ffe15a" : "#131722";
+      refresh();
+    }
+
+    function newMark(box, replacing, reverse = false) {
+      const text = textValue.value.trim();
+      if (active === "replace" && !replacing) throw new Error("Choose existing text first.");
+      if (wantsText() && !text && active !== "replace") throw new Error("Enter text before placing it on the page.");
+      if (wantsText() && !size.reportValidity()) throw new Error("Enter a font size between 4 and 120.");
+      if (wantsImage() && !image) throw new Error("Choose an image file first.");
+      return { ...box, kind: active, text, size: Number(size.value), family: family.value, color: color.value,
+        background: background.value, image: wantsImage() ? image : null, shape: shape.value, align: alignment.value,
+        angle: replacing?.angle ?? -current().rotation * Math.PI / 180, reverse };
+    }
+
+    const scan = button("Run OCR on page", async () => {
+      if (!current()?.original || busy) return;
+      busy = true;
+      refresh(false);
+      tell("Preparing OCR…");
+      try {
+        const original = current().original;
+        const { canvas, viewport } = await renderPdfPage(pdf, original, 1900);
+        try {
+          const data = await recognize(canvas, language.value, tell, true);
+          const items = scanRegions(data, canvas).map((item) => ({ ...item, size: item.size / viewport.scale }));
+          if (!items.length) {
+            tell("No text detected. Try another language or a clearer scan.");
+            return;
+          }
+          scans.set(original, items);
+          originalRegions = items;
+          selected = -1;
+          updateRegions();
+          tell("Scan ready. Select a detected line and review the text before replacing it.");
+        } finally { releaseCanvas(canvas); }
+      } catch (failure) { tell(error(failure)); }
+      finally { busy = false; refresh(); }
+    }, "ghost");
+
+    const apply = button("Apply replacement", () => {
+      if (selected < 0) return;
+      try { commit(newMark(regions[selected], regions[selected])); }
+      catch (failure) { tell(error(failure)); }
+    });
+    const center = button("Place at center", () => {
+      try { commit(newMark(bounds(...originalPoint(0.25, 0.4), ...originalPoint(0.75, 0.6)))); }
+      catch (failure) { tell(error(failure)); }
+    }, "ghost");
+    const positions = [["Left (%)", 25], ["Top (%)", 40], ["Width (%)", 50], ["Height (%)", 20]]
+      .map(([label, value], index) => [label, input({ type: "number", step: 0.1, min: index < 2 ? 0 : 0.1,
+        max: 100, value, required: true })]);
+    const placement = el("form", {}, el("div", { class: "pe-fields" },
+      positions.map(([label, control]) => field(label, control))),
+      actions(el("button", { type: "submit", class: "tp-btn tp-btn-ghost" }, "Place at position")));
+    placement.addEventListener("submit", (event) => {
+      event.preventDefault();
+      if (busy || !base || active === "replace") return;
+      const [x, y, width, height] = positions.map(([, control]) => Number(control.value) / 100);
+      if (x + width > 1.000001 || y + height > 1.000001) {
+        tell("Keep the whole box inside the page.");
+        return;
+      }
+      try { commit(newMark(bounds(...originalPoint(x, y), ...originalPoint(x + width, y + height)))); }
+      catch (failure) { tell(error(failure)); }
+    });
+    const positionOptions = el("details", { class: "pe-position" },
+      el("summary", { text: "Place by coordinates" }), placement);
+    const undo = button("Undo", () => revisit(history, future), "ghost");
+    const redo = button("Redo", () => revisit(future, history), "ghost");
+    const prev = button("Previous page", () => navigate(index() - 1), "ghost");
+    const next = button("Next page", () => navigate(index() + 1), "ghost");
+    const earlier = button("Move page earlier", () => move(-1), "ghost");
+    const later = button("Move page later", () => move(1), "ghost");
+    const rotate = button("Rotate page", () => {
+      change(pages.map((page) => page.id === currentId ? { ...page, rotation: mod(page.rotation + 90) } : page));
+      refresh();
+    }, "ghost");
+    const add = button("Add blank page", async () => {
+      if (pages.length >= 100) return;
+      const page = { id: ++nextId, original: null, rotation: 0, marks: [] };
+      const updated = [...pages];
+      updated.splice(index() + 1, 0, page);
+      change(updated, page.id);
+      await showPage();
+    }, "ghost");
+    const remove = button("Delete page", async () => {
+      if (pages.length <= 1) return;
+      const offset = index();
+      const updated = pages.filter((page) => page.id !== currentId);
+      change(updated, updated[Math.min(offset, updated.length - 1)].id);
+      await showPage();
+    }, "ghost");
+    const save = button("Download edited PDF", async () => {
+      if (busy || !pdf) return;
+      busy = true;
+      refresh(false);
+      try {
+        const bytes = await writePdf(file, pdf, pages, tell);
+        const name = T.safeName(file.name.replace(/\.pdf$/i, ""), "document");
+        T.download(name + "-edited.pdf", bytes, "application/pdf");
+        tell("Edited PDF downloaded.");
+      } catch (failure) { tell("Could not export: " + error(failure)); }
+      finally { busy = false; refresh(false); }
+    });
+
+    const toolButtons = kinds.map(([kind, label]) => button(label, () => selectTool(kind), "ghost", { "aria-pressed": "false" }));
+    const replaceOptions = el("div", { class: "pe-options" }, field("Text on this page", regionsList),
+      actions(field("Scan language", language), scan));
+    const textField = field("Text", textValue);
+    const imageField = field("Choose image or signature", imageInput);
+    const shapeField = field("Shape", shape);
+    const signatureField = checkbox("Use an image of my signature", signatureImage);
+    const fontControls = el("div", { class: "pe-fields" }, field("Font", family), field("Size (pt)", size), field("Alignment", alignment));
+    const colorField = field("Color", color);
+    const fillField = field("Replacement background", background);
+    const inspector = el("section", { class: "pe-inspector" }, el("h2", { text: "Edit page" }), toolHelp,
+      replaceOptions, signatureField, textField, imageField, shapeField, fontControls,
+      el("div", { class: "pe-fields" }, colorField, fillField), actions(apply, center), positionOptions);
+    const editor = el("div", { class: "pe-workspace" },
+      el("div", { class: "pe-top" }, fileName, actions(undo, redo, save)),
+      el("div", { class: "pe-tools", role: "group", "aria-label": "Editing tools" }, toolButtons),
+      el("div", { class: "pe-desk" }, workArea, inspector), exportNote,
+      el("section", { class: "pe-pages" }, el("h2", { text: "Pages" }), field("Go to page", pageList),
+        actions(prev, next, earlier, later, rotate, add, remove), pageSummary));
+    root.replaceChildren(panel("", [field("PDF file", pdfInput), notice, editor]));
+
+    function refresh(repaint = true) {
+      const page = current();
+      pdfInput.disabled = busy;
+      editor.hidden = !pdf || !page;
+      if (editor.hidden) return;
+      const offset = index();
+      fileName.textContent = file.name;
+      const pageLabels = pages.map((item, i) => "Page " + (i + 1) + (item.original ? "" : " · Blank"));
+      if (pageList.options.length !== pages.length ||
+          pages.some((item, i) => pageList.options[i]?.value !== String(item.id))) {
+        pageList.replaceChildren(...pages.map((item, i) => el("option", { value: item.id, text: pageLabels[i] })));
+      }
+      pageList.value = String(currentId);
+      pageList.disabled = busy;
+      pageSummary.textContent = pageLabels[offset] + " of " + pages.length + " · " + page.marks.length + " edits";
+      [prev, earlier].forEach((control) => { control.disabled = busy || offset <= 0; });
+      [next, later].forEach((control) => { control.disabled = busy || offset >= pages.length - 1; });
+      add.disabled = busy || pages.length >= 100;
+      remove.disabled = busy || pages.length <= 1;
+      rotate.disabled = save.disabled = busy || !base;
+      undo.disabled = busy || !history.length;
+      redo.disabled = busy || !future.length;
+      toolButtons.forEach((control, i) => {
+        control.setAttribute("aria-pressed", String(kinds[i][0] === active));
+        control.disabled = busy;
+      });
+      const instructions = {
+        replace: "Click outlined text or select it from the list. Replaced areas use the background color you choose.",
+        text: "Enter text and drag a box on the page to place it.",
+        image: "Choose an image and drag to place it on the page.",
+        signature: "Type your name or choose a signature image, then drag to place it.",
+        highlight: "Drag across the area you want to highlight.",
+        shape: "Choose a shape and drag to draw it.",
+        redact: "Drag a box over private details. Redaction exports every page as an image and removes underlying text and links.",
+      };
+      toolHelp.textContent = instructions[active];
+      workArea.dataset.selecting = String(active === "replace");
+      const marks = pages.flatMap((item) => item.marks);
+      const hasRedaction = marks.some((mark) => mark.kind === "redact");
+      const hasReplacement = marks.some((mark) => mark.kind === "replace");
+      exportNote.hidden = !hasRedaction && !hasReplacement;
+      exportNote.textContent = hasRedaction
+        ? "Redaction exports every page as a flattened image without selectable text, links or form fields."
+        : "Original content on replaced pages is flattened. New text supported by built-in PDF fonts stays selectable. This copy omits links and form fields.";
+      replaceOptions.hidden = active !== "replace";
+      fillField.hidden = active !== "replace";
+      textField.hidden = fontControls.hidden = !wantsText();
+      signatureField.hidden = active !== "signature";
+      imageField.hidden = !wantsImage();
+      shapeField.hidden = active !== "shape";
+      colorField.hidden = active === "redact" || wantsImage();
+      apply.hidden = active !== "replace";
+      center.hidden = active === "replace" || active === "redact";
+      positionOptions.hidden = active === "replace";
+      scan.disabled = busy || !page.original || !base;
+      apply.disabled = busy || selected < 0;
+      center.disabled = busy || !base;
+      [regionsList, textValue, size, color, background, shape, family, alignment, signatureImage, imageInput, language]
+        .forEach((control) => { control.disabled = busy; });
+      if (repaint) draw();
+    }
+
+    async function showPage() {
+      busy = true;
+      selected = -1;
+      drag = null;
+      if (base) releaseCanvas(base);
+      base = null;
+      originalRegions = [];
+      updateRegions();
+      refresh(false);
+      tell("Rendering page…");
+      try {
+        const page = current();
+        if (page.original) {
+          const rendered = await renderPdfPage(pdf, page.original, 1450);
+          base = rendered.canvas;
+          baseScale = rendered.viewport.scale;
+          const source = await pdf.getPage(page.original);
+          originalRegions = scans.get(page.original) || textRegions(await source.getTextContent(), rendered.viewport, base);
+        } else {
+          baseScale = 1.5;
+          base = canvasFor(Math.ceil(blankSize[0] * baseScale), Math.ceil(blankSize[1] * baseScale));
+          const context = base.getContext("2d");
+          context.fillStyle = "#fff";
+          context.fillRect(0, 0, base.width, base.height);
+        }
+        updateRegions();
+        tell("");
+      } catch (failure) { tell(error(failure)); }
+      finally { busy = false; refresh(); }
+    }
+
+    function move(direction) {
+      const offset = index();
+      const updated = [...pages];
+      const destination = offset + direction;
+      if (destination < 0 || destination >= updated.length) return;
+      [updated[offset], updated[destination]] = [updated[destination], updated[offset]];
+      change(updated);
+      refresh(false);
+    }
+
+    async function navigate(offset) {
+      if (!pages[offset] || pages[offset].id === currentId || busy) return;
+      currentId = pages[offset].id;
+      await showPage();
+    }
+
+    const originalPoint = (x, y) => ({ 90: [y, 1 - x], 180: [1 - x, 1 - y], 270: [1 - y, x] }[current().rotation] || [x, y]);
+    const point = (event) => {
+      const rect = preview.getBoundingClientRect();
+      const x = clamp((event.clientX - rect.left) / rect.width);
+      const y = clamp((event.clientY - rect.top) / rect.height);
+      return originalPoint(x, y);
+    };
+
+    preview.addEventListener("pointerdown", (event) => {
+      if (!base || busy || drag || event.button !== 0) return;
+      const [x, y] = point(event);
+      if (active === "replace") {
+        const matches = regions.map((item, i) => ({ ...item, i })).filter((item) =>
+          item.x <= x && item.x + item.width >= x && item.y <= y && item.y + item.height >= y);
+        matches.sort((first, second) => first.width * first.height - second.width * second.height);
+        chooseRegion(matches[0]?.i ?? -1);
+      } else {
+        drag = { id: event.pointerId, point: [x, y] };
+        preview.setPointerCapture(event.pointerId);
+      }
+    });
+    let animation = 0;
+    preview.addEventListener("pointermove", (event) => {
+      if (drag?.id !== event.pointerId) return;
+      const outline = bounds(...drag.point, ...point(event));
+      cancelAnimationFrame(animation);
+      animation = requestAnimationFrame(() => { if (drag) draw(outline); });
+    });
+    preview.addEventListener("pointerup", (event) => {
+      if (drag?.id !== event.pointerId) return;
+      cancelAnimationFrame(animation);
+      const end = point(event);
+      const box = bounds(...drag.point, ...end);
+      const reverse = (end[0] - drag.point[0]) * (end[1] - drag.point[1]) < 0;
+      drag = null;
+      const width = box.width * base.width;
+      const height = box.height * base.height;
+      const canBeFlat = active === "shape" && shape.value === "line";
+      if (Math.max(width, height) < 3 || (!canBeFlat && Math.min(width, height) < 3)) { draw(); return; }
+      try { commit(newMark(box, null, reverse)); }
+      catch (failure) { tell(error(failure)); draw(); }
+    });
+    preview.addEventListener("lostpointercapture", () => {
+      if (drag) { drag = null; draw(); }
+    });
+
+    regionsList.addEventListener("change", () => chooseRegion(regionsList.value === "" ? -1 : Number(regionsList.value)));
+    pageList.addEventListener("change", () => navigate(pages.findIndex((page) => page.id === Number(pageList.value))));
+    signatureImage.addEventListener("change", () => refresh(false));
+    imageInput.addEventListener("change", async () => {
+      image = null;
+      if (!imageInput.files[0]) return;
+      busy = true;
+      refresh(false);
+      try { image = await loadImage(imageInput.files[0]); tell("Image ready to place."); }
+      catch (failure) { tell(error(failure)); }
+      finally { busy = false; refresh(false); }
+    });
+    pdfInput.addEventListener("change", async () => {
+      const candidate = pdfInput.files[0];
+      if (!candidate || busy) return;
+      busy = true;
+      refresh(false);
+      tell("Opening PDF…");
+      let incoming;
+      try {
+        incoming = await openPdf(candidate);
+        // Exporting preserved pages requires a PDF that pdf-lib can open too.
+        await PDFLib.PDFDocument.load(await candidate.arrayBuffer(), { updateMetadata: false });
+        await pdf?.destroy();
+        pdf = incoming;
+        file = candidate;
+        history.length = future.length = 0;
+        scans.clear();
+        image = null;
+        imageInput.value = "";
+        signatureImage.checked = false;
+        pages = Array.from({ length: pdf.numPages }, (_, i) => ({
+          id: ++nextId, original: i + 1, rotation: 0, marks: [],
+        }));
+        currentId = pages[0].id;
+        await showPage();
+      } catch (failure) {
+        if (incoming && incoming !== pdf) await incoming.destroy();
+        pdfInput.value = "";
+        tell(error(failure));
+      } finally { busy = false; refresh(false); }
+    });
+    refresh(false);
+  });
+})();
