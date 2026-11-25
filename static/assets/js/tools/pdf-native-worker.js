@@ -145,7 +145,7 @@ function replacePage(document, index, edits) {
       const object = engine.FPDFPage_GetObject(page, edit.object);
       if (!object || engine.FPDFPageObj_GetType(object) !== 1 || readText(object, textPage) !== edit.sourceText) return null;
       return { edit, object, matrix: objectMatrix(object), bounds: objectBounds(object),
-        font: engine.FPDFTextObj_GetFont(object), size: textSize(object), color: fillColor(object), inserted: 0 };
+        font: engine.FPDFTextObj_GetFont(object), size: textSize(object), color: fillColor(object), inserted: 0, closest: false };
     }));
     if (plans.length !== edits.length || plans.some((plan) => !plan?.matrix || !plan.bounds || !plan.font || !plan.size)) return false;
     let ready = false;
@@ -153,11 +153,17 @@ function replacePage(document, index, edits) {
       for (const plan of plans) {
         const { edit, matrix, bounds, font, size, color } = plan;
         if (!edit.text) continue;
-        const candidates = edit.family === "original"
-          ? [() => engine.FPDFPageObj_CreateTextObj(document, font, size)]
-          : [() => engine.FPDFPageObj_NewTextObj(document, stockFont(edit.family, edit.bold, edit.italic || edit.family === "script"), size)];
-        for (const make of candidates) {
-          const replacement = make();
+        const candidates = [];
+        if (edit.family === "original") {
+          candidates.push({ closest: false, create: () => engine.FPDFPageObj_CreateTextObj(document, font, size) });
+        }
+        const options = edit.family === "original" ? edit.fallback : edit;
+        if (options) {
+          candidates.push({ closest: edit.family === "original", create: () => engine.FPDFPageObj_NewTextObj(document,
+            stockFont(options.family, options.bold, options.italic || options.family === "script"), size) });
+        }
+        for (const candidate of candidates) {
+          const replacement = candidate.create();
           if (!replacement) continue;
           if (!configureText(replacement, edit, matrix, bounds, color, size * Math.hypot(matrix[2], matrix[3]))) {
             engine.FPDFPageObj_Destroy(replacement);
@@ -168,6 +174,7 @@ function replacePage(document, index, edits) {
           const valid = withTextPage(page, (textPage) => readText(replacement, textPage).trim() === edit.text.trim());
           if (valid === true) {
             plan.inserted = replacement;
+            plan.closest = candidate.closest;
             break;
           }
           if (!engine.FPDFPage_RemoveObject(page, replacement)) throw new Error("Could not roll back a PDF text change.");
@@ -188,7 +195,7 @@ function replacePage(document, index, edits) {
         }
       }
       if (!engine.FPDFPage_GenerateContent(page)) throw new Error("Could not write the changed PDF page.");
-      return true;
+      return plans.filter((plan) => plan.closest).map(({ edit }) => edit.object);
     } finally {
       if (!ready) {
         for (const { inserted } of plans) {
@@ -235,10 +242,14 @@ self.onmessage = async ({ data: { id, type, payload } }) => {
     } else if (type === "save") {
       const result = openDocument(source, (document) => {
         const applied = [];
+        const closest = [];
         for (const { index, edits } of payload) {
-          if (replacePage(document, index, edits)) applied.push(index);
+          const matches = replacePage(document, index, edits);
+          if (!matches) continue;
+          applied.push(index);
+          for (const object of matches) closest.push({ index, object });
         }
-        return { applied, bytes: applied.length ? saveCopy(document) : null };
+        return { applied, closest, bytes: applied.length ? saveCopy(document) : null };
       });
       self.postMessage({ id, result }, result.bytes ? [result.bytes.buffer] : []);
     } else {

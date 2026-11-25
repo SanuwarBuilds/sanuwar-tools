@@ -23,7 +23,7 @@
   }
 
   function nativeClient() {
-    const worker = new Worker("/assets/js/tools/pdf-native-worker.js?v=2", { type: "module" });
+    const worker = new Worker("/assets/js/tools/pdf-native-worker.js?v=3", { type: "module" });
     const requests = new Map();
     let sequence = 0;
     let closed = false;
@@ -78,7 +78,7 @@
       item.width * item.height * 0.38)].sort((a, b) => (a.y - b.y) || (a.x - b.x));
   }
 
-  function textRegions(content, viewport, canvas) {
+  function textRegions(content, viewport, canvas, source) {
     return content.items.flatMap((item) => {
       if (!item.str?.trim()) return [];
       const [a, b, c, d, x, y] = pdfjsLib.Util.transform(viewport.transform, item.transform);
@@ -99,7 +99,10 @@
       const ys = points.map(([, vertical]) => vertical);
       const box = bounds(Math.min(...xs), Math.min(...ys), Math.max(...xs), Math.max(...ys));
       if (!box.width || !box.height) return [];
-      return [{ ...box, text: item.str, size: height / viewport.scale, angle: Math.atan2(uy, ux) }];
+      const loaded = source.commonObjs.has(item.fontName) ? source.commonObjs.get(item.fontName) : null;
+      return [{ ...box, text: item.str, size: height / viewport.scale, angle: Math.atan2(uy, ux),
+        originalFont: loaded?.name || "", fontFamily: loaded?.fallbackName || font.fontFamily,
+        fontBold: Boolean(loaded?.bold || loaded?.black), fontItalic: Boolean(loaded?.italic) }];
     });
   }
 
@@ -107,13 +110,85 @@
     return (data.blocks || []).flatMap((block) => block.paragraphs)
       .flatMap((paragraph) => paragraph.lines)
       .filter((line) => line.text.trim())
-      .map(({ text, bbox }) => ({
+      .map(({ text, bbox, words }) => ({
         ...bounds(bbox.x0 / canvas.width, (bbox.y0 - 2) / canvas.height, bbox.x1 / canvas.width, (bbox.y1 + 2) / canvas.height),
         text: text.trim(),
         ocr: true,
+        originalFont: words?.find((word) => word.font_name)?.font_name || "",
+        fontBold: Boolean(words?.length && words.filter((word) => word.is_bold).length > words.length / 2),
+        fontItalic: Boolean(words?.length && words.filter((word) => word.is_italic).length > words.length / 2),
         size: Math.max(5, 0.85 * (bbox.y1 - bbox.y0)),
         angle: 0,
       }));
+  }
+
+  function closestStyle(region) {
+    const name = (region.originalFont || "").replace(/^[A-Z]{6}\+/, "").toLowerCase();
+    const generic = (region.fontFamily || "").toLowerCase();
+    const family = /courier|mono|consolas|menlo|typewriter/.test(name + generic) ? "mono"
+      : /times|garamond|georgia|baskerville|cambria|minion|palatino|roman/.test(name) ||
+        (generic.includes("serif") && !generic.includes("sans")) ? "serif" : "sans";
+    return {
+      family,
+      bold: Boolean(region.fontBold || /bold|black|heavy|demi|semibold|ultra/.test(name)),
+      italic: Boolean(region.fontItalic || /italic|oblique|slanted/.test(name)),
+    };
+  }
+
+  function sampleColors(canvas, region) {
+    const sourceX = Math.max(0, Math.floor(region.x * canvas.width));
+    const sourceY = Math.max(0, Math.floor(region.y * canvas.height));
+    const sourceWidth = Math.min(canvas.width - sourceX, Math.max(1, Math.ceil(region.width * canvas.width)));
+    const sourceHeight = Math.min(canvas.height - sourceY, Math.max(1, Math.ceil(region.height * canvas.height)));
+    const sample = canvasFor(Math.min(160, sourceWidth), Math.min(48, sourceHeight));
+    try {
+      const context = sample.getContext("2d");
+      context.drawImage(canvas, sourceX, sourceY, sourceWidth, sourceHeight, 0, 0, sample.width, sample.height);
+      const data = context.getImageData(0, 0, sample.width, sample.height).data;
+      const colors = new Map();
+      for (let offset = 0; offset < data.length; offset += 4) {
+        const rgb = [data[offset], data[offset + 1], data[offset + 2]];
+        const key = rgb.map((value) => value >> 4).join(",");
+        const entry = colors.get(key) || { count: 0, rgb: [0, 0, 0] };
+        entry.count++;
+        rgb.forEach((value, index) => { entry.rgb[index] += value; });
+        colors.set(key, entry);
+      }
+      const ranked = [...colors.values()].sort((a, b) => b.count - a.count);
+      const average = (entry) => entry.rgb.map((value) => Math.round(value / entry.count));
+      const toHex = (rgb) => "#" + rgb.map((value) => value.toString(16).padStart(2, "0")).join("");
+      const paper = average(ranked[0]);
+      const ink = ranked.slice(1).find((entry) => {
+        const rgb = average(entry);
+        return Math.hypot(...rgb.map((value, index) => value - paper[index])) > 105;
+      });
+      return { background: toHex(paper), color: ink ? toHex(average(ink)) : "#131722" };
+    } finally { releaseCanvas(sample); }
+  }
+
+  function mergeDetectedText(digital, scanned) {
+    return [...digital, ...scanned.filter((line) => !digital.some((item) => {
+      const overlapWidth = Math.max(0, Math.min(item.x + item.width, line.x + line.width) - Math.max(item.x, line.x));
+      const overlapHeight = Math.max(0, Math.min(item.y + item.height, line.y + line.height) - Math.max(item.y, line.y));
+      return overlapWidth * overlapHeight > item.width * item.height * 0.45;
+    }))];
+  }
+
+  function hasPageInk(canvas) {
+    const sample = canvasFor(48, 48);
+    try {
+      const context = sample.getContext("2d");
+      context.drawImage(canvas, 0, 0, 48, 48);
+      const data = context.getImageData(0, 0, 48, 48).data;
+      let darkest = 255;
+      let lightest = 0;
+      for (let offset = 0; offset < data.length; offset += 4) {
+        const level = (data[offset] + data[offset + 1] + data[offset + 2]) / 3;
+        darkest = Math.min(darkest, level);
+        lightest = Math.max(lightest, level);
+      }
+      return lightest - darkest > 24;
+    } finally { releaseCanvas(sample); }
   }
 
   function paint(canvas, marks, scale, nativeText = new Map()) {
@@ -282,6 +357,8 @@
     }
   }
 
+  class FontMatchError extends Error {}
+
   const nativeMarks = (marks) => marks.filter((mark) => mark.kind === "replace" && !mark.visual);
   const visualMarks = (marks) => marks.filter((mark) => mark.kind !== "replace" || mark.visual);
 
@@ -290,14 +367,14 @@
       const patches = nativeMarks(page.marks);
       if (!page.original || !patches.length) return [];
       const edits = [...new Map(patches.map((mark) => [mark.object, mark])).values()].map(({ object, sourceText, text,
-        size, color, align, family, bold, italic }) => ({ object, sourceText, text, size, color, align, family, bold, italic }));
+        size, color, align, family, bold, italic, fallback }) => ({ object, sourceText, text, size, color, align, family, bold, italic, fallback }));
       return [{ index: page.original - 1, edits }];
     });
     if (!candidates.length) return { bytes: null, applied: [] };
     if (!client) throw new Error("The PDF text engine is unavailable. Reopen the PDF and try again.");
     const result = await client.call("save", candidates);
     const failed = candidates.find(({ index }) => !result.applied.includes(index));
-    if (failed) throw new Error("Page " + (failed.index + 1) + " cannot save this text in the selected font. Pick another font or use a visual replacement.");
+    if (failed) throw new FontMatchError("Page " + (failed.index + 1) + " could not write this text as selectable PDF text.");
     return result;
   }
 
@@ -396,14 +473,14 @@
     const urlInput = input({ type: "url", placeholder: "https://example.com" });
     const bold = el("input", { type: "checkbox" });
     const italic = el("input", { type: "checkbox" });
-    const language = select([["English", "eng"], ["Hindi", "hin"], ["Bangla", "ben"],
-      ["Hindi + English", "hin+eng"], ["Bangla + English", "ben+eng"]], "eng");
+    const language = select([["Automatic (English, Hindi, Bangla)", "eng+hin+ben"], ["English", "eng"], ["Hindi", "hin"], ["Bangla", "ben"],
+      ["Hindi + English", "hin+eng"], ["Bangla + English", "ben+eng"]], "eng+hin+ben");
     const textValue = T.textarea("", { rows: 3, maxlength: 2000, placeholder: "Enter text" });
     const size = input({ type: "number", min: 4, max: 120, step: 0.5, value: 18 });
     const color = input({ type: "color", value: "#131722", class: "pe-color" });
     const background = input({ type: "color", value: "#ffffff", class: "pe-color" });
     const shape = select([["Rectangle", "rectangle"], ["Ellipse", "ellipse"], ["Line", "line"]], "rectangle");
-    const family = select([["Keep original font", "original"], ["Sans-serif", "sans"], ["Serif", "serif"], ["Monospace", "mono"], ["Script", "script"]], "sans");
+    const family = select([["Auto match font", "original"], ["Sans-serif", "sans"], ["Serif", "serif"], ["Monospace", "mono"], ["Script", "script"]], "sans");
     const alignment = select([["Left", "left"], ["Center", "center"], ["Right", "right"]], "left");
     const signatureImage = el("input", { type: "checkbox" });
     for (const [control, label] of [[pageList, "Go to page"], [regionsList, "Text on this page"], [language, "Scan language"],
@@ -425,6 +502,8 @@
       inlineValue, inlineNotice, actions(inlineApply, chooseFont, inlineCancel));
     const sheet = el("div", { class: "pe-sheet" }, preview);
     const workArea = el("div", { class: "pe-preview", tabindex: 0, role: "region", "aria-label": "PDF preview" }, sheet, inlineEdit);
+    const matchBadge = el("span", { class: "pe-match-badge", text: "Closest match", hidden: true });
+    const stage = el("div", { class: "pe-stage-column" }, workArea, matchBadge);
     const toolHelp = el("p", { class: "tp-hint" });
     const exportNote = el("p", { class: "tp-hint pe-export-note" });
     const history = [];
@@ -441,6 +520,7 @@
     let base;
     let patchedCanvas;
     let baseScale = 1;
+    let digitalRegions = [];
     let originalRegions = [];
     let regions = [];
     let selected = -1;
@@ -470,13 +550,20 @@
       currentId = id;
     }
 
+    function pageWithMark(page, mark) {
+      const previous = mark.kind === "replace" ? regions[selected] : null;
+      return { ...page, marks: [...page.marks.filter((item) => item !== previous), mark] };
+    }
+
     function commit(mark) {
       closeInline();
-      change(pages.map((page) => page.id === currentId ? { ...page, marks: [...page.marks, mark] } : page));
+      change(pages.map((page) => page.id === currentId ? pageWithMark(page, mark) : page));
       selected = -1;
       updateRegions();
       refresh();
-      tell(mark.kind === "replace" ? "Text replacement added." : "Edit added to the page.");
+      tell(mark.kind === "replace"
+        ? (mark.closest ? "Text replacement added. Closest match used." : "Text replacement added.")
+        : "Edit added to the page.");
     }
 
     async function revisit(from, to) {
@@ -565,16 +652,20 @@
       closeInline();
       fontNotice.hidden = true;
       inlineNotice.hidden = true;
-      visualReplacement.checked = Boolean(regions[value]?.visual);
+      visualReplacement.checked = Boolean(regions[value]?.forceVisual);
       selected = value;
       regionsList.value = value < 0 ? "" : String(value);
       if (value >= 0) {
         const item = regions[value];
         textValue.value = item.text;
-        family.value = item.family || (item.object != null ? "original" : "sans");
-        color.value = item.color || item.originalColor || "#131722";
-        bold.checked = Boolean(item.bold);
-        italic.checked = Boolean(item.italic);
+        const style = closestStyle(item);
+        const sampled = item.kind === "replace" ? null : sampleColors(base, item);
+        family.value = item.autoFont ? "original" : item.family || "original";
+        color.value = item.color || item.originalColor || sampled?.color || "#131722";
+        background.value = item.background || sampled?.background || "#ffffff";
+        bold.checked = item.bold ?? style.bold;
+        italic.checked = item.italic ?? style.italic;
+        alignment.value = item.align || (/^[\p{Script=Arabic}\p{Script=Hebrew}]/u.test(item.text) ? "right" : "left");
         size.value = Math.max(4, Math.min(120, Math.round(item.size * 2) / 2));
       }
       refresh();
@@ -670,33 +761,55 @@
       return { ...box, kind: active, text, url: url?.href, size: fontSize, family: family.value, color: color.value,
         bold: bold.checked, italic: italic.checked,
         background: background.value, image: wantsImage() ? image : null, shape: shape.value, align: alignment.value,
-        angle: replacing?.angle ?? -current().rotation * Math.PI / 180, reverse };
+        angle: replacing?.angle ?? -current().rotation * Math.PI / 180, reverse,
+        visual: false, closest: false, autoFont: false, forceVisual: false };
     }
 
-    const scan = button("Run OCR on page", async () => {
-      if (!current()?.original || busy) return;
+    async function detectScannedText(page, languageCode) {
+      const { canvas, viewport } = await renderPdfPage(pdf, page.original, 1900);
+      try {
+        const data = await recognize(canvas, languageCode, tell, true);
+        const items = scanRegions(data, canvas).map((item) => ({ ...item, size: item.size / viewport.scale }));
+        scans.set(page.original, items);
+        originalRegions = mergeDetectedText(digitalRegions, items);
+        return items.length;
+      } finally { releaseCanvas(canvas); }
+    }
+
+    async function runPageOcr(automatic = false) {
+      const page = current();
+      if (!page?.original || busy) return;
       busy = true;
       refresh(false);
-      tell("Preparing OCR…");
       try {
-        const original = current().original;
-        const { canvas, viewport } = await renderPdfPage(pdf, original, 1900);
-        try {
-          const data = await recognize(canvas, language.value, tell, true);
-          const items = scanRegions(data, canvas).map((item) => ({ ...item, size: item.size / viewport.scale }));
-          if (!items.length) {
-            tell("No text detected. Try another language or a clearer scan.");
+        if (automatic) {
+          const source = await pdf.getPage(page.original);
+          const { fnArray } = await source.getOperatorList();
+          const imageOps = new Set(Object.entries(pdfjsLib.OPS).filter(([name]) =>
+            /^paint.*Image/.test(name)).map(([, operation]) => operation));
+          if (!fnArray.some((operation) => imageOps.has(operation))) {
+            scans.set(page.original, []);
             return;
           }
-          scans.set(original, items);
-          originalRegions = items;
-          selected = -1;
-          updateRegions();
-          tell("Scan ready. Select a detected line and review the text before replacing it.");
-        } finally { releaseCanvas(canvas); }
-      } catch (failure) { tell(error(failure)); }
-      finally { busy = false; refresh(); }
-    }, "ghost");
+        }
+        tell("Detecting text on this page…");
+        const count = await detectScannedText(page, language.value);
+        selected = -1;
+        updateRegions();
+        tell(count ? "Scan ready. Tap the text you want to edit." : "No text detected. Try another language or a clearer scan.");
+      } catch (failure) {
+        scans.set(page.original, []);
+        tell(error(failure));
+      } finally { busy = false; refresh(); }
+    }
+
+    const scan = button("Run OCR on page", () => runPageOcr(), "ghost");
+
+    function useVisualMatch(mark, region) {
+      const automatic = mark.family === "original";
+      const style = automatic ? closestStyle(region) : null;
+      return { ...mark, ...style, visual: true, closest: automatic, autoFont: automatic, forceVisual: visualReplacement.checked };
+    }
 
     const apply = button("Apply replacement", async () => {
       if (selected < 0 || busy) return;
@@ -704,22 +817,25 @@
       const inlineWasOpen = !inlineEdit.hidden;
       try {
         const mark = newMark(region, region);
-        if (region.object == null && !region.ocr && !visualReplacement.checked) {
-          throw new Error("This text block cannot be edited in its original font. Select Use visual replacement to edit its appearance.");
-        }
-        if (region.ocr || visualReplacement.checked) {
-          mark.visual = true;
-          if (mark.family === "original") throw new Error("Choose a font for the visual replacement.");
-          commit(mark);
+        if (region.object == null || visualReplacement.checked || /[\r\n]/.test(mark.text)) {
+          commit(useVisualMatch(mark, region));
           return;
         }
-        if (/[\r\n]/.test(mark.text)) throw new Error("Use one line for direct text editing.");
+        if (mark.family === "original") mark.fallback = closestStyle(region);
         busy = true;
         refresh(false);
-        tell("Checking the PDF font…");
+        tell("Matching the PDF font…");
         const page = current();
-        const { bytes } = await materializeText(client, [{ ...page, marks: [...page.marks, mark] }]);
-        const rendered = await usePatchedPdf(bytes, (patched) => renderPdfPage(patched, page.original, 1450));
+        let result;
+        try {
+          result = await materializeText(client, [pageWithMark(page, mark)]);
+        } catch (failure) {
+          if (!(failure instanceof FontMatchError)) throw failure;
+          commit(useVisualMatch(mark, region));
+          return;
+        }
+        mark.closest = result.closest.some((item) => item.index === page.original - 1 && item.object === mark.object);
+        const rendered = await usePatchedPdf(result.bytes, (patched) => renderPdfPage(patched, page.original, 1450));
         if (patchedCanvas) releaseCanvas(patchedCanvas);
         patchedCanvas = rendered.canvas;
         fontNotice.hidden = true;
@@ -820,7 +936,6 @@
     const visualReplacement = el("input", { type: "checkbox" });
     const visualChoice = checkbox("Use visual replacement", visualReplacement);
     visualReplacement.addEventListener("change", () => {
-      if (visualReplacement.checked && family.value === "original") family.value = "sans";
       refresh(false);
     });
     const fontControls = el("div", { class: "pe-fields" }, field("Font", family), field("Size (pt)", size), field("Alignment", alignment));
@@ -834,7 +949,7 @@
       el("div", { class: "pe-command-bar" },
         el("div", { class: "pe-tools", role: "group", "aria-label": "Editing tools" }, toolButtons),
         el("div", { class: "pe-zoom", role: "group", "aria-label": "Page zoom" }, zoomOut, zoom, zoomIn, fitPage)),
-      el("div", { class: "pe-desk" }, workArea, inspector), exportNote,
+      el("div", { class: "pe-desk" }, stage, inspector), exportNote,
       el("section", { class: "pe-pages" }, el("h2", { text: "Pages" }), field("Go to page", pageList),
         actions(prev, next, earlier, later, rotate, add, remove), pageSummary));
     root.replaceChildren(panel("", [upload, notice, editor]));
@@ -872,6 +987,7 @@
       }
       pageList.value = String(currentId);
       pageList.disabled = busy;
+      matchBadge.hidden = !page.marks.some((mark) => mark.closest);
       pageSummary.textContent = pageLabels[offset] + " of " + pages.length + " · " + page.marks.length + " edits";
       [prev, earlier].forEach((control) => { control.disabled = busy || offset <= 0; });
       [next, later].forEach((control) => { control.disabled = busy || offset >= pages.length - 1; });
@@ -913,7 +1029,7 @@
         ? "Redaction exports every page as a flattened image without selectable text, links or form fields."
         : visualFallback
           ? "This edit uses a visual replacement. Its page may be flattened when you download."
-          : "Direct text edits stay selectable. Keep original font uses the PDF’s existing font.";
+          : "Direct text edits stay selectable. Auto match tries the original font first.";
       replaceOptions.hidden = active !== "replace";
       const region = regions[selected];
       visualChoice.hidden = active !== "replace" || !region || region.ocr;
@@ -921,7 +1037,7 @@
       fillField.hidden = active !== "replace" || (region?.object != null && !visualReplacement.checked);
       textField.hidden = fontControls.hidden = !wantsText();
       styleOptions.hidden = !wantsText();
-      family.options[0].hidden = active !== "replace" || region?.object == null || visualReplacement.checked;
+      family.options[0].hidden = active !== "replace";
       const keepFont = family.value === "original";
       bold.disabled = italic.disabled = busy || keepFont;
       urlField.hidden = active !== "link";
@@ -949,7 +1065,7 @@
       if (base) releaseCanvas(base);
       if (patchedCanvas) releaseCanvas(patchedCanvas);
       patchedCanvas = base = null;
-      originalRegions = [];
+      digitalRegions = originalRegions = [];
       textFind.value = "";
       updateRegions();
       refresh(false);
@@ -961,15 +1077,20 @@
           base = rendered.canvas;
           baseScale = rendered.viewport.scale;
           const source = await pdf.getPage(page.original);
-          const extracted = textRegions(await source.getTextContent(), rendered.viewport, base);
-          if (!scans.has(page.original) && client && await nativeReady) {
+          const extracted = textRegions(await source.getTextContent(), rendered.viewport, base, source);
+          if (client && await nativeReady) {
             if (!objectRegions.has(page.original)) {
               try { objectRegions.set(page.original, await client.call("page", page.original - 1)); }
               catch { objectRegions.set(page.original, []); }
             }
           }
-          originalRegions = scans.get(page.original) ||
-            findNativeRegions(objectRegions.get(page.original) || [], rendered.viewport, base, extracted);
+          digitalRegions = findNativeRegions(objectRegions.get(page.original) || [], rendered.viewport, base, extracted);
+          originalRegions = mergeDetectedText(digitalRegions, scans.get(page.original) || []);
+          if (!digitalRegions.length && !scans.has(page.original) && hasPageInk(base)) {
+            tell("Detecting scanned text…");
+            try { await detectScannedText(page, language.value); }
+            catch { scans.set(page.original, []); }
+          }
           if (nativeMarks(page.marks).length) {
             const { bytes } = await materializeText(client, [page]);
             patchedCanvas = (await usePatchedPdf(bytes, (patched) => renderPdfPage(patched, page.original, 1450))).canvas;
@@ -1058,6 +1179,7 @@
       matches.sort((first, second) => first.width * first.height - second.width * second.height);
       chooseRegion(matches[0]?.i ?? -1);
       if (matches.length) openInline();
+      else if (current()?.original && !textFind.value && !scans.has(current().original)) void runPageOcr(true);
     }
 
     let animation = 0;

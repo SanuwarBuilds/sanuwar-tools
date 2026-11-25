@@ -1,10 +1,10 @@
 {% extends 'base.html' %}
 {% set vendor_files = {'js-yaml': 'js-yaml.js', 'marked': 'marked.js', 'fflate': 'fflate.js', 'pdf-lib': 'pdf-lib.js', 'pdfjs': 'pdf.min.js', 'jspdf': 'jspdf.umd.min.js', 'bcryptjs': 'bcrypt.min.js', 'qrcodegen': 'qrcodegen.js', 'hlsjs': 'hls.min.js', 'dashjs': 'dash.all.min.js', 'tesseract': 'ocr/tesseract.min.js'} %}
-{% set bundle_version = 5 if tool.bundle == 'pdf-editor' else 4 if tool.bundle in ['file-workbench', 'text'] else 3 if tool.bundle in ['misc', 'network'] else 4 if tool.bundle == 'players' else 4 if tool.bundle in ['calculators', 'media'] else 2 %}
+{% set bundle_version = 6 if tool.bundle == 'pdf-editor' else 4 if tool.bundle in ['file-workbench', 'text'] else 3 if tool.bundle in ['misc', 'network'] else 4 if tool.bundle == 'players' else 4 if tool.bundle in ['calculators', 'media'] else 2 %}
 {% set streaming_players = ['m3u8-player', 'dash-player', 'cloud-video-player'] %}
 {% set uses_network = tool.slug == 'currency-converter' %}
 {% set tool_help = {
-  'pdf-editor': 'Choose a PDF, then select existing text or drag to place a markup. Run OCR to select text on a scanned page. Use the page controls to organize the document, then download a copy.',
+  'pdf-editor': 'Choose a PDF, tap the text you want to change, and apply your correction. The editor matches the font automatically and detects text on scanned pages. Download a copy when you are done.',
   'application-file-pack': 'Choose any of the three files and enter the requirements shown on your application. Save passing files individually or together in a ZIP.',
   'image-to-text': 'Choose the language and a sharp screenshot or scan. Review and edit the extracted text before copying or downloading it.',
   'screenshot-pdf-redactor': 'Draw black boxes over the private details on each page. Review every page, then save a flattened copy.',
@@ -48,7 +48,7 @@
 {% set surface = 'utility' %}
 {% endif %}
 {% block bodyclass %}wb-tool-page tool-page-{{ tool.bundle }} st-tool st-tool-{{ surface }}{% endblock %}
-{% block page_styles %}<link rel="stylesheet" href="/assets/css/tools.css?v=6">{% if tool.bundle in ['file-workbench', 'study-planner'] %}<link rel="stylesheet" href="/assets/css/file-workbench.css?v=1">{% endif %}{% if tool.bundle == 'pdf-editor' %}<link rel="stylesheet" href="/assets/css/pdf-editor.css?v=3">{% endif %}{% if tool.bundle == 'players' %}<link rel="stylesheet" href="/assets/css/players.css?v=5">{% endif %}{% endblock %}
+{% block page_styles %}<link rel="stylesheet" href="/assets/css/tools.css?v=6">{% if tool.bundle in ['file-workbench', 'study-planner'] %}<link rel="stylesheet" href="/assets/css/file-workbench.css?v=1">{% endif %}{% if tool.bundle == 'pdf-editor' %}<link rel="stylesheet" href="/assets/css/pdf-editor.css?v=4">{% endif %}{% if tool.bundle == 'players' %}<link rel="stylesheet" href="/assets/css/players.css?v=5">{% endif %}{% endblock %}
 {% block content %}
 <section class="tp-shell wrap" data-tool-page data-tool-slug="{{ tool.slug }}"{% if tool.slug == 'form-file-checker' %} data-photo-available="{{ 'true' if photo_tools_available else 'false' }}"{% endif %}>
   <nav class="tp-crumb" aria-label="Breadcrumb"><a href="/">Home</a><span aria-hidden="true">/</span><a href="/tools">All tools</a><span aria-hidden="true">/</span><a href="/tools?category={{ tool.category | urlencode }}">{{ tool.category }}</a></nav>
