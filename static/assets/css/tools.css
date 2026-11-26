@@ -412,6 +412,10 @@
 .tp-result-list { display: flex; flex-direction: column; gap: 6px; margin-top: 12px; max-height: 360px; overflow: auto; }
 .tp-result { padding: 8px 10px; border: 1px solid var(--bp-line); border-radius: 8px; background: var(--bp-panel-2); font: 11px/1.5 var(--tp-mono); word-break: break-word; }
 .tp-result b { color: var(--bp-accent); }
+.pin-lookup .tp-status { margin: 12px 0 0; }
+.pin-lookup .tp-status:empty { display: block; margin: 0; padding: 0; }
+.pin-lookup-results[hidden] { display: none; }
+.pin-lookup-results .tp-result { font: 14px/1.55 var(--bp-font); }
 
 .tp-drop-inline { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; }
 

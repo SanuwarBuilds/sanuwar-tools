@@ -594,6 +594,7 @@ TOOL_CATEGORY_ICONS = {
     'Security & Privacy': 'shield',
     'Sports & Games': 'score',
     'Land & Property': 'convert',
+    'Lookups': 'document',
 }
 TOOL_CATEGORY_ORDER = [
     'Players',
@@ -611,6 +612,7 @@ TOOL_CATEGORY_ORDER = [
     'Time & Date',
     'Health & Fitness',
     'Land & Property',
+    'Lookups',
     'Sports & Games',
 ]
 

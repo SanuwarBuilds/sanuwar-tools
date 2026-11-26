@@ -69,6 +69,99 @@
     });
   });
 
+  T.register("pin-code-finder", (root) => {
+    const mode = T.select([["By PIN code", "pincode"], ["By post office name", "postoffice"]], "pincode");
+    const query = T.input({ required: true, maxlength: 100, autocomplete: "off", spellcheck: "false", "aria-describedby": "pin-lookup-status" });
+    const queryField = T.field("PIN code", query);
+    const queryLabel = q(".tp-label", queryField);
+    const submit = T.button("Find post offices", null, "primary", { type: "submit" });
+    const feedback = el("p", { id: "pin-lookup-status", class: "tp-status", role: "status", "aria-atomic": "true" });
+    const results = el("div", { class: "tp-result-list pin-lookup-results", role: "list", "aria-label": "Matching post offices", tabindex: "0", hidden: true });
+    const form = el("form", { novalidate: true },
+      T.twoCol(T.field("Search by", mode), queryField),
+      T.actions(submit),
+      feedback);
+    root.replaceChildren(T.panel(null, [form, results], "pin-lookup"));
+
+    let pending;
+    const showFeedback = (message, kind = "info") => {
+      feedback.className = message ? `tp-status is-${kind}` : "tp-status";
+      feedback.textContent = message;
+    };
+    const clearLookup = () => {
+      pending?.abort();
+      pending = null;
+      submit.disabled = false;
+      query.removeAttribute("aria-invalid");
+      results.replaceChildren();
+      results.hidden = true;
+      showFeedback("");
+    };
+    const updateMode = () => {
+      const byPin = mode.value === "pincode";
+      clearLookup();
+      query.value = "";
+      queryLabel.textContent = byPin ? "6-digit PIN code" : "Post office name";
+      query.inputMode = byPin ? "numeric" : "search";
+      query.placeholder = byPin ? "e.g. 781001" : "e.g. Guwahati";
+      submit.textContent = byPin ? "Find post offices" : "Find PIN codes";
+    };
+
+    mode.addEventListener("change", updateMode);
+    query.addEventListener("input", clearLookup);
+    form.addEventListener("submit", async (event) => {
+      event.preventDefault();
+      clearLookup();
+      const endpoint = mode.value;
+      const byPin = endpoint === "pincode";
+      const value = query.value.trim();
+      if (byPin ? !/^[1-9]\d{5}$/.test(value) : value.length < 2) {
+        query.setAttribute("aria-invalid", "true");
+        showFeedback(byPin ? "Enter a valid 6-digit PIN code." : "Enter at least 2 characters of the post office name.", "error");
+        query.focus();
+        return;
+      }
+
+      const request = new AbortController();
+      pending = request;
+      submit.disabled = true;
+      showFeedback("Searching postal records…");
+      const timeout = setTimeout(() => request.abort(), 10000);
+      try {
+        const response = await fetch(`https://searchpincode.in/api/${endpoint}/${encodeURIComponent(value)}`, {
+          signal: request.signal,
+          credentials: "omit",
+        });
+        if (!response.ok && response.status !== 404) throw new Error("Postal lookup failed.");
+        const [lookup] = await response.json();
+        if (pending !== request) return;
+        const offices = lookup?.Status === "Success" ? lookup.PostOffice : null;
+        if ((lookup?.Status === "Error" && response.status === 404) ||
+            (Array.isArray(offices) && !offices.length)) {
+          showFeedback(byPin ? `No post offices found for PIN ${value}.` : "No matching post offices found. Try a shorter name.");
+          return;
+        }
+        if (!Array.isArray(offices)) throw new Error("Unexpected postal data.");
+        results.replaceChildren(...offices.map((office) => el("div", { class: "tp-result", role: "listitem" },
+          el("strong", {}, office.Name),
+          el("div", {}, [office.District, office.State].filter(Boolean).join(", ")),
+          el("div", {}, [`PIN ${byPin ? value : office.PINCode ?? "unavailable"}`, office.BranchType].filter(Boolean).join(" · ")),
+        )));
+        results.hidden = false;
+        showFeedback(`${offices.length} matching post office${offices.length === 1 ? "" : "s"}.`, "ok");
+      } catch {
+        if (pending === request) showFeedback("Postal lookup is unavailable right now. Try again in a moment.", "error");
+      } finally {
+        clearTimeout(timeout);
+        if (pending === request) {
+          pending = null;
+          submit.disabled = false;
+        }
+      }
+    });
+    updateMode();
+  });
+
   const FUNCTIONS = {
     sqrt: Math.sqrt, cbrt: Math.cbrt, abs: Math.abs, round: Math.round, floor: Math.floor, ceil: Math.ceil,
     sin: Math.sin, cos: Math.cos, tan: Math.tan, log: Math.log10, ln: Math.log, exp: Math.exp,
