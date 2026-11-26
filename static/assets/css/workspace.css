@@ -226,3 +226,18 @@ body.pro-theme.v2.bp.nx.wb-ui.reference-ui .desk-guide-row {
 body.pro-theme.v2.bp.nx.wb-ui.reference-ui .desk-guide-row small {
   white-space: normal;
 }
+
+@media (min-width: 1101px) and (max-width: 1399px) {
+  body.pro-theme.v2.bp.nx.wb-ui.reference-ui .wb-header-inner {
+    width: calc(100% - 40px);
+    gap: 12px;
+    padding-inline: 0;
+  }
+  body.pro-theme.v2.bp.nx.wb-ui.reference-ui .wb-nav { gap: 3px; }
+  body.pro-theme.v2.bp.nx.wb-ui.reference-ui .wb-nav-control > a {
+    padding-inline: 4px 2px;
+    font-size: 12px;
+    white-space: nowrap;
+  }
+  .wb-ui .wb-nav-toggle { width: 18px; }
+}

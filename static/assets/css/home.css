@@ -1,0 +1,180 @@
+body.pro-theme.v2.bp.nx.wb-ui.reference-ui.file-home {
+  --st-bg: #fbfafd;
+  --st-paper: #fff;
+  --st-well: #f3effb;
+  --st-ink: #13121e;
+  --st-muted: #4d4b5d;
+  --st-line: #ddd9e5;
+  --st-line-strong: #b9b2cb;
+  --st-tint: #eee9ff;
+  --st-accent: #3522c5;
+  --st-accent-hover: #271891;
+  --st-action: #3522c5;
+  --st-on-action: #fff;
+  --file-hero-bg: linear-gradient(105deg, #f6f2fc, #e9e2fa 62%, #ded6f5);
+  --file-workspace-bg: linear-gradient(145deg, #eee8ff, #ded8f8);
+}
+
+html[data-theme="dark"] body.pro-theme.v2.bp.nx.wb-ui.reference-ui.file-home {
+  --st-bg: #161421;
+  --st-paper: #201d2d;
+  --st-well: #2b253d;
+  --st-ink: #f5f2ff;
+  --st-muted: #c9c2d7;
+  --st-line: #413b52;
+  --st-line-strong: #756986;
+  --st-tint: #342751;
+  --st-accent: #c3b5ff;
+  --st-accent-hover: #dfd5ff;
+  --st-action: #c3b5ff;
+  --st-on-action: #231351;
+  --file-hero-bg: linear-gradient(105deg, #21192f, #34284a);
+  --file-workspace-bg: linear-gradient(145deg, #312641, #2b2342);
+}
+
+html[data-theme="dark"] body.pro-theme.v2.bp.nx.wb-ui.reference-ui.file-home .wb-header :is(.wb-icon-btn, .wb-search-trigger) {
+  color: var(--st-ink);
+}
+html[data-theme="dark"] body.pro-theme.v2.bp.nx.wb-ui.reference-ui.file-home .wb-header .wb-icon-btn:hover {
+  background: var(--st-well);
+}
+
+body.pro-theme.v2.bp.nx.wb-ui.reference-ui.file-home .wb-header .wb-brand-mark svg rect:nth-child(n) { fill: #6740d3; }
+body.pro-theme.v2.bp.nx.wb-ui.reference-ui.file-home .wb-header .wb-brand-mark svg rect:nth-child(1),
+body.pro-theme.v2.bp.nx.wb-ui.reference-ui.file-home .wb-header .wb-brand-mark svg rect:nth-child(4) { fill: #8d62e7; }
+
+.file-home .file-hero { background: var(--file-hero-bg); overflow: hidden; }
+.file-hero-inner { position: relative; display: flex; align-items: center; min-height: clamp(194px, 15.2vw, 258px); }
+.file-hero-copy { position: relative; z-index: 1; width: 61%; padding: 30px 0 34px clamp(0px, 1.7vw, 26px); }
+.file-home #main .file-hero h1 {
+  margin: 0 0 9px;
+  color: var(--wb-ink);
+  font: 780 clamp(38px, 4.65vw, 74px)/1.05 Inter, sans-serif;
+  letter-spacing: -.065em;
+}
+.file-home #main .file-hero p {
+  max-width: 58ch;
+  margin: 0;
+  color: var(--wb-muted);
+  font: 440 clamp(15px, 1.55vw, 24px)/1.45 Inter, sans-serif;
+}
+.file-hero-art {
+  position: absolute;
+  inset: 0 clamp(-48px, -3.1vw, -16px) 0 auto;
+  width: 50%;
+  height: 100%;
+  object-fit: cover;
+  object-position: center;
+  mask-image: linear-gradient(90deg, transparent, #000 19%, #000 92%, transparent);
+}
+[data-theme="dark"] .file-hero-art {
+  filter: brightness(.78) saturate(.85);
+  mask-image: radial-gradient(ellipse 53% 63% at 52% 49%, #000 62%, transparent);
+}
+
+body.reference-ui.file-home #main .desk-page { padding-top: 20px; }
+body.reference-ui.file-home #main .desk-search { border-color: var(--wb-accent); }
+body.reference-ui.file-home #main .desk-search .desk-icon { color: var(--wb-ink); }
+body.reference-ui.file-home #main .desk-search input { font-size: clamp(16px, 1.4vw, 22px); }
+body.reference-ui.file-home #main .desk-search > button {
+  min-height: 40px;
+  padding-inline: clamp(13px, 2.25vw, 34px);
+  color: var(--st-on-action);
+  background: var(--st-action);
+}
+body.reference-ui.file-home #main .desk-search > button:hover { background: var(--st-accent-hover); }
+
+.file-shortcuts { display: flex; align-items: center; padding-block: 8px; }
+.file-home .file-shortcuts a {
+  display: flex;
+  flex: 1;
+  justify-content: center;
+  align-items: center;
+  gap: 10px;
+  min-height: 44px;
+  padding-inline: 8px;
+  color: var(--wb-accent);
+  font-size: clamp(13px, 1.25vw, 20px);
+  font-weight: 600;
+  line-height: 1.2;
+  text-decoration: none;
+}
+.file-home .file-shortcuts a + a { border-inline-start: 1px solid var(--wb-line-strong); }
+body.reference-ui.file-home #main .file-shortcuts .desk-icon { width: 30px; height: 30px; background: transparent; color: currentColor; }
+body.reference-ui.file-home #main .file-shortcuts .desk-icon svg { width: 28px; height: 28px; }
+.file-home .file-shortcuts a:hover span:not(.desk-icon) { text-decoration: underline; text-underline-offset: 4px; }
+.file-home .file-quick { margin: 2px 0 12px; }
+.file-home .file-resources { margin-block: 4px 12px; }
+.file-home .file-resources a { font-size: clamp(12px, 1.1vw, 17px); }
+
+.file-tool-layout {
+  display: grid;
+  grid-template-columns: minmax(0, 2.1fr) minmax(280px, 1fr);
+  gap: 20px;
+  align-items: start;
+}
+.file-popular { min-width: 0; scroll-margin-top: 84px; }
+body.reference-ui.file-home #main .desk-panel-head { margin-bottom: 11px; }
+body.reference-ui.file-home #main :is(.file-popular, .file-workspace, .file-guides) h2 {
+  color: var(--st-ink);
+  font-size: clamp(23px, 2vw, 30px);
+  line-height: 1.14;
+}
+body.reference-ui.file-home #main .file-popular .desk-tool-grid { gap: 7px 9px; }
+body.reference-ui.file-home #main .file-popular .desk-tool-row > a { min-height: 69px; }
+body.reference-ui.file-home #main .file-popular .desk-tool-row small { white-space: normal; }
+body.reference-ui.file-home #main .file-workspace { padding: 16px 20px 22px; background: var(--file-workspace-bg); }
+body.reference-ui.file-home #main .file-workspace h3 { margin: 0 0 9px; }
+.file-default-tools { display: grid; gap: 7px; }
+body.reference-ui.file-home #main .file-default-tools .desk-tool-row > a { min-height: 44px; }
+.file-default-tools small:empty { display: none; }
+.file-workspace [data-tool-list]:not([hidden]) + [data-tool-list]:not([hidden]),
+.file-workspace [data-workspace-default]:not([hidden]) ~ [data-tool-list]:not([hidden]) { margin-top: 12px; }
+body.reference-ui.file-home #main .file-workspace .desk-recent-list { grid-template-columns: minmax(0, 1fr); max-height: 232px; }
+
+.file-home .file-guides { margin-top: 22px; margin-bottom: 0; }
+.file-guide-grid { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 14px; }
+.file-home .file-guide-card {
+  display: grid;
+  grid-template-columns: minmax(0, .9fr) minmax(0, 1.1fr);
+  align-items: center;
+  gap: 13px;
+  padding: 10px;
+  border: 1px solid var(--wb-line);
+  border-radius: 12px;
+  background: var(--wb-card);
+  color: var(--wb-ink);
+  text-decoration: none;
+}
+.file-home .file-guide-card img { display: block; width: 100%; height: auto; border-radius: 8px; }
+.file-home .file-guide-card strong { display: block; font-size: clamp(14px, 1.36vw, 21px); line-height: 1.2; letter-spacing: -.025em; }
+.file-home .file-guide-card small { display: block; margin-top: 7px; color: var(--wb-muted); font-size: 13px; line-height: 1.35; }
+.file-home .file-guide-card:hover { border-color: var(--wb-accent); background: var(--wb-card-2); }
+.file-home #browse-categories { scroll-margin-top: 84px; }
+
+@media (max-width: 980px) {
+  .file-tool-layout { gap: 14px; grid-template-columns: minmax(0, 1fr) minmax(240px, .6fr); }
+  .file-home .file-guide-card { grid-template-columns: 1fr; align-content: start; }
+}
+@media (max-width: 760px) {
+  .file-hero-inner { display: grid; min-height: 0; padding-top: 20px; }
+  .file-hero-copy { width: 100%; padding: 0; }
+  .file-home #main .file-hero p { max-width: 38ch; }
+  .file-hero-art {
+    position: static;
+    justify-self: end;
+    width: min(100%, 420px);
+    height: auto;
+    margin-bottom: -2px;
+    mask-image: radial-gradient(ellipse 54% 68% at 52% 52%, #000 62%, transparent);
+  }
+  .file-tool-layout { grid-template-columns: minmax(0, 1fr); }
+  .file-shortcuts { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 5px 8px; }
+  .file-home .file-shortcuts a { justify-content: flex-start; padding-inline: 0; }
+  .file-home .file-shortcuts a + a { border: 0; }
+  body.reference-ui.file-home #main .file-shortcuts .desk-icon { width: 26px; height: 26px; }
+  body.reference-ui.file-home #main .file-shortcuts .desk-icon svg { width: 22px; height: 22px; }
+  .file-home #main .file-guides .desk-panel-head { flex-wrap: wrap; gap: 4px 12px; }
+  .file-guide-grid { grid-template-columns: minmax(0, 1fr); gap: 8px; }
+  .file-home .file-guide-card { grid-template-columns: minmax(90px, .65fr) minmax(0, 1.35fr); }
+}

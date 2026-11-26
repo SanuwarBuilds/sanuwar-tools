@@ -209,6 +209,7 @@
   };
   const navEntries = kind => {
     if (kind === "tools") return tools.filter(item => item.category === "Tool");
+    if (kind === "guides") return tools.filter(item => item.category === "Guide");
     if (kind === "categories") return tools.filter(item => item.category === "Category");
     if (kind === "directories") {
       const seen = new Set();

@@ -66,11 +66,12 @@
 <link rel="stylesheet" href="/assets/css/site-search.css?v=3">
 <script nonce="{{ csp_nonce }}" src="/assets/js/site-search.js?v=1" defer></script>
 <script nonce="{{ csp_nonce }}" src="/assets/js/tools/smart-search.js?v=1" defer></script>
-<script nonce="{{ csp_nonce }}" src="/assets/js/workbench.js?v=5" defer></script>
-{% if public_ui %}<link rel="stylesheet" href="/assets/css/workspace.css?v=2">{% endif %}
+<script nonce="{{ csp_nonce }}" src="/assets/js/workbench.js?v=6" defer></script>
+{% if public_ui %}<link rel="stylesheet" href="/assets/css/workspace.css?v=3">{% endif %}
 {% if public_ui %}
 <script nonce="{{ csp_nonce }}" src="/assets/js/saved-tools.js?v=3" defer></script>{% endif %}
-{% if public_ui %}<link rel="stylesheet" href="/assets/css/tool-studio.css?v=1">{% endif %}
+{% if public_ui %}<link rel="stylesheet" href="/assets/css/tool-studio.css?v=2">{% endif %}
+{% if request.path == '/' %}<link rel="stylesheet" href="/assets/css/home.css?v=1">{% endif %}
 {% if request.path.startswith('/admin') %}<link rel="stylesheet" href="/assets/css/admin-pro.css?v=3">{% endif %}
 </head>
 <body class="studio-theme {% if public_ui %}pro-theme v2 bp nx wb-ui reference-ui {% elif request.path.startswith('/admin') %}pro-theme bp {% endif %}{% block bodyclass %}{% endblock %}">
@@ -119,6 +120,7 @@
 <div class="wb-sheet-head"><strong>More</strong><button type="button" data-wb-close aria-label="Close menu">×</button></div>
 <div class="wb-sheet-links">
 <a href="/#browse-categories">Browse categories</a>
+<a href="/#guides">Practical guides</a>
 <a href="/eduhelp">Eduhelp <small>Updates &amp; labs</small></a>
 <a href="/players">Players <small>Video, audio &amp; streams</small></a>
 <a href="/directory">Directories <small>Sources</small></a>

@@ -1,65 +1,112 @@
 {% extends 'base.html' %}
 {% from '_ad_unit.html' import ad_unit with context %}
 {% from '_workspace_macros.html' import icon, arrow, shortcut %}
-{% block bodyclass %}wb-home desk-home st-directory-home{% endblock %}
+{% block bodyclass %}wb-home desk-home file-home{% endblock %}
 {% block content %}
-<div class="desk-page wrap">
-<section class="st-directory-search" aria-labelledby="hero-title">
-  <h1 id="hero-title">Find a tool</h1>
-  <div class="st-search-box" data-site-search-open>
-    <label for="tool-search">{{ icon('search') }}<span class="sr-only">Search everything</span></label>
-    <input type="search" id="tool-search" placeholder="Search tools, guides, and downloads" aria-label="Search everything" aria-haspopup="dialog" aria-controls="wb-palette" autocomplete="off">
-    <button type="button" aria-label="Open search" data-site-search-open><kbd data-wb-kbd>⌘ K</kbd></button>
+{% set tool_slugs = catalog.tools | map(attribute='slug') | list %}
+{% set downloads_enabled = public_config.get('downloadPage', {}).get('enabled', True) %}
+{% set photo_link = '/photo-tools?mode=photo&kb=50' %}
+<section class="file-hero" aria-labelledby="hero-title">
+  <div class="wrap file-hero-inner">
+    <div class="file-hero-copy">
+      <h1 id="hero-title">Get the file right.</h1>
+      <p>Resize photos, prepare PDFs, and check files before you submit.</p>
+    </div>
+    <img class="file-hero-art" src="/assets/home/file-preparation.webp" alt="" width="716" height="233" fetchpriority="high">
   </div>
 </section>
 
-<div class="st-directory-layout">
-  <nav class="st-category-nav" id="browse-categories" aria-label="Browse by category">
-    <a class="st-category-current" href="/tools">{{ icon('grid') }}<span>All tools</span></a>
-    {% for category, label, symbol in [('PDF & Documents','PDF & Documents','pdf'),('Images & Media','Photo & Image','image'),('Calculators','Calculators','calculator'),('Developer Tools','Developer Tools','code'),('Security & Privacy','Privacy & Security','check')] %}
-    <a href="/tools?category={{ category | urlencode }}">{{ icon(symbol) }}<span>{{ label }}</span></a>
+<div class="desk-page wrap">
+  <div class="desk-search">
+    <label for="tool-search">{{ icon('search') }}<span class="sr-only">Search everything</span></label>
+    <input type="search" id="tool-search" placeholder="Search tools, guides and downloads…" aria-haspopup="dialog" aria-controls="wb-palette" autocomplete="off">
+    <kbd data-wb-kbd aria-hidden="true">⌘ K</kbd>
+    <button type="button" data-site-search-open aria-haspopup="dialog" aria-controls="wb-palette">Search</button>
+  </div>
+  {% set quick_actions = [
+    ('pdf-merge', 'Merge PDFs', 'pdf'),
+    ('qr-code-generator', 'Create a QR code', 'qr'),
+    ('form-file-checker', 'Check a form file', 'check')
+  ] %}
+  <nav class="file-shortcuts file-quick" aria-label="Quick actions">
+    {% if photo_tools_available %}<a href="{{ photo_link }}">{{ icon('image') }}<span>Resize to 50 KB</span></a>
+    {% elif 'image-compressor' in tool_slugs %}<a href="/tools/image-compressor">{{ icon('image') }}<span>Compress an image</span></a>{% endif %}
+    {% for slug, label, symbol in quick_actions if slug in tool_slugs %}
+    <a href="/tools/{{ slug }}">{{ icon(symbol) }}<span>{{ label }}</span></a>
     {% endfor %}
-    <div class="st-category-resources">
-      {% if public_config.get('downloadPage', {}).get('enabled', True) %}<a href="/downloads">{{ icon('download') }}<span>Downloads</span></a>{% endif %}
-      <a href="/eduhelp">{{ icon('education') }}<span>Eduhelp</span></a>
-    </div>
   </nav>
 
-  <section id="tools" class="st-directory-main" aria-labelledby="popular-title">
-    <div class="st-section-header"><h2 id="popular-title">Popular tools</h2><a href="/tools">View all tools {{ arrow() }}</a></div>
-    <div class="st-popular-grid">
-      {{ shortcut('/tools/pdf-editor', 'PDF Editor', 'Edit text and pages', 'pen') }}
-      {{ shortcut('/tools/application-file-pack', 'Application File Pack', 'Prepare photo, signature, and PDF', 'folder') }}
-      {% if photo_tools_available %}{{ shortcut('/photo-tools?mode=photo&kb=50', 'Photo Resizer', 'Resize to your required size', 'image') }}{% else %}{{ shortcut('/tools/image-compressor', 'Image Compressor', 'Reduce image file size', 'image') }}{% endif %}
-      {{ shortcut('/tools/image-to-text', 'Image to Text', 'Extract text from images', 'text') }}
-      {{ shortcut('/tools/pdf-merge', 'PDF Merge', 'Combine PDF files', 'pdf') }}
-      {{ shortcut('/tools/qr-code-generator', 'QR Code Generator', 'Create a QR code', 'qr') }}
-    </div>
-    <nav class="st-resource-strip" aria-label="More resources">
-      {% if public_config.get('downloadPage', {}).get('enabled', True) %}<a href="/downloads">{{ icon('download') }}<span>Downloads</span>{{ arrow() }}</a>{% endif %}
-      <a href="#guides">{{ icon('books') }}<span>Practical guides</span>{{ arrow() }}</a>
-      <a href="/eduhelp">{{ icon('education') }}<span>Eduhelp</span>{{ arrow() }}</a>
-    </nav>
-  </section>
-</div>
+  <div class="file-tool-layout">
+    <section id="tools" class="file-popular" aria-labelledby="popular-title">
+      <div class="desk-panel-head"><h2 id="popular-title">Popular tools</h2><a href="/tools">View all tools {{ arrow() }}</a></div>
+      <div class="desk-tool-grid">
+        {% if photo_tools_available %}{{ shortcut(photo_link, 'Photo Resizer', 'Resize a photo to the size you need.', 'image') }}{% endif %}
+        {% for slug, label, description, symbol, tone in [
+          ('image-compressor', 'Image Compressor', 'Reduce image size while keeping good quality.', 'image', 'green'),
+          ('pdf-merge', 'PDF Merge', 'Combine multiple PDFs into a single file.', 'pdf', 'red'),
+          ('qr-code-generator', 'QR Code Generator', 'Create a QR code for a link, text or contact.', 'qr', 'blue'),
+          ('form-file-checker', 'Form File Checker', 'Check your file against form requirements.', 'check', 'green'),
+          ('fill-sign-pdf', 'Fill & Sign PDF', 'Add text, signatures and details to a PDF.', 'pen', 'purple')
+        ] if slug in tool_slugs %}
+        {{ shortcut('/tools/' ~ slug, label, description, symbol, tone) }}
+        {% endfor %}
+      </div>
+    </section>
 
-<aside class="desk-panel desk-workspace st-saved-workspace" data-saved-tools data-photo-available="{{ 'true' if photo_tools_available else 'false' }}" aria-labelledby="workspace-title" hidden>
-  <h2 id="workspace-title">Your workspace</h2>
-  <div data-tool-list="recent" hidden><h3>Recently used</h3><ul class="desk-recent-list"></ul></div>
-  <div data-tool-list="favorites" hidden><h3>Favorites</h3><ul class="desk-recent-list"></ul></div>
-</aside>
-
-<section class="desk-panel desk-guides" id="guides" aria-labelledby="guides-title">
-  <div class="desk-panel-head"><h2 id="guides-title">{{ icon('books', 'green') }}Practical guides</h2></div>
-  <div class="desk-tool-grid">
-    {% for slug, guide in guides.items() %}
-    <a class="desk-download-row desk-guide-row" href="{{ url_for('tool_guide', slug=slug) }}">
-      <span class="desk-row-copy"><strong>{{ guide.title }}</strong><small>{{ guide.intro }}</small></span>
-      {{ arrow() }}
-    </a>
-    {% endfor %}
+    <aside class="desk-panel desk-workspace file-workspace" data-saved-tools data-photo-available="{{ 'true' if photo_tools_available else 'false' }}" aria-labelledby="workspace-title">
+      <div class="desk-panel-head"><h2 id="workspace-title">Your workspace</h2></div>
+      <div data-workspace-default>
+        <h3>Quick access</h3>
+        <div class="file-default-tools">
+          {% for slug, label, symbol in [('pdf-organizer', 'PDF Organizer', 'folder'), ('json-formatter', 'JSON Formatter', 'braces'), ('gst-calculator', 'GST Calculator', 'calculator')] if slug in tool_slugs %}
+          {{ shortcut('/tools/' ~ slug, label, '', symbol, favorite=True) }}
+          {% endfor %}
+        </div>
+      </div>
+      <div data-tool-list="recent" hidden><h3>Recently used</h3><ul class="desk-recent-list"></ul></div>
+      <div data-tool-list="favorites" hidden><h3>Favorites</h3><ul class="desk-recent-list"></ul></div>
+    </aside>
   </div>
-</section>
+
+  {% set illustrated_guides = {
+    'prepare-files-for-an-online-form': ('Prepare a photo for an online form', 'Crop and size your photo and signature for an application.', 'form-photo', 190),
+    'assemble-a-pdf-application': ('Assemble and sign a PDF application', 'Combine, sign and compress your application files.', 'pdf-application', 194),
+    'compress-photos-for-sharing': ('Make photos smaller for email and web', 'Choose an image size and format that fit the upload limit.', 'photo-compression', 207)
+  } %}
+  <section class="desk-guides file-guides" id="guides" aria-labelledby="guides-title">
+    <div class="desk-panel-head">
+      <h2 id="guides-title">Practical guides</h2>
+      {% for slug, guide in guides.items() if slug not in illustrated_guides %}
+      <a href="{{ url_for('tool_guide', slug=slug) }}">{{ guide.title }} {{ arrow() }}</a>
+      {% endfor %}
+    </div>
+    <div class="file-guide-grid">
+      {% for slug, (title, summary, artwork, width) in illustrated_guides.items() if slug in guides %}
+      <a class="file-guide-card" href="{{ url_for('tool_guide', slug=slug) }}">
+        <img src="/assets/home/{{ artwork }}.webp" alt="" width="{{ width }}" height="112" loading="lazy" decoding="async">
+        <span><strong>{{ title }}</strong><small>{{ summary }}</small></span>
+      </a>
+      {% endfor %}
+    </div>
+  </section>
+
+  <nav class="file-shortcuts file-resources" aria-label="Browse resources">
+    <a href="/tools">{{ icon('grid') }}<span>Browse all tools</span>{{ arrow() }}</a>
+    {% if downloads_enabled %}<a href="/downloads">{{ icon('download') }}<span>Downloads</span>{{ arrow() }}</a>{% endif %}
+    <a href="/eduhelp">{{ icon('education') }}<span>Eduhelp</span>{{ arrow() }}</a>
+    <a href="/eduhelp/labs">{{ icon('lab') }}<span>Interactive science labs</span>{{ arrow() }}</a>
+  </nav>
+
+  <nav class="desk-category-strip" id="browse-categories" aria-labelledby="categories-title">
+    <h2 id="categories-title">Browse by category</h2>
+    {% for category, label, symbol in [
+      ('PDF & Documents', 'PDF & Documents', 'pdf'), ('Images & Media', 'Photo & Image', 'image'),
+      ('Calculators', 'Calculators', 'calculator'), ('Developer Tools', 'Developer Tools', 'code'),
+      ('Security & Privacy', 'Privacy & Security', 'check')
+    ] if category in catalog.categories %}
+    <a href="/tools?category={{ category | urlencode }}">{{ icon(symbol) }}<span>{{ label }}</span></a>
+    {% endfor %}
+  </nav>
 
 <div class="desk-library-grid">
 {% if public_config.get('downloadPage', {}).get('enabled', True) %}

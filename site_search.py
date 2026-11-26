@@ -48,7 +48,7 @@ def build_index(config, catalog, downloads, directory, eduhelp, admin=False, wid
     for name, href, description in PAGES:
         add(name, href, 'Page', description)
     for slug, guide in GUIDES.items():
-        add(guide['title'], '/guides/' + slug, 'Guide', guide['intro'])
+        add(guide['title'], '/guides/' + slug, 'Guide', guide['intro'], slug.replace('-', ' '))
     for category in catalog.get('categories', []):
         add(category, '/tools?' + urlencode({'category': category}), 'Category', 'Browse ' + category.lower())
     for tool in catalog.get('tools', []):

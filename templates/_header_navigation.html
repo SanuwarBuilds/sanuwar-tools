@@ -1,5 +1,5 @@
 <nav class="wb-nav" aria-label="Main navigation">
-{% set nav_items = [('tools', 'Tools', '/tools'), ('categories', 'Categories', '/#browse-categories'), ('directories', 'Directories', '/directory'), ('eduhelp', 'Eduhelp', '/eduhelp'), ('players', 'Players', '/players'), ('downloads', 'Downloads', '/downloads'), ('more', 'More', '/about')] %}
+{% set nav_items = [('tools', 'Tools', '/tools'), ('categories', 'Categories', '/#browse-categories'), ('guides', 'Practical guides', '/#guides'), ('downloads', 'Downloads', '/downloads'), ('eduhelp', 'Eduhelp', '/eduhelp'), ('directories', 'Directories', '/directory'), ('players', 'Players', '/players'), ('more', 'More', '/about')] %}
 {% for key, label, href in nav_items %}
 {% if key != 'downloads' or public_config.get('downloadPage', {}).get('enabled', True) %}
 <div class="wb-nav-item" data-nav-menu="{{ key }}">
