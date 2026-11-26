@@ -1,16 +1,16 @@
-/* The directory and working surfaces share navigation, color, and controls. */
-body.pro-theme.v2.bp.nx.wb-ui.reference-ui {
-  --st-bg: #f6f7f3;
+/* Public palette shared by the homepage, browser tools, and resource pages. */
+html[data-theme] body.pro-theme.v2.bp.nx.wb-ui.reference-ui {
+  --st-bg: #fbfafd;
   --st-paper: #fff;
-  --st-well: #f0f3ee;
-  --st-ink: #15251e;
-  --st-muted: #4d5e55;
-  --st-line: #d8e0d9;
-  --st-line-strong: #a9bab0;
-  --st-tint: #e2efe4;
-  --st-accent: #155b42;
-  --st-accent-hover: #104731;
-  --st-action: #155b42;
+  --st-well: #f3effb;
+  --st-ink: #13121e;
+  --st-muted: #4d4b5d;
+  --st-line: #ddd9e5;
+  --st-line-strong: #b9b2cb;
+  --st-tint: #eee9ff;
+  --st-accent: #3522c5;
+  --st-accent-hover: #271891;
+  --st-action: #3522c5;
   --st-on-action: #fff;
   --wb-bg: var(--st-bg);
   --wb-card: var(--st-paper);
@@ -25,28 +25,29 @@ body.pro-theme.v2.bp.nx.wb-ui.reference-ui {
   --wb-soft: var(--st-well);
   --wb-accent: var(--st-accent);
   --wb-accent-2: var(--st-accent-hover);
+  --wb-accent-ink: var(--st-on-action);
   --wb-accent-wash: var(--st-tint);
 }
 
 html[data-theme="dark"] body.pro-theme.v2.bp.nx.wb-ui.reference-ui {
-  --st-bg: #121b17;
-  --st-paper: #192620;
-  --st-well: #22332a;
-  --st-ink: #edf5ed;
-  --st-muted: #b3c6b9;
-  --st-line: #3b4e44;
-  --st-line-strong: #637d6d;
-  --st-tint: #254734;
-  --st-accent: #9ce0b9;
-  --st-accent-hover: #b8f5ce;
-  --st-action: #a3dfb9;
-  --st-on-action: #102a1f;
+  --st-bg: #161421;
+  --st-paper: #201d2d;
+  --st-well: #2b253d;
+  --st-ink: #f5f2ff;
+  --st-muted: #c9c2d7;
+  --st-line: #413b52;
+  --st-line-strong: #756986;
+  --st-tint: #342751;
+  --st-accent: #c3b5ff;
+  --st-accent-hover: #dfd5ff;
+  --st-action: #c3b5ff;
+  --st-on-action: #231351;
 }
 
 body.pro-theme.v2.bp.nx.wb-ui.reference-ui .wb-header .wb-brand-mark svg rect,
-body.pro-theme.v2.bp.nx.wb-ui.reference-ui .desk-footer .desk-footer-brand svg rect { fill: var(--st-accent); }
-body.pro-theme.v2.bp.nx.wb-ui.reference-ui .wb-header .wb-brand-mark svg rect:nth-child(1) { fill: #309168; }
-body.pro-theme.v2.bp.nx.wb-ui.reference-ui .wb-header .wb-brand-mark svg rect:nth-child(4) { fill: #267c59; }
+body.pro-theme.v2.bp.nx.wb-ui.reference-ui .desk-footer .desk-footer-brand svg rect { fill: #6740d3; }
+body.pro-theme.v2.bp.nx.wb-ui.reference-ui .wb-header .wb-brand-mark svg rect:nth-child(1),
+body.pro-theme.v2.bp.nx.wb-ui.reference-ui .wb-header .wb-brand-mark svg rect:nth-child(4) { fill: #8d62e7; }
 body.reference-ui .wb-header .wb-signin {
   background: var(--st-action);
   color: var(--st-on-action);
@@ -416,23 +417,23 @@ body.st-tool #tool-root .tp-table-wrap { overflow-x: auto; }
 
 body.st-tool-playback #tool-root .pl-loader {
   border-radius: 14px 14px 0 0;
-  background: #101d18;
+  background: #21192f;
 }
 body.st-tool-playback #tool-root .pl-loader .tp-drop {
   background: #ffffff0d;
   border-color: #ffffff45;
-  color: #f1f8f3;
+  color: #f5f2ff;
 }
 body.st-tool-playback #tool-root .pl-loader .tp-drop:hover,
-body.st-tool-playback #tool-root .pl-loader .tp-drop.is-over { background: #ffffff1a; border-color: #95d9b3; }
-body.st-tool-playback #tool-root .pl-loader :is(.tp-hint, .tp-drop-name) { color: #b7cabe; }
-body.st-tool-playback #tool-root .pl-loader .tp-drop-icon { color: #95d9b3; }
+body.st-tool-playback #tool-root .pl-loader .tp-drop.is-over { background: #ffffff1a; border-color: #c3b5ff; }
+body.st-tool-playback #tool-root .pl-loader :is(.tp-hint, .tp-drop-name) { color: #c9c2d7; }
+body.st-tool-playback #tool-root .pl-loader .tp-drop-icon { color: #c3b5ff; }
 body.st-tool-playback #tool-root .pl-loader .tp-input {
-  color: #f1f8f3;
+  color: #f5f2ff;
   background: #ffffff0d;
   border-color: #ffffff45;
 }
-body.st-tool-playback #tool-root .pl-loader .tp-input::placeholder { color: #b7cabe; }
+body.st-tool-playback #tool-root .pl-loader .tp-input::placeholder { color: #c9c2d7; }
 
 body.st-tool-photo #main .photo-guidance {
   padding: clamp(16px, 2.7vw, 26px);
