@@ -1,6 +1,8 @@
 {% extends 'base.html' %}
-{% block bodyclass %}directory-page dir-detail{% endblock %}
+{% block bodyclass %}directory-page dir-detail{% if category.slug == 'public-apis' %} public-api-directory{% endif %}{% endblock %}
+{% block page_styles %}{% if category.slug == 'public-apis' %}<link rel="stylesheet" href="/assets/css/api-studio.css?v=1">{% endif %}{% endblock %}
 {% block content %}
+{% set api_directory = category.slug == 'public-apis' %}
 <section class="wb-page wrap wb-directory">
   <nav class="tp-crumb" aria-label="Breadcrumb"><a href="/">Home</a><span aria-hidden="true">/</span><a href="/directory">Directories</a><span aria-hidden="true">/</span><span>{{ category.name }}</span></nav>
 
@@ -29,6 +31,14 @@
     <span class="wb-toolbar-count"><b id="directory-total">{{ total_sites }}</b> sources listed</span>
   </div>
 
+  {% if api_directory %}
+  <div class="wb-toolbar" id="directory-api-filters" role="group" aria-label="Filter public APIs">
+    <label class="wb-select">Auth <select data-api-filter="auth"><option value="">Any</option><option>No</option><option>API Key</option></select></label>
+    <label class="wb-select">HTTPS <select data-api-filter="https"><option value="">Any</option><option>Yes</option><option>No</option></select></label>
+    <label class="wb-select">CORS <select data-api-filter="cors"><option value="">Any</option><option>Yes</option><option>No</option><option>Unknown</option></select></label>
+  </div>
+  {% endif %}
+
   {% if groups | length > 1 %}
   <div class="filter-tabs wb-dir-groups" id="directory-groups" role="group" aria-label="Filter by section">
     <button type="button" class="filter-tab active" data-group="all" aria-pressed="true">All <span>{{ total_sites }}</span></button>
@@ -43,15 +53,19 @@
     <div>
       <span class="wb-eyebrow">Safety note</span>
       <h2 id="dir-notice-title">Before you open a source</h2>
+      {% if api_directory %}
+      <p>API limits and terms vary by provider. CORS indicates browser access to the documented endpoints tested or listed by the provider.</p>
+      {% else %}
       <p>{{ notice }}</p>
       <p>Adult listings are intentionally excluded from every directory on this site.</p>
+      {% endif %}
     </div>
   </aside>
 
   <section class="wb-section" id="sites" aria-labelledby="sites-title">
     <div class="wb-section-head">
-      <div><span class="wb-eyebrow">01 / Sources</span><h2 id="sites-title">{{ category.name }} sites</h2></div>
-      <p class="wb-count"><b id="directory-visible">{{ total_sites }}</b> of {{ total_sites }}</p>
+      <div><span class="wb-eyebrow">01 / Sources</span><h2 id="sites-title">{{ 'API catalogue' if api_directory else category.name ~ ' sites' }}</h2></div>
+      <p class="wb-count" role="status"><b id="directory-visible">{{ total_sites }}</b> of {{ total_sites }}</p>
     </div>
     <div class="wb-site-grid" id="directory-grid" aria-live="polite">
       {% set counter = namespace(value=0) %}
@@ -60,11 +74,16 @@
       {% for site in group.sites %}
       {% if site.url | public_url %}
       {% set counter.value = counter.value + 1 %}
-      <article class="dir-site" data-group="{{ group_index }}" data-search="{{ (site.name ~ ' ' ~ (site.note or '') ~ ' ' ~ (site.url | site_domain)) | lower }}">
+      <article class="dir-site" data-group="{{ group_index }}" data-search="{{ (site.name ~ ' ' ~ group.name ~ ' ' ~ (site.note or '') ~ ' ' ~ (site.url | site_domain)) | lower }}"{% if api_directory %} data-auth="{{ site.auth }}" data-https="{{ site.https }}" data-cors="{{ site.cors }}"{% endif %}>
         <span class="dir-site-mark" aria-hidden="true">{{ site.name[0] | upper }}</span>
         <div class="dir-site-body">
           <h3><a href="{{ site.url | public_url }}" target="_blank" rel="noopener noreferrer">{{ site.name }}<span class="dir-site-arrow" aria-hidden="true">↗</span></a></h3>
           <p class="dir-site-meta"><span>{{ site.url | site_domain }}</span>{% if site.note %}<span class="dir-site-note">{{ site.note }}</span>{% endif %}</p>
+          {% if api_directory %}
+          <p class="dir-site-meta"><span>Auth: {{ site.auth }}</span><span>HTTPS: {{ site.https }}</span><span>CORS: {{ site.cors }}</span></p>
+          {% endif %}
+          {% set check_link = site.url | link_check_href %}
+          {% if check_link %}<a class="wb-text-link" href="{{ check_link }}" aria-label="Check link for {{ site.name }}">Check link</a>{% endif %}
         </div>
       </article>
       {% endif %}
@@ -91,4 +110,4 @@
   </section>
 </section>
 {% endblock %}
-{% block scripts %}<script nonce="{{ csp_nonce }}" src="/assets/js/directory.js?v=2" defer></script>{% endblock %}
+{% block scripts %}<script nonce="{{ csp_nonce }}" src="/assets/js/directory.js?v=3" defer></script>{% endblock %}

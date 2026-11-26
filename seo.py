@@ -342,6 +342,8 @@ def install(app, load_config, load_directory=None, load_tool_catalog=None, load_
                                            'Runs locally with no uploads'] if land_tool else
                                           ['Daily exchange rates from Frankfurter', 'No account required']
                                           if tool_page['slug'] == 'currency-converter' else
+                                          ['Browser interface with public API integration', 'No account required']
+                                          if tool_page['bundle'] == 'api-studio' else
                                           ['Indian post office lookup by PIN code or name',
                                            'Postal data from SearchPincode.in', 'No account required']
                                           if tool_page['slug'] == 'pin-code-finder' else

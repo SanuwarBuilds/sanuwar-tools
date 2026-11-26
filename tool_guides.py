@@ -1,6 +1,32 @@
 """Practical workflows that connect the site's browser tools."""
 
+API_STUDIO_HELP = {
+    'color-contrast-studio': 'Conversion and WCAG checks run locally. Generating a palette sends the base color and scheme to The Color API.',
+    'link-safety-checker': 'Your browser sends the hostname to ScanMalware after you choose Check link. Results reflect past public reports and are never a safety guarantee.',
+    'svg-icon-font-finder': 'Search terms are sent to Iconify or Fontsource. Review the license shown with each result before reusing it.',
+    'anime-scene-finder': 'When you choose Find scene, the selected image or public image URL is sent to trace.moe for matching.',
+}
+
 GUIDES = {
+    'check-colors-links-and-media': {
+        'title': 'Check contrast, public link reports and media sources',
+        'intro': 'Check text legibility, consult published link reports, find reusable assets or identify a scene from a screenshot.',
+        'sections': [
+            ('Check a foreground and background', [
+                'Use the colors as they are displayed. WCAG AA requires at least 4.5:1 for normal text and 3:1 for large text.',
+            ]),
+            ('Read a past link report', [
+                'Use Check link next to a directory or download link. The checker searches completed public reports and distinguishes exact page matches from other reports for the same host. An empty result means the provider returned no matching history.',
+            ]),
+            ('Check the source of an image or asset', [
+                'Review the asset license before using an icon or font. For anime, choose a clear frame with as few overlays as possible, then review the similarity, episode and approximate timestamp.',
+            ]),
+        ],
+        'tools': [('Color & WCAG Contrast Studio', '/tools/color-contrast-studio'),
+                  ('Link & URL Safety Checker', '/tools/link-safety-checker'),
+                  ('SVG Icon & Font Finder', '/tools/svg-icon-font-finder'),
+                  ('Anime Scene Finder', '/tools/anime-scene-finder')],
+    },
     'prepare-files-for-an-online-form': {
         'title': 'Prepare a photo and signature for an online form',
         'intro': 'Turn the requirements on your application form into a correctly sized photo and signature, then verify both files before uploading.',

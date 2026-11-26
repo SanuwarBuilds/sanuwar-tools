@@ -18,7 +18,7 @@ import security
 from availability import is_public, public_config
 import payments
 import seo
-from tool_guides import GUIDES
+from tool_guides import API_STUDIO_HELP, GUIDES
 import monetization
 import user_auth
 import visitor_analytics
@@ -94,7 +94,9 @@ def index():
     raw = safe_read(TOOLS_CONFIG_REL)
     config = public_config(raw if isinstance(raw, dict) else {})
     catalog = load_tool_catalog()
-    config['tools'] = [*config.get('tools', []), *browser_tool_cards(catalog)]
+    configured_routes = {item.get('route') for item in config.get('tools', [])}
+    config['tools'] = [*config.get('tools', []),
+                       *(card for card in browser_tool_cards(catalog) if card['route'] not in configured_routes)]
     downloads = [public_download_item(item) for item in public_downloads()]
     from urllib.parse import urlsplit
     for item in downloads:
@@ -179,6 +181,12 @@ def validate_directory_document(data):
                     raise ValueError(f'Site "{site["name"]}" needs an HTTPS URL')
                 if 'note' in site and not isinstance(site['note'], str):
                     raise ValueError('Site notes must be text')
+                if slug == 'public-apis' and (
+                    site.get('auth') not in ('No', 'API Key')
+                    or site.get('https') not in ('Yes', 'No')
+                    or site.get('cors') not in ('Yes', 'No', 'Unknown')
+                ):
+                    raise ValueError('Each API needs valid Auth, HTTPS and CORS values')
     return data
 
 @app.route('/api/admin/directories', methods=['GET'])
@@ -248,6 +256,14 @@ def site_domain(value):
     except ValueError:
         return ''
     return host[4:] if host.startswith('www.') else host
+
+@app.template_filter('link_check_href')
+def link_check_href(value):
+    from urllib.parse import quote, urlsplit
+    if not isinstance(value, str) or not value.startswith('https://') or not security.valid_url(value):
+        return ''
+    parsed = urlsplit(value)
+    return '/tools/link-safety-checker#url=' + quote(parsed._replace(query='', fragment='').geturl(), safe='')
 
 @app.template_filter('download_size_label')
 def download_size_label(size):
@@ -575,7 +591,7 @@ EDUHELP_LABS = {
     'electricity': 'class-10-electricity.html',
     'carbon-compounds': 'carbon-compounds.html',
 }
-TOOL_BUNDLES = {"text", "media", "forms", "network", "misc", "calculators", "dls", "land", "players", "file-workbench", "study-planner", "pdf-editor"}
+TOOL_BUNDLES = {"text", "media", "forms", "network", "misc", "calculators", "dls", "land", "players", "file-workbench", "study-planner", "pdf-editor", "api-studio"}
 TOOL_VENDORS = {"js-yaml", "marked", "fflate", "pdf-lib", "pdfjs", "jspdf", "bcryptjs", "qrcodegen", "hlsjs", "dashjs", "tesseract"}
 TOOL_CATEGORY_ICONS = {
     'Players': 'film',
@@ -626,6 +642,10 @@ def load_tool_catalog():
             categories.append(category.strip())
     tools = []
     seen = set()
+    config = safe_read(TOOLS_CONFIG_REL)
+    config_tools = config.get('tools') if isinstance(config, dict) else []
+    hidden_routes = {item.get('route') for item in (config_tools if isinstance(config_tools, list) else [])
+                     if isinstance(item, dict) and not is_public(item) and isinstance(item.get('route'), str)}
     for item in data['tools']:
         if not isinstance(item, dict):
             continue
@@ -641,6 +661,8 @@ def load_tool_catalog():
         if not isinstance(description, str) or not description.strip():
             continue
         if bundle not in TOOL_BUNDLES or not isinstance(category, str) or not category.strip():
+            continue
+        if bundle == 'api-studio' and f'/tools/{slug}' in hidden_routes:
             continue
         vendors = [vendor for vendor in item.get('vendor', []) if vendor in TOOL_VENDORS] if isinstance(item.get('vendor'), list) else []
         icon = item.get('icon') if isinstance(item.get('icon'), str) else '•'
@@ -719,7 +741,7 @@ def tool_page(slug):
     related = [item for item in catalog['tools']
                if item['category'] == tool['category'] and item['slug'] != slug][:4]
     template = 'tools/land.html' if slug == 'land-measurement-calculator' else 'tools/tool.html'
-    return render_template(template, tool=tool, related=related, catalog=catalog)
+    return render_template(template, tool=tool, related=related, catalog=catalog, api_studio_help=API_STUDIO_HELP)
 
 BYPASS_PASSWORD_SALT = 'sanuwar-tools::bypass::jpd::v1'
 BYPASS_PASSWORD_HASH = '2c04d2f0c3db543e3965959bc8968c693ec3db1276077f88f9e3ee8de4e190ed'

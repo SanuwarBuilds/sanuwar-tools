@@ -8,6 +8,7 @@
   const visible = document.querySelector("#directory-visible");
   const empty = document.querySelector("#directory-empty");
   const tabs = [...document.querySelectorAll("#directory-groups [data-group]")];
+  const apiFilters = [...document.querySelectorAll("[data-api-filter]")];
   let activeGroup = "all";
 
   const setActiveTab = (group) => {
@@ -26,7 +27,8 @@
     items.forEach((item) => {
       const groupOk = isHub || activeGroup === "all" || item.dataset.group === activeGroup;
       const queryOk = !query || (item.dataset.search || "").includes(query);
-      const show = groupOk && queryOk;
+      const apiOk = apiFilters.every(filter => !filter.value || item.dataset[filter.dataset.apiFilter] === filter.value);
+      const show = groupOk && queryOk && apiOk;
       item.hidden = !show;
       if (show) count += 1;
     });
@@ -44,12 +46,14 @@
 
   document.querySelector("#directory-clear")?.addEventListener("click", () => {
     input.value = "";
+    apiFilters.forEach(filter => { filter.value = ""; });
     setActiveTab("all");
     apply();
     input.focus();
   });
 
   input.addEventListener("input", apply);
+  apiFilters.forEach(filter => filter.addEventListener("change", apply));
   apply();
   const requestedQuery = new URLSearchParams(location.search).get("q");
   if (requestedQuery) { input.value = requestedQuery; input.dispatchEvent(new Event("input")); }

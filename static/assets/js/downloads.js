@@ -219,7 +219,21 @@
   }
   function fileAction(item, file = item, index = 0) {
     if (item.locked) return buyButton(item);
-    if (!file.private_delivery) return downloadLink(file.link, "Download", item.id);
+    if (!file.private_delivery) {
+      const download = downloadLink(file.link, "Download", item.id);
+      const safe = url(file.link);
+      if (!safe || !safe.startsWith("https://")) return download;
+      const target = new URL(safe);
+      target.search = "";
+      target.hash = "";
+      const actions = document.createDocumentFragment();
+      actions.append(download, el("a", {
+        class: "button button-light",
+        href: "/tools/link-safety-checker#url=" + encodeURIComponent(target.href),
+        "aria-label": "Check link for " + (file.name || item.title),
+      }, "Check link"));
+      return actions;
+    }
     const button = el(
       "button",
       {

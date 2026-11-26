@@ -73,6 +73,14 @@ def validate_payload(data):
             raise ValueError('Field is too long')
     walk(data)
 
+API_STUDIO_CONNECT = {
+    '/tools/color-contrast-studio': 'https://www.thecolorapi.com',
+    '/tools/link-safety-checker': 'https://scanmalware.com',
+    '/tools/svg-icon-font-finder': 'https://api.iconify.design https://api.fontsource.org https://cdn.jsdelivr.net',
+    '/tools/anime-scene-finder': 'https://api.trace.moe',
+}
+
+
 def install(app):
     secret = os.getenv('SECRET_KEY', '')
     if not secret or len(secret) < 32:
@@ -176,10 +184,11 @@ def install(app):
                 "default-src 'none'; script-src 'self' 'wasm-unsafe-eval'; connect-src 'self'")
         if (request.path in ('/players', '/tools') or request.path.startswith('/players/') or request.path.startswith('/tools/')) and response.status_code == 200 and response.mimetype == 'text/html':
             wasm = " 'wasm-unsafe-eval'" if request.path == '/tools/heic-to-jpg' else ''
+            connect = API_STUDIO_CONNECT.get(request.path, 'https: https://api.frankfurter.app https://api.frankfurter.dev')
             response.headers['Content-Security-Policy'] = (
                 f"default-src 'self'; script-src 'self'{wasm}; style-src 'self' 'unsafe-inline'; "
                 "img-src 'self' https: data: blob:; font-src 'self'; "
-                "connect-src 'self' https: https://api.frankfurter.app https://api.frankfurter.dev; "
+                f"connect-src 'self' {connect}; "
                 "worker-src 'self' blob:; media-src 'self' https: data: blob:; "
                 "object-src 'none'; base-uri 'self'; frame-ancestors 'none'; form-action 'self'")
         if request.path == '/signin' and response.status_code == 200:

@@ -379,3 +379,53 @@ class ToolHubTests(unittest.TestCase):
             self.assertEqual(registered[tool['slug']],tool['bundle'])
             self.assertTrue(tool['description'].strip())
             self.assertIn(tool['bundle'],module.TOOL_BUNDLES)
+
+    def test_browser_api_tools_have_scoped_provider_access_and_public_metadata(self):
+        config = json.loads((ROOT / 'data/tools.config.json').read_text())
+        routes = {
+            '/tools/color-contrast-studio': {'https://www.thecolorapi.com'},
+            '/tools/link-safety-checker': {'https://scanmalware.com'},
+            '/tools/svg-icon-font-finder': {'https://api.iconify.design', 'https://api.fontsource.org', 'https://cdn.jsdelivr.net'},
+            '/tools/anime-scene-finder': {'https://api.trace.moe'},
+        }
+        cards = {card['route']: card for card in config['tools'] if card.get('route') in routes}
+        self.assertEqual(set(cards), set(routes))
+        for route, providers in routes.items():
+            with self.subTest(route=route):
+                response = self.client.get(route)
+                self.assertEqual(response.status_code, 200)
+                html = response.get_data(as_text=True)
+                self.assertIn('/assets/js/tools/api-studio.js', html)
+                self.assertIn('/assets/css/api-studio.css', html)
+                self.assertIn('Data and privacy', html)
+                directives = dict(part.strip().split(' ', 1) for part in
+                                  response.headers['Content-Security-Policy'].split(';') if part.strip())
+                self.assertEqual(set(directives['connect-src'].split()), {"'self'"} | providers)
+                self.assertEqual(directives['script-src'], "'self'")
+                self.assertEqual(directives['object-src'], "'none'")
+                self.assertEqual(directives['form-action'], "'self'")
+
+        self.records[module.TOOLS_CONFIG_REL]['tools'] = [cards[route] for route in routes]
+        response = self.client.get('/api/search-index')
+        self.assertEqual(response.status_code, 200)
+        entries = response.get_json()['entries']
+        for route in routes:
+            self.assertEqual(sum(item['href'] == route for item in entries), 1)
+        hidden = '/tools/link-safety-checker'
+        cards[hidden]['visible'] = False
+        self.assertEqual(self.client.get(hidden).status_code, 404)
+        self.assertFalse(any(card['route'] == hidden for card in self.client.get('/api/browser-tools.json').json['tools']))
+
+    def test_api_directory_ships_search_metadata_and_filter_controls(self):
+        self.records[module.DIRECTORY_REL] = json.loads((ROOT / 'data/directory.json').read_text())
+        self.assertEqual(self.client.get('/directory').status_code, 200)
+        response = self.client.get('/directory/public-apis')
+        body = response.get_data(as_text=True)
+        self.assertEqual(response.status_code, 200)
+        self.assertIn('data-api-filter="auth"', body)
+        self.assertIn('data-api-filter="https"', body)
+        self.assertIn('data-api-filter="cors"', body)
+        self.assertIn('data-auth="API Key" data-https="Yes" data-cors="Unknown"', body)
+        self.assertIn('data-auth="No" data-https="Yes" data-cors="Yes"', body)
+        self.assertIn('/tools/link-safety-checker#url=https%3A%2F%2F', body)
+        self.assertIn('/directory/public-apis', self.client.get('/sitemap.xml').get_data(as_text=True))

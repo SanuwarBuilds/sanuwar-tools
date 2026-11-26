@@ -1,5 +1,5 @@
 {
-  "updated": "2026-11-09",
+  "updated": "2026-11-26",
   "notice": "SanuwarTools lists third-party websites for reference only. We do not host, stream or upload any content. Some links may be blocked in your region. Use an ad blocker and a VPN only where it is legal to do so, and follow the laws of your country.",
   "categories": [
     {
@@ -409,6 +409,123 @@
           "name": "Browsers",
           "sites": [
             { "name": "Opera", "url": "https://www.opera.com/", "note": "Built-in ad blocker" }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "public-apis",
+      "slug": "public-apis",
+      "name": "Public APIs",
+      "short": "Public APIs",
+      "icon": "tool",
+      "tagline": "Filter free APIs by access and browser support",
+      "description": "Browse public APIs by topic, authentication, HTTPS and browser CORS support. Check each provider’s terms and limits.",
+      "groups": [
+        {
+          "name": "Design and media",
+          "sites": [
+            {
+              "name": "The Color API",
+              "url": "https://www.thecolorapi.com/docs",
+              "note": "Convert colors and generate palettes.",
+              "auth": "No",
+              "https": "Yes",
+              "cors": "Yes"
+            },
+            {
+              "name": "PickShade",
+              "url": "https://pickshade.com/api",
+              "note": "Color conversion, contrast and palettes.",
+              "auth": "No",
+              "https": "Yes",
+              "cors": "Yes"
+            },
+            {
+              "name": "Iconify",
+              "url": "https://iconify.design/docs/api/",
+              "note": "Search and download SVG icons.",
+              "auth": "No",
+              "https": "Yes",
+              "cors": "Yes"
+            },
+            {
+              "name": "Fontsource",
+              "url": "https://fontsource.org/docs/api/introduction",
+              "note": "Open-source font metadata and files.",
+              "auth": "No",
+              "https": "Yes",
+              "cors": "Yes"
+            },
+            {
+              "name": "raFont",
+              "url": "https://rafont.com/api-docs",
+              "note": "Font suggestions. Use from a server when needed.",
+              "auth": "No",
+              "https": "Yes",
+              "cors": "No"
+            },
+            {
+              "name": "trace.moe",
+              "url": "https://soruly.github.io/trace.moe-api/",
+              "note": "Anime scene search from screenshots.",
+              "auth": "No",
+              "https": "Yes",
+              "cors": "Yes"
+            },
+            {
+              "name": "Jikan",
+              "url": "https://docs.api.jikan.moe/",
+              "note": "Anime and manga metadata.",
+              "auth": "No",
+              "https": "Yes",
+              "cors": "Yes"
+            }
+          ]
+        },
+        {
+          "name": "Security and utilities",
+          "sites": [
+            {
+              "name": "ScanMalware",
+              "url": "https://scanmalware.com/api-docs/",
+              "note": "Look up existing public security reports.",
+              "auth": "No",
+              "https": "Yes",
+              "cors": "Yes"
+            },
+            {
+              "name": "URLhaus",
+              "url": "https://urlhaus.abuse.ch/api/",
+              "note": "Malware URL intelligence. Free community authentication subject to terms.",
+              "auth": "API Key",
+              "https": "Yes",
+              "cors": "Unknown"
+            },
+            {
+              "name": "SearchPinCode",
+              "url": "https://searchpincode.in/api/",
+              "note": "Indian postal PIN and post office data.",
+              "auth": "No",
+              "https": "Yes",
+              "cors": "Yes"
+            },
+            {
+              "name": "Frankfurter",
+              "url": "https://frankfurter.dev/",
+              "note": "Daily and historical exchange rates.",
+              "auth": "No",
+              "https": "Yes",
+              "cors": "Yes"
+            },
+            {
+              "name": "Open-Meteo",
+              "url": "https://open-meteo.com/en/docs",
+              "note": "Weather forecasts. Keyless free tier for non-commercial use.",
+              "auth": "No",
+              "https": "Yes",
+              "cors": "Yes"
+            }
           ]
         }
       ]

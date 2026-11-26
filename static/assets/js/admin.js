@@ -1678,6 +1678,16 @@
             siteNote.input.addEventListener("input", () => {
               site.note = siteNote.input.value;
             });
+            const apiFields = slug.input.value.trim() === "public-apis"
+              ? [
+                  ["auth", "Auth", ["No", "API Key"]],
+                  ["https", "HTTPS", ["Yes", "No"]],
+                  ["cors", "CORS", ["Unknown", "Yes", "No"]],
+                ].map(([key, label, options]) => {
+                  const control = select(label, options, site[key] || options[0]);
+                  control.input.addEventListener("change", () => { site[key] = control.input.value; });
+                  return control.node;
+                }) : [];
             return el(
               "div",
               { class: "dir-site-row" },
@@ -1693,6 +1703,7 @@
                 true,
                 `Remove ${site.name || "site"}`,
               ),
+              ...apiFields,
             );
           });
           return el(
@@ -1733,6 +1744,7 @@
       );
     };
     drawGroups();
+    slug.input.addEventListener("change", drawGroups);
     if (!category) {
       name.input.addEventListener("input", () => {
         slug.input.value = name.input.value
@@ -1791,6 +1803,11 @@
                 name: (site.name || "").trim(),
                 url: (site.url || "").trim(),
                 ...((site.note || "").trim() ? { note: site.note.trim() } : {}),
+                ...(nextSlug === "public-apis" ? {
+                  auth: site.auth || "No",
+                  https: site.https || "Yes",
+                  cors: site.cors || "Unknown",
+                } : {}),
               })),
           }))
           .filter((group) => group.name && group.sites.length);

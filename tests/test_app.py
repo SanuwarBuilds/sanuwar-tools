@@ -117,6 +117,21 @@ class WorkspaceTests(unittest.TestCase):
         ):
             self.assertEqual(self.request('/api/admin/directories', data=document).status_code, 400, document)
 
+    def test_public_api_directory_requires_supported_tags_and_check_link_strips_secrets(self):
+        self.login()
+        site = {'name': 'Example API', 'url': 'https://example.com/doc?token=secret#section',
+                'auth': 'No', 'https': 'Yes', 'cors': 'Unknown'}
+        document = {'categories': [{'name': 'Public APIs', 'slug': 'public-apis',
+                                    'groups': [{'name': 'Reference', 'sites': [site]}]}]}
+        self.assertEqual(self.request('/api/admin/directories', data=document).status_code, 200)
+        html = self.client.get('/directory/public-apis').get_data(as_text=True)
+        self.assertIn('href="/tools/link-safety-checker#url=https%3A%2F%2Fexample.com%2Fdoc"', html)
+        self.assertEqual(module.link_check_href('/assets/example.svg'), '')
+        self.assertEqual(module.link_check_href('javascript:alert(1)'), '')
+        self.assertEqual(module.link_check_href('https://me:secret@example.com/'), '')
+        site['cors'] = 'Wrong'
+        self.assertEqual(self.request('/api/admin/directories', data=document).status_code, 400)
+
     def test_eduhelp_public_page_filters_updates(self):
         page = self.client.get('/eduhelp')
         self.assertEqual(page.status_code, 200)
