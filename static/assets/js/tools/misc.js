@@ -455,13 +455,15 @@
   });
 
   T.register("qr-code-generator", (root) => {
+    const shortLink = new URLSearchParams(location.hash.slice(1)).get("short");
+    const defaultLink = /^https:\/\/is\.gd\/[a-z\d]+$/i.test(shortLink || "") ? shortLink : "https://sanuwartools.online";
     const type = T.select([
       ["Website URL or link", "url"],
       ["Plain text", "text"],
       ["Wi-Fi network", "wifi"],
       ["UPI payment", "upi"],
     ], "url");
-    const content = T.textarea("https://sanuwartools.online", { rows: 3, placeholder: "https://example.com" });
+    const content = T.textarea(defaultLink, { rows: 3, placeholder: "https://example.com" });
     const ssid = T.input({ type: "text", placeholder: "Home Wi-Fi" });
     const password = T.input({ type: "password", placeholder: "Wi-Fi password" });
     const security = T.select([["WPA / WPA2 / WPA3", "WPA"], ["WEP", "WEP"], ["Open network", "nopass"]], "WPA");
@@ -515,7 +517,7 @@
     root.replaceChildren(panel);
 
     let payload = "";
-    let lastUrl = "https://sanuwartools.online";
+    let lastUrl = defaultLink;
     const escapeWifi = (value) => String(value).replace(/([\\;,":])/g, "\\$1");
     const encodeUpi = (value) => encodeURIComponent(String(value)).replace(/%40/g, "@");
 

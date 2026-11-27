@@ -11,6 +11,7 @@ import hmac
 import hashlib
 import tempfile
 import time
+import requests
 from PIL import Image, UnidentifiedImageError
 from werkzeug.security import check_password_hash
 from werkzeug.utils import secure_filename
@@ -18,7 +19,7 @@ import security
 from availability import is_public, public_config
 import payments
 import seo
-from tool_guides import API_STUDIO_HELP, GUIDES
+from tool_guides import API_STUDIO_HELP, GUIDES, STUDY_TOOL_HELP
 import monetization
 import user_auth
 import visitor_analytics
@@ -362,8 +363,82 @@ def eduhelp():
     updates.sort(key=lambda item: item.get('pinned') is not True)
     categories = [name for name in EDUHELP_CATEGORIES
                   if any(item.get('category') == name for item in updates)]
-    return render_template('eduhelp.html', updates=updates, categories=categories,
+    tools = [tool for tool in load_tool_catalog()['tools'] if tool['category'] == 'Education']
+    return render_template('eduhelp.html', updates=updates, categories=categories, study_tools=tools,
+                           weather_mode=weather_provider(),
                            notice=data.get('notice', ''), updated=data.get('updated', ''))
+
+
+WEATHER_ENDPOINTS = {
+    'places': 'https://customer-geocoding-api.open-meteo.com/v1/search',
+    'weather': 'https://customer-api.open-meteo.com/v1/forecast',
+    'air': 'https://customer-air-quality-api.open-meteo.com/v1/air-quality',
+}
+WEATHER_FIELDS = {
+    'weather': ('temperature_2m', 'relative_humidity_2m', 'wind_speed_10m', 'weather_code'),
+    'air': ('us_aqi', 'pm2_5', 'pm10'),
+}
+
+
+def weather_provider():
+    if os.getenv('OPEN_METEO_API_KEY', '').strip():
+        return 'proxy'
+    if (request.host.split(':', 1)[0] in ('localhost', '127.0.0.1') or
+            os.getenv('OPEN_METEO_NONCOMMERCIAL') == '1'):
+        return 'public'
+    return 'unconfigured'
+
+
+@app.get('/api/public-weather/<kind>')
+def public_weather(kind):
+    if kind not in WEATHER_ENDPOINTS:
+        abort(404)
+    key = os.getenv('OPEN_METEO_API_KEY', '').strip()
+    if not key:
+        return jsonify(error='Weather service is not configured.'), 503
+    if security.limited(('public-weather', request.remote_addr), maximum=36, window=60):
+        return jsonify(error='Too many weather requests. Try again shortly.'), 429
+
+    if kind == 'places':
+        name = request.args.get('name', '').strip()
+        if not 2 <= len(name) <= 100 or any(ord(ch) < 32 for ch in name):
+            return jsonify(error='Enter a city name of 2–100 characters.'), 400
+        params = {'name': name, 'count': 6, 'language': 'en'}
+    else:
+        try:
+            lat = float(request.args.get('latitude', ''))
+            lng = float(request.args.get('longitude', ''))
+        except (ValueError, OverflowError):
+            return jsonify(error='Invalid coordinates.'), 400
+        if not (-90 <= lat <= 90 and -180 <= lng <= 180):
+            return jsonify(error='Invalid coordinates.'), 400
+        params = {'latitude': round(lat, 5), 'longitude': round(lng, 5), 'timezone': 'auto',
+                  'current': ','.join(WEATHER_FIELDS[kind])}
+    try:
+        upstream = requests.get(WEATHER_ENDPOINTS[kind], params={**params, 'apikey': key},
+                                timeout=(3, 6), allow_redirects=False)
+        if upstream.status_code == 429:
+            return jsonify(error='Weather provider request limit reached.'), 429
+        if upstream.status_code != 200:
+            return jsonify(error='Weather provider is unavailable.'), 502
+        data = upstream.json()
+        if not isinstance(data, dict) or data.get('error'):
+            return jsonify(error='Weather provider returned an invalid response.'), 502
+        if kind == 'places':
+            results = data.get('results', [])
+            if not isinstance(results, list):
+                return jsonify(error='Weather provider returned an invalid response.'), 502
+            fields = ('name', 'admin1', 'country', 'latitude', 'longitude')
+            return jsonify(results=[{name: place.get(name) for name in fields}
+                                    for place in results[:6] if isinstance(place, dict)])
+        current = data.get('current')
+        if not isinstance(current, dict):
+            return jsonify(error='Weather provider returned no current data.'), 502
+        fields = ('time', *WEATHER_FIELDS[kind])
+        return jsonify(current={name: current.get(name) for name in fields},
+                       timezone=data.get('timezone'))
+    except (requests.RequestException, ValueError):
+        return jsonify(error='Weather provider is unavailable.'), 502
 
 @app.get('/eduhelp/labs')
 def eduhelp_labs():
@@ -591,7 +666,7 @@ EDUHELP_LABS = {
     'electricity': 'class-10-electricity.html',
     'carbon-compounds': 'carbon-compounds.html',
 }
-TOOL_BUNDLES = {"text", "media", "forms", "network", "misc", "calculators", "dls", "land", "players", "file-workbench", "study-planner", "pdf-editor", "api-studio"}
+TOOL_BUNDLES = {"text", "media", "forms", "network", "misc", "calculators", "dls", "land", "players", "file-workbench", "study-planner", "pdf-editor", "api-studio", "study-utilities"}
 TOOL_VENDORS = {"js-yaml", "marked", "fflate", "pdf-lib", "pdfjs", "jspdf", "bcryptjs", "qrcodegen", "hlsjs", "dashjs", "tesseract"}
 TOOL_CATEGORY_ICONS = {
     'Players': 'film',
@@ -611,6 +686,7 @@ TOOL_CATEGORY_ICONS = {
     'Sports & Games': 'score',
     'Land & Property': 'convert',
     'Lookups': 'document',
+    'Education': 'ebook',
 }
 TOOL_CATEGORY_ORDER = [
     'Players',
@@ -629,6 +705,7 @@ TOOL_CATEGORY_ORDER = [
     'Health & Fitness',
     'Land & Property',
     'Lookups',
+    'Education',
     'Sports & Games',
 ]
 
@@ -662,7 +739,7 @@ def load_tool_catalog():
             continue
         if bundle not in TOOL_BUNDLES or not isinstance(category, str) or not category.strip():
             continue
-        if bundle == 'api-studio' and f'/tools/{slug}' in hidden_routes:
+        if bundle in ('api-studio', 'study-utilities') and f'/tools/{slug}' in hidden_routes:
             continue
         vendors = [vendor for vendor in item.get('vendor', []) if vendor in TOOL_VENDORS] if isinstance(item.get('vendor'), list) else []
         icon = item.get('icon') if isinstance(item.get('icon'), str) else '•'
@@ -741,7 +818,9 @@ def tool_page(slug):
     related = [item for item in catalog['tools']
                if item['category'] == tool['category'] and item['slug'] != slug][:4]
     template = 'tools/land.html' if slug == 'land-measurement-calculator' else 'tools/tool.html'
-    return render_template(template, tool=tool, related=related, catalog=catalog, api_studio_help=API_STUDIO_HELP)
+    return render_template(template, tool=tool, related=related, catalog=catalog,
+                           api_studio_help=API_STUDIO_HELP, study_tool_help=STUDY_TOOL_HELP,
+                           weather_mode=weather_provider() if slug == 'weather-air-quality' else '')
 
 BYPASS_PASSWORD_SALT = 'sanuwar-tools::bypass::jpd::v1'
 BYPASS_PASSWORD_HASH = '2c04d2f0c3db543e3965959bc8968c693ec3db1276077f88f9e3ee8de4e190ed'

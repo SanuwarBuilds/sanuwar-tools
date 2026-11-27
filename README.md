@@ -64,6 +64,13 @@ The JSON writer atomically replaces local files and checks the GitHub response b
 
 **Operational limits:** the retained JSON/GitHub storage is appropriate for this small catalogue but is not a transactional multi-writer database. Warm Vercel instances can serve stale `/tmp` data until redeployment. Concurrent edits/votes can overwrite one another. Rate limits are per process; configure a shared edge/gateway limiter for distributed brute-force protection. Poll sessions deter repeat votes in the same browser but are not verified-person voting. The application upload ceiling is 32 MB; your hosting plan may impose a smaller request-body limit. Larger release files should be hosted on GitHub Releases and added by HTTPS URL. The app validates images and blocks executable web uploads; it does not perform antivirus scanning or certify third-party downloads.
 
+## Eduhelp weather service
+
+The Eduhelp weather widget uses the keyless Open-Meteo endpoints in local previews.
+For a commercial deployment, set `OPEN_METEO_API_KEY` in the server environment.
+The Flask proxy keeps the key server-side. A deployment that qualifies for the
+provider's non-commercial terms can explicitly set `OPEN_METEO_NONCOMMERCIAL=1`.
+
 ## Checks
 
 ```sh

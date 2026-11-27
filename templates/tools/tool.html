@@ -1,6 +1,6 @@
 {% extends 'base.html' %}
 {% set vendor_files = {'js-yaml': 'js-yaml.js', 'marked': 'marked.js', 'fflate': 'fflate.js', 'pdf-lib': 'pdf-lib.js', 'pdfjs': 'pdf.min.js', 'jspdf': 'jspdf.umd.min.js', 'bcryptjs': 'bcrypt.min.js', 'qrcodegen': 'qrcodegen.js', 'hlsjs': 'hls.min.js', 'dashjs': 'dash.all.min.js', 'tesseract': 'ocr/tesseract.min.js'} %}
-{% set bundle_version = 7 if tool.bundle == 'pdf-editor' else 4 if tool.bundle in ['file-workbench', 'text', 'misc'] else 3 if tool.bundle == 'network' else 4 if tool.bundle == 'players' else 4 if tool.bundle in ['calculators', 'media'] else 2 %}
+{% set bundle_version = 7 if tool.bundle == 'pdf-editor' else 5 if tool.bundle == 'misc' else 4 if tool.bundle in ['file-workbench', 'text'] else 3 if tool.bundle == 'network' else 4 if tool.bundle == 'players' else 4 if tool.bundle in ['calculators', 'media'] else 2 %}
 {% set streaming_players = ['m3u8-player', 'dash-player', 'cloud-video-player'] %}
 {% set tool_help = {
   'pdf-editor': 'Choose a PDF, tap the text you want to change, and apply your correction. The editor matches the font automatically and detects text on scanned pages. Download a copy when you are done.',
@@ -47,7 +47,7 @@
 {% set surface = 'utility' %}
 {% endif %}
 {% block bodyclass %}wb-tool-page tool-page-{{ tool.bundle }} st-tool st-tool-{{ surface }}{% endblock %}
-{% block page_styles %}<link rel="stylesheet" href="/assets/css/tools.css?v=7">{% if tool.bundle in ['file-workbench', 'study-planner'] %}<link rel="stylesheet" href="/assets/css/file-workbench.css?v=1">{% endif %}{% if tool.bundle == 'pdf-editor' %}<link rel="stylesheet" href="/assets/css/pdf-editor.css?v=5">{% endif %}{% if tool.bundle == 'players' %}<link rel="stylesheet" href="/assets/css/players.css?v=5">{% endif %}{% if tool.bundle == 'api-studio' %}<link rel="stylesheet" href="/assets/css/api-studio.css?v=1">{% endif %}{% endblock %}
+{% block page_styles %}<link rel="stylesheet" href="/assets/css/tools.css?v=7">{% if tool.bundle in ['file-workbench', 'study-planner'] %}<link rel="stylesheet" href="/assets/css/file-workbench.css?v=1">{% endif %}{% if tool.bundle == 'pdf-editor' %}<link rel="stylesheet" href="/assets/css/pdf-editor.css?v=5">{% endif %}{% if tool.bundle == 'players' %}<link rel="stylesheet" href="/assets/css/players.css?v=5">{% endif %}{% if tool.bundle in ['api-studio', 'study-utilities'] %}<link rel="stylesheet" href="/assets/css/api-studio.css?v=2">{% endif %}{% endblock %}
 {% block content %}
 <section class="tp-shell wrap" data-tool-page data-tool-slug="{{ tool.slug }}"{% if tool.slug == 'form-file-checker' %} data-photo-available="{{ 'true' if photo_tools_available else 'false' }}"{% endif %}>
   <nav class="tp-crumb" aria-label="Breadcrumb"><a href="/">Home</a><span aria-hidden="true">/</span><a href="/tools">All tools</a><span aria-hidden="true">/</span><a href="/tools?category={{ tool.category | urlencode }}">{{ tool.category }}</a></nav>
@@ -61,7 +61,7 @@
   </header>
 
   <div class="tp-layout">
-    <div class="tp-workspace" id="tool-root">
+    <div class="tp-workspace" id="tool-root"{% if weather_mode %} data-weather-mode="{{ weather_mode }}"{% endif %}>
       <div class="tp-loading"><span></span>Loading tool…</div>
       <noscript><p>Enable JavaScript to use this tool.</p></noscript>
     </div>
@@ -82,6 +82,9 @@
         <h2>Data and privacy</h2>
         <p>{{ api_studio_help[tool.slug] }}</p>
         <p><a href="/directory/public-apis">Browse the Public APIs directory</a></p>
+        {% elif tool.bundle == 'study-utilities' %}
+        <h2>Data and privacy</h2>
+        <p>{{ study_tool_help[tool.slug] }}</p>
         {% elif tool.slug in streaming_players %}
         <h2>Streaming source</h2>
         <p>The player fetches the link you paste, so that server can see the request. Local files are never uploaded.</p>
@@ -90,6 +93,11 @@
         <p>Your inputs and files stay on this device while this tool processes them.</p>
         {% endif %}
       </section>
+      {% if tool.slug == 'qr-code-generator' %}
+      <section class="tp-aside-card"><h2>Shorten a long link</h2><p><a href="/tools/url-shortener">Open URL Shortener</a></p></section>
+      {% elif tool.slug == 'currency-converter' %}
+      <section class="tp-aside-card"><h2>Market rates and crypto</h2><p><a href="/tools/live-forex-crypto-converter">Open Live Forex &amp; Crypto Converter</a></p></section>
+      {% endif %}
       {% if related %}
       <section class="tp-aside-card">
         <h2>More {{ tool.category | lower }}</h2>

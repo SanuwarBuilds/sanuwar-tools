@@ -7,7 +7,37 @@ API_STUDIO_HELP = {
     'anime-scene-finder': 'When you choose Find scene, the selected image or public image URL is sent to trace.moe for matching.',
 }
 
+STUDY_TOOL_HELP = {
+    'dictionary-science-reference': 'English word searches go to Free Dictionary API. The unit catalogue comes from Toolalize, and the curated formula reference works locally.',
+    'books-scripture-explorer': 'References go to the selected provider. Passages and book records retain their edition, language and source credit.',
+    'weather-air-quality': 'The location you search is sent to Open-Meteo. Forecast and air quality values are modeled estimates, with U.S. AQI shown on its own scale.',
+    'url-shortener': 'The full link you submit is sent to is.gd. Use public links without passwords or private access tokens. QR codes are generated locally.',
+    'live-forex-crypto-converter': 'Coinbase supplies current indicative exchange rates. Unit conversions use Toolalize. Exchange rates can change before a transaction.',
+    'caption-transcript-extractor': 'Caption files are parsed locally in your browser.',
+}
+
 GUIDES = {
+    'use-eduhelp-reference-tools': {
+        'title': 'Look up a word, formula or reading reference',
+        'intro': 'Use the Eduhelp reference tools alongside the Study Planner and Science Labs.',
+        'sections': [
+            ('Check a word or formula', ['Look up a word and choose the definition that fits the sentence. For a formula, check its assumptions and units before substituting values.']),
+            ('Find a passage or book', ['Choose a collection and enter its reference. BookRank accepts ISBN-13 numbers, and scripture results identify their source and translation.']),
+            ('Compare weather and air quality', ['Search by city and confirm the region. Check the time on each result because weather and air quality are modeled and updated separately.']),
+        ],
+        'tools': [('Dictionary & Science Reference', '/tools/dictionary-science-reference'),
+                  ('Books & Scripture Explorer', '/tools/books-scripture-explorer'),
+                  ('Weather & Air Quality', '/tools/weather-air-quality')],
+    },
+    'share-a-short-link-and-qr-code': {
+        'title': 'Share a short link and QR code',
+        'intro': 'Make a short link for a public page, and turn it into a scannable QR code.',
+        'sections': [
+            ('Shorten the public URL', ['Paste the complete HTTPS URL. The short-link provider receives the link for redirection, so use a link intended for sharing.']),
+            ('Generate and test the QR code', ['Choose Generate QR code to open the existing generator with the short link filled in. Scan the PNG and confirm the destination before sharing it.']),
+        ],
+        'tools': [('URL Shortener', '/tools/url-shortener'), ('QR Code Generator', '/tools/qr-code-generator')],
+    },
     'check-colors-links-and-media': {
         'title': 'Check contrast, public link reports and media sources',
         'intro': 'Check text legibility, consult published link reports, find reusable assets or identify a scene from a screenshot.',

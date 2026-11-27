@@ -1,5 +1,6 @@
 {% extends 'base.html' %}
 {% block bodyclass %}eduhelp-page{% endblock %}
+{% block page_styles %}<link rel="stylesheet" href="/assets/css/tools.css?v=7"><link rel="stylesheet" href="/assets/css/api-studio.css?v=2">{% endblock %}
 {% block content %}
 <section class="wb-page wrap wb-eduhelp">
   <nav class="tp-crumb" aria-label="Breadcrumb"><a href="/">Home</a><span aria-hidden="true">/</span><span>Eduhelp</span></nav>
@@ -21,6 +22,23 @@
       {% if updated %}<div class="wb-stat"><strong>{{ updated }}</strong><span>last updated</span></div>{% endif %}
     </aside>
   </header>
+
+  {% if study_tools %}
+  <section class="wb-section" aria-labelledby="study-tools-title">
+    <div class="wb-section-head"><h2 id="study-tools-title">Study and reference tools</h2></div>
+    <div class="wb-edu-grid">
+      {% for tool in study_tools %}
+      <article class="edu-card">
+        <h3><a href="/tools/{{ tool.slug }}">{{ tool.name }}</a></h3>
+        <p>{{ tool.description }}</p>
+        {% if tool.slug == 'weather-air-quality' %}
+        <div class="study-weather-widget" data-study-weather-widget data-weather-mode="{{ weather_mode }}" aria-label="Weather and air quality lookup"><noscript><p>Enable JavaScript to check current weather.</p></noscript></div>
+        {% endif %}
+      </article>
+      {% endfor %}
+    </div>
+  </section>
+  {% endif %}
 
   <div class="wb-toolbar">
     <label class="wb-search-field" for="eduhelp-search">
@@ -99,4 +117,10 @@
   </aside>
 </section>
 {% endblock %}
-{% block scripts %}<script nonce="{{ csp_nonce }}" src="/assets/js/eduhelp.js?v=2" defer></script>{% endblock %}
+{% block scripts %}
+<script nonce="{{ csp_nonce }}" src="/assets/js/eduhelp.js?v=2" defer></script>
+{% if study_tools | selectattr('slug', 'equalto', 'weather-air-quality') | list %}
+<script nonce="{{ csp_nonce }}" src="/assets/js/tools/core.js?v=3" defer></script>
+<script nonce="{{ csp_nonce }}" src="/assets/js/tools/study-utilities.js?v=2" defer></script>
+{% endif %}
+{% endblock %}

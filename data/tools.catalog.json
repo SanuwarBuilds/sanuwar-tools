@@ -1,7 +1,13 @@
 {
   "updated": "2026-11-26",
-  "categories": ["Players", "Text Tools", "Developer Tools", "Encoding & Hashing", "Images & Media", "PDF & Documents", "Compression & Archives", "Networking", "Calculators", "Time & Date", "Security & Privacy", "Financial Calculators", "Health & Fitness", "Unit Converters", "Land & Property", "Sports & Games", "Lookups"],
+  "categories": ["Players", "Text Tools", "Developer Tools", "Encoding & Hashing", "Images & Media", "PDF & Documents", "Compression & Archives", "Networking", "Calculators", "Time & Date", "Security & Privacy", "Financial Calculators", "Health & Fitness", "Unit Converters", "Land & Property", "Sports & Games", "Lookups", "Education"],
   "tools": [
+    {"slug": "dictionary-science-reference", "name": "Instant Dictionary & Science Reference", "category": "Education", "icon": "word", "bundle": "study-utilities", "description": "Look up English definitions and synonyms, and find common science formulas and SI units."},
+    {"slug": "books-scripture-explorer", "name": "Books & Scripture Explorer", "category": "Education", "icon": "book", "bundle": "study-utilities", "description": "Read Bhagavad Gita, Quran and Bible passages or find book ratings by ISBN."},
+    {"slug": "weather-air-quality", "name": "Weather & Air Quality", "category": "Education", "icon": "AQI", "bundle": "study-utilities", "description": "Check current weather, U.S. AQI and particulate levels by city."},
+    {"slug": "url-shortener", "name": "URL Shortener", "category": "Developer Tools", "icon": "URL", "bundle": "study-utilities", "description": "Shorten a public HTTPS link and open it in the QR Code Generator."},
+    {"slug": "live-forex-crypto-converter", "name": "Live Forex & Crypto Converter", "category": "Calculators", "icon": "FX", "bundle": "study-utilities", "description": "Convert INR, USD, EUR and popular cryptocurrencies, or convert everyday measurement units."},
+    {"slug": "caption-transcript-extractor", "name": "Caption Transcript Extractor", "category": "Images & Media", "icon": "VTT", "bundle": "study-utilities", "description": "Turn a local SRT or WebVTT caption file into a copyable transcript."},
     {"slug": "color-contrast-studio", "name": "Color & WCAG Contrast Studio", "category": "Developer Tools", "icon": "RGB", "bundle": "api-studio", "description": "Convert HEX, RGB and HSL, build color palettes and check WCAG text contrast."},
     {"slug": "link-safety-checker", "name": "Link & URL Safety Checker", "category": "Security & Privacy", "icon": "URL", "bundle": "api-studio", "description": "Look up existing public security reports for an HTTPS link before opening it."},
     {"slug": "svg-icon-font-finder", "name": "SVG Icon & Font Finder", "category": "Developer Tools", "icon": "SVG", "bundle": "api-studio", "description": "Find open-source SVG icons and fonts, check licenses and copy or download assets."},
