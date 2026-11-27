@@ -88,3 +88,15 @@
   .papers-exams a { display: grid; padding-inline: 10px; }
   .papers-open { font-size: 13px; }
 }
+.papers-practice { margin-top: 10px; padding: 0 16px 12px; border: 1px solid var(--papers-line); border-radius: 12px; background: var(--papers-paper); }
+.papers-practice summary { padding-top: 12px; font-weight: 700; cursor: pointer; }
+.papers-practice .papers-filters { padding: 0; margin: 12px 0; border: 0; }
+.papers-practice input { width: 100%; min-width: 0; max-width: 210px; padding: 7px; min-height: 44px; border: 1px solid var(--papers-line); border-radius: 8px; color: var(--papers-ink); background: var(--papers-paper); font-size: 16px; }
+.papers-practice [role=timer] { font-size: 24px; font-weight: 700; font-variant-numeric: tabular-nums; min-width: 5ch; }
+.papers-practice [role=status]:empty { display: none; }
+.papers-practice label { flex: 0 1 145px; }
+
+.papers-paper-actions { display: flex; flex-wrap: wrap; justify-content: end; gap: 0 12px; }
+@media (max-width: 500px) {
+  .papers-paper-actions { flex-direction: column; align-items: end; }
+}

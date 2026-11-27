@@ -369,6 +369,94 @@ def eduhelp():
                            notice=data.get('notice', ''), updated=data.get('updated', ''))
 
 
+def eduhelp_resource(filename):
+    with open(os.path.join(BASE_DIR, 'data', filename), encoding='utf-8') as resource:
+        return json.load(resource)
+
+
+@app.get('/eduhelp/study')
+def eduhelp_study():
+    chapters = eduhelp_resource('eduhelp-study.json')
+    options = {key: sorted({chapter[key] for chapter in chapters.values()}, key=natural_key)
+               for key in ('board', 'level', 'subject')}
+    filters = {key: request.args.get(key, '') for key in options}
+    chapters = {slug: chapter for slug, chapter in chapters.items()
+                if all(value not in options[key] or chapter[key] == value for key, value in filters.items())}
+    return render_template('eduhelp_study.html', chapters=chapters, options=options, filters=filters)
+
+
+@app.get('/eduhelp/study/<slug>')
+def eduhelp_chapter(slug):
+    chapter = eduhelp_resource('eduhelp-study.json').get(slug)
+    if not chapter:
+        abort(404)
+    return render_template('eduhelp_chapter.html', chapter=chapter)
+
+
+@app.get('/eduhelp/calendar')
+def eduhelp_calendar():
+    events = eduhelp_resource('eduhelp-opportunities.json')['events']
+    kinds = ('Admission', 'Admit card', 'Application deadline', 'Exam', 'Result')
+    kind = request.args.get('type', '')
+    if kind not in kinds:
+        kind = ''
+    periods = {'upcoming': 'Upcoming and ongoing', 'past': 'Past dates', 'all': 'All dates'}
+    period = request.args.get('period', 'upcoming')
+    if period not in periods:
+        period = 'upcoming'
+    india = datetime.timezone(datetime.timedelta(hours=5, minutes=30))
+    today = datetime.datetime.now(india).date().isoformat()
+    groups = {}
+    for event in sorted(events, key=lambda item: item['start'], reverse=period == 'past'):
+        past = event.get('end', event['start']) < today
+        if (kind and event['type'] != kind) or (period != 'all' and past != (period == 'past')):
+            continue
+        groups.setdefault(event['start'][:7], []).append(event)
+    return render_template('eduhelp_calendar.html', groups=groups, kinds=kinds, kind=kind,
+                           periods=periods, period=period)
+
+
+@app.get('/eduhelp/calendar/<slug>.ics')
+def eduhelp_calendar_event(slug):
+    event = next((item for item in eduhelp_resource('eduhelp-opportunities.json')['events'] if item['id'] == slug), None)
+    if not event:
+        abort(404)
+    end = datetime.date.fromisoformat(event.get('end', event['start'])) + datetime.timedelta(days=1)
+    title = event['title'].replace('\\', '\\\\').replace(',', '\\,').replace(';', '\\;').replace('\n', '\\n')
+    stamp = datetime.datetime.now(datetime.timezone.utc).strftime('%Y%m%dT%H%M%SZ')
+    lines = [
+        'BEGIN:VCALENDAR', 'VERSION:2.0', 'PRODID:-//SanuwarTools//EduHelp//EN', 'BEGIN:VEVENT',
+        f'UID:{slug}@sanuwartools.online', f'DTSTAMP:{stamp}',
+        "DTSTART;VALUE=DATE:" + event['start'].replace('-', ''),
+        f'DTEND;VALUE=DATE:{end:%Y%m%d}', 'SUMMARY:' + title,
+        'DESCRIPTION:Verify any changes with the official source.', 'URL:' + event['source'],
+        'END:VEVENT', 'END:VCALENDAR', '',
+    ]
+    # Fold content lines for calendar importers. The seeded event fields are ASCII.
+    folded = ['\r\n '.join([line[:75]] + [line[i:i + 74] for i in range(75, len(line), 74)]) for line in lines]
+    return make_response('\r\n'.join(folded), 200, {
+        'Content-Type': 'text/calendar; charset=utf-8',
+        'Content-Disposition': f'attachment; filename="{slug}.ics"',
+    })
+
+
+@app.get('/eduhelp/scholarships')
+def eduhelp_scholarships():
+    schemes = eduhelp_resource('eduhelp-opportunities.json')['schemes']
+    regions = ('Assam', 'Other Indian states')
+    levels = sorted({level for scheme in schemes for level in scheme['levels']}, key=natural_key)
+    region = request.args.get('region', 'Assam')
+    if region not in regions:
+        region = 'Assam'
+    level = request.args.get('level', '')
+    if level not in levels:
+        level = ''
+    matches = [scheme for scheme in schemes if region in scheme['regions'] and
+               (not level or level in scheme['levels'])]
+    return render_template('eduhelp_scholarships.html', schemes=matches, regions=regions,
+                           levels=levels, region=region, level=level)
+
+
 @app.get('/eduhelp/papers')
 def eduhelp_papers():
     exams = {'hslc': 'HSLC · Class 10', 'hs': 'HS Final · Class 12'}
@@ -385,8 +473,7 @@ def eduhelp_papers():
         stream = ''
     query = request.args.get('q', '').strip()[:100]
     terms = ['math' if word == 'maths' else word for word in query.casefold().split()]
-    with open(os.path.join(BASE_DIR, 'data', 'eduhelp-papers.json'), encoding='utf-8') as archive:
-        catalog = json.load(archive)
+    catalog = eduhelp_resource('eduhelp-papers.json')
     exam_papers = [paper for paper in catalog if paper['exam'] == exam]
     subjects = sorted({paper['subject'] for paper in exam_papers}, key=natural_key)
     subject = request.args.get('subject', '')
@@ -487,7 +574,9 @@ def eduhelp_labs():
     data = load_eduhelp()
     labs = [item for item in data.get('updates', [])
             if isinstance(item, dict) and is_public(item) and item.get('category') == 'Lab']
-    return render_template('eduhelp_labs.html', classes=group_eduhelp_labs(labs),
+    guides = {url_for('eduhelp_lab', slug=chapter['lab']): url_for('eduhelp_chapter', slug=slug, _anchor='experiment')
+              for slug, chapter in eduhelp_resource('eduhelp-study.json').items()}
+    return render_template('eduhelp_labs.html', classes=group_eduhelp_labs(labs), guides=guides,
                            total=len(labs), notice=data.get('notice', ''),
                            updated=data.get('updated', ''))
 

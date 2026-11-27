@@ -115,3 +115,9 @@
 }
 
 .fw-redaction-controls[hidden] { display: none; }
+.fw-reschedule { display: flex; flex-wrap: wrap; align-items: center; gap: 6px; min-width: 0; }
+.fw-reschedule input { width: auto; max-width: 100%; }
+@media (max-width: 450px) {
+  .fw-target-day .fw-list-row { flex-wrap: wrap; }
+  .fw-reschedule { flex-basis: 100%; }
+}

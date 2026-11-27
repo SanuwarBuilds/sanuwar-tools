@@ -7,6 +7,7 @@
     date.getFullYear(), String(date.getMonth() + 1).padStart(2, "0"), String(date.getDate()).padStart(2, "0"),
   ].join("-");
   const dayNumber = (value) => Date.parse(value + "T00:00:00Z") / 86400000;
+  const dateFromDay = (day) => new Date(day * 86400000).toISOString().slice(0, 10);
   const displayDate = (value) => new Intl.DateTimeFormat(undefined, { dateStyle: "medium", timeZone: "UTC" })
     .format(new Date(value + "T00:00:00Z"));
 
@@ -25,6 +26,7 @@
     const timerNotice = el("p", { class: "fw-status", role: "status" });
     const timerDisplay = el("div", { class: "fw-clock", role: "timer", "aria-label": "Time remaining" });
     const focusCount = el("p", { class: "tp-hint" });
+    const planNotice = el("p", { class: "fw-status", role: "status" });
     const examStatus = el("p", { class: "fw-status", role: "status" });
     const progressLabel = el("p", { class: "tp-hint", role: "status" });
     const progress = el("progress", { class: "fw-progress", max: 1, value: 0, "aria-label": "Chapter targets completed" });
@@ -158,12 +160,23 @@
             renderTargets();
             chapter.focus();
           }, "ghost", { "aria-label": "Remove " + task.chapter });
-          return el("li", { class: "fw-list-row" }, el("label", { class: "fw-check" }, checkbox, task.chapter), remove);
+          const date = input({ type: "date", "aria-label": "Reschedule " + task.chapter, value: task.date });
+          date.addEventListener("change", () => {
+            if (!date.value) { date.value = task.date; return; }
+            task.date = date.value;
+            planNotice.textContent = task.chapter + " moved to " + displayDate(task.date) + ".";
+            persist();
+            renderTargets();
+            taskList.querySelector("[data-task='" + task.id + "']")?.focus();
+          });
+          return el("li", { class: "fw-list-row" }, el("label", { class: "fw-check" }, checkbox, task.chapter),
+            el("div", { class: "fw-reschedule" }, date, remove));
         }));
-        return el("section", { class: "fw-target-day" },
-          el("h3", { text: day === today ? "Today · " + displayDate(day) : displayDate(day) }), list);
+        const label = day === today ? "Today · " : day < today && tasks.some((task) => !task.done) ? "Overdue · " : "";
+        return el("section", { class: "fw-target-day" }, el("h3", { text: label + displayDate(day) }), list);
       });
       taskList.replaceChildren(...sections);
+      moveOverdue.disabled = !state.tasks.some((task) => !task.done && task.date < today);
     }
 
     const add = el("form", {},
@@ -180,9 +193,59 @@
       chapter.focus();
     });
 
+    const topics = el("textarea", { class: "tp-textarea", rows: 4, maxlength: 5000, required: true,
+      placeholder: "Electricity\nCarbon and its Compounds" });
+    const batch = el("form", {},
+      field("Pending chapters, one per line", topics, "New chapters are spread from today through the day before your exam."),
+      actions(el("button", { type: "submit", class: "tp-btn tp-btn-primary" }, "Build daily plan")));
+    batch.addEventListener("submit", (event) => {
+      event.preventDefault();
+      const first = dayNumber(dateKey());
+      const days = dayNumber(state.exam) - first;
+      if (!Number.isFinite(days) || days < 1) {
+        planNotice.textContent = "Choose a future exam date before building a daily plan.";
+        examDate.focus();
+        return;
+      }
+      const seen = new Set(state.tasks.map((task) => task.chapter.toLowerCase()));
+      const pending = [];
+      for (const line of topics.value.split(/\r?\n/)) {
+        const name = line.trim().slice(0, 160);
+        const key = name.toLowerCase();
+        if (!name || seen.has(key)) continue;
+        seen.add(key);
+        pending.push(name);
+      }
+      if (!pending.length) {
+        planNotice.textContent = "Add at least one new chapter.";
+        return;
+      }
+      if (pending.length > 60) {
+        planNotice.textContent = "Enter up to 60 new chapters at a time.";
+        return;
+      }
+      pending.forEach((name, index) => {
+        const offset = pending.length === 1 ? 0 : Math.floor(index * (days - 1) / (pending.length - 1));
+        state.tasks.push({ id: crypto.randomUUID(), date: dateFromDay(first + offset), chapter: name, done: false });
+      });
+      topics.value = "";
+      planNotice.textContent = pending.length + (pending.length === 1 ? " chapter scheduled." : " chapters scheduled.");
+      persist();
+      renderTargets();
+    });
+
+    const moveOverdue = button("Move overdue to today", () => {
+      const today = dateKey();
+      const overdue = state.tasks.filter((task) => !task.done && task.date < today);
+      overdue.forEach((task) => { task.date = today; });
+      planNotice.textContent = overdue.length + (overdue.length === 1 ? " target moved to today." : " targets moved to today.");
+      persist();
+      renderTargets();
+    }, "ghost");
+
     root.replaceChildren(
       panel("Study timer", [actions(...modes), timerDisplay, durationField, actions(start, reset), timerNotice, focusCount], "fw-timer-panel"),
-      panel("Revision plan", [field("Exam date (optional)", examDate), examStatus, add, progressLabel, progress, taskList, storageStatus]),
+      panel("Revision plan", [field("Exam date (optional)", examDate), examStatus, batch, add, actions(moveOverdue), planNotice, progressLabel, progress, taskList, storageStatus]),
     );
     renderMode();
     renderExam();

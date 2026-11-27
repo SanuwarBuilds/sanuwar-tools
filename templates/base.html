@@ -1,4 +1,4 @@
-{% set public_ui = request.path in ('/', '/downloads', '/download.html', '/photo-tools', '/signin', '/account', '/privacy', '/about', '/contact', '/tools', '/bypass', '/payment-demo', '/eduhelp', '/eduhelp/labs', '/eduhelp/papers', '/players') or request.path.startswith('/guides/') or request.path.startswith('/downloads/') or request.path.startswith('/directory') or request.path.startswith('/tools/') or request.path.startswith('/players/') or request.path.startswith('/purchase') %}
+{% set public_ui = request.path in ('/', '/downloads', '/download.html', '/photo-tools', '/signin', '/account', '/privacy', '/about', '/contact', '/tools', '/bypass', '/payment-demo', '/eduhelp', '/eduhelp/labs', '/eduhelp/papers', '/eduhelp/study', '/eduhelp/calendar', '/eduhelp/scholarships', '/players') or request.path.startswith('/eduhelp/study/') or request.path.startswith('/guides/') or request.path.startswith('/downloads/') or request.path.startswith('/directory') or request.path.startswith('/tools/') or request.path.startswith('/players/') or request.path.startswith('/purchase') %}
 {% set default_theme = public_config.get('site', {}).get('defaultTheme', 'dark') %}
 <!doctype html>
 <html lang="en" data-theme="{{ 'light' if public_ui else default_theme }}">
@@ -66,7 +66,7 @@
 <link rel="stylesheet" href="/assets/css/site-search.css?v=3">
 <script nonce="{{ csp_nonce }}" src="/assets/js/site-search.js?v=1" defer></script>
 <script nonce="{{ csp_nonce }}" src="/assets/js/tools/smart-search.js?v=1" defer></script>
-<script nonce="{{ csp_nonce }}" src="/assets/js/workbench.js?v=7" defer></script>
+<script nonce="{{ csp_nonce }}" src="/assets/js/workbench.js?v=8" defer></script>
 {% if public_ui %}<link rel="stylesheet" href="/assets/css/workspace.css?v=5">{% endif %}
 {% if public_ui %}
 <script nonce="{{ csp_nonce }}" src="/assets/js/saved-tools.js?v=3" defer></script>{% endif %}

@@ -1,0 +1,93 @@
+{% extends 'eduhelp_resource.html' %}
+{% block resource_crumb %}<a href="{{ url_for('eduhelp_study') }}">Study hub</a><span aria-hidden="true">/</span><span>{{ chapter.title }}</span>{% endblock %}
+{% block resource_body %}
+<header class="edu-resource-head edu-no-print">
+  <p>{{ chapter.board }} · {{ chapter.level }} Science · {{ chapter.subject }}</p><h1>{{ chapter.title }}</h1>
+  <nav class="edu-links" aria-label="Chapter sections">
+    <a href="#notes">Notes &amp; formulas</a><a href="#experiment">Guided lab</a><a href="#quiz">Quiz &amp; timed practice</a>
+    <a href="#flashcards">Flashcards</a><a href="#worksheet">Worksheet builder</a>
+  </nav>
+</header>
+<section id="notes" class="edu-resource-section edu-no-print">
+  <h2>Visual notes</h2>
+  <div class="edu-resource-grid">
+    {% for title, text in chapter.notes %}<article class="edu-resource-card"><h3>{{ title }}</h3><p lang="hi-Latn">{{ text }}</p></article>{% endfor %}
+  </div>
+  <div class="edu-resource-grid">
+    <figure class="edu-resource-card edu-diagram">
+      <figcaption>{{ chapter.diagram[0] }}</figcaption>
+      <pre role="img" aria-label="{{ chapter.diagram[2] }}">{{ chapter.diagram[1] }}</pre><p>{{ chapter.diagram[2] }}</p>
+    </figure>
+    <article class="edu-resource-card">
+      <h3>Solved example</h3><p lang="hi-Latn"><strong>{{ chapter.example[0] }}</strong></p><p lang="hi-Latn">{{ chapter.example[1] }}</p>
+    </article>
+  </div>
+</section>
+<section id="formula-sheet" class="edu-resource-section edu-print-sheet">
+  <div class="edu-section-heading"><div><p class="edu-category">{{ chapter.title }}</p><h2>Quick revision sheet</h2></div>
+    <button class="button button-light edu-no-print" type="button" data-edu-print="formula-sheet">Print revision sheet</button>
+  </div>
+  <dl class="edu-reference">{% for label, value in chapter.formulas %}<div><dt>{{ label }}</dt><dd>{{ value }}</dd></div>{% endfor %}</dl>
+  <p><a href="{{ chapter.source }}" target="_blank" rel="noopener noreferrer">Open the NCERT textbook chapter ↗</a></p>
+</section>
+<section id="experiment" class="edu-resource-section edu-no-print">
+  <h2>Guided lab</h2>
+  <div class="edu-resource-card edu-interactive">
+    <h3>{{ chapter.experiment.title }}</h3>
+    <a class="button button-light" href="{{ url_for('eduhelp_lab', slug=chapter.lab) }}" target="_blank" rel="noopener noreferrer">Open simulation ↗</a>
+    <ol>{% for step in chapter.experiment.steps %}<li>{{ step }}</li>{% endfor %}</ol>
+    <form data-edu-experiment>
+      <fieldset><legend>{{ chapter.experiment.prompt }}</legend>
+      {% for item in chapter.experiment.options %}<label class="edu-choice"><input type="radio" name="prediction" value="{{ loop.index0 }}" required> {{ item }}</label>{% endfor %}</fieldset>
+      <button class="button button-dark" type="submit">Check prediction</button>
+    </form>
+    <p data-edu-observation role="status"></p>
+  </div>
+</section>
+<section id="quiz" class="edu-resource-section edu-no-print">
+  <h2>Chapter quiz</h2>
+  <div class="edu-resource-card edu-interactive" data-edu-quiz>
+    <div class="edu-links">
+      <button type="button" class="button button-dark" data-quiz-start>Start quiz</button>
+      <button type="button" class="button button-light" data-quiz-start data-timed>Start 15-minute test</button>
+    </div>
+    <p data-quiz-time hidden role="timer" aria-label="Time remaining"></p>
+    <form data-quiz-form hidden></form>
+    <div data-quiz-result hidden tabindex="-1"></div>
+  </div>
+</section>
+<section id="flashcards" class="edu-resource-section edu-no-print">
+  <h2>Revision flashcards</h2>
+  <div class="edu-resource-card edu-interactive" data-edu-cards>
+    <p data-card-progress role="status"></p>
+    <h3 data-card-question></h3>
+    <p class="edu-card-answer" data-card-answer hidden></p>
+    <div class="edu-links">
+      <button type="button" class="button button-dark" data-card-reveal>Show answer</button>
+      <button type="button" class="button button-light" data-card-grade="again" hidden>Review again</button>
+      <button type="button" class="button button-light" data-card-grade="known" hidden>Knew it</button>
+      <button type="button" class="button button-light" data-card-restart hidden>Start another round</button>
+    </div>
+  </div>
+</section>
+<section id="worksheet" class="edu-resource-section edu-no-print">
+  <h2>Teacher worksheet builder</h2>
+  <form class="edu-controls" data-edu-worksheet>
+    <label><span id="worksheet-difficulty">Difficulty</span><select name="difficulty" aria-labelledby="worksheet-difficulty"><option>Mixed</option><option>Easy</option><option>Medium</option><option>Hard</option></select></label>
+    <label>Total marks<input name="marks" type="number" min="1" max="24" value="10" required></label>
+    <button type="submit" class="button button-dark">Build worksheet</button>
+  </form>
+  <p data-worksheet-status role="status"></p>
+  <div class="edu-links" data-worksheet-print hidden>
+    <button type="button" class="button button-light" data-edu-print="worksheet-paper">Print or save worksheet</button>
+    <button type="button" class="button button-light" data-edu-print="worksheet-key">Print or save answer key</button>
+  </div>
+</section>
+<section id="worksheet-paper" class="edu-resource-section edu-print-sheet" hidden></section>
+<section id="worksheet-key" class="edu-resource-section edu-print-sheet" hidden></section>
+<noscript><p>Enable JavaScript to run the quiz, flashcards and worksheet builder.</p></noscript>
+{% endblock %}
+{% block scripts %}
+<script nonce="{{ csp_nonce }}" type="application/json" id="edu-chapter-data">{{ chapter | tojson }}</script>
+<script nonce="{{ csp_nonce }}" src="/assets/js/eduhelp-study.js?v=1" defer></script>
+{% endblock %}

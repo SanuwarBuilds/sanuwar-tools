@@ -66,6 +66,24 @@ class StudyUtilitiesTests(unittest.TestCase):
         self.assertIn(b'/tools/url-shortener', self.client.get('/tools/qr-code-generator').data)
         self.assertIn(b'/tools/live-forex-crypto-converter', self.client.get('/tools/currency-converter').data)
 
+    def test_calendar_export_uses_exclusive_end_and_rejects_unknown_events(self):
+        response = self.client.get('/eduhelp/calendar/hslc-2027-theory.ics')
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(response.mimetype, 'text/calendar')
+        self.assertIn('attachment;', response.headers['Content-Disposition'])
+        self.assertIn(b'DTSTART;VALUE=DATE:20270225\r\nDTEND;VALUE=DATE:20270317\r\n', response.data)
+        self.assertEqual(self.client.get('/eduhelp/calendar/missing.ics').status_code, 404)
+
+    def test_study_hub_filters_chapters_and_shows_guided_resources(self):
+        page = self.client.get('/eduhelp/study?board=NCERT&level=Class+10&subject=Chemistry')
+        self.assertEqual(page.status_code, 200)
+        self.assertIn(b'/eduhelp/study/carbon-compounds#quiz', page.data)
+        self.assertNotIn(b'/eduhelp/study/electricity#quiz', page.data)
+        chapter = self.client.get('/eduhelp/study/carbon-compounds')
+        self.assertIn(b'/eduhelp/labs/carbon-compounds', chapter.data)
+        self.assertIn(b'data-edu-worksheet', chapter.data)
+        self.assertEqual(self.client.get('/eduhelp/study/missing').status_code, 404)
+
     def test_weather_picks_public_or_proxy_mode_without_exposing_key(self):
         page = '/tools/weather-air-quality'
         self.assertIn(b'data-weather-mode="unconfigured"', self.client.get(

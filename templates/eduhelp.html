@@ -1,6 +1,6 @@
 {% extends 'base.html' %}
 {% block bodyclass %}eduhelp-page{% endblock %}
-{% block page_styles %}<link rel="stylesheet" href="/assets/css/tools.css?v=7"><link rel="stylesheet" href="/assets/css/api-studio.css?v=2">{% endblock %}
+{% block page_styles %}<link rel="stylesheet" href="/assets/css/eduhelp-study.css?v=1"><link rel="stylesheet" href="/assets/css/tools.css?v=7"><link rel="stylesheet" href="/assets/css/api-studio.css?v=2">{% endblock %}
 {% block content %}
 <section class="wb-page wrap wb-eduhelp">
   <nav class="tp-crumb" aria-label="Breadcrumb"><a href="/">Home</a><span aria-hidden="true">/</span><span>Eduhelp</span></nav>
@@ -11,10 +11,10 @@
       <h1 id="eduhelp-title">Eduhelp</h1>
       <p class="wb-page-lede">Exam notices, results, admission dates, scholarships and career alerts — collected in one calm board. Every update links to the official source, so always verify the final details there.</p>
       <div class="wb-page-actions">
-        <a class="button button-dark" href="#updates">Browse {{ updates | length }} updates</a>
+        <a class="button button-dark" href="/eduhelp/study">Browse study chapters</a>
+        <a class="button button-light" href="#updates">Browse {{ updates | length }} updates</a>
         <a class="button button-light" href="/eduhelp/papers">Previous-year papers <span aria-hidden="true">→</span></a>
         {% if 'Lab' in categories %}<a class="button button-light" href="/eduhelp/labs">Lab library <span aria-hidden="true">→</span></a>{% endif %}
-        <a class="button button-light" href="/tools/study-timer-revision-planner">Study timer &amp; revision planner</a>
         <a class="button button-light" href="#eduhelp-notice">Read the notice <span aria-hidden="true">→</span></a>
       </div>
     </div>
@@ -23,6 +23,17 @@
       {% if updated %}<div class="wb-stat"><strong>{{ updated }}</strong><span>last updated</span></div>{% endif %}
     </aside>
   </header>
+
+  <section class="wb-section edu-resource-shelf" aria-labelledby="edu-resources-title">
+    <div class="wb-section-head"><h2 id="edu-resources-title">Study and exam resources</h2></div>
+    <ul>
+      <li><a href="/eduhelp/study">Class-wise study hub</a></li>
+      <li><a href="/eduhelp/papers">Papers &amp; timed practice</a></li>
+      <li><a href="/tools/study-timer-revision-planner">Daily revision planner</a></li>
+      <li><a href="/eduhelp/calendar">Exam &amp; admission calendar</a></li>
+      <li><a href="/eduhelp/scholarships">Scholarship finder</a></li>
+    </ul>
+  </section>
 
   {% if study_tools %}
   <section class="wb-section" aria-labelledby="study-tools-title">

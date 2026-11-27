@@ -1,0 +1,514 @@
+{
+  "electricity": {
+    "title": "Electricity",
+    "subject": "Physics",
+    "source": "https://ncert.nic.in/textbook/pdf/jesc111.pdf",
+    "lab": "electricity",
+    "summary": "Circuits, Ohm’s law, resistance, heating and electrical power.",
+    "notes": [
+      [
+        "Current aur voltage",
+        "Current batata hai ki har second kitna charge wire ke cross-section se guzarta hai. Voltage batata hai ki har coulomb ko move karne mein kitni energy transfer hoti hai. Ammeter ko series aur voltmeter ko component ke parallel jodo."
+      ],
+      [
+        "Ohm’s law aur resistance",
+        "Temperature constant ho toh ohmic resistor ke liye voltage badhane par current usi ratio mein badhta hai. V versus I graph ki slope R hai. Same material ki lambi wire ka R zyada aur moti wire ka R kam hota hai."
+      ],
+      [
+        "Series aur parallel",
+        "Series circuit mein har resistor se same current guzarta hai; voltage divide hota hai. Parallel branches ke across same voltage hota hai; total current branch currents ka sum hai."
+      ],
+      [
+        "Heating, power aur energy",
+        "Resistor electrical energy ko heat mein badal sakta hai. Power energy transfer per second hai. Bijli ke bill mein kWh energy ki unit hai; kW power ki unit hai."
+      ]
+    ],
+    "formulas": [
+      [
+        "Current",
+        "I = Q/t (A)"
+      ],
+      [
+        "Potential difference",
+        "V = W/Q (V)"
+      ],
+      [
+        "Ohm’s law",
+        "V = IR"
+      ],
+      [
+        "Wire resistance",
+        "R = ρL/A"
+      ],
+      [
+        "Series",
+        "R = R₁ + R₂ + …"
+      ],
+      [
+        "Parallel",
+        "1/R = 1/R₁ + 1/R₂ + …"
+      ],
+      [
+        "Heating",
+        "H = I²Rt (J)"
+      ],
+      [
+        "Power and energy",
+        "P = VI = I²R = V²/R; E = Pt; 1 kWh = 3.6 × 10⁶ J"
+      ]
+    ],
+    "diagram": [
+      "Ammeter in series, voltmeter in parallel",
+      "   ┌── A ──┬── [ R ] ──┬──┐\n   │       │           │  │\n   │       └──── V ────┘  │\n   └─────── + | | − ──────┘",
+      "A measures the loop current. V measures the voltage across R."
+    ],
+    "example": [
+      "6 V battery se 3 Ω aur 6 Ω ke parallel resistors jude hain. Total current kitna hai?",
+      "Har branch par 6 V hai. I₁ = 6/3 = 2 A aur I₂ = 6/6 = 1 A. Isliye I_total = 3 A aur R_effective = 6/3 = 2 Ω."
+    ],
+    "experiment": {
+      "title": "Compare voltage and current",
+      "steps": [
+        "Open the lab and choose Ohm’s Law & Resistors → Ohm’s Law.",
+        "At 12 V, note the live current. Keep resistance unchanged.",
+        "Before moving the voltage slider to 24 V, predict the new current. Compare the two meter readings."
+      ],
+      "prompt": "When voltage doubles and resistance stays fixed, what happens to current?",
+      "options": [
+        "It halves",
+        "It doubles",
+        "It stays the same"
+      ],
+      "correct": 1,
+      "explanation": "I = V/R, so doubling V at fixed R doubles I."
+    },
+    "questions": [
+      {
+        "topic": "Current and meters",
+        "difficulty": "Easy",
+        "marks": 1,
+        "prompt": "Which unit measures current?",
+        "options": [
+          "Ohm",
+          "Ampere",
+          "Joule",
+          "Watt"
+        ],
+        "correct": 1,
+        "explanation": "An ampere is one coulomb per second."
+      },
+      {
+        "topic": "Current and meters",
+        "difficulty": "Easy",
+        "marks": 1,
+        "prompt": "How is a voltmeter connected across a resistor?",
+        "options": [
+          "In parallel",
+          "In series",
+          "In place of the battery",
+          "At only one terminal"
+        ],
+        "correct": 0,
+        "explanation": "It measures potential difference between the resistor’s two terminals."
+      },
+      {
+        "topic": "Ohm’s law",
+        "difficulty": "Easy",
+        "marks": 1,
+        "prompt": "A 4 Ω resistor carries 2 A. What is the voltage?",
+        "options": [
+          "2 V",
+          "4 V",
+          "6 V",
+          "8 V"
+        ],
+        "correct": 3,
+        "explanation": "V = IR = 2 × 4 = 8 V."
+      },
+      {
+        "topic": "Resistance",
+        "difficulty": "Easy",
+        "marks": 1,
+        "prompt": "Doubling a wire’s length at the same area and temperature has what effect on resistance?",
+        "options": [
+          "Half",
+          "No change",
+          "Double",
+          "Four times"
+        ],
+        "correct": 2,
+        "explanation": "R = ρL/A, so resistance is proportional to length."
+      },
+      {
+        "topic": "Series and parallel",
+        "difficulty": "Medium",
+        "marks": 2,
+        "prompt": "Find the equivalent resistance of 3 Ω and 9 Ω in series.",
+        "options": [
+          "2.25 Ω",
+          "6 Ω",
+          "12 Ω",
+          "27 Ω"
+        ],
+        "correct": 2,
+        "explanation": "In series, add the resistances: 3 + 9 = 12 Ω."
+      },
+      {
+        "topic": "Series and parallel",
+        "difficulty": "Medium",
+        "marks": 2,
+        "prompt": "Find the equivalent resistance of 6 Ω and 3 Ω in parallel.",
+        "options": [
+          "2 Ω",
+          "3 Ω",
+          "4.5 Ω",
+          "9 Ω"
+        ],
+        "correct": 0,
+        "explanation": "1/R = 1/6 + 1/3 = 1/2, giving R = 2 Ω."
+      },
+      {
+        "topic": "Energy and power",
+        "difficulty": "Medium",
+        "marks": 2,
+        "prompt": "A 100 W fan runs for 5 hours. How much energy does it use?",
+        "options": [
+          "0.05 kWh",
+          "0.5 kWh",
+          "5 kWh",
+          "500 kWh"
+        ],
+        "correct": 1,
+        "explanation": "E = Pt = 0.10 kW × 5 h = 0.50 kWh."
+      },
+      {
+        "topic": "Energy and power",
+        "difficulty": "Medium",
+        "marks": 2,
+        "prompt": "A 3 Ω resistor carries 2 A for 10 s. Calculate its heat energy.",
+        "options": [
+          "12 J",
+          "30 J",
+          "60 J",
+          "120 J"
+        ],
+        "correct": 3,
+        "explanation": "H = I²Rt = 4 × 3 × 10 = 120 J."
+      },
+      {
+        "topic": "Resistance",
+        "difficulty": "Hard",
+        "marks": 3,
+        "prompt": "A wire is stretched to twice its original length, with volume and resistivity unchanged. What is the new resistance?",
+        "options": [
+          "R/2",
+          "R",
+          "2R",
+          "4R"
+        ],
+        "correct": 3,
+        "explanation": "Its cross-sectional area halves as length doubles. R = ρL/A therefore becomes 4R."
+      },
+      {
+        "topic": "Ohm’s law",
+        "difficulty": "Hard",
+        "marks": 3,
+        "prompt": "A linear V versus I graph rises by 8 V when current increases by 2 A. What does its slope represent?",
+        "options": [
+          "2 Ω",
+          "4 Ω",
+          "8 Ω",
+          "16 Ω"
+        ],
+        "correct": 1,
+        "explanation": "The slope is ΔV/ΔI = 8/2 = 4 Ω."
+      },
+      {
+        "topic": "Series and parallel",
+        "difficulty": "Hard",
+        "marks": 3,
+        "prompt": "A 12 V supply feeds 3 Ω and 6 Ω in parallel. What is the total current?",
+        "options": [
+          "2 A",
+          "3 A",
+          "4 A",
+          "6 A"
+        ],
+        "correct": 3,
+        "explanation": "The two branch currents are 12/3 = 4 A and 12/6 = 2 A; they add to 6 A."
+      },
+      {
+        "topic": "Energy and power",
+        "difficulty": "Hard",
+        "marks": 3,
+        "prompt": "At a fixed voltage, a 4 Ω resistor is replaced by an 8 Ω resistor. How does power change?",
+        "options": [
+          "Halves",
+          "Doubles",
+          "Quadruples",
+          "Stays the same"
+        ],
+        "correct": 0,
+        "explanation": "P = V²/R, so doubling R at fixed V halves P."
+      }
+    ],
+    "board": "NCERT",
+    "level": "Class 10"
+  },
+  "carbon-compounds": {
+    "title": "Carbon and its Compounds",
+    "subject": "Chemistry",
+    "source": "https://ncert.nic.in/textbook/pdf/jesc104.pdf",
+    "lab": "carbon-compounds",
+    "summary": "Covalent bonding, hydrocarbons, functional groups, reactions and soap.",
+    "notes": [
+      [
+        "Tetravalency aur catenation",
+        "Carbon ke outer shell mein chaar electrons hain. Carbon electron pairs share karke covalent bonds banata hai. Carbon ka apne atoms ke saath chain, branch ya ring banane ka gun catenation hai."
+      ],
+      [
+        "Hydrocarbons aur functional groups",
+        "Sirf carbon aur hydrogen wale molecules hydrocarbons hain. Alkane mein C–C single bonds, alkene mein C=C aur alkyne mein C≡C hota hai. –OH alcohol ka aur –COOH carboxylic acid ka functional group hai."
+      ],
+      [
+        "Homologous series aur reactions",
+        "Ek series ke consecutive members mein –CH₂– ka antar hota hai. Complete combustion mein CO₂ aur water bante hain. Hydrogen add karne se alkene saturated ho sakta hai. Methane chlorination substitution ka example hai."
+      ],
+      [
+        "Ethanol, ethanoic acid aur soap",
+        "Ethanol aur ethanoic acid ester bana sakte hain. Soap ki tail oil mein aur ionic head water ki taraf rehti hai. Micelles oil ko water ke saath rinse karne mein help karte hain. Hard water ke calcium aur magnesium ions soap ke saath scum bana sakte hain."
+      ]
+    ],
+    "formulas": [
+      [
+        "Open-chain alkanes",
+        "CₙH₂ₙ₊₂"
+      ],
+      [
+        "One C=C bond",
+        "CₙH₂ₙ"
+      ],
+      [
+        "One C≡C bond",
+        "CₙH₂ₙ₋₂"
+      ],
+      [
+        "Homologous series step",
+        "–CH₂–, 14 u"
+      ],
+      [
+        "Ethanol",
+        "CH₃CH₂OH"
+      ],
+      [
+        "Ethanoic acid",
+        "CH₃COOH"
+      ],
+      [
+        "Methane combustion",
+        "CH₄ + 2O₂ → CO₂ + 2H₂O"
+      ],
+      [
+        "Esterification",
+        "CH₃COOH + C₂H₅OH ⇌ CH₃COOC₂H₅ + H₂O"
+      ]
+    ],
+    "diagram": [
+      "Methane and ethene",
+      "    H        H   H\n    |         \\ /\nH — C — H      C=C\n    |         / \\\n    H        H   H",
+      "Methane has four C–H single bonds. Ethene has a C=C double bond and four C–H single bonds."
+    ],
+    "example": [
+      "C₃H₆ ek open-chain hydrocarbon hai jisme sirf ek multiple bond hai. Iska family kya hai?",
+      "CₙH₂ₙ mein n = 3 par C₃H₆ aata hai. Ek C=C bond wala open-chain compound alkene hai. Is example ka naam propene hai."
+    ],
+    "experiment": {
+      "title": "Compare carbon bonds",
+      "steps": [
+        "In the lab, open the covalent bonding simulation and select Methane (CH₄). Count the single bonds.",
+        "Choose Ethene (C₂H₄) and inspect the C–C bond. Count a double bond twice when checking the valency of carbon.",
+        "Switch to Ethyne (C₂H₂). Compare its triple bond with the double bond you saw in ethene."
+      ],
+      "prompt": "Which molecule contains a carbon–carbon double bond?",
+      "options": [
+        "Methane",
+        "Ethyne",
+        "Ethene"
+      ],
+      "correct": 2,
+      "explanation": "Ethene has C=C, ethyne has C≡C, and methane has only one carbon atom."
+    },
+    "questions": [
+      {
+        "topic": "Bonding",
+        "difficulty": "Easy",
+        "marks": 1,
+        "prompt": "What is the usual valency of carbon in these compounds?",
+        "options": [
+          "Two",
+          "Three",
+          "Four",
+          "Six"
+        ],
+        "correct": 2,
+        "explanation": "Carbon usually forms four covalent bonds when single bonds count once, double bonds twice and triple bonds three times."
+      },
+      {
+        "topic": "Hydrocarbons",
+        "difficulty": "Easy",
+        "marks": 1,
+        "prompt": "Which molecule contains a C=C bond?",
+        "options": [
+          "Methane",
+          "Ethane",
+          "Ethene",
+          "Ethyne"
+        ],
+        "correct": 2,
+        "explanation": "Ethene is an alkene and has a carbon–carbon double bond."
+      },
+      {
+        "topic": "Functional groups",
+        "difficulty": "Easy",
+        "marks": 1,
+        "prompt": "Which group occurs in ethanol?",
+        "options": [
+          "–OH",
+          "–COOH",
+          "–CHO",
+          "–Cl"
+        ],
+        "correct": 0,
+        "explanation": "Ethanol is an alcohol, with a hydroxyl (–OH) group."
+      },
+      {
+        "topic": "Homologous series",
+        "difficulty": "Easy",
+        "marks": 1,
+        "prompt": "What group separates consecutive members of the same homologous series?",
+        "options": [
+          "H₂",
+          "CH₂",
+          "CH₃",
+          "CO₂"
+        ],
+        "correct": 1,
+        "explanation": "Each successive member adds one carbon and two hydrogen atoms."
+      },
+      {
+        "topic": "Hydrocarbons",
+        "difficulty": "Medium",
+        "marks": 2,
+        "prompt": "What is the molecular formula of open-chain butane?",
+        "options": [
+          "C₄H₆",
+          "C₄H₈",
+          "C₄H₁₀",
+          "C₄H₁₂"
+        ],
+        "correct": 2,
+        "explanation": "For an alkane, CₙH₂ₙ₊₂ gives C₄H₁₀."
+      },
+      {
+        "topic": "Reactions",
+        "difficulty": "Medium",
+        "marks": 2,
+        "prompt": "Which products form on complete combustion of methane?",
+        "options": [
+          "CO and H₂",
+          "CO₂ and H₂O",
+          "C and H₂O",
+          "CO₂ and H₂"
+        ],
+        "correct": 1,
+        "explanation": "With enough oxygen, the carbon becomes CO₂ and the hydrogen becomes H₂O."
+      },
+      {
+        "topic": "Reactions",
+        "difficulty": "Medium",
+        "marks": 2,
+        "prompt": "Hydrogen reacts with ethene over a suitable catalyst. Which product forms?",
+        "options": [
+          "Ethane",
+          "Ethyne",
+          "Ethanol",
+          "Ethanoic acid"
+        ],
+        "correct": 0,
+        "explanation": "Adding H₂ across the double bond forms the saturated hydrocarbon ethane."
+      },
+      {
+        "topic": "Soap and detergents",
+        "difficulty": "Medium",
+        "marks": 2,
+        "prompt": "Which part of a soap ion points inward toward grease in a micelle?",
+        "options": [
+          "Water-loving head",
+          "Hydrocarbon tail",
+          "Both ends equally",
+          "Neither end"
+        ],
+        "correct": 1,
+        "explanation": "The nonpolar tail prefers grease; the ionic head faces the surrounding water."
+      },
+      {
+        "topic": "Reactions",
+        "difficulty": "Hard",
+        "marks": 3,
+        "prompt": "What total coefficient of O₂ balances C₂H₄ + O₂ → CO₂ + H₂O?",
+        "options": [
+          "1",
+          "2",
+          "3",
+          "4"
+        ],
+        "correct": 2,
+        "explanation": "Balance C and H first: 2CO₂ + 2H₂O needs six oxygen atoms, or 3O₂."
+      },
+      {
+        "topic": "Reactions",
+        "difficulty": "Hard",
+        "marks": 3,
+        "prompt": "Which pair can produce ethyl ethanoate by esterification?",
+        "options": [
+          "Ethene and water",
+          "Ethane and oxygen",
+          "Ethanol and ethanoic acid",
+          "Methane and chlorine"
+        ],
+        "correct": 2,
+        "explanation": "The alcohol supplies the ethyl group and the carboxylic acid supplies ethanoate."
+      },
+      {
+        "topic": "Soap and detergents",
+        "difficulty": "Hard",
+        "marks": 3,
+        "prompt": "Why can soap lather poorly in water rich in Ca²⁺ and Mg²⁺?",
+        "options": [
+          "It evaporates",
+          "The ions form insoluble compounds with soap",
+          "The water loses oxygen",
+          "The ions turn soap into ethanol"
+        ],
+        "correct": 1,
+        "explanation": "Calcium and magnesium form insoluble scum, leaving less soap available to lather."
+      },
+      {
+        "topic": "Bonding",
+        "difficulty": "Hard",
+        "marks": 3,
+        "prompt": "How many shared electron pairs are there in one ethene molecule?",
+        "options": [
+          "4",
+          "5",
+          "6",
+          "8"
+        ],
+        "correct": 2,
+        "explanation": "Four C–H single bonds provide four pairs. The C=C double bond adds two more."
+      }
+    ],
+    "board": "NCERT",
+    "level": "Class 10"
+  }
+}

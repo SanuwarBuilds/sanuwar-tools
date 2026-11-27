@@ -1,0 +1,35 @@
+{% extends 'eduhelp_resource.html' %}
+{% block resource_crumb %}<span>Study hub</span>{% endblock %}
+{% block resource_body %}
+<header class="edu-resource-head">
+  <p>Class 10 Science</p><h1>Study hub</h1>
+  <div class="edu-links">
+    <a href="/eduhelp/papers?exam=hslc">HSLC past papers ↗</a>
+    <a href="/eduhelp/papers?exam=hs">HS Final past papers ↗</a>
+    <a href="/tools/study-timer-revision-planner">Revision planner ↗</a>
+  </div>
+</header>
+<form class="edu-controls" method="get" aria-label="Filter study chapters">
+  {% for key, label in [('board', 'Curriculum'), ('level', 'Class'), ('subject', 'Subject')] %}
+  <label><span id="study-{{ key }}">{{ label }}</span><select name="{{ key }}" aria-labelledby="study-{{ key }}">
+    <option value="">Any {{ label | lower }}</option>{% for item in options[key] %}<option{% if item == filters[key] %} selected{% endif %}>{{ item }}</option>{% endfor %}
+  </select></label>
+  {% endfor %}
+  <button class="button button-dark">Find chapters</button>
+</form>
+<div class="edu-resource-grid">
+  {% for slug, chapter in chapters.items() %}
+  <article class="edu-resource-card">
+    <p class="edu-category">{{ chapter.subject }}</p>
+    <h2><a href="{{ url_for('eduhelp_chapter', slug=slug) }}">{{ chapter.title }}</a></h2>
+    <p>{{ chapter.summary }}</p>
+    <div class="edu-links">
+      <a href="{{ url_for('eduhelp_chapter', slug=slug) }}#notes">Notes</a>
+      <a href="{{ url_for('eduhelp_chapter', slug=slug) }}#quiz">Quiz</a>
+      <a href="{{ url_for('eduhelp_chapter', slug=slug) }}#experiment">Guided lab</a>
+      <a href="{{ url_for('eduhelp_chapter', slug=slug) }}#flashcards">Flashcards</a>
+    </div>
+  </article>
+  {% else %}<p>No chapters match these filters.</p>{% endfor %}
+</div>
+{% endblock %}

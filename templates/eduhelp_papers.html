@@ -1,6 +1,6 @@
 {% extends 'base.html' %}
 {% block bodyclass %}eduhelp-page papers-page{% endblock %}
-{% block page_styles %}<link rel="stylesheet" href="/assets/css/eduhelp-papers.css?v=1">{% endblock %}
+{% block page_styles %}<link rel="stylesheet" href="/assets/css/eduhelp-papers.css?v=2">{% endblock %}
 {% block content %}
 <section class="wb-page wrap wb-eduhelp papers">
   <nav class="tp-crumb" aria-label="Breadcrumb"><a href="/">Home</a><span aria-hidden="true">/</span><a href="/eduhelp">Eduhelp</a><span aria-hidden="true">/</span><span>Previous-year papers</span></nav>
@@ -40,6 +40,25 @@
     </div>
   </form>
 
+  <details class="papers-practice" data-paper-practice>
+    <summary>Timed paper practice</summary>
+    <p>Open any paper below in a separate tab. Set the time printed on the paper, then start the timer here. Use the linked worked solution where available to check your answers.</p>
+    <div class="papers-filters">
+      <label>Minutes<input type="number" name="minutes" value="180" min="1" max="300" required></label>
+      <span role="timer" aria-label="Paper practice time"></span>
+      <button class="button button-dark" type="button" data-paper-toggle>Start</button>
+      <button class="button button-light" type="button" data-paper-reset>Reset</button>
+    </div>
+    <p data-paper-status role="status"></p>
+    <form class="papers-filters" data-paper-score>
+      <label>Marks earned<input type="number" name="earned" min="0" step="0.5" required></label>
+      <label>Total marks<input type="number" name="total" min="1" step="0.5" required></label>
+      <button type="submit" class="button button-light">Calculate score</button>
+    </form>
+    <p data-paper-result role="status"></p>
+    <noscript><p>Enable JavaScript to use the timer and score calculator.</p></noscript>
+  </details>
+
   <section class="papers-results" aria-labelledby="papers-results-title">
     <div class="papers-results-head">
       <h2 id="papers-results-title">{{ exams[exam] }}</h2>
@@ -69,8 +88,14 @@
               <h3>{{ paper.subject }}</h3>
               <p>{% if paper.kind %}{{ paper.kind }} · {% endif %}{% if paper.streams %}{{ paper.streams | join(' / ') }} · {% endif %}{{ paper.source }}</p>
             </div>
+            <div class="papers-paper-actions">
             <a class="papers-open" href="{{ paper.url }}" target="_blank" rel="noopener noreferrer"
               aria-label="Open {{ paper.subject }}, {{ number }}, on {{ paper.source }}">{% if paper.format == 'web' %}View paper{% else %}Open PDF{% endif %} <span aria-hidden="true">↗</span></a>
+            {% if paper.solution %}
+            <a class="papers-open" href="{{ paper.solution }}" target="_blank" rel="noopener noreferrer"
+              aria-label="Worked solution for {{ paper.subject }}, {{ number }}">Solution <span aria-hidden="true">↗</span></a>
+            {% endif %}
+            </div>
           </li>
           {% endfor %}
         </ul>
@@ -85,3 +110,5 @@
   </section>
 </section>
 {% endblock %}
+
+{% block scripts %}<script nonce="{{ csp_nonce }}" src="/assets/js/eduhelp-papers.js?v=1" defer></script>{% endblock %}

@@ -46,6 +46,7 @@
                   </h5>
                   {% if lab.summary %}<p>{{ lab.summary }}</p>{% endif %}
                 </div>
+                {% if lab.link in guides %}<a class="edu-open" href="{{ guides[lab.link] }}">Guided activity <span aria-hidden="true">→</span></a>{% endif %}
                 {% if lab.link %}<a class="edu-open" href="{{ lab.link | public_url }}">Open lab <span aria-hidden="true">→</span></a>{% endif %}
               </li>
               {% endfor %}

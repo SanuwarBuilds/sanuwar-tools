@@ -1,0 +1,177 @@
+{
+  "events": [
+    {
+      "id": "post-matric-disability-deadline-2026",
+      "type": "Application deadline",
+      "title": "NSP: Post-matric disability scholarship application deadline",
+      "start": "2026-11-30",
+      "source": "https://scholarships.gov.in/All-Scholarships",
+      "checked": "2026-11-27"
+    },
+    {
+      "id": "hslc-2027-theory",
+      "type": "Exam",
+      "title": "Assam HSLC 2027 theory examination window",
+      "start": "2027-02-25",
+      "end": "2027-03-16",
+      "source": "https://site.sebaonline.org/photo/upload/2026/1795085848_7256.pdf",
+      "checked": "2026-11-27"
+    },
+    {
+      "id": "hs-final-2027-theory",
+      "type": "Exam",
+      "title": "Assam HS Final 2027 theory examination window",
+      "start": "2027-03-12",
+      "end": "2027-04-05",
+      "source": "https://ahsec.assam.gov.in/wp-content/uploads/2026/11/Programme-of-HS-Final-Examination-2027_final.pdf",
+      "checked": "2026-11-27"
+    },
+    {
+      "id": "hslc-2027-maths",
+      "type": "Exam",
+      "title": "HSLC 2027 General Mathematics",
+      "start": "2027-03-16",
+      "source": "https://site.sebaonline.org/photo/upload/2026/1795085848_7256.pdf",
+      "checked": "2026-11-27"
+    },
+    {
+      "id": "hs-final-2027-english",
+      "type": "Exam",
+      "title": "HS Final 2027 English",
+      "start": "2027-03-12",
+      "source": "https://ahsec.assam.gov.in/wp-content/uploads/2026/11/Programme-of-HS-Final-Examination-2027_final.pdf",
+      "checked": "2026-11-27"
+    },
+    {
+      "id": "hs-final-2027-practical-30",
+      "type": "Exam",
+      "title": "HS Final 2027 practical window (30-mark subjects)",
+      "start": "2027-01-27",
+      "source": "https://ahsec.assam.gov.in/wp-content/uploads/2026/11/Programme-of-HS-Final-Examination-2027_final.pdf",
+      "checked": "2026-11-27",
+      "end": "2027-01-30"
+    },
+    {
+      "id": "darpan-2026-initial-admissions",
+      "type": "Admission",
+      "title": "DARPAN 2026 initial HS First-Year application window",
+      "start": "2026-04-12",
+      "source": "https://www.darpan.ahseconline.in/",
+      "checked": "2026-11-27",
+      "end": "2026-04-22"
+    },
+    {
+      "id": "hslc-2026-result",
+      "type": "Result",
+      "title": "HSLC 2026 results published",
+      "start": "2026-04-10",
+      "source": "https://site.sebaonline.org/results",
+      "checked": "2026-11-27"
+    }
+  ],
+  "schemes": [
+    {
+      "name": "National Means-cum-Merit Scholarship",
+      "regions": [
+        "Assam",
+        "Other Indian states"
+      ],
+      "levels": [
+        "Class 8",
+        "Class 9",
+        "Class 10",
+        "Class 11",
+        "Class 12"
+      ],
+      "eligibility": "The state selection test is for eligible Class 8 students in government, government-aided or local-body schools. Awards start in Class 9, with renewal subject to the scheme rules through Class 12.",
+      "documents": [
+        "School and marks records",
+        "Family income certificate",
+        "Category certificate if applicable",
+        "NSP registration details"
+      ],
+      "deadline": "2026-11-15",
+      "source": "https://www.education.gov.in/en/national-means-cum-merit-scholarship-scheme-nmmss",
+      "apply": "https://scholarships.gov.in/Students"
+    },
+    {
+      "name": "Pre-Matric Scholarship for Students with Disabilities",
+      "regions": [
+        "Assam",
+        "Other Indian states"
+      ],
+      "levels": [
+        "Class 9",
+        "Class 10"
+      ],
+      "eligibility": "Indian students in Classes 9 or 10 with benchmark disability of 40% or more. The department lists a family income limit of ₹2.5 lakh per year.",
+      "documents": [
+        "UDID card",
+        "Aadhaar",
+        "Income proof",
+        "School records"
+      ],
+      "deadline": "2026-10-31",
+      "source": "https://depwd.gov.in/en/scholership-schemes-pre-matric/",
+      "apply": "https://scholarships.gov.in/Students"
+    },
+    {
+      "name": "Post-Matric Scholarship for Students with Disabilities",
+      "regions": [
+        "Assam",
+        "Other Indian states"
+      ],
+      "levels": [
+        "Class 11",
+        "Class 12",
+        "Undergraduate"
+      ],
+      "eligibility": "The scheme starts at Class 11 and covers eligible Indian students with benchmark disability of 40% or more. Check the current income and course rules before applying.",
+      "documents": [
+        "UDID or disability certificate as required",
+        "Aadhaar",
+        "Income proof",
+        "Admission or enrolment records"
+      ],
+      "deadline": "2026-11-30",
+      "source": "https://depwd.gov.in/en/revision-of-the-existing-guidelines-of-the-scheme-of-scholarship-for-students-with-disabilities/",
+      "apply": "https://scholarships.gov.in/Students"
+    },
+    {
+      "name": "Assam HS First-Year Admission Fee Exemption",
+      "regions": [
+        "Assam"
+      ],
+      "levels": [
+        "Class 11"
+      ],
+      "eligibility": "Assam Secondary Education lists fee exemption for eligible Class 11 entrants to covered government or provincialised institutions. Confirm this year’s rules during admission.",
+      "documents": [
+        "Income certificate",
+        "HSLC records",
+        "Any additional documents requested by the institution"
+      ],
+      "source": "https://education.assam.gov.in/portlets/exemption-of-fees-for-students"
+    },
+    {
+      "name": "Mukhya Mantrir Nijut Moina Aasoni",
+      "regions": [
+        "Assam"
+      ],
+      "levels": [
+        "Class 11",
+        "Class 12"
+      ],
+      "eligibility": "Assam education support for eligible girl students. DARPAN publishes distinct procedures for HS first-year and second-year students.",
+      "documents": [
+        "Class 11 DARPAN account details or Class 12 HS registration number",
+        "Date of birth as recorded with the board",
+        "Other documents listed in the official student SOP"
+      ],
+      "source": "https://www.darpan.ahseconline.in/notification/SOP_FOR_STUDENTS-NIJUT_MOINA_AASONI.pdf",
+      "apply": "https://www.darpan.ahseconline.in/",
+      "apply_label": "Open DARPAN",
+      "deadline_note": "Check DARPAN for the current application window."
+    }
+  ]
+}

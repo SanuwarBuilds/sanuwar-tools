@@ -1,0 +1,39 @@
+{% extends 'eduhelp_resource.html' %}
+{% block resource_crumb %}<span>Exam &amp; admission calendar</span>{% endblock %}
+{% block resource_body %}
+<header class="edu-resource-head"><p>Assam education dates</p><h1>Exam &amp; admission calendar</h1>
+  <p>Save announced dates to your calendar. Check the official programme for subject dates and any revisions.</p>
+</header>
+<form class="edu-controls" method="get" aria-label="Filter calendar dates">
+  <label><span id="calendar-kind">Event type</span><select name="type" aria-labelledby="calendar-kind"><option value="">All events</option>
+  {% for item in kinds %}<option{% if kind == item %} selected{% endif %}>{{ item }}</option>{% endfor %}</select></label>
+  <label><span id="calendar-period">When</span><select name="period" aria-labelledby="calendar-period">{% for value, label in periods.items() %}<option value="{{ value }}"{% if value == period %} selected{% endif %}>{{ label }}</option>{% endfor %}</select></label>
+  <button class="button button-dark">Show dates</button>
+</form>
+{% for month, events in groups.items() %}
+<section class="edu-resource-section" aria-label="Events starting in {{ month }}">
+  <h2><time datetime="{{ month }}">{{ month }}</time></h2>
+  <ul class="edu-event-list">
+  {% for event in events %}
+    <li class="edu-resource-card">
+      <div><p class="edu-category">{{ event.type }}</p><h3>{{ event.title }}</h3>
+      <p><time datetime="{{ event.start }}">{{ event.start }}</time>{% if event.end %} to <time datetime="{{ event.end }}">{{ event.end }}</time>{% endif %}</p>
+      <small>Source checked {{ event.checked }}</small></div>
+      <div class="edu-links"><a href="{{ event.source }}" target="_blank" rel="noopener noreferrer">Official source ↗</a>
+      <a class="button button-light" href="{{ url_for('eduhelp_calendar_event', slug=event.id) }}">Add to calendar</a></div>
+    </li>
+  {% endfor %}
+  </ul>
+</section>
+{% else %}<p>No announced dates for these filters. Check the official portals below.</p>{% endfor %}
+<section class="edu-resource-section">
+  <h2>Admissions, admit cards and results</h2>
+  <p>Check the official portals for announcements and dates as they are published.</p>
+  <div class="edu-links">
+    <a href="https://site.sebaonline.org/notifications" target="_blank" rel="noopener noreferrer">HSLC notices and admit cards ↗</a>
+    <a href="https://site.sebaonline.org/results" target="_blank" rel="noopener noreferrer">HSLC results ↗</a>
+    <a href="https://ahsec.assam.gov.in/" target="_blank" rel="noopener noreferrer">HS notices and results ↗</a>
+    <a href="https://www.darpan.ahseconline.in/" target="_blank" rel="noopener noreferrer">DARPAN admissions ↗</a>
+  </div>
+</section>
+{% endblock %}

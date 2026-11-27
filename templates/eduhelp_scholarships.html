@@ -1,0 +1,24 @@
+{% extends 'eduhelp_resource.html' %}
+{% block resource_crumb %}<span>Scholarship finder</span>{% endblock %}
+{% block resource_body %}
+<header class="edu-resource-head"><p>School and higher education</p><h1>Scholarship finder</h1>
+  <p>Find schemes and fee support by location and class. Confirm eligibility, documents and deadlines on the official portal.</p>
+</header>
+<form class="edu-controls" method="get" aria-label="Filter scholarships">
+  <label><span id="scheme-region">State</span><select name="region" aria-labelledby="scheme-region">{% for item in regions %}<option{% if item == region %} selected{% endif %}>{{ item }}</option>{% endfor %}</select></label>
+  <label><span id="scheme-level">Class or level</span><select name="level" aria-labelledby="scheme-level"><option value="">All levels</option>
+    {% for item in levels %}<option{% if item == level %} selected{% endif %}>{{ item }}</option>{% endfor %}</select></label>
+  <button class="button button-dark">Find schemes</button>
+</form>
+<div class="edu-resource-grid">
+  {% for scheme in schemes %}<article class="edu-resource-card">
+    <p class="edu-category">{{ scheme.levels | join(' · ') }}</p><h2>{{ scheme.name }}</h2>
+    <p>{{ scheme.eligibility }}</p>
+    <h3>Documents to check</h3><ul>{% for doc in scheme.documents %}<li>{{ doc }}</li>{% endfor %}</ul>
+    <p>{% if scheme.deadline %}2026–27 student deadline <time datetime="{{ scheme.deadline }}">{{ scheme.deadline }}</time>{% else %}{{ scheme.deadline_note | default('Check the institution’s admission deadline.') }}{% endif %}</p>
+    <div class="edu-links"><a href="{{ scheme.source }}" target="_blank" rel="noopener noreferrer">Official details ↗</a>
+    {% if scheme.apply %}<a href="{{ scheme.apply }}" target="_blank" rel="noopener noreferrer">{{ scheme.apply_label | default('Apply via NSP') }} ↗</a>{% endif %}</div>
+  </article>{% else %}<p>No matching schemes in this list. Check NSP for more options.</p>{% endfor %}
+</div>
+<p><a href="https://scholarships.gov.in/All-Scholarships" target="_blank" rel="noopener noreferrer">Check live deadlines on the National Scholarship Portal ↗</a></p>
+{% endblock %}

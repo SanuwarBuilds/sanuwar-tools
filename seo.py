@@ -39,6 +39,15 @@ PAGES = {
     '/players': ('Online Video & Audio Players — MP4, HLS, DASH, MKV, MP3 | SanuwarTools',
                  'Play local videos, HLS and DASH streams, MKV files, MP3 playlists, subtitles and authorized cloud links in your browser. Files stay on your device.'),
 }
+EDUHELP_RESOURCES = {
+    '/eduhelp/study': ('Class-wise Study Hub', 'Find NCERT Class 10 chapter notes, quizzes, guided labs and flashcards.'),
+    '/eduhelp/study/electricity': ('Electricity Class 10 Notes & Quiz', 'Learn Ohm’s law, resistance and circuits with examples, a guided lab and practice questions.'),
+    '/eduhelp/study/carbon-compounds': ('Carbon and its Compounds Class 10 Notes & Quiz', 'Review carbon bonding, hydrocarbons and reactions with a guided lab, quiz and worksheets.'),
+    '/eduhelp/calendar': ('Assam Exam & Admission Calendar', 'Find announced HSLC and HS Final dates, official programmes and calendar downloads.'),
+    '/eduhelp/scholarships': ('Scholarship Finder', 'Filter scholarships and fee support by location and class.'),
+}
+PAGES.update({path: (name + ' | SanuwarTools', description)
+              for path, (name, description) in EDUHELP_RESOURCES.items()})
 PAGE_TYPES = {
     '/': 'WebPage',
     '/photo-tools': 'WebPage',
@@ -50,6 +59,9 @@ PAGE_TYPES = {
     '/eduhelp': 'CollectionPage',
     '/eduhelp/labs': 'CollectionPage',
     '/eduhelp/papers': 'CollectionPage',
+    '/eduhelp/study': 'CollectionPage',
+    '/eduhelp/calendar': 'CollectionPage',
+    '/eduhelp/scholarships': 'CollectionPage',
     '/players': 'CollectionPage',
 }
 BREADCRUMBS = {
@@ -292,6 +304,16 @@ def install(app, load_config, load_directory=None, load_tool_catalog=None, load_
                     {'@type': 'ListItem', 'position': 2, 'name': 'Directories', 'item': ORIGIN + '/directory'},
                     {'@type': 'ListItem', 'position': 3, 'name': crumb_name, 'item': canonical},
                 ]
+            elif path in EDUHELP_RESOURCES:
+                crumb_items = [
+                    {'@type': 'ListItem', 'position': 1, 'name': 'Home', 'item': ORIGIN + '/'},
+                    {'@type': 'ListItem', 'position': 2, 'name': 'Eduhelp', 'item': ORIGIN + '/eduhelp'},
+                ]
+                if path.startswith('/eduhelp/study/'):
+                    crumb_items.append({'@type': 'ListItem', 'position': 3, 'name': 'Study hub',
+                                        'item': ORIGIN + '/eduhelp/study'})
+                crumb_items.append({'@type': 'ListItem', 'position': len(crumb_items) + 1,
+                                    'name': EDUHELP_RESOURCES[path][0], 'item': canonical})
             else:
                 crumb_name = BREADCRUMBS.get(path, title.split(' | ')[0].split(' — ')[0])
                 crumb_items = [
@@ -399,7 +421,7 @@ def install(app, load_config, load_directory=None, load_tool_catalog=None, load_
             paths.append('/photo-tools')
         guide_dates = {'/guides/' + slug: guide.get('updated', '2026-11-15') for slug, guide in GUIDES.items()}
         paths.extend(guide_dates)
-        paths.extend(['/about', '/contact', '/privacy', '/directory', '/eduhelp', '/eduhelp/labs', '/eduhelp/papers', '/players'])
+        paths.extend(['/about', '/contact', '/privacy', '/directory', '/eduhelp', '/eduhelp/labs', '/eduhelp/papers', *EDUHELP_RESOURCES, '/players'])
         for category in directory_categories():
             slug = category.get('slug')
             if isinstance(slug, str) and re.fullmatch(r'[a-z0-9-]{1,80}', slug):

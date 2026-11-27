@@ -79,7 +79,9 @@ class SearchDiscoveryTests(unittest.TestCase):
                           'https://sanuwartools.online/photo-tools',
                           *(f'https://sanuwartools.online/guides/{slug}' for slug in GUIDES),
                           'https://sanuwartools.online/about','https://sanuwartools.online/contact','https://sanuwartools.online/privacy',
-                          'https://sanuwartools.online/directory','https://sanuwartools.online/eduhelp','https://sanuwartools.online/eduhelp/labs','https://sanuwartools.online/eduhelp/papers','https://sanuwartools.online/players','https://sanuwartools.online/directory/anime'])
+                          'https://sanuwartools.online/directory','https://sanuwartools.online/eduhelp','https://sanuwartools.online/eduhelp/labs','https://sanuwartools.online/eduhelp/papers',
+                          *(f'https://sanuwartools.online{path}' for path in seo.EDUHELP_RESOURCES),
+                          'https://sanuwartools.online/players','https://sanuwartools.online/directory/anime'])
         self.records[module.TOOLS_CONFIG_REL]['downloadPage']['enabled']=False
         self.assertNotIn(b'/downloads',self.client.get('/sitemap.xml').data)
         self.assertEqual(self.client.get('/downloads').status_code,404)
@@ -181,7 +183,7 @@ class SearchDiscoveryTests(unittest.TestCase):
         self.assertEqual(response.status_code,200)
         self.assertEqual(response.get_data(as_text=True),seo.INDEXNOW_KEY)
         sitemap=self.client.get('/sitemap.xml').data.decode()
-        self.assertEqual(sitemap.count('<lastmod>'+seo.SITE_UPDATED+'</lastmod>'),12)
+        self.assertEqual(sitemap.count('<lastmod>'+seo.SITE_UPDATED+'</lastmod>'),12 + len(seo.EDUHELP_RESOURCES))
 
     def test_directory_hub_and_category_pages_are_indexable(self):
         hub=self.client.get('/directory')

@@ -1,0 +1,9 @@
+{% extends 'base.html' %}
+{% block bodyclass %}eduhelp-page edu-resource-page{% endblock %}
+{% block page_styles %}<link rel="stylesheet" href="/assets/css/eduhelp-study.css?v=1">{% endblock %}
+{% block content %}
+<section class="wb-page wrap edu-resource" id="edu-resource">
+  <nav class="tp-crumb edu-no-print" aria-label="Breadcrumb"><a href="/">Home</a><span aria-hidden="true">/</span><a href="/eduhelp">Eduhelp</a><span aria-hidden="true">/</span>{% block resource_crumb %}{% endblock %}</nav>
+  {% block resource_body %}{% endblock %}
+</section>
+{% endblock %}
