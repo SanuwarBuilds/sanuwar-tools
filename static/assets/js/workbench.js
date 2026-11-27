@@ -218,10 +218,10 @@
       return [...directories, ...tools.filter(item => item.category === "Website")];
     }
     if (kind === "downloads") return tools.filter(item => ["Download", "Album", "File"].includes(item.category));
-    if (kind === "eduhelp") return tools.filter(item => item.category === "Eduhelp" || item.href.startsWith("/eduhelp/labs"));
+    if (kind === "eduhelp") return tools.filter(item => item.category === "Eduhelp" || item.href.startsWith("/eduhelp/"));
     if (kind === "players") return tools.filter(item => (item.keywords || "").includes("Players") || item.href === "/players");
     const pages = tools.filter(item => ["Page", "Admin", "Widget"].includes(item.category));
-    return pages.filter(item => !["/", "/tools", "/downloads", "/directory", "/eduhelp", "/eduhelp/labs"].includes(item.href));
+    return pages.filter(item => !["/", "/tools", "/downloads", "/directory", "/eduhelp", "/eduhelp/labs", "/eduhelp/papers"].includes(item.href));
   };
   navMenus.forEach(menu => {
     const toggle = menu.querySelector(".wb-nav-toggle");

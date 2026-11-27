@@ -32,6 +32,8 @@ PAGES = {
                    'Browse the published directories of external services and tools.'),
     '/eduhelp': ('Eduhelp — Exam, Result, Admission & Scholarship Updates | SanuwarTools',
                  'Follow education updates in one place: exam notices, board and university results, admission dates, scholarships and career alerts with links to official sources.'),
+    '/eduhelp/papers': ('Assam HSLC & HS Previous-Year Question Papers 2015–2026 | SanuwarTools',
+                        'Browse Assam HSLC Class 10 and HS Final Class 12 question papers from 2015 to 2026. Filter by year, subject and stream.'),
     '/eduhelp/labs': ('Interactive 3D Science Labs — Class 10 Physics & Chemistry | SanuwarTools',
                       'Explore interactive 3D science labs arranged by class, subject and chapter, including Class 10 electricity and carbon compounds experiments.'),
     '/players': ('Online Video & Audio Players — MP4, HLS, DASH, MKV, MP3 | SanuwarTools',
@@ -47,6 +49,7 @@ PAGE_TYPES = {
     '/directory': 'CollectionPage',
     '/eduhelp': 'CollectionPage',
     '/eduhelp/labs': 'CollectionPage',
+    '/eduhelp/papers': 'CollectionPage',
     '/players': 'CollectionPage',
 }
 BREADCRUMBS = {
@@ -58,6 +61,7 @@ BREADCRUMBS = {
     '/directory': 'Directories',
     '/eduhelp': 'Eduhelp',
     '/eduhelp/labs': 'Lab library',
+    '/eduhelp/papers': 'Previous-year papers',
     '/players': 'Players',
 }
 PHOTO_FAQS = [
@@ -395,7 +399,7 @@ def install(app, load_config, load_directory=None, load_tool_catalog=None, load_
             paths.append('/photo-tools')
         guide_dates = {'/guides/' + slug: guide.get('updated', '2026-11-15') for slug, guide in GUIDES.items()}
         paths.extend(guide_dates)
-        paths.extend(['/about', '/contact', '/privacy', '/directory', '/eduhelp', '/eduhelp/labs', '/players'])
+        paths.extend(['/about', '/contact', '/privacy', '/directory', '/eduhelp', '/eduhelp/labs', '/eduhelp/papers', '/players'])
         for category in directory_categories():
             slug = category.get('slug')
             if isinstance(slug, str) and re.fullmatch(r'[a-z0-9-]{1,80}', slug):

@@ -369,6 +369,48 @@ def eduhelp():
                            notice=data.get('notice', ''), updated=data.get('updated', ''))
 
 
+@app.get('/eduhelp/papers')
+def eduhelp_papers():
+    exams = {'hslc': 'HSLC · Class 10', 'hs': 'HS Final · Class 12'}
+    exam = request.args.get('exam', 'hslc')
+    if exam not in exams:
+        exam = 'hslc'
+    years = list(range(2026, 2014, -1))
+    year = request.args.get('year', type=int)
+    if year not in years:
+        year = None
+    streams = ('Arts', 'Science', 'Commerce', 'Common', 'Other subjects') if exam == 'hs' else ()
+    stream = request.args.get('stream', '')
+    if stream not in streams:
+        stream = ''
+    query = request.args.get('q', '').strip()[:100]
+    terms = ['math' if word == 'maths' else word for word in query.casefold().split()]
+    with open(os.path.join(BASE_DIR, 'data', 'eduhelp-papers.json'), encoding='utf-8') as archive:
+        catalog = json.load(archive)
+    exam_papers = [paper for paper in catalog if paper['exam'] == exam]
+    subjects = sorted({paper['subject'] for paper in exam_papers}, key=natural_key)
+    subject = request.args.get('subject', '')
+    if subject not in subjects:
+        subject = ''
+
+    grouped = {number: [] for number in ([year] if year else years)}
+    for paper in exam_papers:
+        if paper['year'] not in grouped or (subject and subject != paper['subject']):
+            continue
+        categories = paper.get('streams') or ['Other subjects']
+        if stream and stream not in categories and not (stream in streams[:3] and 'Common' in categories):
+            continue
+        searchable = f"{paper['subject']} {paper['year']} {paper.get('kind', 'Board exam')}".casefold()
+        if all(word in searchable for word in terms):
+            grouped[paper['year']].append(paper)
+
+    totals = {key: sum(paper['exam'] == key for paper in catalog) for key in exams}
+    return render_template('eduhelp_papers.html', exam=exam, exams=exams, years=years, year=year,
+                           streams=streams, stream=stream, subjects=subjects, subject=subject,
+                           query=query, grouped=grouped, totals=totals,
+                           matches=sum(map(len, grouped.values())))
+
+
 WEATHER_ENDPOINTS = {
     'places': 'https://customer-geocoding-api.open-meteo.com/v1/search',
     'weather': 'https://customer-api.open-meteo.com/v1/forecast',

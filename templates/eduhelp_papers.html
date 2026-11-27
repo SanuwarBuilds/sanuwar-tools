@@ -1,0 +1,87 @@
+{% extends 'base.html' %}
+{% block bodyclass %}eduhelp-page papers-page{% endblock %}
+{% block page_styles %}<link rel="stylesheet" href="/assets/css/eduhelp-papers.css?v=1">{% endblock %}
+{% block content %}
+<section class="wb-page wrap wb-eduhelp papers">
+  <nav class="tp-crumb" aria-label="Breadcrumb"><a href="/">Home</a><span aria-hidden="true">/</span><a href="/eduhelp">Eduhelp</a><span aria-hidden="true">/</span><span>Previous-year papers</span></nav>
+  <header class="papers-head">
+    <div>
+      <p class="papers-board">Assam board exams</p>
+      <h1>Previous-year papers</h1>
+      <p>Find Assam HSLC and HS Final question papers from 2015 to 2026 by year, subject or stream.</p>
+    </div>
+  </header>
+
+  <nav class="papers-exams" aria-label="Choose examination">
+    {% for value, label in exams.items() %}
+    <a href="{{ url_for('eduhelp_papers', exam=value, year=year) }}"{% if exam == value %} aria-current="page"{% endif %}>
+      <strong>{{ label }}</strong><span>{{ totals[value] }} papers</span>
+    </a>
+    {% endfor %}
+  </nav>
+
+  <form class="papers-filters" method="get" action="{{ url_for('eduhelp_papers') }}" role="search" aria-label="Find question papers">
+    <input type="hidden" name="exam" value="{{ exam }}">
+    <div class="papers-filter"><label for="papers-query">Search papers</label><input id="papers-query" name="q" type="search" value="{{ query }}" maxlength="100" placeholder="Search subject or year"></div>
+    <div class="papers-filter"><label for="papers-year">Year</label><select id="papers-year" name="year"><option value="">All years</option>
+      {% for option in years %}<option value="{{ option }}"{% if option == year %} selected{% endif %}>{{ option }}</option>{% endfor %}
+    </select></div>
+    {% if streams %}
+    <div class="papers-filter"><label for="papers-stream">Stream</label><select id="papers-stream" name="stream"><option value="">All streams</option>
+      {% for option in streams %}<option value="{{ option }}"{% if option == stream %} selected{% endif %}>{{ option }}</option>{% endfor %}
+    </select></div>
+    {% endif %}
+    <div class="papers-filter"><label for="papers-subject">Subject</label><select id="papers-subject" name="subject"><option value="">All subjects</option>
+      {% for option in subjects %}<option value="{{ option }}"{% if option == subject %} selected{% endif %}>{{ option }}</option>{% endfor %}
+    </select></div>
+    <div class="papers-actions">
+      <button class="button button-dark" type="submit">Find papers</button>
+      {% if query or year or stream or subject %}<a href="{{ url_for('eduhelp_papers', exam=exam) }}">Clear</a>{% endif %}
+    </div>
+  </form>
+
+  <section class="papers-results" aria-labelledby="papers-results-title">
+    <div class="papers-results-head">
+      <h2 id="papers-results-title">{{ exams[exam] }}</h2>
+      <span>{{ matches }} {{ 'paper' if matches == 1 else 'papers' }} · Opens at source</span>
+    </div>
+    {% if not matches and (query or stream or subject) %}
+      <div class="wb-empty"><h3>No papers match these filters.</h3><p>Try a different year, subject or search term.</p></div>
+    {% endif %}
+    {% for number, papers_in_year in grouped.items() %}
+      {% if papers_in_year or (not query and not stream and not subject) %}
+      <details class="papers-year"{% if year or query or stream or subject or (papers_in_year and loop.first) %} open{% endif %}>
+        <summary>
+          <strong>{{ number }}</strong>
+          <span>{% if papers_in_year %}{{ papers_in_year|length }} {{ 'paper' if papers_in_year|length == 1 else 'papers' }}{% elif number == 2021 %}Regular exam cancelled{% else %}No verified papers yet{% endif %}</span>
+        </summary>
+        {% if number == 2021 %}
+        <p class="papers-year-note">The 2021 regular exam was cancelled.{% if papers_in_year %} These papers are from the Special Exam.{% endif %}
+          {% if exam == 'hslc' %}<a href="https://www.sebaonline.info/admin/down_uploads/Result_Gazette_2021.pdf" target="_blank" rel="noopener noreferrer">Board gazette ↗</a>
+          {% else %}<a href="https://www.jagiroadcollege.co.in/upload/notice/1628094375.pdf" target="_blank" rel="noopener noreferrer">Council notice ↗</a>{% endif %}
+        </p>
+        {% endif %}
+        {% if papers_in_year %}
+        <ul class="papers-list">
+          {% for paper in papers_in_year %}
+          <li>
+            <div class="papers-paper">
+              <h3>{{ paper.subject }}</h3>
+              <p>{% if paper.kind %}{{ paper.kind }} · {% endif %}{% if paper.streams %}{{ paper.streams | join(' / ') }} · {% endif %}{{ paper.source }}</p>
+            </div>
+            <a class="papers-open" href="{{ paper.url }}" target="_blank" rel="noopener noreferrer"
+              aria-label="Open {{ paper.subject }}, {{ number }}, on {{ paper.source }}">{% if paper.format == 'web' %}View paper{% else %}Open PDF{% endif %} <span aria-hidden="true">↗</span></a>
+          </li>
+          {% endfor %}
+        </ul>
+        {% elif number != 2021 %}
+        <p class="papers-year-note">No verified papers are listed for this year yet.</p>
+        {% else %}
+        <p class="papers-year-note">No Special Exam papers have been verified for this exam yet.</p>
+        {% endif %}
+      </details>
+      {% endif %}
+    {% endfor %}
+  </section>
+</section>
+{% endblock %}

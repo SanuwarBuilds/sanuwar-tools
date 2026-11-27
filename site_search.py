@@ -8,6 +8,7 @@ PAGES = [
     ('All browser tools', '/tools', 'Calculators converters text image PDF tools'),
     ('Directories', '/directory', 'Movies anime music websites'),
     ('Eduhelp', '/eduhelp', 'Exams results admission notes study'),
+    ('Assam Previous-year Papers', '/eduhelp/papers', 'Previous year board question papers PYQ HSLC SEBA class 10 HS Final AHSEC ASSEB class 12 Arts Science Commerce 2015 2026'),
     ('Lab library', '/eduhelp/labs', 'Interactive science physics chemistry biology labs'),
     ('Players', '/players', 'Video audio player HLS DASH MKV MP3 subtitles cloud streaming'),
     ('How it works', '/#how-it-works', 'Help using the toolkit'),
