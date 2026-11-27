@@ -2,7 +2,7 @@
   "updated": "2026-11-26",
   "categories": ["Players", "Text Tools", "Developer Tools", "Encoding & Hashing", "Images & Media", "PDF & Documents", "Compression & Archives", "Networking", "Calculators", "Time & Date", "Security & Privacy", "Financial Calculators", "Health & Fitness", "Unit Converters", "Land & Property", "Sports & Games", "Lookups", "Education"],
   "tools": [
-    {"slug": "scan-to-pdf", "name": "Scan to PDF", "category": "PDF & Documents", "icon": "PDF", "bundle": "scan-workflow", "vendor": ["pdf-lib"], "popular": true, "description": "Capture or import document photos, crop and reorder pages, and save them as a PDF."},
+    {"slug": "scan-to-pdf", "name": "Scan to PDF", "category": "PDF & Documents", "icon": "PDF", "bundle": "scan-workflow", "vendor": ["pdf-lib", "pdfjs"], "popular": true, "description": "Smart Scan turns photos and scanned PDFs into clearer PDFs with automatic cropping, straightening and shadow correction."},
     {"slug": "searchable-pdf", "name": "Searchable PDF", "category": "PDF & Documents", "icon": "OCR", "bundle": "scan-workflow", "vendor": ["pdf-lib", "pdfjs", "tesseract"], "description": "Add a searchable text layer to scanned PDF pages with English, Hindi and Bangla OCR."},
     {"slug": "photo-background-remover", "name": "Photo Background Remover", "category": "Images & Media", "icon": "IMG", "bundle": "scan-workflow", "description": "Remove a portrait photo background or replace it with white, blue or a custom color."},
     {"slug": "dictionary-science-reference", "name": "Instant Dictionary & Science Reference", "category": "Education", "icon": "word", "bundle": "study-utilities", "description": "Look up English definitions and synonyms, and find common science formulas and SI units."},

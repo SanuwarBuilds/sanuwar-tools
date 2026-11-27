@@ -52,131 +52,261 @@
   }
 
   T.register("scan-to-pdf", (root) => {
+    const scan = T.smartScan;
     const status = live();
-    const files = input({ type: "file", accept: imageTypes, multiple: true });
+    const files = input({ type: "file", accept: imageTypes + ",.heic,.heif,.pdf,application/pdf", multiple: true });
     const camera = input({ type: "file", accept: "image/*", capture: "environment", hidden: true, "aria-label": "Camera image" });
     const takePhoto = button("Use camera", () => camera.click(), "ghost");
-    const paper = select([["Match image", "image"], ["A4", "a4"], ["US Letter", "letter"]], "a4");
+    const paper = select([["Match scan", "image"], ["A4", "a4"], ["US Letter", "letter"]], "a4");
+    const filter = select([["Enhanced color", "color"], ["Grayscale", "gray"], ["Black & white", "bw"], ["Original colors", "original"]], "color");
     const canvas = canvasFor(1, 1);
-    canvas.setAttribute("aria-label", "Selected page and crop preview");
+    canvas.setAttribute("aria-label", "Selected page preview");
+    const svgNS = "http://www.w3.org/2000/svg";
+    const cropOverlay = document.createElementNS(svgNS, "svg");
+    cropOverlay.setAttribute("viewBox", "0 0 1000 1000");
+    cropOverlay.setAttribute("preserveAspectRatio", "none");
+    cropOverlay.setAttribute("aria-hidden", "true");
+    const cropOutline = document.createElementNS(svgNS, "polygon");
+    cropOverlay.append(cropOutline);
+    const handles = ["Top left", "Top right", "Bottom right", "Bottom left"].map((name) =>
+      el("button", { type: "button", class: "sw-corner", "aria-label": name + " corner" }));
+    const cropLayer = el("div", { class: "sw-corners", hidden: true }, cropOverlay, handles);
+    const surface = el("div", { class: "sw-scan-surface" }, canvas, cropLayer);
+    const preview = stage(surface);
+    preview.classList.add("sw-scan-stage");
+    const empty = el("div", { class: "sw-scan-empty" },
+      el("span", { class: "sw-scan-mark", "aria-hidden": "true" }),
+      el("p", { text: "Add a photo or scanned PDF to preview the scan." }));
     const rows = el("ol", { class: "sw-pages" });
     const pages = [];
     let selected = null;
+    let view = "clean";
+    let rendered;
     let result;
     let busy = false;
-    const sides = ["Left", "Top", "Right", "Bottom"];
-    const cropInputs = sides.map(() => input({ type: "range", min: 0, max: 45, value: 0, step: 1 }));
-    const reset = button("Reset crop", () => {
-      selected.crop = [0, 0, 0, 0];
+    let drag;
+    const views = [["Enhanced", "clean"], ["Original", "original"], ["Adjust corners", "crop"]].map(([label, mode]) =>
+      [button(label, () => { view = mode; update(false); }, "ghost"), mode]);
+    const viewBar = el("div", { class: "sw-scan-views", role: "group", "aria-label": "Preview mode" }, views.map(([control]) => control));
+    const scanInfo = el("p", { class: "tp-hint sw-scan-info" });
+    const adjustment = hint("Drag a corner, or focus it and use the arrow keys. Hold Shift for larger steps.");
+    const reset = button("Use full page", () => {
+      selected.corners = scan.fullPage();
+      selected.cornerMode = "full";
       update();
     }, "ghost");
-    const rotate = button("Rotate page", () => {
+    const auto = button("Use detected corners", () => {
+      selected.corners = selected.detected;
+      selected.cornerMode = "auto";
+      update();
+    }, "ghost");
+    const rotate = button("Rotate 90°", () => {
       selected.rotation = (selected.rotation + 90) % 360;
+      view = "clean";
       update();
     }, "ghost");
-    const cropOptions = el("details", { class: "sw-advanced" }, el("summary", { text: "Crop and rotate" }),
-      el("div", { class: "sw-fields" }, cropInputs.map((control, i) => field(sides[i] + " trim (%)", control))),
-      actions(reset, rotate));
-    const preview = stage(canvas);
+    const cropActions = actions(reset, auto);
+    cropActions.classList.add("sw-crop-actions");
+    const editor = el("div", { class: "sw-scan-editor", hidden: true },
+      viewBar, preview, scanInfo, adjustment, cropActions,
+      el("div", { class: "sw-scan-settings" }, field("Scan filter", filter), rotate));
     const output = resultBar("Download PDF", () => result, status, [
       ["Edit PDF", "/tools/pdf-editor", "pdf"], ["Add searchable text", "/tools/searchable-pdf", "pdf"],
       ["Add to Application Pack", "/tools/application-file-pack", "pdf"],
     ]);
 
-    function frame(page, target, limit, showCrop) {
-      const source = page.image;
-      const [left, top, right, bottom] = page.crop.map((n) => n / 100);
-      const x = showCrop ? 0 : left * source.width;
-      const y = showCrop ? 0 : top * source.height;
-      const w = showCrop ? source.width : source.width * (1 - left - right);
-      const h = showCrop ? source.height : source.height * (1 - top - bottom);
-      const scale = Math.min(1, limit / Math.max(w, h));
-      const sideways = page.rotation % 180 !== 0;
-      target.width = Math.max(1, Math.round((sideways ? h : w) * scale));
-      target.height = Math.max(1, Math.round((sideways ? w : h) * scale));
-      const context = target.getContext("2d");
-      context.translate(target.width / 2, target.height / 2);
-      context.rotate(page.rotation * Math.PI / 180);
-      context.scale(scale, scale);
-      context.drawImage(source, x, y, w, h, -w / 2, -h / 2, w, h);
-      if (showCrop && page.crop.some(Boolean)) {
-        context.fillStyle = "#122d24a0";
-        context.fillRect(-w / 2, -h / 2, w, h * top);
-        context.fillRect(-w / 2, h / 2 - h * bottom, w, h * bottom);
-        context.fillRect(-w / 2, -h / 2 + h * top, w * left, h * (1 - top - bottom));
-        context.fillRect(w / 2 - w * right, -h / 2 + h * top, w * right, h * (1 - top - bottom));
-      }
+    function invalidateResult() {
+      result = null;
+      output.hidden = true;
     }
 
-    function update(invalidate = true) {
-      if (invalidate) { result = null; output.hidden = true; }
-      files.disabled = camera.disabled = takePhoto.disabled = paper.disabled = busy;
-      preview.hidden = cropOptions.hidden = !selected;
-      for (const [i, control] of cropInputs.entries()) {
-        control.value = selected?.crop[i] ?? 0;
-        control.disabled = busy;
+    function updateCorners() {
+      cropOutline.setAttribute("points", selected.corners.map(([x, y], i) => {
+        handles[i].style.left = (x * 100) + "%";
+        handles[i].style.top = (y * 100) + "%";
+        return (x * 1000) + "," + (y * 1000);
+      }).join(" "));
+      scanInfo.textContent = {
+        auto: "Document corners detected automatically.",
+        manual: "Custom document corners.",
+        full: "Using the full page.",
+        none: "Using the full page. Adjust corners if you see a border or desk around the document.",
+      }[selected.cornerMode];
+    }
+
+    function renderPreview() {
+      const isCrop = view === "crop";
+      cropLayer.hidden = adjustment.hidden = cropActions.hidden = !isCrop;
+      if (isCrop) updateCorners();
+      else scanInfo.textContent = view === "original" ? "Source preview before cropping and cleanup."
+        : selected.cornerMode === "auto" ? "Auto-cropped and straightened." : selected.cornerMode === "manual" ? "Straightened using your corners." : "";
+      const previewMode = view === "clean" ? view : "source";
+      const last = rendered;
+      if (last?.page === selected && last.view === previewMode && (previewMode === "source" ||
+          (last.corners === selected.corners && last.mode === selected.mode && last.rotation === selected.rotation))) return;
+
+      if (view === "clean") scan.draw(selected, canvas, 940);
+      else {
+        const scale = Math.min(1, 940 / Math.max(selected.image.width, selected.image.height));
+        canvas.width = Math.max(1, Math.round(selected.image.width * scale));
+        canvas.height = Math.max(1, Math.round(selected.image.height * scale));
+        canvas.getContext("2d").drawImage(selected.image, 0, 0, canvas.width, canvas.height);
       }
-      reset.disabled = rotate.disabled = busy;
+      surface.style.setProperty("--sw-scan-width", (435 * canvas.width / canvas.height) + "px");
+      rendered = { page: selected, view: previewMode, corners: selected.corners, mode: selected.mode, rotation: selected.rotation };
+    }
+
+    function moveCorner(index, x, y) {
+      const corners = selected.corners.map((point, i) =>
+        i === index ? [Math.max(0, Math.min(1, x)), Math.max(0, Math.min(1, y))] : point);
+      if (!scan.validCorners(corners)) return;
+      selected.corners = corners;
+      selected.cornerMode = "manual";
+      invalidateResult();
+      updateCorners();
+    }
+
+    handles.forEach((handle, index) => {
+      handle.onpointerdown = (event) => {
+        if (event.button !== 0 || drag) return;
+        const bounds = surface.getBoundingClientRect();
+        drag = { id: event.pointerId, index, bounds, x: event.clientX, y: event.clientY, point: selected.corners[index] };
+        handle.setPointerCapture(event.pointerId);
+      };
+      handle.onpointermove = (event) => {
+        if (drag?.id !== event.pointerId || drag.index !== index) return;
+        moveCorner(index, drag.point[0] + (event.clientX - drag.x) / drag.bounds.width,
+          drag.point[1] + (event.clientY - drag.y) / drag.bounds.height);
+      };
+      handle.onlostpointercapture = (event) => { if (drag?.id === event.pointerId) drag = null; };
+      handle.onkeydown = (event) => {
+        const offset = { ArrowLeft: [-1, 0], ArrowUp: [0, -1], ArrowRight: [1, 0], ArrowDown: [0, 1] }[event.key];
+        if (!offset) return;
+        event.preventDefault();
+        const step = event.shiftKey ? .035 : .007;
+        const [x, y] = selected.corners[index];
+        moveCorner(index, x + offset[0] * step, y + offset[1] * step);
+      };
+    });
+
+    function update(invalidate = true) {
+      if (invalidate) invalidateResult();
+      files.disabled = camera.disabled = takePhoto.disabled = paper.disabled = busy;
+      filter.disabled = rotate.disabled = reset.disabled = busy;
+      auto.disabled = busy || !selected?.detected;
+      views.forEach(([control, mode]) => {
+        control.disabled = busy;
+        control.setAttribute("aria-pressed", String(mode === view));
+      });
+      handles.forEach((handle) => { handle.disabled = busy; });
+      editor.hidden = !selected;
+      empty.hidden = Boolean(selected);
       generate.disabled = busy || !pages.length;
       rows.replaceChildren(...pages.map((page, index) => {
+        const focusPage = (i) => rows.children[i]?.querySelector("button")?.focus();
         const shift = (offset) => {
           [pages[index], pages[index + offset]] = [pages[index + offset], pages[index]];
           update();
-          rows.children[index + offset].querySelector("button")?.focus();
+          focusPage(index + offset);
         };
-        const open = button((index + 1) + ". " + page.name, () => { selected = page; update(false); rows.children[index].querySelector("button")?.focus(); },
-          "ghost", { class: "sw-page-name", disabled: busy, "aria-pressed": page === selected ? "true" : "false" });
+        const open = button((index + 1) + ". " + page.name, () => { selected = page; view = "clean"; update(false); focusPage(index); },
+          "ghost", { class: "sw-page-name", disabled: busy, "aria-pressed": String(page === selected) });
         return el("li", {}, open,
           button("↑", () => shift(-1), "ghost", { disabled: busy || index === 0, "aria-label": "Move page " + (index + 1) + " earlier" }),
           button("↓", () => shift(1), "ghost", { disabled: busy || index === pages.length - 1, "aria-label": "Move page " + (index + 1) + " later" }),
           button("×", () => {
             pages.splice(index, 1);
             releaseCanvas(page.image);
-            if (selected === page) selected = pages[Math.min(index, pages.length - 1)] || null;
+            if (selected === page) { selected = pages[Math.min(index, pages.length - 1)] || null; view = "clean"; }
             update();
+            if (pages.length) focusPage(Math.min(index, pages.length - 1));
+            else files.focus();
           }, "ghost", { disabled: busy, "aria-label": "Remove page " + (index + 1) }));
       }));
-      if (selected) frame(selected, canvas, 1100, true);
+      if (selected) {
+        filter.value = selected.mode;
+        renderPreview();
+      } else if (rendered) {
+        releaseCanvas(canvas);
+        rendered = null;
+      }
+    }
+
+    function appendPage(image, name, hasText = false) {
+      try {
+        const pixels = pages.reduce((sum, page) => sum + page.image.width * page.image.height, 0);
+        if (pixels + image.width * image.height > 24_000_000) {
+          throw new Error("This batch is too large for the editor. Export a smaller batch first.");
+        }
+        const detected = hasText ? null : scan.detectCorners(image);
+        const page = {
+          image, name, detected, corners: detected || scan.fullPage(), rotation: 0,
+          mode: hasText ? "original" : "color", cornerMode: hasText ? "full" : detected ? "auto" : "none",
+        };
+        pages.push(page);
+        selected ||= page;
+      } catch (error) {
+        releaseCanvas(image);
+        throw error;
+      }
+    }
+
+    async function scanImage(file) {
+      if (/\.(heic|heif)$/i.test(file.name) || /^image\/hei[cf]/i.test(file.type)) {
+        T.localFiles.guardFile(file);
+        const { heicTo, isHeic } = await import("/assets/vendor/heic/heic-to.min.js?v=1.6.7");
+        if (!(await isHeic(file))) throw new Error("This HEIC or HEIF image could not be read.");
+        const jpeg = await heicTo({ blob: file, type: "image/jpeg", quality: .94 });
+        return fittedCanvas(await loadImage(jpeg), 2000);
+      }
+      return fittedCanvas(await loadImage(file), 2000);
     }
 
     async function add(list) {
       if (busy || !list.length) return;
       busy = true;
-      update();
+      update(false);
+      const initialCount = pages.length;
       const errors = [];
-      let added = 0;
-      if (list.length + pages.length > 30) errors.push("Up to 30 pages per PDF.");
-      for (const file of list.slice(0, 30 - pages.length)) {
-        try {
-          status.textContent = "Opening " + file.name + "…";
-          const image = fittedCanvas(await loadImage(file), 1800);
-          const usedPixels = pages.reduce((sum, page) => sum + page.image.width * page.image.height, 0);
-          if (usedPixels + image.width * image.height > 24_000_000) {
-            releaseCanvas(image);
-            throw new Error("This batch is too large for the editor. Export a smaller batch first.");
-          }
-          const page = { image, name: file.name, rotation: 0, crop: [0, 0, 0, 0] };
-          pages.push(page);
-          selected ||= page;
-          added++;
-        } catch (error) { errors.push(file.name + ": " + problem(error)); }
+      let rasterizedText = false;
+      try {
+        for (const file of list) {
+          if (pages.length >= 30) { errors.push("Up to 30 pages per scan."); break; }
+          let pdf;
+          try {
+            status.textContent = "Opening " + file.name + "…";
+            const header = new TextDecoder().decode(await file.slice(0, 5).arrayBuffer());
+            if (header === "%PDF-" || /\.pdf$/i.test(file.name) || file.type === "application/pdf") {
+              pdf = await openPdf(file);
+              for (let number = 1; number <= pdf.numPages; number++) {
+                if (pages.length >= 30) { errors.push("Up to 30 pages per scan."); break; }
+                status.textContent = file.name + " · Importing page " + number + " of " + pdf.numPages + "…";
+                const pdfPage = await pdf.getPage(number);
+                const hasText = (await pdfPage.getTextContent()).items.some((item) => item.str?.trim());
+                const { canvas: image } = await renderPdfPage(pdf, number, 2000);
+                appendPage(image, file.name + " · " + number, hasText);
+                rasterizedText ||= hasText;
+              }
+            } else appendPage(await scanImage(file), file.name);
+          } catch (error) { errors.push(file.name + " · " + problem(error)); }
+          finally { await pdf?.destroy().catch(() => {}); }
+        }
+      } finally {
+        files.value = camera.value = "";
+        busy = false;
+        const added = pages.length - initialCount;
+        update(added > 0);
+        status.textContent = [
+          added ? added + (added === 1 ? " page added." : " pages added.") : "",
+          rasterizedText ? "Imported PDF text becomes an image. You can add searchable text after export." : "",
+          ...new Set(errors),
+        ].filter(Boolean).join(" ");
       }
-      files.value = camera.value = "";
-      busy = false;
-      update();
-      status.textContent = added + " pages added. " + errors.join(" ");
     }
     files.onchange = () => void add([...files.files]);
     camera.onchange = () => void add([...camera.files]);
     paper.onchange = () => update();
-    cropInputs.forEach((control, i) => {
-      control.oninput = () => {
-        selected.crop[i] = Number(control.value);
-        result = null;
-        output.hidden = true;
-        frame(selected, canvas, 1100, true);
-      };
-    });
+    filter.onchange = () => { selected.mode = filter.value; view = "clean"; update(); };
 
     const generate = button("Create PDF", async () => {
       busy = true;
@@ -187,8 +317,8 @@
           status.textContent = "Building page " + (i + 1) + " of " + pages.length + "…";
           const pageCanvas = canvasFor(1, 1);
           try {
-            frame(item, pageCanvas, 1800, false);
-            const image = await doc.embedJpg(await (await toBlob(pageCanvas, "image/jpeg", 0.88)).arrayBuffer());
+            scan.draw(item, pageCanvas, 2000);
+            const image = await doc.embedJpg(await (await toBlob(pageCanvas, "image/jpeg", .91)).arrayBuffer());
             let dims = paper.value === "a4" ? [595.28, 841.89] : paper.value === "letter" ? [612, 792] : [
               720 * image.width / Math.max(image.width, image.height), 720 * image.height / Math.max(image.width, image.height)];
             if (paper.value !== "image" && image.width > image.height) dims = dims.reverse();
@@ -205,12 +335,12 @@
       finally { busy = false; update(false); }
     });
 
-    root.replaceChildren(panel("", [el("div", { class: "sw-layout" },
-      el("div", { class: "sw-controls" }, el("h2", { text: "Pages" }), field("Add page photos", files), camera, takePhoto,
-        rows, field("PDF page size", paper), actions(generate)),
-      el("div", { class: "sw-preview" }, el("h2", { text: "Page preview" }), preview, cropOptions,
-        hint("Use the camera to capture one page at a time, or select several photos."))),
-    status, output]));
+    root.replaceChildren(panel("", [el("div", { class: "sw-layout sw-scan-layout" },
+      el("div", { class: "sw-controls" }, el("h2", { text: "Scan pages" }),
+        el("div", { class: "sw-scan-import" }, field("Add photos or PDFs", files), camera, takePhoto,
+          hint("JPG, PNG, WebP, BMP, HEIC, HEIF or PDF. Files stay on this device.")), rows),
+      el("div", { class: "sw-preview" }, el("h2", { text: "Page preview" }), empty, editor)),
+    el("div", { class: "sw-scan-output" }, field("PDF page size", paper), actions(generate)), status, output]));
     update();
   });
 
