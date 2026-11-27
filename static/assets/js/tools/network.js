@@ -115,7 +115,7 @@
   const copyButton = (getText, label = "Copy summary") => T.button(label, () => copy(getText()), "ghost");
 
   T.register("ip-calculator", (root) => {
-    root.innerHTML = `<div class="tp-panel" data-workflow="calculate-address"><label class="tp-field"><span class="tp-label">IP address or CIDR</span><input class="tp-input js-ip" value="192.168.1.10/24" spellcheck="false"></label><div class="tp-actions"><button type="button" class="tp-btn tp-btn-primary" data-run>Calculate</button><button type="button" class="tp-btn tp-btn-ghost" data-copy>Copy summary</button></div><div class="tp-kv js-out"></div></div>`;
+    root.innerHTML = `<div class="tp-panel"><label class="tp-field"><span class="tp-label">IP address or CIDR</span><input class="tp-input js-ip" value="192.168.1.10/24" spellcheck="false"></label><div class="tp-actions"><button type="button" class="tp-btn tp-btn-primary" data-run>Calculate</button><button type="button" class="tp-btn tp-btn-ghost" data-copy>Copy summary</button></div><div class="tp-kv js-out"></div></div>`;
     let summary = "";
     const run = () => {
       try {
@@ -149,7 +149,7 @@
 
   const makeTable = (columns) => {
     const wrap = el("div", { class: "tp-table-wrap", tabindex: 0, role: "region", "aria-label": "Network reference table" });
-    const table = el("table", { class: "tp-table" }, el("thead", {}, el("tr", {}, ...columns.map((column) => el("th", { scope: "col", text: column })))), el("tbody"));
+    const table = el("table", { class: "tp-table" }, el("thead", {}, el("tr", {}, ...columns.map((column) => el("th", { text: column })))), el("tbody"));
     wrap.append(table);
     return { wrap, body: table.querySelector("tbody") };
   };
@@ -160,7 +160,7 @@
   };
 
   T.register("ipv4-cidr", (root) => {
-    root.innerHTML = `<div class="tp-panel" data-workflow="reference"><div class="tp-cols"><label class="tp-field"><span class="tp-label">Base address</span><input class="tp-input js-base" value="192.168.1.0"></label><label class="tp-field"><span class="tp-label">Filter prefix</span><input class="tp-input js-filter" type="search" placeholder="/24"></label></div><div class="js-table"></div><p class="tp-hint">Usable hosts exclude the network and broadcast addresses for /0–/30. /31 and /32 follow modern point-to-point and host-route rules.</p></div>`;
+    root.innerHTML = `<div class="tp-panel"><div class="tp-cols"><label class="tp-field"><span class="tp-label">Base address</span><input class="tp-input js-base" value="192.168.1.0"></label><label class="tp-field"><span class="tp-label">Filter prefix</span><input class="tp-input js-filter" type="search" placeholder="/24"></label></div><div class="js-table"></div><p class="tp-hint">Usable hosts exclude the network and broadcast addresses for /0–/30. /31 and /32 follow modern point-to-point and host-route rules.</p></div>`;
     const { wrap, body } = makeTable(["Prefix", "Netmask", "Wildcard", "Addresses", "Usable", "Network", "Broadcast"]);
     q(".js-table", root).append(wrap);
     const draw = () => {
@@ -182,7 +182,7 @@
   });
 
   T.register("ipv6-cidr", (root) => {
-    root.innerHTML = `<div class="tp-panel" data-workflow="reference"><label class="tp-field"><span class="tp-label">Filter prefix</span><input class="tp-input js-filter" type="search" placeholder="/64"></label><div class="js-table"></div><p class="tp-hint">IPv6 has no broadcast address; every address in a block is part of the address space.</p></div>`;
+    root.innerHTML = `<div class="tp-panel"><label class="tp-field"><span class="tp-label">Filter prefix</span><input class="tp-input js-filter" type="search" placeholder="/64"></label><div class="js-table"></div><p class="tp-hint">IPv6 has no broadcast address; every address in a block is part of the address space.</p></div>`;
     const { wrap, body } = makeTable(["Prefix", "Mask", "Addresses", "Power of two"]);
     q(".js-table", root).append(wrap);
     const draw = () => {
@@ -201,7 +201,7 @@
   });
 
   T.register("ip-to-ptr", (root) => {
-    root.innerHTML = `<div class="tp-panel" data-workflow="convert-address"><label class="tp-field"><span class="tp-label">IPv4 or IPv6 address</span><textarea class="tp-textarea js-in" rows="5" placeholder="192.0.2.10&#10;2001:db8::1"></textarea></label><div class="tp-actions"><button type="button" class="tp-btn tp-btn-primary" data-run>Build PTR names</button><button type="button" class="tp-btn tp-btn-ghost" data-copy>Copy</button></div><div class="tp-output js-out"></div></div>`;
+    root.innerHTML = `<div class="tp-panel"><label class="tp-field"><span class="tp-label">IPv4 or IPv6 address</span><textarea class="tp-textarea js-in" rows="5" placeholder="192.0.2.10&#10;2001:db8::1"></textarea></label><div class="tp-actions"><button type="button" class="tp-btn tp-btn-primary" data-run>Build PTR names</button><button type="button" class="tp-btn tp-btn-ghost" data-copy>Copy</button></div><div class="tp-output js-out"></div></div>`;
     const run = () => {
       const lines = q(".js-in", root).value.split(/\s+/).filter(Boolean);
       if (!lines.length) return status(root, "Add at least one IP address.", "error");
@@ -238,7 +238,7 @@
   };
 
   T.register("random-ip-generator", (root) => {
-    root.innerHTML = `<div class="tp-panel" data-workflow="generate-addresses"><div class="tp-cols"><label class="tp-field"><span class="tp-label">CIDR range</span><input class="tp-input js-cidr" value="192.168.0.0/24"></label><label class="tp-field"><span class="tp-label">How many?</span><input class="tp-input" type="number" min="1" max="1000" value="20"></label></div><div class="tp-chips-inline"><label class="tp-pill"><input type="checkbox" class="js-usable" checked> Exclude network / broadcast</label><label class="tp-pill"><input type="checkbox" class="js-dedupe" checked> Unique values</label></div><div class="tp-actions"><button type="button" class="tp-btn tp-btn-primary" data-run>Generate</button><button type="button" class="tp-btn tp-btn-ghost" data-copy>Copy</button><button type="button" class="tp-btn tp-btn-ghost" data-download>Download</button></div><label class="tp-field"><span class="tp-label">Addresses</span><textarea class="tp-textarea is-output js-out" rows="12" readonly></textarea></label></div>`;
+    root.innerHTML = `<div class="tp-panel"><div class="tp-cols"><label class="tp-field"><span class="tp-label">CIDR range</span><input class="tp-input js-cidr" value="192.168.0.0/24"></label><label class="tp-field"><span class="tp-label">How many?</span><input class="tp-input" type="number" min="1" max="1000" value="20"></label></div><div class="tp-chips-inline"><label class="tp-pill"><input type="checkbox" class="js-usable" checked> Exclude network / broadcast</label><label class="tp-pill"><input type="checkbox" class="js-dedupe" checked> Unique values</label></div><div class="tp-actions"><button type="button" class="tp-btn tp-btn-primary" data-run>Generate</button><button type="button" class="tp-btn tp-btn-ghost" data-copy>Copy</button><button type="button" class="tp-btn tp-btn-ghost" data-download>Download</button></div><label class="tp-field"><span class="tp-label">Addresses</span><textarea class="tp-textarea is-output js-out" rows="12" readonly></textarea></label></div>`;
     const generate = () => {
       try {
         const parsed = parseCidr(q(".js-cidr", root).value);
@@ -273,13 +273,10 @@
   });
 
   const referenceTool = (root, config) => {
-    root.innerHTML = `<div class="tp-panel" data-workflow="reference"><div class="tp-cols"><label class="tp-field"><span class="tp-label">Search</span><input class="tp-input js-search" type="search" placeholder="${config.placeholder}"></label>${config.filter ? `<label class="tp-field"><span class="tp-label">Show</span><select class="tp-select js-filter">${config.filter.map((item) => `<option value="${item[0]}">${item[1]}</option>`).join("")}</select></label>` : ""}</div><div class="tp-chips-inline js-count"></div><div class="js-table"></div></div>`;
+    root.innerHTML = `<div class="tp-panel"><div class="tp-cols"><label class="tp-field"><span class="tp-label">Search</span><input class="tp-input js-search" type="search" placeholder="${config.placeholder}"></label>${config.filter ? `<label class="tp-field"><span class="tp-label">Show</span><select class="tp-select js-filter">${config.filter.map((item) => `<option value="${item[0]}">${item[1]}</option>`).join("")}</select></label>` : ""}</div><div class="tp-chips-inline js-count"></div><div class="js-table"></div></div>`;
     const { wrap, body } = makeTable(config.columns);
     q(".js-table", root).append(wrap);
     let rows = [];
-    const count = q(".js-count", root);
-    count.setAttribute("role", "status");
-    count.textContent = "Loading reference entries…";
     const draw = () => {
       const query = q(".js-search", root).value.trim().toLowerCase();
       const filter = q(".js-filter", root)?.value || "";
@@ -288,9 +285,7 @@
         return (!query || text.includes(query)) && (!filter || row._filter === filter || filter === "all");
       });
       renderRows(body, visible.slice(0, 900));
-      wrap.hidden = !visible.length;
-      count.textContent = visible.length ? `${visible.length.toLocaleString("en-US")} entries` : "No entries match. Change the search or filter.";
-
+      q(".js-count", root).replaceChildren(el("span", { class: "tp-pill", text: `${visible.length.toLocaleString("en-US")} entries` }));
     };
     q(".js-search", root).addEventListener("input", T.debounce(draw, 150));
     q(".js-filter", root)?.addEventListener("change", draw);
@@ -301,10 +296,7 @@
         return cells;
       });
       draw();
-    }).catch(error => {
-      count.textContent = "";
-      status(root, `Could not load the reference data: ${error.message}`, "error");
-    });
+    }).catch((error) => status(root, `Could not load the reference data: ${error.message}`, "error"));
   };
 
   T.register("root-zone-database", (root) => referenceTool(root, {

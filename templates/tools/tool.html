@@ -1,6 +1,6 @@
 {% extends 'base.html' %}
 {% set vendor_files = {'js-yaml': 'js-yaml.js', 'marked': 'marked.js', 'fflate': 'fflate.js', 'pdf-lib': 'pdf-lib.js', 'pdfjs': 'pdf.min.js', 'jspdf': 'jspdf.umd.min.js', 'bcryptjs': 'bcrypt.min.js', 'qrcodegen': 'qrcodegen.js', 'hlsjs': 'hls.min.js', 'dashjs': 'dash.all.min.js', 'tesseract': 'ocr/tesseract.min.js'} %}
-{% set bundle_versions = {'pdf-editor': 8, 'file-workbench': 6, 'text': 6, 'misc': 6, 'network': 4, 'players': 5, 'calculators': 6, 'media': 6, 'forms': 4, 'api-studio': 3, 'study-utilities': 3, 'dls': 3, 'study-planner': 3} %}
+{% set bundle_version = 7 if tool.bundle == 'pdf-editor' else 7 if tool.bundle in ['misc', 'text'] else 4 if tool.bundle == 'file-workbench' else 3 if tool.bundle == 'network' else 4 if tool.bundle == 'players' else 4 if tool.bundle in ['calculators', 'media'] else 2 %}
 {% set streaming_players = ['m3u8-player', 'dash-player', 'cloud-video-player'] %}
 {% set tool_help = {
   'pdf-editor': 'Choose a PDF, tap the text you want to change, and apply your correction. The editor matches the font automatically and detects text on scanned pages. Download a copy when you are done.',
@@ -50,10 +50,7 @@
 {% block page_styles %}<link rel="stylesheet" href="/assets/css/tools.css?v=7">{% if tool.bundle in ['file-workbench', 'study-planner'] %}<link rel="stylesheet" href="/assets/css/file-workbench.css?v=1">{% endif %}{% if tool.bundle == 'pdf-editor' %}<link rel="stylesheet" href="/assets/css/pdf-editor.css?v=5">{% endif %}{% if tool.bundle == 'players' %}<link rel="stylesheet" href="/assets/css/players.css?v=5">{% endif %}{% if tool.bundle in ['api-studio', 'study-utilities'] %}<link rel="stylesheet" href="/assets/css/api-studio.css?v=2">{% endif %}{% endblock %}
 {% block content %}
 <section class="tp-shell wrap" data-tool-page data-tool-slug="{{ tool.slug }}"{% if tool.slug == 'form-file-checker' %} data-photo-available="{{ 'true' if photo_tools_available else 'false' }}"{% endif %}>
-  <div class="studio-toolbar">
-    <nav class="tp-crumb" aria-label="Breadcrumb"><a href="/tools">Tools</a><span aria-hidden="true">/</span><span aria-current="page">{{ tool.name }}</span></nav>
-    <button class="studio-search" type="button" data-site-search-open aria-haspopup="dialog" aria-controls="wb-palette">Search <kbd data-wb-kbd>⌘K</kbd></button>
-  </div>
+  <nav class="tp-crumb" aria-label="Breadcrumb"><a href="/">Home</a><span aria-hidden="true">/</span><a href="/tools">All tools</a><span aria-hidden="true">/</span><a href="/tools?category={{ tool.category | urlencode }}">{{ tool.category }}</a></nav>
   <header class="st-tool-title">
     <span class="st-tool-icon" aria-hidden="true"><img src="/assets/icons/{{ tool.icon_file }}.svg?v=soft1" alt="" width="40" height="40"></span>
     <div class="st-tool-title-copy">
@@ -65,12 +62,10 @@
 
   <div class="tp-layout">
     <div class="tp-workspace" id="tool-root"{% if weather_mode %} data-weather-mode="{{ weather_mode }}"{% endif %}>
-      <div class="tp-loading" role="status"><span aria-hidden="true"></span>Loading {{ tool.name }}…</div>
+      <div class="tp-loading"><span></span>Loading tool…</div>
       <noscript><p>Enable JavaScript to use this tool.</p></noscript>
     </div>
-    <details class="studio-help">
-      <summary>{{ 'How to use & related tools' if tool.slug in tool_help else 'Tool information & related tools' }}</summary>
-      <div class="tp-aside st-tool-support">
+    <aside class="tp-aside st-tool-support" aria-label="Tool help and related tools">
       {% if tool.slug in tool_help %}
       <section class="tp-aside-card"><h2>How to use it</h2><p>{{ tool_help[tool.slug] }}</p>{% if tool.bundle == 'players' %}<p>The screen button in the dock switches to your browser's built-in player controls, and the choice is remembered.</p>{% endif %}</section>
       {% endif %}
@@ -112,14 +107,13 @@
         <a class="tp-more" href="/tools">See all {{ catalog.tools | length }} tools →</a>
       </section>
       {% endif %}
-      </div>
-      {% include 'tools/_guides.html' %}
-    </details>
+    </aside>
   </div>
+  {% include 'tools/_guides.html' %}
 </section>
 {% endblock %}
 {% block scripts %}
-<script nonce="{{ csp_nonce }}" src="/assets/js/tools/core.js?v=4" defer></script>
+<script nonce="{{ csp_nonce }}" src="/assets/js/tools/core.js?v=3" defer></script>
 {% for vendor in tool.vendor or [] %}{% if vendor in vendor_files %}<script nonce="{{ csp_nonce }}" src="/assets/vendor/{{ vendor_files[vendor] }}?v=1" defer></script>{% endif %}{% endfor %}
 {% if tool.bundle in ['file-workbench', 'pdf-editor'] %}
 <script nonce="{{ csp_nonce }}" src="/assets/js/tools/local-files.js?v=1" defer></script>
@@ -131,6 +125,6 @@
 <script nonce="{{ csp_nonce }}" src="/assets/js/tools/dls-tables.js?v=1" defer></script>
 <script nonce="{{ csp_nonce }}" src="/assets/js/tools/dls-core.js?v=1" defer></script>
 {% endif %}
-<script nonce="{{ csp_nonce }}" src="/assets/js/tools/{{ tool.bundle }}.js?v={{ bundle_versions.get(tool.bundle, 2) }}" defer></script>
+<script nonce="{{ csp_nonce }}" src="/assets/js/tools/{{ tool.bundle }}.js?v={{ bundle_version }}" defer></script>
 <script nonce="{{ csp_nonce }}" src="/assets/js/tools/boot.js?v=1" defer></script>
 {% endblock %}

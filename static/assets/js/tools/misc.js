@@ -9,21 +9,13 @@
 
   T.register("currency-converter", (root) => {
     root.innerHTML = `<div class="tp-panel"><div class="tp-cols"><label class="tp-field"><span class="tp-label">Amount</span><input class="tp-input js-amount" type="number" min="0" step="any" value="100"></label><label class="tp-field"><span class="tp-label">From</span><span class="js-from"></span></label><label class="tp-field"><span class="tp-label">To</span><span class="js-to"></span></label></div><div class="tp-actions"><button type="button" class="tp-btn tp-btn-primary" data-convert>Convert</button><button type="button" class="tp-btn tp-btn-ghost" data-swap>⇄ Swap</button><button type="button" class="tp-btn tp-btn-ghost" data-copy>Copy result</button></div><div class="tp-currency-result js-result"><span>—</span><small>Live daily rate from the European Central Bank.</small></div><div class="tp-chips-inline"><button type="button" class="tp-chip js-quick" data-value="1">1</button><button type="button" class="tp-chip js-quick" data-value="10">10</button><button type="button" class="tp-chip js-quick" data-value="100">100</button><button type="button" class="tp-chip js-quick" data-value="1000">1,000</button><button type="button" class="tp-chip js-quick" data-value="10000">10,000</button></div></div>`;
-    const exchange = q(".tp-panel", root);
-    const quote = q(".js-result", root);
-    const copy = q("[data-copy]", root);
-    const quickAmounts = q(".tp-chips-inline", root);
-    const actionRow = q(".tp-actions", root);
-    const source = el("section", { class: "task-input" },
-      q(".tp-cols", root), quickAmounts, actionRow);
-    exchange.replaceChildren(el("div", { class: "task-pair", "data-workflow": "exchange-rate" }, source,
-      el("section", { class: "task-output" }, el("h2", { class: "task-section-title", text: "Converted amount" }), quote, T.actions(copy))));
     let from = T.select(["USD"], "USD");
     let to = T.select(["EUR"], "EUR");
     q(".js-from", root).replaceChildren(from);
     q(".js-to", root).replaceChildren(to);
     let summary = "";
     let conversion = 0;
+    const copyResult = q("[data-copy]", root);
     const fill = (codes) => {
       const currentFrom = from.value || "USD";
       const currentTo = to.value || "EUR";
@@ -37,7 +29,7 @@
     const convert = async () => {
       const attempt = ++conversion;
       summary = "";
-      copy.disabled = true;
+      copyResult.disabled = true;
       const amount = Number(q(".js-amount", root).value);
       if (!Number.isFinite(amount) || amount < 0) return status(root, "Enter a valid amount.", "error");
       const result = q(".js-result", root);
@@ -52,7 +44,7 @@
         result.querySelector("span").textContent = `${value.toLocaleString("en-US", { maximumFractionDigits: 4 })} ${to.value}`;
         result.querySelector("small").textContent = `${amount.toLocaleString("en-US")} ${from.value} = ${value.toLocaleString("en-US", { maximumFractionDigits: 4 })} ${to.value} · 1 ${from.value} = ${one.toLocaleString("en-US", { maximumFractionDigits: 6 })} ${to.value} · ${data.date}`;
         summary = `${amount} ${from.value} = ${value} ${to.value} (${data.date})`;
-        copy.disabled = false;
+        copyResult.disabled = false;
         status(root, "Converted with the latest published rate.", "ok");
       } catch (error) {
         if (attempt !== conversion) return;
@@ -92,13 +84,12 @@
     const queryLabel = q(".tp-label", queryField);
     const submit = T.button("Find post offices", null, "primary", { type: "submit" });
     const feedback = el("p", { id: "pin-lookup-status", class: "tp-status", role: "status", "aria-atomic": "true" });
-    const results = el("div", { class: "tp-result-list pin-lookup-results", role: "list", "aria-label": "Matching post offices" });
+    const results = el("div", { class: "tp-result-list pin-lookup-results", role: "list", "aria-label": "Matching post offices", tabindex: "0", hidden: true });
     const form = el("form", { novalidate: true },
       T.twoCol(T.field("Search by", mode), queryField),
       T.actions(submit),
       feedback);
-    root.replaceChildren(T.panel(null, el("div", { "data-workflow": "lookup" },
-      form, T.resultArea("Matching post offices", results, "Search by PIN code or post office name.")), "pin-lookup"));
+    root.replaceChildren(T.panel(null, [form, results], "pin-lookup"));
 
     let pending;
     const showFeedback = (message, kind = "info") => {
@@ -111,7 +102,7 @@
       submit.disabled = false;
       query.removeAttribute("aria-invalid");
       results.replaceChildren();
-      results.removeAttribute("aria-busy");
+      results.hidden = true;
       showFeedback("");
     };
     const updateMode = () => {
@@ -142,7 +133,6 @@
       const request = new AbortController();
       pending = request;
       submit.disabled = true;
-      results.setAttribute("aria-busy", "true");
       showFeedback("Searching postal records…");
       const timeout = setTimeout(() => request.abort(), 10000);
       try {
@@ -165,6 +155,7 @@
           el("div", {}, [office.District, office.State].filter(Boolean).join(", ")),
           el("div", {}, [`PIN ${byPin ? value : office.PINCode ?? "unavailable"}`, office.BranchType].filter(Boolean).join(" · ")),
         )));
+        results.hidden = false;
         showFeedback(`${offices.length} matching post office${offices.length === 1 ? "" : "s"}.`, "ok");
       } catch {
         if (pending === request) showFeedback("Postal lookup is unavailable right now. Try again in a moment.", "error");
@@ -172,7 +163,6 @@
         clearTimeout(timeout);
         if (pending === request) {
           pending = null;
-          results.removeAttribute("aria-busy");
           submit.disabled = false;
         }
       }
@@ -305,7 +295,7 @@
       ["4", "4"], ["5", "5"], ["6", "6"], ["×", "*"], ["%", "%"],
       ["1", "1"], ["2", "2"], ["3", "3"], ["−", "-"], ["π", "pi"],
       ["0", "0"], [".", "."], ["e", "e"], ["+", "+"], ["=", "equals"]];
-    root.innerHTML = `<div class="tp-calc" data-workflow="keypad"><div class="tp-calc-screen"><div class="tp-calc-history js-history" aria-label="Recent calculations"></div><input class="tp-calc-input js-expr" inputmode="text" spellcheck="false" autocomplete="off" aria-label="Calculator expression" value=""><output class="tp-calc-result js-result" aria-live="polite">0</output></div><div class="tp-calc-keys js-keys">${keys.map(([label, key]) => `<button type="button" class="tp-calc-key" data-key="${key}"${key === "equals" ? ' data-equals="true"' : ""}>${label}</button>`).join("")}</div><p class="tp-hint">Type directly with your keyboard. Enter calculates, Escape clears. Supports <code>+ − × ÷ ^</code>, parentheses, <code>sqrt()</code>, <code>%</code>, <code>!</code>, <code>pi</code> and <code>e</code>.</p></div>`;
+    root.innerHTML = `<div class="tp-calc"><div class="tp-calc-screen"><div class="tp-calc-history js-history" aria-label="Recent calculations"></div><input class="tp-calc-input js-expr" inputmode="text" spellcheck="false" autocomplete="off" aria-label="Calculator expression" value=""><output class="tp-calc-result js-result" aria-live="polite">0</output></div><div class="tp-calc-keys js-keys">${keys.map(([label, key]) => `<button type="button" class="tp-calc-key" data-key="${key}"${key === "equals" ? ' data-equals="true"' : ""}>${label}</button>`).join("")}</div><p class="tp-hint">Type directly with your keyboard. Enter calculates, Escape clears. Supports <code>+ − × ÷ ^</code>, parentheses, <code>sqrt()</code>, <code>%</code>, <code>!</code>, <code>pi</code> and <code>e</code>.</p></div>`;
     const expression = q(".js-expr", root);
     const result = q(".js-result", root);
     const historyNode = q(".js-history", root);
@@ -343,7 +333,7 @@
   });
 
   T.register("emoji-picker", (root) => {
-    root.innerHTML = `<div class="tp-panel" data-workflow="browse-emoji"><div class="tp-cols"><label class="tp-field"><span class="tp-label">Search emojis</span><input class="tp-input js-search" type="search" placeholder="happy, fire, flag, rocket…"></label><label class="tp-field"><span class="tp-label">Category</span><select class="tp-select js-category"><option value="all">All categories</option></select></label></div><div class="tp-emoji-detail js-detail"><span class="tp-emoji-big" aria-hidden="true">☺</span><div><strong>Pick an emoji</strong><p>Click any character to copy it instantly.</p></div></div><div class="tp-chips-inline js-count"></div><div class="tp-emoji-grid js-grid"></div></div>`;
+    root.innerHTML = `<div class="tp-panel"><div class="tp-cols"><label class="tp-field"><span class="tp-label">Search emojis</span><input class="tp-input js-search" type="search" placeholder="happy, fire, flag, rocket…"></label><label class="tp-field"><span class="tp-label">Category</span><select class="tp-select js-category"><option value="all">All categories</option></select></label></div><div class="tp-emoji-detail js-detail"><span class="tp-emoji-big" aria-hidden="true">☺</span><div><strong>Pick an emoji</strong><p>Click any character to copy it instantly.</p></div></div><div class="tp-chips-inline js-count"></div><div class="tp-emoji-grid js-grid"></div></div>`;
     const grid = q(".js-grid", root);
     const category = q(".js-category", root);
     const detail = q(".js-detail", root);
@@ -384,7 +374,7 @@
   };
 
   T.register("countdown-timer", (root) => {
-    root.innerHTML = `<div class="tp-panel" data-workflow="countdown"><div class="tp-cols"><label class="tp-field"><span class="tp-label">Countdown name</span><input class="tp-input js-name" value="My countdown" maxlength="80"></label><label class="tp-field"><span class="tp-label">Target date and time</span><input class="tp-input js-target" type="datetime-local"></label></div><div class="tp-chips-inline"><button type="button" class="tp-chip js-preset" data-hours="1">+1 hour</button><button type="button" class="tp-chip js-preset" data-hours="24">+1 day</button><button type="button" class="tp-chip js-preset" data-hours="168">+1 week</button><button type="button" class="tp-chip js-preset" data-hours="720">+30 days</button></div><div class="tp-countdown js-clock"><div><strong>00</strong><span>days</span></div><div><strong>00</strong><span>hours</span></div><div><strong>00</strong><span>minutes</span></div><div><strong>00</strong><span>seconds</span></div></div><p class="tp-countdown-note js-note"></p><div class="tp-actions"><button type="button" class="tp-btn tp-btn-ghost" data-copy>Copy countdown</button><button type="button" class="tp-btn tp-btn-ghost" data-reset>Reset</button></div></div>`;
+    root.innerHTML = `<div class="tp-panel"><div class="tp-cols"><label class="tp-field"><span class="tp-label">Countdown name</span><input class="tp-input js-name" value="My countdown" maxlength="80"></label><label class="tp-field"><span class="tp-label">Target date and time</span><input class="tp-input js-target" type="datetime-local"></label></div><div class="tp-chips-inline"><button type="button" class="tp-chip js-preset" data-hours="1">+1 hour</button><button type="button" class="tp-chip js-preset" data-hours="24">+1 day</button><button type="button" class="tp-chip js-preset" data-hours="168">+1 week</button><button type="button" class="tp-chip js-preset" data-hours="720">+30 days</button></div><div class="tp-countdown js-clock"><div><strong>00</strong><span>days</span></div><div><strong>00</strong><span>hours</span></div><div><strong>00</strong><span>minutes</span></div><div><strong>00</strong><span>seconds</span></div></div><p class="tp-countdown-note js-note"></p><div class="tp-actions"><button type="button" class="tp-btn tp-btn-ghost" data-copy>Copy countdown</button><button type="button" class="tp-btn tp-btn-ghost" data-reset>Reset</button></div></div>`;
     const targetInput = q(".js-target", root);
     const nameInput = q(".js-name", root);
     const clock = q(".js-clock", root);
@@ -434,7 +424,7 @@
   });
 
   T.register("utc-time", (root) => {
-    root.innerHTML = `<div class="tp-panel" data-workflow="clock"><div class="tp-clock-hero"><span class="tp-clock-label">Coordinated Universal Time</span><strong class="js-utc-time">00:00:00</strong><span class="js-utc-date">—</span></div><div class="tp-kv js-details"></div><div class="tp-actions"><button type="button" class="tp-btn tp-btn-ghost" data-copy-iso>Copy ISO 8601</button><button type="button" class="tp-btn tp-btn-ghost" data-copy-unix>Copy Unix timestamp</button><button type="button" class="tp-btn tp-btn-ghost" data-copy-all>Copy all</button></div></div>`;
+    root.innerHTML = `<div class="tp-panel"><div class="tp-clock-hero"><span class="tp-clock-label">Coordinated Universal Time</span><strong class="js-utc-time">00:00:00</strong><span class="js-utc-date">—</span></div><div class="tp-kv js-details"></div><div class="tp-actions"><button type="button" class="tp-btn tp-btn-ghost" data-copy-iso>Copy ISO 8601</button><button type="button" class="tp-btn tp-btn-ghost" data-copy-unix>Copy Unix timestamp</button><button type="button" class="tp-btn tp-btn-ghost" data-copy-all>Copy all</button></div></div>`;
     let values = {};
     const update = () => {
       const now = new Date();
@@ -513,19 +503,18 @@
     const qrExplain = el("p", { class: "qr-explain-body", text: "Generate a QR code to see what it contains." });
     const form = el("div", { class: "tp-cols" },
       T.field("QR code type", type), contentField, ...wifiFields, ...upiFields,
-      T.field("Download size (approx.)", size));
-    const advanced = T.disclosure("Advanced print settings",
-      T.field("Error correction", level), T.field("Quiet-zone margin (modules)", margin));
-    const save = T.button("Download PNG", () => downloadPng(), "primary");
-    const copyContent = T.button("Copy encoded content", () => T.copy(payload), "ghost");
-    const previewStatus = el("p", { class: "tp-hint" });
-    const panel = el("section", { class: "tp-panel st-qr-workspace", "data-workflow": "design-and-preview" },
-      el("div", { class: "st-qr-settings studio-pane studio-controls" },
-        el("h2", { class: "studio-pane-title", text: "QR code settings" }),
-        form, advanced, T.actions(T.button("Generate QR code", () => generate(true), "ghost"))),
+      T.field("Download size (approx.)", size), T.field("Error correction", level),
+      T.field("Quiet-zone margin (modules)", margin));
+    const actions = el("div", { class: "tp-actions" },
+      T.button("Generate QR code", () => generate(true), "primary"),
+      T.button("Download PNG", () => downloadPng(), "ghost"),
+      T.button("Copy encoded content", () => payload ? T.copy(payload) : status(root, "Generate a QR code first.", "error"), "ghost"));
+    const panel = el("section", { class: "tp-panel st-qr-workspace" },
+      el("div", { class: "st-qr-settings" },
+        el("h2", { class: "tp-panel-title", text: "QR code settings" }),
+        form, actions),
       el("div", { class: "qr-result" },
-        el("h2", { class: "studio-pane-title", text: "Live preview" }),
-        preview, previewStatus, T.actions(save, copyContent),
+        preview,
         el("div", { class: "qr-meta" },
           el("span", { class: "qr-meta-label", text: "Encoded content" }),
           payloadText,
@@ -604,8 +593,6 @@
         code.addData(payload);
         code.make();
         draw(code);
-        save.disabled = copyContent.disabled = false;
-        previewStatus.textContent = `${canvas.width} × ${canvas.height} px`;
         lastUrl = type.value === "url" ? payload : lastUrl;
         payloadText.textContent = payload;
         const kind = { url: "website link", text: "plain text", wifi: "Wi-Fi network", upi: "UPI payment" }[type.value];
@@ -613,8 +600,6 @@
         if (announce) status(root, "QR code generated locally.", "ok");
       } catch (error) {
         payload = "";
-        save.disabled = copyContent.disabled = true;
-        previewStatus.textContent = error.message;
         payloadText.textContent = "—";
         qrExplain.textContent = "Generate a valid code to see its explanation.";
         canvas.getContext("2d").clearRect(0, 0, canvas.width, canvas.height);

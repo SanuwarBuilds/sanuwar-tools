@@ -250,7 +250,7 @@
       output.value = "";
       notice.textContent = "";
     });
-    root.replaceChildren(el("div", { class: "st-ocr", "data-workflow": "extract-text" },
+    root.replaceChildren(el("div", { class: "st-ocr" },
       panel("Image and language", [controls, actions(run), notice], "st-ocr-source"),
       panel("", [field("Recognized text", output),
         actions(T.copyButton(() => output.value, "Copy text"),
@@ -266,11 +266,9 @@
     const outputs = [];
     const zip = runZip(() => outputs, "converted-photos.zip", notice);
     const form = el("form");
+    const controls = el("fieldset", { class: "fw-controls" }, grid(field("HEIC or HEIF photos (up to 20)", files), field("JPG quality (%)", quality)));
     const run = el("button", { type: "submit", class: "tp-btn tp-btn-primary", disabled: true }, "Convert to JPG");
-    const controls = el("fieldset", { class: "fw-controls studio-split" },
-      panel("Source photos", [field("HEIC or HEIF photos (up to 20)", files), notice, results], "studio-pane studio-source"),
-      panel("JPG settings", [field("JPG quality (%)", quality), actions(run, zip)], "studio-pane studio-controls"));
-    form.append(controls);
+    form.append(controls, actions(run, zip), notice, results);
     const clear = () => {
       outputs.length = 0;
       results.replaceChildren();
@@ -325,13 +323,11 @@
     const orientation = select([["Match each original page", "auto"], ["Portrait", "portrait"], ["Landscape", "landscape"]], "auto");
     const margin = number(0, 60, 10, 0.1);
     margin.required = true;
+    const controls = el("fieldset", { class: "fw-controls" }, field("PDF file", file),
+      grid(field("Paper size", paper), field("Orientation", orientation), field("Margins on all sides (mm)", margin)));
     const notice = live();
     const run = el("button", { type: "submit", class: "tp-btn tp-btn-primary", disabled: true }, "Download resized PDF");
-    const controls = el("fieldset", { class: "fw-controls studio-split" },
-      panel("Source document", [field("PDF file", file), notice], "studio-pane studio-source"),
-      panel("Paper settings", [field("Paper size", paper), field("Orientation", orientation),
-        field("Margins on all sides (mm)", margin), actions(run)], "studio-pane studio-controls"));
-    const form = el("form", {}, controls);
+    const form = el("form", {}, controls, actions(run), notice);
     file.addEventListener("change", () => {
       run.disabled = !file.files.length;
       notice.textContent = "";
@@ -478,11 +474,9 @@
 
     const pageControls = actions(previous, pageLabel, next);
     pageControls.classList.add("fw-redaction-controls");
-    const editor = el("div", { class: "studio-split", "data-workflow": "redact-document" },
-      panel("Preview", [pageControls, view], "studio-pane studio-source"),
-      panel("Redaction controls", [review,
-        el("details", { class: "fw-details" }, el("summary", { text: "Add a box by position" }), boxForm),
-        actions(undo, save)], "studio-pane studio-controls"));
+    const editor = el("div", {}, pageControls, view, review,
+      el("details", { class: "fw-details" }, el("summary", { text: "Add a box by position" }), boxForm),
+      actions(undo, save));
     const sync = () => {
       const ready = Boolean(preview);
       const count = [...masks.values()].reduce((sum, list) => sum + list.length, 0);

@@ -1,30 +1,27 @@
-/* Public color, typography and shared workspace components. */
-html[data-public-ui][data-theme="dark"] { color-scheme: dark; }
-html[data-public-ui][data-theme="light"] { color-scheme: light; }
-
+/* Approved SanuwarTools workspace reference: clear, compact, task-first. */
 body.pro-theme.v2.bp.nx.wb-ui.reference-ui {
-  --wb-bg: #f4f7f5; --wb-card: #fff; --wb-card-2: #eef5f1;
-  --wb-ink: #14241d; --wb-ink-2: #24382f; --wb-muted: #4f655a; --wb-faint: #4f655a;
-  --wb-line: #d9e4de; --wb-line-strong: #a1b7ab; --wb-soft: #edf4f0;
-  --wb-accent: #155b42; --wb-accent-2: #104a36; --wb-accent-ink: #fff; --wb-accent-wash: #dff3e8;
-  --wb-header-bg: #fff; --wb-radius: 16px; --wb-radius-sm: 10px; --wb-wrap: 1440px;
+  --wb-bg: #fff; --wb-card: #fff; --wb-card-2: #fafaff;
+  --wb-ink: #111321; --wb-ink-2: #303244; --wb-muted: #56596d; --wb-faint: #62657a;
+  --wb-line: #e0e1eb; --wb-line-strong: #c5c7d9; --wb-soft: #f2f1fc;
+  --wb-accent: #3424bd; --wb-accent-2: #5842d9; --wb-accent-wash: #eeebff;
+  --wb-header-bg: #fff; --wb-radius: 14px; --wb-radius-sm: 10px; --wb-wrap: 1440px;
   --desk-purple: #6740ed; --desk-purple-bg: #f0eaff;
   --desk-blue: #0874dc; --desk-blue-bg: #eaf3ff;
   --desk-red: #db3543; --desk-red-bg: #ffedef;
-  --desk-green: #126c4c; --desk-green-bg: #dff3e8;
+  --desk-green: #187b39; --desk-green-bg: #eaf6ed;
   color: var(--wb-ink); background: var(--wb-bg); font-family: Inter, sans-serif;
   -webkit-font-smoothing: antialiased;
 }
 [data-theme="dark"] body.pro-theme.v2.bp.nx.wb-ui.reference-ui {
-  --wb-bg: #0c100f; --wb-card: #141a18; --wb-card-2: #19211e;
-  --wb-ink: #f3f7f5; --wb-ink-2: #e1e9e5; --wb-muted: #94a39c; --wb-faint: #94a39c;
-  --wb-line: #232d29; --wb-line-strong: #52645b; --wb-soft: #19211e;
-  --wb-accent: #10b981; --wb-accent-2: #46dba8; --wb-accent-ink: #071610; --wb-accent-wash: #16372b;
-  --wb-header-bg: #0e1411;
+  --wb-bg: #14141d; --wb-card: #1c1c29; --wb-card-2: #222133;
+  --wb-ink: #f5f5ff; --wb-ink-2: #dcdced; --wb-muted: #b9b9ce; --wb-faint: #adadc3;
+  --wb-line: #38384c; --wb-line-strong: #67657f; --wb-soft: #302a48;
+  --wb-accent: #b6a6ff; --wb-accent-2: #c7baff; --wb-accent-wash: #362c54;
+  --wb-header-bg: #14141d;
   --desk-purple: #c4a4ff; --desk-purple-bg: #35274c;
   --desk-blue: #84baff; --desk-blue-bg: #20324b;
   --desk-red: #ffa0a7; --desk-red-bg: #49262e;
-  --desk-green: #65dfb0; --desk-green-bg: #16372b;
+  --desk-green: #8bd8a0; --desk-green-bg: #223c2c;
 }
 body.reference-ui::before, body.reference-ui::after { display: none; }
 body.pro-theme.v2.bp.nx.wb-ui.reference-ui .wrap { width: min(100% - 80px, 1440px); }
@@ -36,14 +33,14 @@ body.pro-theme.v2.bp.nx.wb-ui.reference-ui .wb-header-inner { height: 56px; gap:
 body.pro-theme.v2.bp.nx.wb-ui.reference-ui .wb-brand { font-size: 26px; font-weight: 750; letter-spacing: -.04em; gap: 10px; white-space: nowrap; }
 body.pro-theme.v2.bp.nx.wb-ui.reference-ui .wb-brand-mark { width: 32px; height: 32px; padding: 0; background: transparent; border: 0; box-shadow: none; }
 body.pro-theme.v2.bp.nx.wb-ui.reference-ui .wb-brand-mark svg { width: 32px; height: 32px; fill: var(--wb-accent); }
-body.pro-theme.v2.bp.nx.wb-ui.reference-ui .wb-brand-mark svg rect:nth-child(1), body.pro-theme.v2.bp.nx.wb-ui.reference-ui .desk-footer-brand svg rect:nth-child(1) { fill: var(--wb-accent); }
-body.pro-theme.v2.bp.nx.wb-ui.reference-ui .wb-brand-mark svg rect:nth-child(4), body.pro-theme.v2.bp.nx.wb-ui.reference-ui .desk-footer-brand svg rect:nth-child(4) { fill: #10b981; }
+body.pro-theme.v2.bp.nx.wb-ui.reference-ui .wb-brand-mark svg rect:nth-child(1), body.pro-theme.v2.bp.nx.wb-ui.reference-ui .desk-footer-brand svg rect:nth-child(1) { fill: #8b5cf6; }
+body.pro-theme.v2.bp.nx.wb-ui.reference-ui .wb-brand-mark svg rect:nth-child(4), body.pro-theme.v2.bp.nx.wb-ui.reference-ui .desk-footer-brand svg rect:nth-child(4) { fill: #a184f6; }
 body.pro-theme.v2.bp.nx.wb-ui.reference-ui .wb-brand-dot { color: var(--wb-accent); }
 body.pro-theme.v2.bp.nx.wb-ui.reference-ui .wb-nav { flex: 1; justify-content: center; gap: 8px; }
 body.pro-theme.v2.bp.nx.wb-ui.reference-ui .wb-nav-control > a { color: var(--wb-ink); font-size: 14px; padding-left: 8px; }
 body.pro-theme.v2.bp.nx.wb-ui.reference-ui .wb-nav-toggle { color: var(--wb-ink); }
 body.pro-theme.v2.bp.nx.wb-ui.reference-ui .wb-actions { gap: 8px; }
-body.pro-theme.v2.bp.nx.wb-ui.reference-ui .wb-signin { background: var(--wb-accent); color: var(--wb-accent-ink); border: 1px solid var(--wb-accent); border-radius: 999px; box-shadow: none; padding: 10px 18px; min-height: 42px; font-size: 13px; font-weight: 550; }
+body.pro-theme.v2.bp.nx.wb-ui.reference-ui .wb-signin { background: var(--wb-accent); color: #fff; border: 1px solid var(--wb-accent); border-radius: 9px; box-shadow: none; padding: 10px 18px; min-height: 42px; font-size: 13px; font-weight: 550; }
 body.pro-theme.v2.bp.nx.wb-ui.reference-ui .wb-icon-btn, body.pro-theme.v2.bp.nx.wb-ui.reference-ui .wb-search-trigger { color: var(--wb-ink); }
 body.pro-theme.v2.bp.nx.wb-ui.reference-ui .wb-palette { --wb-card: var(--wb-bg); }
 body.pro-theme.v2.bp.nx.wb-ui.reference-ui .desk-page { padding-top: 32px; padding-bottom: 20px; }
@@ -58,7 +55,7 @@ body.pro-theme.v2.bp.nx.wb-ui.reference-ui .desk-search input { flex: 1; min-wid
 body.pro-theme.v2.bp.nx.wb-ui.reference-ui .desk-search input:focus { outline: none; }
 body.pro-theme.v2.bp.nx.wb-ui.reference-ui .desk-search input::placeholder { color: var(--wb-muted); opacity: 1; }
 body.pro-theme.v2.bp.nx.wb-ui.reference-ui .desk-search kbd { color: var(--wb-muted); background: var(--wb-card); border: 1px solid var(--wb-line); border-radius: 6px; padding: 4px 8px; font: inherit; font-size: 12px; white-space: nowrap; }
-body.pro-theme.v2.bp.nx.wb-ui.reference-ui .desk-search > button { min-height: 44px; padding: 8px 26px; border: 0; background: var(--wb-accent); color: var(--wb-accent-ink); border-radius: 9px; font: inherit; font-size: 15px; font-weight: 600; cursor: pointer; }
+body.pro-theme.v2.bp.nx.wb-ui.reference-ui .desk-search > button { min-height: 44px; padding: 8px 26px; border: 0; background: var(--wb-accent); color: #fff; border-radius: 9px; font: inherit; font-size: 15px; font-weight: 600; cursor: pointer; }
 body.pro-theme.v2.bp.nx.wb-ui.reference-ui .desk-quick { display: flex; flex-wrap: wrap; gap: 0; margin-top: 9px; }
 body.pro-theme.v2.bp.nx.wb-ui.reference-ui .desk-quick a { display: flex; align-items: center; gap: 10px; min-height: 44px; padding: 0 24px; color: var(--wb-accent); font-size: 14px; font-weight: 500; text-decoration: underline; text-underline-offset: 3px; }
 body.pro-theme.v2.bp.nx.wb-ui.reference-ui .desk-quick a:first-child { padding-left: 0; }
@@ -243,22 +240,4 @@ body.pro-theme.v2.bp.nx.wb-ui.reference-ui .desk-guide-row small {
     white-space: nowrap;
   }
   .wb-ui .wb-nav-toggle { width: 18px; }
-}
-
-/* Keep account access next to the public theme control on small screens. */
-@media (max-width: 760px) {
-  body.pro-theme.v2.bp.nx.wb-ui.reference-ui .wb-signin {
-    display: inline-flex;
-    align-items: center;
-    white-space: nowrap;
-    padding-inline: 11px;
-    font-size: 12px;
-  }
-}
-@media (max-width: 430px) {
-  body.pro-theme.v2.bp.nx.wb-ui.reference-ui .wb-header-inner { gap: 6px; }
-  body.pro-theme.v2.bp.nx.wb-ui.reference-ui .wb-brand { font-size: 17px; gap: 5px; }
-  body.pro-theme.v2.bp.nx.wb-ui.reference-ui .wb-brand-mark,
-  body.pro-theme.v2.bp.nx.wb-ui.reference-ui .wb-brand-mark svg { width: 23px; height: 23px; }
-  body.pro-theme.v2.bp.nx.wb-ui.reference-ui .wb-actions { gap: 2px; }
 }

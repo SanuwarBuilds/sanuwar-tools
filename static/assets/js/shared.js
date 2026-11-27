@@ -186,9 +186,7 @@ window.ST = (() => {
     }
     document
       .querySelector('meta[name="theme-color"]')
-      ?.setAttribute("content", root.hasAttribute("data-public-ui")
-        ? (dark ? "#0c100f" : "#f4f7f5")
-        : (dark ? "#0c0817" : "#fbfaff"));
+      ?.setAttribute("content", dark ? "#0c0817" : "#fbfaff");
   };
   try {
     root.dataset.theme =

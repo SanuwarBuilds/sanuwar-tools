@@ -55,7 +55,6 @@
   }
 
   if (shelf) {
-    const history = shelf.querySelector("[data-workspace-history]");
     const isWorkspace = shelf.classList.contains("desk-workspace");
     const iconFor = path => path.includes("pdf") ? ["pdf", "red"] : path.includes("image") || path.includes("photo") ? ["image", "blue"] : path.includes("calculator") ? ["calculator", "blue"] : path.includes("json") ? ["braces", "green"] : ["grid", "purple"];
     const favoriteButton = ({path, name}, saved) => {
@@ -103,16 +102,14 @@
       }
       if (isWorkspace) {
         const defaults = shelf.querySelector("[data-workspace-default]");
-        const hasHistory = Boolean(shelf.querySelector("[data-tool-list]:not([hidden])"));
-        if (history) history.hidden = !hasHistory;
-        else shelf.hidden = !defaults && !hasHistory;
+        shelf.hidden = !defaults && !shelf.querySelector("[data-tool-list]:not([hidden])");
         if (defaults) defaults.hidden = !shelf.querySelector('[data-tool-list="recent"]').hidden;
         shelf.querySelectorAll("[data-workspace-favorite]").forEach(toggle => {
           const favorite = saved.favorites.some(item => item.path === toggle.dataset.workspaceFavorite);
           toggle.setAttribute("aria-pressed", String(favorite));
           toggle.setAttribute("aria-label", `${favorite ? "Remove" : "Save"} ${toggle.dataset.favoriteName} ${favorite ? "from" : "to"} favorites`);
         });
-        if (focusPath) [...shelf.querySelectorAll("[data-workspace-favorite]")].find(toggle => toggle.dataset.workspaceFavorite === focusPath && !toggle.closest("[hidden]"))?.focus();
+        if (focusPath) [...shelf.querySelectorAll("[data-workspace-favorite]")].find(toggle => toggle.dataset.workspaceFavorite === focusPath)?.focus();
       } else shelf.hidden = !shelf.querySelector("[data-tool-list]:not([hidden])");
     };
     shelf.addEventListener("click", event => {

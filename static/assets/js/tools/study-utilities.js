@@ -35,17 +35,13 @@
     const submit = T.button(label, null, "primary", { type: "submit" });
     const status = el("p", { class: "api-feedback", role: "status", "aria-atomic": "true" });
     const fields = compact ? el("div", { class: "study-weather-controls" }, controls, submit) : [controls, help, T.actions(submit)];
-    const form = compact ? el("form", {}, fields, status, result) :
-      el("form", { "data-workflow": "lookup" }, el("div", { class: "task-query" }, fields, status),
-        T.resultArea(label === "Extract transcript" ? "Transcript" : "Results", result,
-          label === "Extract transcript" ? "Choose an SRT or VTT file to extract its text." : "Submit the form to see results here."));
+    const form = el("form", {}, fields, status, result);
     form.addEventListener("submit", async event => {
       event.preventDefault();
       if (submit.disabled) return;
       result.replaceChildren();
       status.classList.remove("api-error");
       status.textContent = "Loading…";
-      result.setAttribute("aria-busy", "true");
       submit.disabled = true;
       try {
         status.textContent = await run() || "";
@@ -53,7 +49,6 @@
         status.classList.add("api-error");
         status.textContent = error.message || "This lookup is unavailable.";
       } finally {
-        result.removeAttribute("aria-busy");
         submit.disabled = false;
       }
     });

@@ -111,24 +111,7 @@
       status.classList.toggle('error', error);
     }
   }
-  const studioChoices = ['ratio', 'format'].map((name) => {
-    const select = $('photo-' + name);
-    const radios = [...document.getElementsByName('photo-' + name + '-choice')];
-    radios.forEach((radio) => radio.addEventListener('change', () => {
-      if (!radio.checked) return;
-      select.value = radio.value;
-      select.dispatchEvent(new Event(name === 'format' ? 'input' : 'change'));
-    }));
-    return { select, radios };
-  });
-  function syncStudioChoices() {
-    studioChoices.forEach(({ select, radios }) => radios.forEach((radio) => {
-      radio.checked = radio.value === select.value;
-    }));
-  }
-
   function syncQuality() {
-    syncStudioChoices();
     $('photo-quality-field').hidden = $('photo-format').value !== 'image/jpeg';
     $('quality-value').textContent = quality() + '%';
   }
@@ -336,7 +319,6 @@
 
   function render(estimate = true) {
     if (!source) return;
-    syncStudioChoices();
     message('');
     try {
       const v = values();
@@ -345,9 +327,7 @@
       canvas.height = Math.max(1, Math.round(v.height * scale));
       paint(canvas, canvas.width, canvas.height, comparing);
       if (grid && !comparing) drawGrid(canvas.width, canvas.height);
-      const dimensions = `${v.width} × ${v.height} px`;
-      $('output-dimensions').textContent = dimensions;
-      $('photo-frame-dimensions').textContent = dimensions;
+      $('output-dimensions').textContent = `${v.width} × ${v.height} px`;
       $('output-print').textContent = `${(v.width / v.dpi * 25.4).toFixed(1)} × ${(v.height / v.dpi * 25.4).toFixed(1)} mm`;
       const rect = core.crop(transformed.width, transformed.height, v.width, v.height, Number($('photo-zoom').value) / 100, Number($('photo-x').value) / 100, Number($('photo-y').value) / 100);
       $('photo-warning').textContent = v.width > rect.width || v.height > rect.height ? 'This enlarges the original crop. Use a higher-resolution photo for sharper results.' : '';
@@ -359,7 +339,6 @@
       if (estimate) scheduleEstimate();
     } catch (error) {
       $('output-dimensions').textContent = 'Check dimensions';
-      $('photo-frame-dimensions').textContent = 'Check dimensions';
       $('photo-warning').textContent = error.message;
     }
   }

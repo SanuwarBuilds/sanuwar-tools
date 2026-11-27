@@ -120,7 +120,7 @@
 {% block scripts %}
 <script nonce="{{ csp_nonce }}" src="/assets/js/eduhelp.js?v=2" defer></script>
 {% if study_tools | selectattr('slug', 'equalto', 'weather-air-quality') | list %}
-<script nonce="{{ csp_nonce }}" src="/assets/js/tools/core.js?v=4" defer></script>
-<script nonce="{{ csp_nonce }}" src="/assets/js/tools/study-utilities.js?v=3" defer></script>
+<script nonce="{{ csp_nonce }}" src="/assets/js/tools/core.js?v=3" defer></script>
+<script nonce="{{ csp_nonce }}" src="/assets/js/tools/study-utilities.js?v=2" defer></script>
 {% endif %}
 {% endblock %}

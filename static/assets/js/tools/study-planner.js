@@ -163,9 +163,7 @@
         return el("section", { class: "fw-target-day" },
           el("h3", { text: day === today ? "Today · " + displayDate(day) : displayDate(day) }), list);
       });
-      taskList.replaceChildren(...(sections.length ? sections : [el("p", {
-        class: "task-empty", text: "Add a chapter or topic to start your revision plan.",
-      })]));
+      taskList.replaceChildren(...sections);
     }
 
     const add = el("form", {},
@@ -182,7 +180,6 @@
       chapter.focus();
     });
 
-    root.dataset.workflow = "plan-study";
     root.replaceChildren(
       panel("Study timer", [actions(...modes), timerDisplay, durationField, actions(start, reset), timerNotice, focusCount], "fw-timer-panel"),
       panel("Revision plan", [field("Exam date (optional)", examDate), examStatus, add, progressLabel, progress, taskList, storageStatus]),

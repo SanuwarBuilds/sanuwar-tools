@@ -64,22 +64,18 @@
   function form(label, controls, result, run, help) {
     const submit = T.button(label, null, "primary", { type: "submit" });
     const status = feedback();
-    const node = el("form", { "data-workflow": "lookup" },
-      el("div", { class: "task-query" }, controls, help, T.actions(submit), status.node),
-      T.resultArea("Results", result, "Submit the form to see results here."));
+    const node = el("form", {}, controls, help, T.actions(submit), status.node, result);
     node.addEventListener("submit", async (event) => {
       event.preventDefault();
       if (submit.disabled) return;
       result.replaceChildren();
       submit.disabled = true;
-      result.setAttribute("aria-busy", "true");
-      status.say("Waiting for the provider…");
+      status.say("Working…");
       try {
         await run(status.say);
       } catch (error) {
         status.say(error.message || "Something went wrong. Try again.", true);
       } finally {
-        result.removeAttribute("aria-busy");
         submit.disabled = false;
       }
     });
@@ -174,10 +170,11 @@
       preview.style.color = `rgb(${foreground.join(",")})`;
       preview.style.backgroundColor = `rgb(${background.join(",")})`;
       converted.replaceChildren(
+        colorValues("Foreground", foreground),
+        colorValues("Background", background),
         card("WCAG contrast", preview, el("strong", {}, (Math.floor(ratio * 100) / 100).toFixed(2) + ":1"),
           paragraph(`Normal text: AA ${ratio >= 4.5 ? "passes" : "fails"}, AAA ${ratio >= 7 ? "passes" : "fails"}.`),
           paragraph(`Large text: AA ${ratio >= 3 ? "passes" : "fails"}, AAA ${ratio >= 4.5 ? "passes" : "fails"}.`)),
-        T.disclosure("Color values and copy actions", colorValues("Foreground", foreground), colorValues("Background", background)),
       );
     };
     [fg, bg].forEach(input => input.addEventListener("input", update));

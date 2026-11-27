@@ -370,7 +370,7 @@ class ToolHubTests(unittest.TestCase):
             if bundle=='calculators':
                 found=re.findall(r'slug:\s*"([a-z0-9-]+)"',source)
             else:
-                found=re.findall(r'(?:T\.register|registerTextTool|codeTool|singleHashTool)\("([a-z0-9-]+)"',source)
+                found=re.findall(r'(?:T\.register|codeTool|singleHashTool)\("([a-z0-9-]+)"',source)
             for slug in found:
                 registered.setdefault(slug,bundle)
         self.assertEqual(set(registered),set(slugs))

@@ -1114,7 +1114,7 @@
         el("div", { class: "tp-actions pe-file-actions" }, changeFile, undo, redo), save),
       el("div", { class: "pe-command-bar" },
         el("div", { class: "pe-tools", role: "group", "aria-label": "Editing tools" }, toolButtons.map(([, control]) => control), otherTools)),
-      el("div", { class: "pe-desk studio-split" }, el("div", { class: "pe-document-pane" }, stage, pagesPanel), inspector), exportNote);
+      el("div", { class: "pe-desk" }, pagesPanel, stage, inspector), exportNote);
     root.replaceChildren(panel("", [upload, notice, editor]));
     upload.addEventListener("dragover", (event) => {
       if (busy) return;

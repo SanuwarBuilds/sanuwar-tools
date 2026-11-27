@@ -9,10 +9,7 @@
     <p class="lm-print-meta"><span data-print-scope>India · State reference</span> · <span data-print-prepared>Prepared</span> <span data-print-date></span> · <span data-print-badge>Reference data · Updated 12 Nov 2026</span></p>
     <p class="lm-print-note" data-print-note>Reference conversion only. Confirm with official land records or a licensed surveyor.</p>
   </div>
-  <div class="studio-toolbar">
-    <nav class="tp-crumb" aria-label="Breadcrumb"><a href="/tools">Tools</a><span aria-hidden="true">/</span><span aria-current="page">Land Measurement Calculator</span></nav>
-    <button class="studio-search" type="button" data-site-search-open aria-haspopup="dialog" aria-controls="wb-palette">Search <kbd data-wb-kbd>⌘K</kbd></button>
-  </div>
+  <nav class="tp-crumb" aria-label="Breadcrumb"><a href="/">Home</a><span aria-hidden="true">/</span><a href="/tools">All tools</a><span aria-hidden="true">/</span><span aria-current="page">Land Measurement Calculator</span></nav>
 
   <header class="st-tool-title">
     <div>
@@ -93,7 +90,6 @@
     </article>
 
     <aside class="lm-aside-col">
-      <details class="studio-help"><summary>How to use &amp; related tools</summary>
       <section class="lm-card">
         <h2>How it works</h2>
         <p><strong>01</strong> Choose your state and the local standard used in your land records.</p>
@@ -113,16 +109,15 @@
         <h2>More tools</h2>
         <p><a href="/tools/area-converter">Area converter</a> · <a href="/tools/percentage-calculator">Percentage calculator</a> · <a href="/tools/loan-emi-calculator">Loan EMI calculator</a></p>
       </section>
-      </details>
     </aside>
   </div>
 </section>
 {% endblock %}
 {% block scripts %}
-<script nonce="{{ csp_nonce }}" src="/assets/js/tools/core.js?v=4" defer></script>
+<script nonce="{{ csp_nonce }}" src="/assets/js/tools/core.js?v=2" defer></script>
 <script nonce="{{ csp_nonce }}" src="/assets/js/tools/land-data.js?v=1" defer></script>
 <script nonce="{{ csp_nonce }}" src="/assets/js/tools/land-engine.js?v=1" defer></script>
 <script nonce="{{ csp_nonce }}" src="/assets/js/tools/land-i18n.js?v=3" defer></script>
-<script nonce="{{ csp_nonce }}" src="/assets/js/tools/land.js?v=4" defer></script>
+<script nonce="{{ csp_nonce }}" src="/assets/js/tools/land.js?v=3" defer></script>
 <script nonce="{{ csp_nonce }}" src="/assets/js/tools/boot.js?v=1" defer></script>
 {% endblock %}

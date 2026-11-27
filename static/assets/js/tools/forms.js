@@ -38,12 +38,9 @@
     const limit = input({ type: "number", min: 0.001, step: "any", placeholder: "Optional", inputmode: "decimal" });
     const imageFields = T.twoCol(field("Required format", format), field("Width (px)", width), field("Height (px)", height));
     const results = el("div", { class: "tp-form-results", "aria-live": "polite" });
-    const form = el("form", { class: "studio-split", "data-workflow": "validate-file" },
-      el("section", { class: "studio-pane studio-source" }, field("File to check", picker),
-        T.resultArea("Validation results", results, "Choose a file, enter the requirements and select Check file.")),
-      el("section", { class: "studio-pane studio-controls" }, field("What are you submitting?", role), imageFields,
+    const form = el("form", {}, field("File to check", picker), field("What are you submitting?", role), imageFields,
       field("Maximum file size (KB)", limit, "1 KB = 1,000 bytes. Enter the limit shown on your form."),
-      actions(el("button", { type: "submit", class: "tp-btn tp-btn-primary" }, "Check file"))));
+      actions(el("button", { type: "submit", class: "tp-btn tp-btn-primary" }, "Check file")));
     let revision = 0;
     form.addEventListener("input", () => {
       revision++;
@@ -119,7 +116,7 @@
         results.append(el("a", { href: `/photo-tools?${params}`, class: "tp-btn tp-btn-ghost" }, "Open Photo & Signature Tools"));
       }
     });
-    root.replaceChildren(panel("", form));
+    root.replaceChildren(panel("", [form, results]));
   });
 
   const canvas = (width = 1, height = 1) => el("canvas", { width, height });
@@ -379,13 +376,13 @@
       }
     }, "primary", { disabled: true });
 
-    const editor = el("div", { class: "tp-sign-editor studio-split", "data-workflow": "sign-document", hidden: true },
-      el("section", { class: "studio-pane studio-source", "aria-label": "Document preview" }, actions(previous, indicator, next), sheet),
-      el("section", { class: "studio-pane studio-controls", "aria-label": "Signature settings" },
-        field("Add to page", kind), ...settings.values(), field("Text size (pt)", size),
-        el("p", { class: "tp-hint", text: "Click the page to place an item, or set its position and use Place at position." }),
-        T.twoCol(field("From left (%)", x), field("From top (%)", y)),
-        actions(placeButton), marksList, actions(save))
+    const editor = el("div", { class: "tp-sign-editor", hidden: true },
+      actions(previous, indicator, next),
+      field("Add to page", kind), ...settings.values(),
+      field("Text size (pt)", size),
+      el("p", { class: "tp-hint", text: "Click the page to place an item, or set its position and use Place at position." }),
+      T.twoCol(field("From left (%)", x), field("From top (%)", y)),
+      actions(placeButton), sheet, marksList, actions(save)
     );
     picker.addEventListener("change", async () => {
       const file = picker.files[0];

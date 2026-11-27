@@ -15,104 +15,6 @@
     return out;
   };
 
-  const editors = new Set([
-    "base64", "base32", "base58", "url-encode", "html-encode", "case-converter", "reverse-string",
-    "line-sorter", "bbcode", "markdown", "yaml-json", "csv-json", "xml-json", "toml-json", "yaml-toml",
-    "css-beautifier-minifier", "html-beautifier-minifier", "javascript-beautifier-minifier", "sql-formatter",
-  ]);
-  const generators = new Set(["lorem-ipsum", "uuid", "random-password-generator", "htpasswd-generator"]);
-  const checks = new Set(["md5", "sha1", "sha256", "sha512", "hash-generator", "checksum"]);
-  const archives = new Set(["zip", "unzip", "untar"]);
-
-  const resultPanel = (label, ...content) => el("section", { class: "task-output" },
-    el("h2", { class: "task-section-title", text: label }), content);
-
-  function arrangeTextTool(root, slug) {
-    const panel = root.querySelector(":scope > .tp-panel");
-    const output = panel?.querySelector(".js-out, .js-results");
-    if (!panel) return;
-    const shortcuts = panel.querySelector(".tp-btn-primary[data-run], .tp-btn-primary[data-case], .tp-btn-primary[data-decode]");
-    if (shortcuts) {
-      shortcuts.setAttribute("aria-keyshortcuts", "Control+Enter Meta+Enter");
-      panel.addEventListener("keydown", event => {
-        if (event.key === "Enter" && (event.metaKey || event.ctrlKey) && !event.isComposing) {
-          event.preventDefault();
-          shortcuts.click();
-        }
-      });
-    }
-    if (editors.has(slug) || generators.has(slug) || checks.has(slug)) {
-      const outputField = output?.closest(".tp-field") || output;
-      if (!outputField) return;
-      const resultLabel = outputField.querySelector(".tp-label")?.textContent || (checks.has(slug) ? "Verification result" : "Result");
-      if (output instanceof HTMLTextAreaElement && !output.placeholder) output.placeholder =
-        generators.has(slug) ? "Generated content appears here." : "Your result appears here after processing.";
-      const controls = [...panel.querySelectorAll("button[data-copy], button[data-download]")];
-      const metrics = generators.has(slug) ? panel.querySelector(".tp-kv") : null;
-      const responseActions = controls.length ? T.actions(...controls) : null;
-      const result = outputField === output ? resultPanel(resultLabel, output, responseActions) :
-        el("section", { class: "task-output", "aria-label": resultLabel }, outputField, metrics, responseActions);
-      const input = el("section", { class: "task-input" }, [...panel.children]);
-      const mode = editors.has(slug) ? "editor" : generators.has(slug) ? "generate" : "verify";
-      panel.dataset.workflow = mode;
-      panel.replaceChildren(el("div", { class: "task-pair" }, input, result));
-      input.querySelectorAll(".tp-cols:empty, .tp-actions:empty").forEach(node => node.remove());
-      if (checks.has(slug)) output.dataset.taskEmpty = slug === "checksum"
-        ? "Choose a file and enter its published checksum to verify it." : "Type text or choose a file to see its digest.";
-      return;
-    }
-    if (archives.has(slug)) {
-      const files = panel.querySelector(".js-files");
-      const unpacking = slug !== "zip";
-      const actions = panel.querySelector(".tp-actions");
-      const list = resultPanel(unpacking ? "Archive contents" : "Files to compress", files, actions);
-      files.dataset.taskEmpty = unpacking ? "Choose an archive to inspect its contents." : "Add files to include in the ZIP.";
-      panel.dataset.workflow = "archive";
-      panel.append(list);
-      return;
-    }
-    if (slug === "word-counter") {
-      const report = resultPanel("Text statistics", panel.querySelector(".tp-kv"), panel.querySelector(".js-top"));
-      const input = el("section", { class: "task-input" }, [...panel.children]);
-      panel.dataset.workflow = "measure-text";
-      panel.replaceChildren(el("div", { class: "task-pair" }, input, report));
-      return;
-    }
-    if (slug === "text-diff" || slug === "regex") {
-      const result = slug === "text-diff" ? output : panel.querySelector(".js-results");
-      const stats = panel.querySelector(".js-stats, .tp-kv");
-      result.dataset.taskEmpty = slug === "text-diff" ? "Compare two texts to see added and removed lines." : "Matching text appears here.";
-      const report = resultPanel(slug === "text-diff" ? "Changes" : "Matches", stats, result);
-      panel.insertBefore(report, panel.querySelector(":scope > .tp-panel"));
-      panel.dataset.workflow = "compare";
-      return;
-    }
-    if (slug === "json-formatter") {
-      output.placeholder = "Format, minify or sort your JSON to see the result.";
-      panel.dataset.workflow = "editor";
-      return;
-    }
-    if (slug === "base64-file-converter") {
-      panel.dataset.workflow = "file-data";
-      panel.querySelector(".js-file-slot").before(el("h2", { class: "task-section-title", text: "File to Base64" }));
-      panel.querySelector(".js-in").closest(".tp-field").before(el("h2", { class: "task-section-title", text: "Base64 data" }));
-      return;
-    }
-    if (slug === "basic-auth-header") {
-      panel.dataset.workflow = "credentials";
-      panel.firstElementChild.before(el("h2", { class: "task-section-title", text: "Encode credentials" }));
-      const decoder = panel.querySelector(":scope > .tp-panel");
-      const disclosure = T.disclosure("Decode credentials");
-      decoder.replaceWith(disclosure);
-      disclosure.append(decoder);
-    }
-  }
-
-  const registerTextTool = (slug, mount) => T.register(slug, root => {
-    mount(root);
-    arrangeTextTool(root, slug);
-  });
-
   const MD5_SHIFTS = [7, 12, 17, 22, 7, 12, 17, 22, 7, 12, 17, 22, 7, 12, 17, 22,
     5, 9, 14, 20, 5, 9, 14, 20, 5, 9, 14, 20, 5, 9, 14, 20,
     4, 11, 16, 23, 4, 11, 16, 23, 4, 11, 16, 23, 4, 11, 16, 23,
@@ -545,7 +447,7 @@
 
   const PRETTY_NAMES = { "Select": "SQL Select", "Insert": "SQL Insert", "Update": "SQL Update", "Delete": "SQL Delete" };
 
-  registerTextTool("base64", (root) => {
+  T.register("base64", (root) => {
     root.innerHTML = `<div class="tp-panel"><div class="tp-cols"><label class="tp-field"><span class="tp-label">Input</span><textarea class="tp-textarea js-in" rows="9" placeholder="Paste text or Base64 here…"></textarea></label><label class="tp-field"><span class="tp-label">Result</span><textarea class="tp-textarea is-output js-out" rows="9" readonly placeholder="Result appears here…"></textarea></label></div><div class="tp-actions"><button type="button" class="tp-btn tp-btn-primary" data-run="encode">Encode</button><button type="button" class="tp-btn" data-run="decode">Decode</button><button type="button" class="tp-btn tp-btn-ghost" data-copy>Copy</button><button type="button" class="tp-btn tp-btn-ghost" data-download>Download</button><label class="tp-pill"><input type="checkbox" class="js-urlsafe"> URL-safe</label></div><p class="tp-hint">UTF-8 aware. URL-safe mode swaps + / for - _.</p></div>`;
     const run = (mode) => {
       try {
@@ -562,7 +464,7 @@
     q("[data-download]", root).addEventListener("click", () => T.download("base64.txt", getOutput(root), "text/plain"));
   });
 
-  registerTextTool("base64-file-converter", (root) => {
+  T.register("base64-file-converter", (root) => {
     root.innerHTML = `<div class="tp-panel"><div class="js-file-slot"></div><label class="tp-field"><span class="tp-label">Base64 or data URL</span><textarea class="tp-textarea js-in" rows="8" placeholder="data:image/png;base64,… or raw Base64"></textarea></label><div class="tp-actions"><button type="button" class="tp-btn tp-btn-primary" data-decode>Decode to file</button><button type="button" class="tp-btn" data-copy>Copy data URL</button><button type="button" class="tp-btn tp-btn-ghost" data-download>Download text</button></div><p class="tp-hint">Files are converted locally with FileReader.</p></div>`;
     const drop = fileDrop({ accept: "", label: "Drop a file to make a data URL", onFiles: async ([file]) => {
       try {
@@ -589,7 +491,7 @@
     q("[data-download]", root).addEventListener("click", () => T.download("base64-data.txt", q(".js-in", root).value, "text/plain"));
   });
 
-  registerTextTool("base32", (root) => {
+  T.register("base32", (root) => {
     root.innerHTML = `<div class="tp-panel"><div class="tp-cols"><label class="tp-field"><span class="tp-label">Input</span><textarea class="tp-textarea js-in" rows="9" placeholder="Text or Base32 string…"></textarea></label><label class="tp-field"><span class="tp-label">Result</span><textarea class="tp-textarea is-output js-out" rows="9" readonly></textarea></label></div><div class="tp-actions"><button type="button" class="tp-btn tp-btn-primary" data-run="encode">Encode</button><button type="button" class="tp-btn" data-run="decode">Decode</button><button type="button" class="tp-btn tp-btn-ghost" data-copy>Copy</button></div></div>`;
     const run = (mode) => {
       try {
@@ -602,7 +504,7 @@
     q("[data-copy]", root).addEventListener("click", () => copy(getOutput(root)));
   });
 
-  registerTextTool("base58", (root) => {
+  T.register("base58", (root) => {
     root.innerHTML = `<div class="tp-panel"><div class="tp-cols"><label class="tp-field"><span class="tp-label">Input</span><textarea class="tp-textarea js-in" rows="9" placeholder="Text or Base58 string…"></textarea></label><label class="tp-field"><span class="tp-label">Result</span><textarea class="tp-textarea is-output js-out" rows="9" readonly></textarea></label></div><div class="tp-actions"><button type="button" class="tp-btn tp-btn-primary" data-run="encode">Encode</button><button type="button" class="tp-btn" data-run="decode">Decode</button><button type="button" class="tp-btn tp-btn-ghost" data-copy>Copy</button></div><p class="tp-hint">Uses the Bitcoin Base58 alphabet.</p></div>`;
     const run = (mode) => {
       try {
@@ -615,7 +517,7 @@
     q("[data-copy]", root).addEventListener("click", () => copy(getOutput(root)));
   });
 
-  registerTextTool("url-encode", (root) => {
+  T.register("url-encode", (root) => {
     root.innerHTML = `<div class="tp-panel"><div class="tp-cols"><label class="tp-field"><span class="tp-label">Input</span><textarea class="tp-textarea js-in" rows="9" placeholder="https://example.com/search?q=hello world"></textarea></label><label class="tp-field"><span class="tp-label">Result</span><textarea class="tp-textarea is-output js-out" rows="9" readonly></textarea></label></div><div class="tp-actions"><button type="button" class="tp-btn tp-btn-primary" data-run="component">Encode component</button><button type="button" class="tp-btn" data-run="uri">Encode full URL</button><button type="button" class="tp-btn" data-run="decode">Decode</button><button type="button" class="tp-btn tp-btn-ghost" data-copy>Copy</button></div><p class="tp-hint">Encode component escapes &amp; = ? / #; full URL keeps URL separators.</p></div>`;
     const run = (mode) => {
       try {
@@ -628,7 +530,7 @@
     q("[data-copy]", root).addEventListener("click", () => copy(getOutput(root)));
   });
 
-  registerTextTool("html-encode", (root) => {
+  T.register("html-encode", (root) => {
     root.innerHTML = `<div class="tp-panel"><div class="tp-cols"><label class="tp-field"><span class="tp-label">Input</span><textarea class="tp-textarea js-in" rows="9" placeholder="<p>Hello & welcome</p>"></textarea></label><label class="tp-field"><span class="tp-label">Result</span><textarea class="tp-textarea is-output js-out" rows="9" readonly></textarea></label></div><div class="tp-actions"><button type="button" class="tp-btn tp-btn-primary" data-run="encode">Escape HTML</button><button type="button" class="tp-btn" data-run="decode">Decode entities</button><button type="button" class="tp-btn tp-btn-ghost" data-copy>Copy</button></div></div>`;
     const decode = (value) => { const node = document.createElement("textarea"); node.innerHTML = value; return node.value; };
     const run = (mode) => {
@@ -639,7 +541,7 @@
     q("[data-copy]", root).addEventListener("click", () => copy(getOutput(root)));
   });
 
-  registerTextTool("case-converter", (root) => {
+  T.register("case-converter", (root) => {
     root.innerHTML = `<div class="tp-panel"><label class="tp-field"><span class="tp-label">Text</span><textarea class="tp-textarea js-in" rows="8" placeholder="paste text in any style"></textarea></label><div class="tp-actions">${["UPPER CASE", "lower case", "Title Case", "Sentence case", "camelCase", "PascalCase", "snake_case", "kebab-case", "CONSTANT_CASE"].map((label) => `<button type="button" class="tp-btn tp-btn-ghost" data-case="${label}">${label}</button>`).join("")}</div><label class="tp-field"><span class="tp-label">Result</span><textarea class="tp-textarea is-output js-out" rows="8" readonly></textarea></label><div class="tp-actions"><button type="button" class="tp-btn" data-copy>Copy</button></div></div>`;
     const words = (value) => splitWords(value);
     const transforms = {
@@ -660,7 +562,7 @@
     q("[data-copy]", root).addEventListener("click", () => copy(getOutput(root)));
   });
 
-  registerTextTool("reverse-string", (root) => {
+  T.register("reverse-string", (root) => {
     root.innerHTML = `<div class="tp-panel"><label class="tp-field"><span class="tp-label">Input</span><textarea class="tp-textarea js-in" rows="8"></textarea></label><div class="tp-actions"><button type="button" class="tp-btn tp-btn-primary" data-run="chars">Reverse characters</button><button type="button" class="tp-btn" data-run="words">Reverse words</button><button type="button" class="tp-btn" data-run="lines">Reverse lines</button><button type="button" class="tp-btn tp-btn-ghost" data-copy>Copy</button></div><label class="tp-field"><span class="tp-label">Result</span><textarea class="tp-textarea is-output js-out" rows="8" readonly></textarea></label></div>`;
     const run = (mode) => {
       const value = q(".js-in", root).value;
@@ -673,7 +575,7 @@
     q("[data-copy]", root).addEventListener("click", () => copy(getOutput(root)));
   });
 
-  registerTextTool("line-sorter", (root) => {
+  T.register("line-sorter", (root) => {
     root.innerHTML = `<div class="tp-panel"><label class="tp-field"><span class="tp-label">Lines</span><textarea class="tp-textarea js-in" rows="10" placeholder="One item per line…"></textarea></label><div class="tp-actions"><button type="button" class="tp-btn tp-btn-primary" data-run="asc">Sort A → Z</button><button type="button" class="tp-btn" data-run="desc">Sort Z → A</button><button type="button" class="tp-btn" data-run="dedupe">Remove duplicates</button><button type="button" class="tp-btn" data-run="reverse">Reverse</button><button type="button" class="tp-btn" data-run="shuffle">Shuffle</button><button type="button" class="tp-btn" data-run="trim">Trim lines</button><button type="button" class="tp-btn" data-run="empty">Remove empty</button><button type="button" class="tp-btn tp-btn-ghost" data-copy>Copy</button></div><label class="tp-field"><span class="tp-label">Result</span><textarea class="tp-textarea is-output js-out" rows="10" readonly></textarea></label></div>`;
     const run = (mode) => {
       let lines = q(".js-in", root).value.split(/\r?\n/);
@@ -689,7 +591,7 @@
     q("[data-copy]", root).addEventListener("click", () => copy(getOutput(root)));
   });
 
-  registerTextTool("word-counter", (root) => {
+  T.register("word-counter", (root) => {
     root.innerHTML = `<div class="tp-panel"><label class="tp-field"><span class="tp-label">Text</span><textarea class="tp-textarea js-in" rows="10" placeholder="Start typing or paste text…"></textarea></label><div class="tp-kv"><div><span>Words</span><strong data-stat="words">0</strong></div><div><span>Characters</span><strong data-stat="chars">0</strong></div><div><span>No spaces</span><strong data-stat="chars-ns">0</strong></div><div><span>Sentences</span><strong data-stat="sentences">0</strong></div><div><span>Paragraphs</span><strong data-stat="paragraphs">0</strong></div><div><span>Reading time</span><strong data-stat="reading">0 min</strong></div></div><div class="tp-chips-inline js-top"></div></div>`;
     const update = () => {
       const value = q(".js-in", root).value;
@@ -707,7 +609,7 @@
     update();
   });
 
-  registerTextTool("lorem-ipsum", (root) => {
+  T.register("lorem-ipsum", (root) => {
     root.innerHTML = `<div class="tp-panel"><div class="tp-cols"><label class="tp-field"><span class="tp-label">Amount</span><input class="tp-input" type="number" min="1" max="200" value="4"></label><label class="tp-field"><span class="tp-label">Unit</span><select class="tp-select js-unit"><option value="paragraphs">Paragraphs</option><option value="sentences">Sentences</option><option value="words">Words</option></select></label></div><div class="tp-chips-inline"><label class="tp-pill"><input type="checkbox" class="js-start" checked> Start with “Lorem ipsum”</label><label class="tp-pill"><input type="checkbox" class="js-html"> Wrap paragraphs in HTML</label></div><div class="tp-actions"><button type="button" class="tp-btn tp-btn-primary" data-run>Generate</button><button type="button" class="tp-btn tp-btn-ghost" data-copy>Copy</button></div><label class="tp-field"><span class="tp-label">Result</span><textarea class="tp-textarea is-output js-out" rows="12" readonly></textarea></label></div>`;
     const generate = () => {
       const amount = Math.max(1, Math.min(200, Number(q("input[type=number]", root).value) || 1));
@@ -726,7 +628,7 @@
     generate();
   });
 
-  registerTextTool("uuid", (root) => {
+  T.register("uuid", (root) => {
     root.innerHTML = `<div class="tp-panel"><div class="tp-cols"><label class="tp-field"><span class="tp-label">How many?</span><input class="tp-input" type="number" min="1" max="500" value="10"></label><label class="tp-field"><span class="tp-label">Style</span><select class="tp-select js-style"><option value="standard">Lowercase, hyphens</option><option value="upper">Uppercase</option><option value="nohyphen">No hyphens</option><option value="braces">Braces</option></select></label></div><div class="tp-actions"><button type="button" class="tp-btn tp-btn-primary" data-run>Generate UUIDs</button><button type="button" class="tp-btn tp-btn-ghost" data-copy>Copy all</button><button type="button" class="tp-btn tp-btn-ghost" data-download>Download</button></div><label class="tp-field"><span class="tp-label">UUID v4 list</span><textarea class="tp-textarea is-output js-out" rows="12" readonly></textarea></label></div>`;
     const uuid = () => crypto.randomUUID ? crypto.randomUUID() : (() => {
       const bytes = crypto.getRandomValues(new Uint8Array(16));
@@ -800,9 +702,9 @@
     q("[data-copy]", root).addEventListener("click", () => copy(getOutput(root)));
     q("[data-download]", root).addEventListener("click", () => T.download("formatted.json", getOutput(root), "application/json"));
   };
-  registerTextTool("json-formatter", jsonTool);
+  T.register("json-formatter", jsonTool);
 
-  registerTextTool("regex", (root) => {
+  T.register("regex", (root) => {
     root.innerHTML = `<div class="tp-panel"><div class="tp-cols"><label class="tp-field"><span class="tp-label">Pattern</span><input class="tp-input js-pattern" placeholder="\\b\\w+@\\w+\\.\\w+\\b" spellcheck="false"></label><label class="tp-field"><span class="tp-label">Flags</span><div class="tp-chips-inline">${["g", "i", "m", "s", "u"].map((flag) => `<label class="tp-pill"><input type="checkbox" class="js-flag" value="${flag}" ${flag === "g" ? "checked" : ""}> ${flag}</label>`).join("")}</div></label></div><label class="tp-field"><span class="tp-label">Test text</span><textarea class="tp-textarea js-text" rows="7" placeholder="Paste text to search…"></textarea></label><div class="tp-actions"><button type="button" class="tp-btn tp-btn-primary" data-run>Run test</button><button type="button" class="tp-btn" data-replace>Replace</button><button type="button" class="tp-btn tp-btn-ghost" data-copy>Copy matches</button></div><div class="tp-kv"><div><span>Status</span><strong class="js-state">—</strong></div><div><span>Matches</span><strong class="js-count">0</strong></div></div><div class="tp-result-list js-results"></div><div class="tp-panel"><label class="tp-field"><span class="tp-label">Replace with</span><input class="tp-input js-replacement" placeholder="$1 or replacement text"></label><label class="tp-field"><span class="tp-label">Replaced result</span><textarea class="tp-textarea is-output js-replaced" rows="6" readonly></textarea></label></div></div>`;
     let lastMatches = [];
     const compile = () => {
@@ -852,7 +754,7 @@
     run();
   });
 
-  registerTextTool("yaml-json", (root) => {
+  T.register("yaml-json", (root) => {
     root.innerHTML = `<div class="tp-panel"><div class="tp-cols"><label class="tp-field"><span class="tp-label">YAML / JSON input</span><textarea class="tp-textarea js-in" rows="12" placeholder="name: Sanuwar&#10;tools: 67"></textarea></label><label class="tp-field"><span class="tp-label">Result</span><textarea class="tp-textarea is-output js-out" rows="12" readonly></textarea></label></div><div class="tp-actions"><button type="button" class="tp-btn tp-btn-primary" data-run="tojson">YAML → JSON</button><button type="button" class="tp-btn" data-run="toyaml">JSON → YAML</button><button type="button" class="tp-btn tp-btn-ghost" data-copy>Copy</button><button type="button" class="tp-btn tp-btn-ghost" data-download>Download</button></div></div>`;
     const run = (mode) => {
       try {
@@ -867,8 +769,8 @@
     q("[data-download]", root).addEventListener("click", () => T.download("converted.yaml", getOutput(root), "text/yaml"));
   });
 
-  registerTextTool("csv-json", (root) => {
-    root.innerHTML = `<div class="tp-panel"><div class="tp-chips-inline"><label class="tp-pill"><input type="checkbox" class="js-header" checked> First row is header</label><label class="tp-pill"><span>Delimiter</span><select class="tp-select js-delimiter" ><option value=",">Comma</option><option value=";">Semicolon</option><option value="\t">Tab</option></select></label></div><div class="tp-cols"><label class="tp-field"><span class="tp-label">CSV / JSON input</span><textarea class="tp-textarea js-in" rows="12" placeholder="name,role&#10;Sanuwar,Builder"></textarea></label><label class="tp-field"><span class="tp-label">Result</span><textarea class="tp-textarea is-output js-out" rows="12" readonly></textarea></label></div><div class="tp-actions"><button type="button" class="tp-btn tp-btn-primary" data-run="tojson">CSV → JSON</button><button type="button" class="tp-btn" data-run="tocsv">JSON → CSV</button><button type="button" class="tp-btn tp-btn-ghost" data-copy>Copy</button><button type="button" class="tp-btn tp-btn-ghost" data-download>Download</button></div></div>`;
+  T.register("csv-json", (root) => {
+    root.innerHTML = `<div class="tp-panel"><div class="tp-chips-inline"><label class="tp-pill"><input type="checkbox" class="js-header" checked> First row is header</label><label class="tp-pill"><span>Delimiter</span><select class="tp-select js-delimiter" style="padding:3px 6px"><option value=",">Comma</option><option value=";">Semicolon</option><option value="\t">Tab</option></select></label></div><div class="tp-cols"><label class="tp-field"><span class="tp-label">CSV / JSON input</span><textarea class="tp-textarea js-in" rows="12" placeholder="name,role&#10;Sanuwar,Builder"></textarea></label><label class="tp-field"><span class="tp-label">Result</span><textarea class="tp-textarea is-output js-out" rows="12" readonly></textarea></label></div><div class="tp-actions"><button type="button" class="tp-btn tp-btn-primary" data-run="tojson">CSV → JSON</button><button type="button" class="tp-btn" data-run="tocsv">JSON → CSV</button><button type="button" class="tp-btn tp-btn-ghost" data-copy>Copy</button><button type="button" class="tp-btn tp-btn-ghost" data-download>Download</button></div></div>`;
     const run = (mode) => {
       try {
         const value = q(".js-in", root).value;
@@ -898,7 +800,7 @@
     q("[data-download]", root).addEventListener("click", () => T.download("converted.csv", getOutput(root), "text/csv"));
   });
 
-  registerTextTool("xml-json", (root) => {
+  T.register("xml-json", (root) => {
     root.innerHTML = `<div class="tp-panel"><div class="tp-cols"><label class="tp-field"><span class="tp-label">XML / JSON input</span><textarea class="tp-textarea js-in" rows="12" placeholder="<root><item id='1'>Hello</item></root>"></textarea></label><label class="tp-field"><span class="tp-label">Result</span><textarea class="tp-textarea is-output js-out" rows="12" readonly></textarea></label></div><div class="tp-actions"><button type="button" class="tp-btn tp-btn-primary" data-run="tojson">XML → JSON</button><button type="button" class="tp-btn" data-run="toxml">JSON → XML</button><button type="button" class="tp-btn tp-btn-ghost" data-copy>Copy</button><button type="button" class="tp-btn tp-btn-ghost" data-download>Download</button></div></div>`;
     const run = (mode) => {
       try {
@@ -922,7 +824,7 @@
     q("[data-download]", root).addEventListener("click", () => T.download("converted.xml", getOutput(root), "application/xml"));
   });
 
-  registerTextTool("toml-json", (root) => {
+  T.register("toml-json", (root) => {
     root.innerHTML = `<div class="tp-panel"><div class="tp-cols"><label class="tp-field"><span class="tp-label">TOML / JSON input</span><textarea class="tp-textarea js-in" rows="12" placeholder='[site]&#10;name = "SanuwarTools"'></textarea></label><label class="tp-field"><span class="tp-label">Result</span><textarea class="tp-textarea is-output js-out" rows="12" readonly></textarea></label></div><div class="tp-actions"><button type="button" class="tp-btn tp-btn-primary" data-run="tojson">TOML → JSON</button><button type="button" class="tp-btn" data-run="totoml">JSON → TOML</button><button type="button" class="tp-btn tp-btn-ghost" data-copy>Copy</button><button type="button" class="tp-btn tp-btn-ghost" data-download>Download</button></div></div>`;
     const run = async (mode) => {
       try {
@@ -938,7 +840,7 @@
     q("[data-download]", root).addEventListener("click", () => T.download("converted.toml", getOutput(root), "text/plain"));
   });
 
-  registerTextTool("yaml-toml", (root) => {
+  T.register("yaml-toml", (root) => {
     root.innerHTML = `<div class="tp-panel"><div class="tp-cols"><label class="tp-field"><span class="tp-label">YAML / TOML input</span><textarea class="tp-textarea js-in" rows="12"></textarea></label><label class="tp-field"><span class="tp-label">Result</span><textarea class="tp-textarea is-output js-out" rows="12" readonly></textarea></label></div><div class="tp-actions"><button type="button" class="tp-btn tp-btn-primary" data-run="totoml">YAML → TOML</button><button type="button" class="tp-btn" data-run="toyaml">TOML → YAML</button><button type="button" class="tp-btn tp-btn-ghost" data-copy>Copy</button></div></div>`;
     const run = async (mode) => {
       try {
@@ -953,7 +855,7 @@
     q("[data-copy]", root).addEventListener("click", () => copy(getOutput(root)));
   });
 
-  registerTextTool("bbcode", (root) => {
+  T.register("bbcode", (root) => {
     root.innerHTML = `<div class="tp-panel"><label class="tp-field"><span class="tp-label">Mode</span><select class="tp-select js-mode"><option value="html">BBCode → HTML</option><option value="markdown">BBCode → Markdown</option><option value="bbcode">HTML → BBCode</option></select></label><div class="tp-cols"><label class="tp-field"><span class="tp-label">Input</span><textarea class="tp-textarea js-in" rows="10" placeholder="[b]Hello[/b]"></textarea></label><label class="tp-field"><span class="tp-label">Result</span><textarea class="tp-textarea is-output js-out" rows="10" readonly></textarea></label></div><div class="tp-actions"><button type="button" class="tp-btn tp-btn-primary" data-run>Convert</button><button type="button" class="tp-btn tp-btn-ghost" data-copy>Copy</button></div></div>`;
     const safeUrl = (value) => /^https?:\/\//i.test(value) ? value : "";
     const bbToHtml = (value) => {
@@ -998,7 +900,7 @@
     q("[data-copy]", root).addEventListener("click", () => copy(getOutput(root)));
   });
 
-  registerTextTool("markdown", (root) => {
+  T.register("markdown", (root) => {
     root.innerHTML = `<div class="tp-panel"><div class="tp-cols"><label class="tp-field"><span class="tp-label">Markdown / HTML input</span><textarea class="tp-textarea js-in" rows="12" placeholder="# Hello&#10;&#10;**Bold** text and [a link](https://example.com)."></textarea></label><label class="tp-field"><span class="tp-label">HTML / Markdown result</span><textarea class="tp-textarea is-output js-out" rows="12" readonly></textarea></label></div><div class="tp-actions"><button type="button" class="tp-btn tp-btn-primary" data-run="tohtml">Markdown → HTML</button><button type="button" class="tp-btn" data-run="tomd">HTML → Markdown</button><button type="button" class="tp-btn tp-btn-ghost" data-copy>Copy</button></div><div class="tp-field"><span class="tp-label">Preview</span><div class="tp-output js-preview"></div></div></div>`;
     const run = (mode) => {
       const value = q(".js-in", root).value;
@@ -1016,7 +918,7 @@
     run("tohtml");
   });
 
-  registerTextTool("text-diff", (root) => {
+  T.register("text-diff", (root) => {
     root.innerHTML = `<div class="tp-panel"><div class="tp-cols"><label class="tp-field"><span class="tp-label">Original</span><textarea class="tp-textarea js-left" rows="10"></textarea></label><label class="tp-field"><span class="tp-label">Changed</span><textarea class="tp-textarea js-right" rows="10"></textarea></label></div><div class="tp-actions"><button type="button" class="tp-btn tp-btn-primary" data-run>Compare</button><button type="button" class="tp-btn tp-btn-ghost" data-copy>Copy diff</button></div><div class="tp-chips-inline js-stats"></div><div class="tp-output js-out"></div></div>`;
     let plain = "";
     q("[data-run]", root).addEventListener("click", () => {
@@ -1037,7 +939,7 @@
     q("[data-copy]", root).addEventListener("click", () => copy(plain));
   });
 
-  registerTextTool("sql-formatter", (root) => {
+  T.register("sql-formatter", (root) => {
     root.innerHTML = `<div class="tp-panel"><label class="tp-field"><span class="tp-label">SQL</span><textarea class="tp-textarea js-in" rows="10" placeholder="select id, name from users where active = 1 order by name"></textarea></label><div class="tp-actions"><button type="button" class="tp-btn tp-btn-primary" data-run="format">Format</button><button type="button" class="tp-btn" data-run="minify">Minify</button><button type="button" class="tp-btn tp-btn-ghost" data-copy>Copy</button></div><label class="tp-field"><span class="tp-label">Result</span><textarea class="tp-textarea is-output js-out" rows="12" readonly></textarea></label></div>`;
     const run = (mode) => {
       const value = q(".js-in", root).value;
@@ -1047,7 +949,7 @@
     q("[data-copy]", root).addEventListener("click", () => copy(getOutput(root)));
   });
 
-  const codeTool = (slug, label, beautify, minify, language) => registerTextTool(slug, (root) => {
+  const codeTool = (slug, label, beautify, minify, language) => T.register(slug, (root) => {
     root.innerHTML = `<div class="tp-panel"><label class="tp-field"><span class="tp-label">${label} input</span><textarea class="tp-textarea js-in" rows="12" placeholder="Paste ${label} here…"></textarea></label><div class="tp-actions"><button type="button" class="tp-btn tp-btn-primary" data-run="beautify">Beautify</button><button type="button" class="tp-btn" data-run="minify">Minify</button><button type="button" class="tp-btn tp-btn-ghost" data-copy>Copy</button><button type="button" class="tp-btn tp-btn-ghost" data-download>Download</button></div><label class="tp-field"><span class="tp-label">Result</span><textarea class="tp-textarea is-output js-out" rows="14" readonly></textarea></label><p class="tp-hint">Best-effort ${language} formatting; minification preserves strings and comments inside them.</p></div>`;
     const run = (mode) => {
       const value = q(".js-in", root).value;
@@ -1065,7 +967,7 @@
   codeTool("html-beautifier-minifier", "HTML", beautifyHtml, minifyHtml, "html");
   codeTool("javascript-beautifier-minifier", "JavaScript", beautifyJs, minifyJs, "js");
 
-  const singleHashTool = (slug, algorithm, label) => registerTextTool(slug, (root) => {
+  const singleHashTool = (slug, algorithm, label) => T.register(slug, (root) => {
     root.innerHTML = `<div class="tp-panel"><div class="js-file-slot"></div><label class="tp-field"><span class="tp-label">Or hash text</span><textarea class="tp-textarea js-in" rows="6" placeholder="Type text to hash…"></textarea></label><div class="tp-actions"><button type="button" class="tp-btn tp-btn-primary" data-run>Generate ${label}</button><button type="button" class="tp-btn tp-btn-ghost" data-copy>Copy</button></div><div class="tp-output js-out"></div></div>`;
     const show = (value, note) => { q(".js-out", root).textContent = value; setStatus(root, note, "ok"); };
     const run = async () => {
@@ -1086,7 +988,7 @@
   singleHashTool("sha256", "SHA-256", "SHA-256");
   singleHashTool("sha512", "SHA-512", "SHA-512");
 
-  registerTextTool("hash-generator", (root) => {
+  T.register("hash-generator", (root) => {
     root.innerHTML = `<div class="tp-panel"><div class="js-file-slot"></div><label class="tp-field"><span class="tp-label">Or hash text</span><textarea class="tp-textarea js-in" rows="6" placeholder="Type text to hash…"></textarea></label><div class="tp-chips-inline"><label class="tp-pill"><input type="checkbox" class="js-upper"> Uppercase output</label></div><div class="tp-actions"><button type="button" class="tp-btn tp-btn-primary" data-run>Generate all hashes</button><button type="button" class="tp-btn tp-btn-ghost" data-copy>Copy all</button><button type="button" class="tp-btn tp-btn-ghost" data-download>Download</button></div><div class="tp-kv js-out"></div></div>`;
     let last = {};
     const render = async (bytes, note) => {
@@ -1109,7 +1011,7 @@
     q(".js-upper", root).addEventListener("change", runText);
   });
 
-  registerTextTool("checksum", (root) => {
+  T.register("checksum", (root) => {
     root.innerHTML = `<div class="tp-panel"><div class="js-file-slot"></div><label class="tp-field"><span class="tp-label">Expected checksum</span><input class="tp-input js-expected" placeholder="Paste the published MD5, SHA-1, SHA-256 or SHA-512 hash"></label><div class="tp-actions"><button type="button" class="tp-btn tp-btn-primary" data-run>Verify file</button></div><div class="tp-result-list js-results"></div></div>`;
     let selected = null;
     const drop = fileDrop({ accept: "", label: "Drop the downloaded file", onFiles: ([file]) => { selected = file; setStatus(root, `Ready to verify ${file.name}.`, "info"); }});
@@ -1163,7 +1065,7 @@
     return files;
   };
 
-  registerTextTool("untar", (root) => {
+  T.register("untar", (root) => {
     root.innerHTML = `<div class="tp-panel"><div class="js-file-slot"></div><div class="tp-actions"><button type="button" class="tp-btn" data-all disabled>Download all as ZIP</button></div><div class="tp-file-list js-files"></div></div>`;
     let files = [];
     const drop = fileDrop({ accept: ".tar,.gz,.tgz,application/x-tar,application/gzip", label: "Drop a .tar, .tar.gz or .tgz file", onFiles: async ([file]) => {
@@ -1183,7 +1085,7 @@
     });
   });
 
-  registerTextTool("unzip", (root) => {
+  T.register("unzip", (root) => {
     root.innerHTML = `<div class="tp-panel"><div class="js-file-slot"></div><div class="tp-actions"><button type="button" class="tp-btn" data-all disabled>Extract all as ZIP</button></div><div class="tp-file-list js-files"></div></div>`;
     let files = [];
     const drop = fileDrop({ accept: ".zip,application/zip", label: "Drop a ZIP archive", onFiles: async ([file]) => {
@@ -1202,7 +1104,7 @@
     });
   });
 
-  registerTextTool("zip", (root) => {
+  T.register("zip", (root) => {
     root.innerHTML = `<div class="tp-panel"><div class="js-file-slot"></div><div class="tp-file-list js-files"></div><div class="tp-actions"><button type="button" class="tp-btn tp-btn-primary" data-run disabled>Create ZIP</button><button type="button" class="tp-btn tp-btn-ghost" data-clear disabled>Clear</button></div><p class="tp-hint">Names inside the archive are preserved; a folder picker is available below.</p><label class="tp-drop"><strong>Add a whole folder</strong><span class="tp-hint">The folder name becomes the ZIP root.</span><input type="file" class="js-folder" webkitdirectory hidden></label></div>`;
     const files = [];
     const render = () => {
@@ -1234,7 +1136,7 @@
     q("[data-clear]", root).addEventListener("click", () => { files.length = 0; render(); });
   });
 
-  registerTextTool("random-password-generator", (root) => {
+  T.register("random-password-generator", (root) => {
     root.innerHTML = `<div class="tp-panel"><div class="tp-cols"><label class="tp-field"><span class="tp-label">Length</span><input class="tp-input" type="number" min="4" max="128" value="20"></label><label class="tp-field"><span class="tp-label">How many?</span><input class="tp-input" type="number" min="1" max="50" value="5"></label></div><div class="tp-chips-inline"><label class="tp-pill"><input type="checkbox" class="js-lower" checked> a-z</label><label class="tp-pill"><input type="checkbox" class="js-upper" checked> A-Z</label><label class="tp-pill"><input type="checkbox" class="js-numbers" checked> 0-9</label><label class="tp-pill"><input type="checkbox" class="js-symbols" checked> Symbols</label><label class="tp-pill"><input type="checkbox" class="js-avoid"> Avoid look-alikes</label></div><div class="tp-actions"><button type="button" class="tp-btn tp-btn-primary" data-run>Generate passwords</button><button type="button" class="tp-btn tp-btn-ghost" data-copy>Copy all</button><button type="button" class="tp-btn tp-btn-ghost" data-download>Download</button></div><div class="tp-kv"><div><span>Entropy each</span><strong class="js-entropy">—</strong></div><div><span>Pool</span><strong class="js-pool">—</strong></div></div><label class="tp-field"><span class="tp-label">Passwords</span><textarea class="tp-textarea is-output js-out" rows="10" readonly></textarea></label></div>`;
     const randomIndex = (length) => {
       const limit = Math.floor(4294967296 / length) * length;
@@ -1271,7 +1173,7 @@
     generate();
   });
 
-  registerTextTool("basic-auth-header", (root) => {
+  T.register("basic-auth-header", (root) => {
     root.innerHTML = `<div class="tp-panel"><div class="tp-cols"><label class="tp-field"><span class="tp-label">Username</span><input class="tp-input js-user" autocomplete="off"></label><label class="tp-field"><span class="tp-label">Password</span><input class="tp-input js-pass" type="password" autocomplete="off"></label></div><div class="tp-actions"><button type="button" class="tp-btn tp-btn-primary" data-run="encode">Encode header</button><button type="button" class="tp-btn tp-btn-ghost" data-copy>Copy</button></div><label class="tp-field"><span class="tp-label">Authorization header</span><textarea class="tp-textarea is-output js-out" rows="4" readonly></textarea></label><div class="tp-panel"><label class="tp-field"><span class="tp-label">Decode a Basic header</span><input class="tp-input js-decode" placeholder="Authorization: Basic dXNlcjpwYXNz"></label><div class="tp-actions"><button type="button" class="tp-btn" data-run="decode">Decode</button></div><div class="tp-output js-decoded"></div></div>`;
     const encode = () => {
       const user = q(".js-user", root).value;
@@ -1318,7 +1220,7 @@
       + to64(final[4], final[10], final[5], 4) + to64(0, 0, final[11], 2);
   };
 
-  registerTextTool("htpasswd-generator", (root) => {
+  T.register("htpasswd-generator", (root) => {
     root.innerHTML = `<div class="tp-panel"><div class="tp-cols"><label class="tp-field"><span class="tp-label">Username</span><input class="tp-input js-user" autocomplete="off" placeholder="admin"></label><label class="tp-field"><span class="tp-label">Password</span><input class="tp-input js-pass" type="password" autocomplete="off"></label></div><div class="tp-cols"><label class="tp-field"><span class="tp-label">Algorithm</span><select class="tp-select js-algo"><option value="bcrypt">bcrypt (Apache 2.4+)</option><option value="apr1">APR1 (MD5)</option><option value="sha1">SHA-1 ({SHA})</option><option value="plain">Plain text</option></select></label><label class="tp-field"><span class="tp-label">bcrypt rounds</span><input class="tp-input" type="number" min="8" max="12" value="10"></label></div><div class="tp-actions"><button type="button" class="tp-btn tp-btn-primary" data-run>Generate entry</button><button type="button" class="tp-btn tp-btn-ghost" data-copy>Copy</button></div><label class="tp-field"><span class="tp-label">.htpasswd entry</span><textarea class="tp-textarea is-output js-out" rows="5" readonly></textarea></label><p class="tp-hint">Keep the output file outside your public web root. bcrypt is the safest option for new deployments.</p></div>`;
     q("[data-run]", root).addEventListener("click", async () => {
       const user = q(".js-user", root).value.trim();
