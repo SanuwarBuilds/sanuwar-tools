@@ -71,6 +71,7 @@
 {% if public_ui %}
 <script nonce="{{ csp_nonce }}" src="/assets/js/saved-tools.js?v=4" defer></script>{% endif %}
 {% if public_ui %}<link rel="stylesheet" href="/assets/css/tool-studio.css?v=4">{% endif %}
+{% if request.path.startswith('/tools/') or request.path == '/photo-tools' %}<link rel="stylesheet" href="/assets/css/tool-workflows.css?v=1">{% endif %}
 {% if request.path == '/' %}<link rel="stylesheet" href="/assets/css/home.css?v=3">{% endif %}
 {% if request.path.startswith('/admin') %}<link rel="stylesheet" href="/assets/css/admin-pro.css?v=3">{% endif %}
 </head>

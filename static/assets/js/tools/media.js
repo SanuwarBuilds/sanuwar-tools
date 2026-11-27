@@ -94,9 +94,9 @@
 
   const buildImageTool = (root, config) => {
     const { accept, outputType, quality = false, background = false, maxWidth = true, label, hint } = config;
-    root.innerHTML = `<div class="tp-panel studio-split">
+    root.innerHTML = `<div class="tp-panel studio-split" data-workflow="convert-files">
       <section class="studio-pane studio-source"><h2 class="studio-pane-title">Source images</h2>
-        <div class="js-file-slot"></div><div class="tp-preview js-preview"></div><div class="tp-file-list js-files"></div>
+        <div class="js-file-slot"></div>
       </section>
       <section class="studio-pane studio-controls"><h2 class="studio-pane-title">Export settings</h2>
       <div class="tp-cols">
@@ -105,7 +105,12 @@
         ${background ? `<label class="tp-field"><span class="tp-label">Background</span><input class="tp-input js-background" type="color" value="#ffffff"></label>` : ""}
       </div>
       <div class="tp-actions"><button type="button" class="tp-btn tp-btn-primary" data-run disabled>${label}</button><button type="button" class="tp-btn" data-all disabled>Download all as ZIP</button></div>
-      <p class="tp-hint">${hint || "Files are processed in this tab and never uploaded."}</p></section></div>`;
+      <p class="tp-hint">${hint || "Files are processed in this tab and never uploaded."}</p></section>
+      <section class="task-file-outputs">
+        <h2 class="task-section-title">Output files</h2>
+        <div class="tp-preview js-preview"></div>
+        <div class="tp-file-list js-files" data-task-empty="Choose images and run the tool to see downloadable results."></div>
+      </section></div>`;
     let files = [];
     const drop = fileDrop({ accept, multiple: true, label: "Drop images or choose files", onFiles: (list) => {
       files = list.filter((file) => file.type.startsWith("image/") || /\.(jpe?g|png|webp|avif|svg)$/i.test(file.name));
@@ -141,9 +146,9 @@
   };
 
   T.register("image-compressor", (root) => {
-    root.innerHTML = `<div class="tp-panel studio-split">
+    root.innerHTML = `<div class="tp-panel studio-split" data-workflow="convert-files">
       <section class="studio-pane studio-source"><h2 class="studio-pane-title">Source images</h2>
-        <div class="js-file-slot"></div><div class="tp-preview js-preview"></div><div class="tp-file-list js-files"></div>
+        <div class="js-file-slot"></div>
       </section>
       <section class="studio-pane studio-controls"><h2 class="studio-pane-title">Compression settings</h2>
         <fieldset class="studio-segments"><legend>Output format</legend>
@@ -153,10 +158,16 @@
           <label><input type="radio" name="image-format" value="image/jpeg"><span>JPG</span></label>
         </fieldset>
         <label class="tp-field"><span class="tp-label">Quality <b class="js-quality-value">80%</b></span><input class="tp-input js-quality" type="range" min="25" max="95" value="80"></label>
+        <details class="task-disclosure"><summary>Resize and background</summary>
         <label class="tp-field"><span class="tp-label">Max width (px, 0 = original)</span><input class="tp-input js-max" type="number" min="0" max="12000" value="2000"></label>
-        <label class="tp-field"><span class="tp-label">JPG background</span><input class="tp-input js-background" type="color" value="#ffffff"></label>
+        <label class="tp-field"><span class="tp-label">JPG background</span><input class="tp-input js-background" type="color" value="#ffffff"></label></details>
         <div class="tp-actions"><button type="button" class="tp-btn tp-btn-primary" data-run disabled>Compress images</button><button type="button" class="tp-btn" data-all disabled>Download all as ZIP</button></div>
         <p class="tp-hint">PNG export is lossless but may be larger. JPG and WebP use your quality setting.</p>
+      </section>
+      <section class="task-file-outputs">
+        <h2 class="task-section-title">Output files</h2>
+        <div class="tp-preview js-preview"></div>
+        <div class="tp-file-list js-files" data-task-empty="Choose images and run the tool to see downloadable results."></div>
       </section></div>`;
     if (new URLSearchParams(location.search).get("format") === "webp") q('[name="image-format"][value="image/webp"]', root).checked = true;
     let files = [];
@@ -202,7 +213,7 @@
   T.register("png-to-avif", (root) => buildImageTool(root, { accept: "image/png", outputType: "image/avif", quality: true, maxWidth: true, label: "Convert to AVIF", hint: "AVIF encoding depends on browser support. Transparency is preserved when supported." }));
 
   T.register("svg-to-png", (root) => {
-    root.innerHTML = `<div class="tp-panel studio-split">
+    root.innerHTML = `<div class="tp-panel studio-split" data-workflow="render-file">
       <section class="studio-pane studio-source"><h2 class="studio-pane-title">Source files</h2><div class="js-file-slot"></div><label class="tp-field"><span class="tp-label">Or paste SVG code</span><textarea class="tp-textarea js-svg" rows="8" placeholder="<svg xmlns='http://www.w3.org/2000/svg' width='240' height='240'>…</svg>"></textarea></label><div class="tp-preview js-preview"></div></section>
       <section class="studio-pane studio-controls"><h2 class="studio-pane-title">Render settings</h2><div class="tp-cols"><label class="tp-field"><span class="tp-label">Width (px, 0 = SVG size)</span><input class="tp-input js-width" type="number" min="0" max="8000" value="0"></label><label class="tp-field"><span class="tp-label">Background</span><input class="tp-input js-background" type="color" value="#ffffff"></label><label class="tp-field"><span class="tp-label">Transparent</span><select class="tp-select js-transparent"><option value="no">No</option><option value="yes">Yes</option></select></label></div><div class="tp-actions"><button type="button" class="tp-btn tp-btn-primary" data-run>Render PNG</button></div></section></div>`;
     let svgBlob = null;
@@ -237,7 +248,7 @@
   };
 
   T.register("pdf-merge", (root) => {
-    root.innerHTML = `<div class="tp-panel studio-split">
+    root.innerHTML = `<div class="tp-panel studio-split" data-workflow="merge-files">
       <section class="studio-pane studio-source"><h2 class="studio-pane-title">PDF files</h2><div class="js-file-slot"></div><div class="tp-file-list js-files"></div></section>
       <section class="studio-pane studio-controls"><h2 class="studio-pane-title">Merge settings</h2>
         <div class="tp-actions"><button type="button" class="tp-btn tp-btn-primary" data-run disabled>Merge PDFs</button><button type="button" class="tp-btn tp-btn-ghost" data-clear disabled>Clear</button></div><p class="tp-hint">Use the arrows to set the order. Encrypted PDFs may need to be unlocked first.</p>
@@ -415,13 +426,13 @@
     drop.input.hidden = false;
     drop.input.classList.add("wb-visually-hidden");
     drop.input.addEventListener("change", () => { drop.input.value = ""; });
-    root.replaceChildren(el("div", { class: "tp-panel studio-split" },
+    root.replaceChildren(el("div", { class: "tp-panel studio-split", "data-workflow": "organize-document" },
       T.panel("PDF pages", [drop.node, notice, list], "studio-pane studio-source"),
       T.panel("Export settings", [el("p", { class: "tp-hint", text: "Reorder, rotate or remove pages, then save a new copy." }), T.actions(downloadButton)], "studio-pane studio-controls")));
   });
 
   T.register("pdf-split", (root) => {
-    root.innerHTML = `<div class="tp-panel studio-split">
+    root.innerHTML = `<div class="tp-panel studio-split" data-workflow="split-file">
       <section class="studio-pane studio-source"><h2 class="studio-pane-title">PDF files</h2><div class="js-file-slot"></div><div class="tp-file-list js-files"></div></section>
       <section class="studio-pane studio-controls"><h2 class="studio-pane-title">Page ranges</h2>
         <label class="tp-field"><span class="tp-label">Page ranges</span><input class="tp-input js-ranges" placeholder="1-3, 4, 5-8"></label><div class="tp-actions"><button type="button" class="tp-btn tp-btn-primary" data-run disabled>Split PDF</button><button type="button" class="tp-btn" data-all disabled>Download all as ZIP</button></div><p class="tp-hint">Leave the ranges empty to split every page into its own PDF.</p>
@@ -478,7 +489,7 @@
   };
 
   T.register("pdf-to-image", (root) => {
-    root.innerHTML = `<div class="tp-panel studio-split">
+    root.innerHTML = `<div class="tp-panel studio-split" data-workflow="convert-files">
       <section class="studio-pane studio-source"><h2 class="studio-pane-title">Source files</h2><div class="js-file-slot"></div><div class="tp-preview js-preview"></div><div class="tp-file-list js-files"></div></section>
       <section class="studio-pane studio-controls"><h2 class="studio-pane-title">Export settings</h2><div class="tp-cols"><label class="tp-field"><span class="tp-label">Format</span><select class="tp-select js-format"><option value="image/png">PNG</option><option value="image/jpeg">JPG</option></select></label><label class="tp-field"><span class="tp-label">Resolution</span><select class="tp-select js-dpi"><option value="110">110 DPI · small</option><option value="144" selected>144 DPI · balanced</option><option value="200">200 DPI · sharp</option><option value="300">300 DPI · print</option></select></label></div><div class="tp-actions"><button type="button" class="tp-btn tp-btn-primary" data-run disabled>Convert pages</button><button type="button" class="tp-btn" data-all disabled>Download all as ZIP</button></div></section></div>`;
     let file = null;
@@ -515,7 +526,7 @@
   });
 
   T.register("pdf-viewer", (root) => {
-    root.innerHTML = `<div class="tp-panel studio-split">
+    root.innerHTML = `<div class="tp-panel studio-split" data-workflow="read-document">
       <section class="studio-pane studio-source"><h2 class="studio-pane-title">PDF preview</h2><div class="js-file-slot"></div><div class="tp-viewer js-pages"></div></section>
       <section class="studio-pane studio-controls"><h2 class="studio-pane-title">Page controls</h2><div class="tp-actions js-controls" hidden><button type="button" class="tp-btn tp-btn-sm" data-prev>← Prev</button><span class="tp-pill js-page">Page 1</span><button type="button" class="tp-btn tp-btn-sm" data-next>Next →</button><label class="tp-pill"><span>Zoom</span><select class="tp-select js-zoom" ><option value="0.8">80%</option><option value="1" selected>100%</option><option value="1.4">140%</option><option value="2">200%</option></select></label><button type="button" class="tp-btn tp-btn-sm" data-print>Print</button><button type="button" class="tp-btn tp-btn-sm" data-save>Save</button></div></section></div>`;
     let pdf = null;
@@ -560,7 +571,7 @@
   });
 
   T.register("image-to-pdf", (root) => {
-    root.innerHTML = `<div class="tp-panel studio-split">
+    root.innerHTML = `<div class="tp-panel studio-split" data-workflow="convert-files">
       <section class="studio-pane studio-source"><h2 class="studio-pane-title">Source files</h2><div class="js-file-slot"></div><div class="tp-preview js-preview"></div><div class="tp-file-list js-files"></div></section>
       <section class="studio-pane studio-controls"><h2 class="studio-pane-title">Page setup</h2><div class="tp-cols"><label class="tp-field"><span class="tp-label">Page size</span><select class="tp-select js-size"><option value="a4">A4</option><option value="letter">Letter</option><option value="fit">Fit to image</option></select></label><label class="tp-field"><span class="tp-label">Margin</span><select class="tp-select js-margin"><option value="0">None</option><option value="18" selected>Small</option><option value="36">Large</option></select></label></div><div class="tp-actions"><button type="button" class="tp-btn tp-btn-primary" data-run disabled>Create PDF</button></div></section></div>`;
     let files = [];
@@ -614,7 +625,7 @@
   });
 
   T.register("markdown-to-pdf", (root) => {
-    root.innerHTML = `<div class="tp-panel studio-split">
+    root.innerHTML = `<div class="tp-panel studio-split" data-workflow="publish-document">
       <section class="studio-pane studio-source"><h2 class="studio-pane-title">Source files</h2><div class="js-file-slot"></div><label class="tp-field"><span class="tp-label">Markdown</span><textarea class="tp-textarea js-in" rows="12" placeholder="# Report&#10;&#10;Markdown becomes a clean PDF."></textarea></label></section>
       <section class="studio-pane studio-controls"><h2 class="studio-pane-title">Export document</h2><div class="tp-actions"><button type="button" class="tp-btn tp-btn-primary" data-run>Create PDF</button><button type="button" class="tp-btn tp-btn-ghost" data-load>Load .md file</button></div></section></div>`;
     let dropped = "";
@@ -666,11 +677,15 @@
   });
 
   T.register("pdf-compress", (root) => {
-    root.innerHTML = `<div class="tp-panel studio-split">
+    root.innerHTML = `<div class="tp-panel studio-split" data-workflow="compress-pdf">
       <section class="studio-pane studio-source"><h2 class="studio-pane-title">PDF files</h2><div class="js-file-slot"></div><div class="tp-file-list js-files"></div></section>
       <section class="studio-pane studio-controls"><h2 class="studio-pane-title">Compression settings</h2>
-        <div class="tp-cols"><label class="tp-field"><span class="tp-label">Method</span><select class="tp-select js-method"><option value="optimize">Optimize structure (safe)</option><option value="raster">Rasterize pages (stronger)</option></select></label><label class="tp-field"><span class="tp-label">Raster DPI</span><select class="tp-select js-dpi"><option value="96">96 DPI</option><option value="120" selected>120 DPI</option><option value="150">150 DPI</option></select></label><label class="tp-field"><span class="tp-label">JPEG quality</span><select class="tp-select js-quality"><option value="0.55">55%</option><option value="0.7" selected>70%</option><option value="0.85">85%</option></select></label></div><div class="tp-actions"><button type="button" class="tp-btn tp-btn-primary" data-run disabled>Compress PDF</button></div><p class="tp-hint">Rasterizing turns each page into an image — excellent for scans, but text stops being selectable.</p>
+        <div class="tp-cols"><label class="tp-field"><span class="tp-label">Method</span><select class="tp-select js-method"><option value="optimize">Optimize structure (safe)</option><option value="raster">Rasterize pages (stronger)</option></select></label><div class="js-raster-settings tp-cols" hidden><label class="tp-field"><span class="tp-label">Raster DPI</span><select class="tp-select js-dpi"><option value="96">96 DPI</option><option value="120" selected>120 DPI</option><option value="150">150 DPI</option></select></label><label class="tp-field"><span class="tp-label">JPEG quality</span><select class="tp-select js-quality"><option value="0.55">55%</option><option value="0.7" selected>70%</option><option value="0.85">85%</option></select></label></div></div><div class="tp-actions"><button type="button" class="tp-btn tp-btn-primary" data-run disabled>Compress PDF</button></div><p class="tp-hint">Rasterizing turns each page into an image — excellent for scans, but text stops being selectable.</p>
       </section></div>`;
+    const methodSelect = q(".js-method", root);
+    methodSelect.addEventListener("change", () => {
+      q(".js-raster-settings", root).hidden = methodSelect.value !== "raster";
+    });
     let file = null;
     const drop = fileDrop({ accept: ".pdf,application/pdf", label: "Drop a PDF to compress", onFiles: ([selected]) => { file = selected; q("[data-run]", root).disabled = false; status(root, `${selected.name} · ${fmtBytes(selected.size)}`, "info"); }});
     q(".js-file-slot", root).append(drop.node);

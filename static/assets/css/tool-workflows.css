@@ -1,0 +1,154 @@
+/* Compact tool headers and task layouts. Shared color and typography live in workspace.css. */
+body.reference-ui.st-tool .tp-shell { padding-top: 18px; }
+body.reference-ui.st-tool .studio-toolbar {
+  min-height: 42px;
+  margin-bottom: 8px;
+  border-bottom: 1px solid var(--st-line);
+}
+body.reference-ui.st-tool :is(.st-tool-title, .photo-heading) {
+  gap: 12px;
+  margin: 0 0 16px;
+}
+body.reference-ui.st-tool #main :is(.st-tool-title, .photo-heading) h1 {
+  font-size: 2rem;
+  letter-spacing: -.038em;
+  line-height: 1.13;
+}
+body.reference-ui.st-tool #main :is(.st-tool-title, .photo-heading) p { margin: 4px 0 0; }
+body.reference-ui.st-tool .st-tool-icon { inline-size: 44px; block-size: 44px; border-radius: 10px; }
+body.reference-ui.st-tool .st-tool-icon img { inline-size: 27px; block-size: 27px; }
+body.reference-ui.st-tool .studio-search { min-height: 36px; background: transparent; border: 0; }
+body.reference-ui.st-tool .tp-layout { gap: 14px; }
+body.reference-ui.st-tool #tool-root.tp-workspace { padding: clamp(13px, 2vw, 24px); border-radius: 13px; }
+body.reference-ui.st-tool-playback #tool-root.tp-workspace { padding: 0; }
+body.reference-ui.st-tool #tool-root > .tp-panel { padding: 0; border: 0; background: transparent; box-shadow: none; }
+body.reference-ui.st-tool #tool-root > .tp-panel + .tp-panel { margin-top: 20px; padding-top: 18px; border-top: 1px solid var(--st-line); }
+body.reference-ui.st-tool #tool-root :is(.studio-split, .st-ocr, .st-qr-workspace) > :is(.studio-pane, .st-ocr-source, .st-ocr-result) {
+  margin: 0;
+  padding: 0;
+  border: 0;
+  border-radius: 0;
+  background: transparent;
+}
+body.reference-ui.st-tool #tool-root .studio-source .tp-drop { min-height: 154px; }
+body.reference-ui.st-tool #tool-root .tp-drop-icon svg {
+  width: 25px;
+  height: 25px;
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 1.55;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+body.reference-ui.st-tool #tool-root .studio-controls .tp-actions .tp-btn-primary { flex-basis: auto; }
+body.reference-ui.st-tool #tool-root .tp-status:not(:empty) { margin-bottom: 14px; }
+body.reference-ui.st-tool #tool-root .tp-btn { min-height: 36px; }
+body.reference-ui.st-tool #tool-root .tp-btn:disabled { opacity: .55; cursor: default; }
+body.reference-ui.st-tool #tool-root :is(.tp-input, .tp-select, .tp-textarea) { border-color: var(--st-line-strong); }
+body.reference-ui.st-tool #tool-root :is(.tp-input, .tp-textarea)::placeholder { color: var(--st-muted); }
+body.reference-ui.st-tool #tool-root .tp-cols[hidden] { display: none; }
+
+.st-tool .task-pair, .st-tool .task-calculation, .st-tool [data-workflow="lookup"] {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: var(--studio-gap);
+  align-items: start;
+}
+.st-tool [data-workflow="lookup"] { grid-template-columns: minmax(0, 2fr) minmax(0, 3fr); }
+.st-tool [data-workflow="verify"] .task-pair,
+.st-tool [data-workflow="generate"] .task-pair { grid-template-columns: minmax(0, 2fr) minmax(0, 3fr); }
+.st-tool :is(.task-input, .task-output, .task-query, .task-calculation-output) { min-width: 0; }
+.st-tool :is(.task-pair, .task-calculation, [data-workflow="lookup"]) > :last-child {
+  border-inline-start: 1px solid var(--st-line);
+  padding-inline-start: var(--studio-gap);
+}
+.st-tool .task-section-title, .st-tool #tool-root .calc-step-title {
+  margin: 0 0 10px;
+  color: var(--st-ink);
+  font: 680 .9375rem/1.35 Inter, sans-serif;
+  letter-spacing: -.012em;
+}
+.st-tool :is(.task-empty, [data-task-empty]:empty)::before {
+  color: var(--st-muted);
+}
+.st-tool :is(.task-empty, [data-task-empty]:empty) {
+  display: block;
+  min-width: 0;
+  padding: 14px;
+  margin: 0;
+  border: 1px solid var(--st-line);
+  border-radius: 8px;
+  background: var(--st-well);
+  color: var(--st-muted);
+  font: 400 .8125rem/1.5 Inter, sans-serif;
+}
+.st-tool [data-task-empty]:empty::before { content: attr(data-task-empty); }
+.st-tool [aria-busy="true"][data-task-empty]:empty::before { content: "Waiting for results…"; }
+.st-tool .task-output > .api-results { margin: 0; }
+.st-tool .task-query :is(.tp-hint, .api-feedback) { max-width: 60ch; }
+.st-tool .task-query .api-feedback:empty, .st-tool .task-form-error:empty { display: none; }
+.st-tool .task-form-error { margin: 10px 0; color: var(--desk-red); font-size: .8125rem; }
+
+.st-tool .task-disclosure {
+  margin: 12px 0;
+  border-block: 1px solid var(--st-line);
+  padding-inline: 2px;
+}
+.st-tool .task-disclosure summary {
+  padding: 10px 0;
+  color: var(--st-ink);
+  font: 620 .8125rem/1.45 Inter, sans-serif;
+  cursor: pointer;
+}
+.st-tool .task-disclosure[open] { padding-bottom: 10px; }
+.st-tool .task-disclosure > .tp-field + .tp-field { margin-top: 8px; }
+.st-tool .task-file-outputs {
+  grid-column: 1 / -1;
+  min-width: 0;
+  padding-top: 16px;
+  border-top: 1px solid var(--st-line);
+}
+.st-tool .task-file-outputs .tp-preview:empty { display: none; }
+.st-tool [data-workflow="archive"] > .task-output,
+.st-tool [data-workflow="compare"] > .task-output { margin-top: 16px; padding-top: 14px; border-top: 1px solid var(--st-line); }
+.st-tool [data-workflow="file-data"] > .task-section-title:nth-of-type(2) { margin-top: 18px; }
+
+.st-tool #tool-root :is(.task-calculation-input, .task-calculation-output > .tp-panel) {
+  margin: 0;
+  padding: 0;
+  border: 0;
+  background: transparent;
+  box-shadow: none;
+}
+.st-tool #tool-root [data-workflow="guided-calculate"] { max-width: 760px; margin-inline: auto; }
+.st-tool #tool-root .calc-result-value { font-variant-numeric: tabular-nums; overflow-wrap: anywhere; }
+.st-tool #tool-root [data-workflow="design-and-preview"] { grid-template-columns: minmax(0, 5fr) minmax(0, 4fr); }
+.st-tool #tool-root .qr-result .tp-actions { justify-content: center; margin: 0; }
+.st-tool #tool-root .pl-extras > .task-disclosure { margin: 0; }
+.st-tool .studio-help { font-size: .8125rem; }
+
+@media (max-width: 760px) {
+  body.reference-ui.st-tool #main :is(.st-tool-title, .photo-heading) h1 { font-size: 1.625rem; }
+  body.reference-ui.st-tool #tool-root .tp-btn { min-height: 42px; }
+  .st-tool .task-pair, .st-tool .task-calculation, .st-tool [data-workflow="lookup"],
+  .st-tool [data-workflow="verify"] .task-pair, .st-tool [data-workflow="generate"] .task-pair,
+  .st-tool #tool-root [data-workflow="design-and-preview"] { grid-template-columns: minmax(0, 1fr); }
+  .st-tool :is(.task-pair, .task-calculation, [data-workflow="lookup"]) > :last-child {
+    border-inline-start: 0;
+    padding-inline-start: 0;
+    border-top: 1px solid var(--st-line);
+    padding-top: 14px;
+  }
+}
+.st-tool .photo-header-tools { display: flex; flex-wrap: wrap; gap: 8px; justify-content: flex-end; }
+.st-tool .photo-header-tools .wb-save-tool { margin: 0; }
+.st-tool [data-workflow="reference"] .js-count { display: block; color: var(--st-muted); margin: 10px 0; }
+.st-tool [data-workflow="reference"] .tp-table-wrap[hidden] { display: none; }
+@media (max-width: 760px) {
+  .st-tool .photo-header-tools { justify-content: flex-start; margin-top: 10px; }
+}
+.st-tool #tool-root .qr-preview { width: min(100%, 340px); }
+.st-tool #tool-root .api-results > .task-disclosure { margin-block: 0; }
+.st-tool #tool-root [data-workflow="clock"] .tp-clock-hero,
+.st-tool #tool-root [data-workflow="countdown"] .tp-countdown { font-variant-numeric: tabular-nums; }
+.st-tool #tool-root [data-workflow="keypad"] { max-width: 600px; margin-inline: auto; }

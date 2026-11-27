@@ -120,11 +120,29 @@
       download(typeof filename === "function" ? filename() : filename, data, type);
     }, variant);
 
+  const resultArea = (label, content, empty) => {
+    if (empty) content.dataset.taskEmpty = empty;
+    return el("section", { class: "task-output", "aria-label": label },
+      el("h2", { class: "task-section-title", text: label }), content);
+  };
+
+  const disclosure = (label, ...content) => el("details", { class: "task-disclosure" },
+    el("summary", { text: label }), content);
+
+  const uploadIcon = () => {
+    const svg = document.createElementNS("http://www.w3.org/2000/svg", "svg");
+    svg.setAttribute("viewBox", "0 0 24 24");
+    const path = document.createElementNS("http://www.w3.org/2000/svg", "path");
+    path.setAttribute("d", "M12 16V3m-5 5 5-5 5 5M4 16v5h16v-5");
+    svg.append(path);
+    return svg;
+  };
+
   const fileDrop = (opts = {}) => {
     const fileInput = el("input", { type: "file", accept: opts.accept || "", hidden: true, multiple: Boolean(opts.multiple) });
     const name = el("span", { class: "tp-drop-name" });
     const zone = el("label", { class: "tp-drop tp-drop-keyboard", tabindex: 0, role: "button" },
-      el("span", { class: "tp-drop-icon", "aria-hidden": "true", text: opts.icon || "⇪" }),
+      el("span", { class: "tp-drop-icon", "aria-hidden": "true", text: opts.icon || null }, opts.icon ? null : uploadIcon()),
       el("strong", { text: opts.label || "Drop a file here or click to browse" }),
       el("span", { class: "tp-hint", text: opts.hint || "Your file stays on this device." }),
       name,
@@ -216,25 +234,22 @@
     const slug = page.dataset.toolSlug;
     const root = $("#tool-root");
     const mount = registry[slug];
-    if (!mount || !root) {
-      if (root) root.replaceChildren(el("div", { class: "tp-error" },
-        el("strong", { text: "This tool could not load." }),
-        el("p", { text: "Refresh the page or open another tool." })));
-      return;
-    }
+    if (!root) return;
+    const failed = () => root.replaceChildren(el("div", { class: "tp-error", role: "alert" },
+      el("strong", { text: "This tool could not load." }),
+      actions(button("Reload tool", () => location.reload()), el("a", { class: "tp-btn tp-btn-ghost", href: "/tools" }, "Browse tools"))));
+    if (!mount) { failed(); return; }
     try {
       mount(root);
     } catch (error) {
       console.error(error);
-      root.replaceChildren(el("div", { class: "tp-error" },
-        el("strong", { text: "This tool stopped unexpectedly." }),
-        el("p", { text: error.message || "Refresh the page and try again." })));
+      failed();
     }
   };
 
   window.SANU_TOOLS = {
     register, start, el, $, $$, panel, field, textarea, input, select, option, button, actions,
-    twoCol, status, toast, copy, copyButton, download, downloadButton, fileDrop,
+    twoCol, status, toast, copy, copyButton, download, downloadButton, fileDrop, resultArea, disclosure,
     bytesB64, b64Bytes, textToB64, b64ToText, hex, bytesFromHex, fmtBytes, readFile,
     fetchJSON, safeName, debounce, escapeHtml, registry,
   };

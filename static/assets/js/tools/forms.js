@@ -38,8 +38,9 @@
     const limit = input({ type: "number", min: 0.001, step: "any", placeholder: "Optional", inputmode: "decimal" });
     const imageFields = T.twoCol(field("Required format", format), field("Width (px)", width), field("Height (px)", height));
     const results = el("div", { class: "tp-form-results", "aria-live": "polite" });
-    const form = el("form", { class: "studio-split" },
-      el("section", { class: "studio-pane studio-source" }, field("File to check", picker), results),
+    const form = el("form", { class: "studio-split", "data-workflow": "validate-file" },
+      el("section", { class: "studio-pane studio-source" }, field("File to check", picker),
+        T.resultArea("Validation results", results, "Choose a file, enter the requirements and select Check file.")),
       el("section", { class: "studio-pane studio-controls" }, field("What are you submitting?", role), imageFields,
       field("Maximum file size (KB)", limit, "1 KB = 1,000 bytes. Enter the limit shown on your form."),
       actions(el("button", { type: "submit", class: "tp-btn tp-btn-primary" }, "Check file"))));
@@ -378,7 +379,7 @@
       }
     }, "primary", { disabled: true });
 
-    const editor = el("div", { class: "tp-sign-editor studio-split", hidden: true },
+    const editor = el("div", { class: "tp-sign-editor studio-split", "data-workflow": "sign-document", hidden: true },
       el("section", { class: "studio-pane studio-source", "aria-label": "Document preview" }, actions(previous, indicator, next), sheet),
       el("section", { class: "studio-pane studio-controls", "aria-label": "Signature settings" },
         field("Add to page", kind), ...settings.values(), field("Text size (pt)", size),

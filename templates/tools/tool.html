@@ -1,6 +1,6 @@
 {% extends 'base.html' %}
 {% set vendor_files = {'js-yaml': 'js-yaml.js', 'marked': 'marked.js', 'fflate': 'fflate.js', 'pdf-lib': 'pdf-lib.js', 'pdfjs': 'pdf.min.js', 'jspdf': 'jspdf.umd.min.js', 'bcryptjs': 'bcrypt.min.js', 'qrcodegen': 'qrcodegen.js', 'hlsjs': 'hls.min.js', 'dashjs': 'dash.all.min.js', 'tesseract': 'ocr/tesseract.min.js'} %}
-{% set bundle_version = 8 if tool.bundle == 'pdf-editor' else 5 if tool.bundle in ['file-workbench', 'text'] else 5 if tool.bundle == 'misc' else 3 if tool.bundle == 'network' else 4 if tool.bundle == 'players' else 5 if tool.bundle in ['calculators', 'media'] else 3 if tool.bundle == 'forms' else 2 %}
+{% set bundle_versions = {'pdf-editor': 8, 'file-workbench': 6, 'text': 6, 'misc': 6, 'network': 4, 'players': 5, 'calculators': 6, 'media': 6, 'forms': 4, 'api-studio': 3, 'study-utilities': 3, 'dls': 3, 'study-planner': 3} %}
 {% set streaming_players = ['m3u8-player', 'dash-player', 'cloud-video-player'] %}
 {% set tool_help = {
   'pdf-editor': 'Choose a PDF, tap the text you want to change, and apply your correction. The editor matches the font automatically and detects text on scanned pages. Download a copy when you are done.',
@@ -65,7 +65,7 @@
 
   <div class="tp-layout">
     <div class="tp-workspace" id="tool-root"{% if weather_mode %} data-weather-mode="{{ weather_mode }}"{% endif %}>
-      <div class="tp-loading"><span></span>Loading tool…</div>
+      <div class="tp-loading" role="status"><span aria-hidden="true"></span>Loading {{ tool.name }}…</div>
       <noscript><p>Enable JavaScript to use this tool.</p></noscript>
     </div>
     <details class="studio-help">
@@ -119,7 +119,7 @@
 </section>
 {% endblock %}
 {% block scripts %}
-<script nonce="{{ csp_nonce }}" src="/assets/js/tools/core.js?v=3" defer></script>
+<script nonce="{{ csp_nonce }}" src="/assets/js/tools/core.js?v=4" defer></script>
 {% for vendor in tool.vendor or [] %}{% if vendor in vendor_files %}<script nonce="{{ csp_nonce }}" src="/assets/vendor/{{ vendor_files[vendor] }}?v=1" defer></script>{% endif %}{% endfor %}
 {% if tool.bundle in ['file-workbench', 'pdf-editor'] %}
 <script nonce="{{ csp_nonce }}" src="/assets/js/tools/local-files.js?v=1" defer></script>
@@ -131,6 +131,6 @@
 <script nonce="{{ csp_nonce }}" src="/assets/js/tools/dls-tables.js?v=1" defer></script>
 <script nonce="{{ csp_nonce }}" src="/assets/js/tools/dls-core.js?v=1" defer></script>
 {% endif %}
-<script nonce="{{ csp_nonce }}" src="/assets/js/tools/{{ tool.bundle }}.js?v={{ bundle_version }}" defer></script>
+<script nonce="{{ csp_nonce }}" src="/assets/js/tools/{{ tool.bundle }}.js?v={{ bundle_versions.get(tool.bundle, 2) }}" defer></script>
 <script nonce="{{ csp_nonce }}" src="/assets/js/tools/boot.js?v=1" defer></script>
 {% endblock %}

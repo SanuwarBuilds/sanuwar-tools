@@ -143,6 +143,7 @@
     const progress = () => el("ol", { class: "calc-progress", "aria-label": "DLS calculator steps" },
       labels.map((label, index) => el("li", {
         class: `calc-progress-step${index === step ? " is-active" : ""}${index < step ? " is-done" : ""}`,
+        "aria-current": index === step ? "step" : null,
       }, el("span", { class: "calc-progress-dot", text: String(index + 1).padStart(2, "0") }), el("span", { class: "calc-progress-label", text: label }))));
 
     const setupStep = () => {
@@ -263,51 +264,44 @@
         T.button("Edit inputs", () => { step = 0; render(); }, "primary"),
         T.button("Start over", reset, "ghost")));
 
-    const actions = () => {
-      const row = el("div", { class: "tp-actions calc-actions" });
-      if (step > 0 && step < 4) row.append(T.button("← Back", () => { step -= 1; render(); }, "ghost"));
-      if (step < 4) {
-        row.append(T.button(step === 3 ? "Calculate DLS result" : "Next →", () => {
-          const message = validate();
-          if (message) {
-            T.status(root, message, "error");
-            return;
-          }
-          if (step === 3) {
-            try {
-              result = compute();
-              problem = "";
-              step = 4;
-              render();
-            } catch (error) {
-              result = null;
-              problem = error.message;
-              step = 4;
-              render();
-            }
-            return;
-          }
-          step += 1;
-          render();
-        }, "primary"));
+    const advance = event => {
+      event.preventDefault();
+      const message = validate();
+      if (message) {
+        T.status(root, message, "error");
+        return;
       }
-      row.append(T.button("Reset", reset, "ghost"));
-      return row;
+      if (step === 3) {
+        try {
+          result = compute();
+          problem = "";
+        } catch (error) {
+          result = null;
+          problem = error.message;
+        }
+      }
+      step += 1;
+      render(true);
     };
 
-    const render = () => {
-      const shell = el("div", { class: "calc-wizard" }, progress());
-      if (step === 0) shell.append(setupStep());
-      else if (step === 1) shell.append(team1Step());
-      else if (step === 2) shell.append(team2Step());
-      else if (step === 3) shell.append(liveStep());
-      else shell.append(result ? resultView() : errorView());
+    const render = (focus = false) => {
+      const shell = el("div", { class: "calc-wizard", "data-workflow": "guided-calculate" }, progress());
       if (step < 4) {
-        const body = el("div", { class: "calc-step" });
-        body.append(actions());
-        shell.append(body);
+        const steps = [setupStep, team1Step, team2Step, liveStep];
+        const actions = T.actions(
+          step > 0 ? T.button("Back", () => { step -= 1; render(true); }, "ghost") : null,
+          T.button(step === 3 ? "Calculate DLS result" : "Continue", null, "primary", { type: "submit" }),
+          T.button("Reset", reset, "ghost"));
+        shell.append(el("form", { novalidate: true, onsubmit: advance }, steps[step](), actions));
+      } else {
+        shell.append(result ? resultView() : errorView());
       }
       root.replaceChildren(shell);
+      if (focus) {
+        const heading = shell.querySelector("h2, .calc-result-hero, .tp-error");
+        heading?.setAttribute("tabindex", "-1");
+        heading?.focus();
+      }
     };
 
     render();

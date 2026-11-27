@@ -248,7 +248,11 @@
     const error = rootEl.querySelector("#lm-area-error");
     if (currentResult) currentResult.replaceWith(buildResult(result));
     if (currentQuick) currentQuick.replaceWith(buildQuick(result));
-    if (currentShare) currentShare.replaceWith(buildShare(result));
+    if (currentShare) {
+      const nextShare = buildShare(result);
+      nextShare.open = currentShare.open;
+      currentShare.replaceWith(nextShare);
+    }
     if (error) {
       if (result.status === "error") {
         error.textContent = t(errorKey(result.code));
@@ -655,11 +659,9 @@
 
   function buildShare(result) {
     const relations = engine.relationRows(state.regionId, state.standardId);
-    const section = el("section", { class: "lm-panel lm-share", id: "lm-share", "aria-labelledby": "lm-share-title" });
-    section.append(
-      el("div", { class: "lm-panel-head" },
-        el("h2", { id: "lm-share-title", text: t("shareTitle") }),
-        el("p", { class: "lm-hint", text: t("shareHint") })));
+    const section = T.disclosure(t("shareTitle"), el("p", { class: "lm-hint", text: t("shareHint") }));
+    section.classList.add("lm-share");
+    section.id = "lm-share";
     if (relations.length) {
       section.append(el("p", {
         class: "lm-relations lm-share-relations",
@@ -768,6 +770,7 @@
 
   function mount(root) {
     rootEl = root;
+    root.dataset.workflow = "convert-land-area";
     hydrate(new URLSearchParams(location.search));
     ensureUnits();
     document.documentElement.lang = state.lang;

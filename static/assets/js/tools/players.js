@@ -1305,10 +1305,10 @@
       storeBufferPref(state.buffer);
       applyBufferSettings();
     });
-    extras.append(T.panel("Buffering", el("div", { class: "pl-buffer-body" }, bufferFields, bufferStat), "pl-buffer-panel"));
+    extras.append(T.disclosure("Playback and buffering", el("div", { class: "pl-buffer-body" }, bufferFields, bufferStat)));
 
     const shortcutItems = [["Space / K", "Play or pause"], ["← / →", "Seek 10 s (Shift: 30 s)"], ["↑ / ↓", "Volume"], ["M", "Mute"], ["F", "Fullscreen"], ["P", "Picture-in-picture"], ["L", "Loop"], [", / .", "Slower or faster"]];
-    extras.append(T.panel("Keyboard shortcuts", el("ul", { class: "pl-keys" },
+    extras.append(T.disclosure("Keyboard shortcuts", el("ul", { class: "pl-keys" },
       ...shortcutItems.map(([keys, action]) => el("li", {}, el("kbd", { text: keys }), el("span", { text: action }))))));
 
     updateVolumeIcons();

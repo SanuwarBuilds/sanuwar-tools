@@ -176,6 +176,9 @@
   const mountWizard = (root, config) => {
     const steps = config.steps || [{ title: config.stepTitle || "Enter the values", fields: config.fields || [] }];
     const values = {};
+    const direct = steps.length === 1;
+    const announcement = el("p", { class: "sr-only", role: "status" });
+    let output;
     let index = 0;
     let resultState = null;
     let errorState = null;
@@ -230,8 +233,12 @@
         resultState = null;
         errorState = error.message || "This calculation could not be completed.";
       }
-      index = steps.length;
-      render();
+      if (direct && output) {
+        drawOutput();
+        return;
+      }
+      if (!direct) index = steps.length;
+      render(!direct);
     };
 
     const validate = () => {
@@ -258,6 +265,7 @@
       return el("ol", { class: "calc-progress", "aria-label": "Calculator steps" },
         labels.map((label, stepIndex) => el("li", {
           class: `calc-progress-step${stepIndex === index ? " is-active" : ""}${stepIndex < index ? " is-done" : ""}`,
+          "aria-current": stepIndex === index ? "step" : null,
         }, el("span", { class: "calc-progress-dot", text: String(stepIndex + 1).padStart(2, "0") }), el("span", { class: "calc-progress-label", text: label }))));
     };
 
@@ -272,7 +280,7 @@
       if (result.details?.length) {
         lines.push(`Supporting figures: ${result.details.slice(0, 5).map(([label, value]) => `${label} — ${value}`).join("; ")}.`);
       }
-      if (result.steps?.length) lines.push("The full formula is shown in the step-by-step working above.");
+      if (result.steps?.length) lines.push("Open Show the calculation to see the full formula.");
       lines.push("Everything was calculated locally in your browser; no values were uploaded.");
       return lines;
     };
@@ -318,23 +326,24 @@
           result.details.map(([label, value]) => el("div", {}, el("span", { text: label }), el("strong", { text: String(value) })))));
       }
       if (result.steps?.length) {
-        section.append(el("h3", { class: "tp-panel-title", text: "Step-by-step working" }));
-        section.append(el("ol", { class: "calc-working" }, result.steps.map((line) => el("li", { text: String(line) }))));
+        section.append(el("details", { class: "task-disclosure" },
+          el("summary", { text: "Show the calculation" }),
+          el("ol", { class: "calc-working" }, result.steps.map((line) => el("li", { text: String(line) })))));
       }
       (result.notes || []).forEach((note) => section.append(el("p", { class: "calc-note", text: String(note) })));
       const explanation = explanationView(result);
       if (explanation) section.append(explanation);
       section.append(el("div", { class: "tp-actions calc-actions" },
-        T.button("Copy result", () => T.copy(summary(result)), "primary"),
-        T.button("Edit inputs", () => { index = steps.length - 1; render(); }, "ghost"),
-        T.button("Start over", reset, "ghost")));
+        T.button("Copy result", () => T.copy(summary(result)), "ghost"),
+        direct ? null : T.button("Edit inputs", () => { index = steps.length - 1; render(true); }, "ghost"),
+        direct ? null : T.button("Start over", reset, "ghost")));
       return section;
     };
 
     const errorView = () => el("section", { class: "tp-panel" },
-      el("div", { class: "tp-error" }, el("strong", { text: "Check your inputs" }), el("p", { text: errorState })),
-      el("div", { class: "tp-actions calc-actions" },
-        T.button("Edit inputs", () => { index = Math.max(0, steps.length - 1); render(); }, "primary"),
+      el("div", { class: "tp-error calc-feedback" }, el("strong", { text: "Check your inputs" }), el("p", { text: errorState })),
+      direct ? null : el("div", { class: "tp-actions calc-actions" },
+        T.button("Edit inputs", () => { index = steps.length - 1; render(true); }, "primary"),
         T.button("Start over", reset, "ghost")));
 
     const stepView = () => {
@@ -352,40 +361,55 @@
         }));
       const isLast = index === steps.length - 1;
       const actions = el("div", { class: "tp-actions calc-actions" });
-      if (index > 0) actions.append(T.button("← Back", () => { index -= 1; render(); }, "ghost"));
-      actions.append(T.button(isLast ? "Calculate result" : "Next →", () => {
-        const problem = validate();
-        if (problem) {
-          T.status(root, problem, "error");
-          return;
-        }
-        if (isLast) calculate();
-        else { index += 1; render(); }
-      }, "primary"));
+      const problem = el("p", { class: "task-form-error", role: "status" });
+      if (index > 0) actions.append(T.button("Back", () => { index -= 1; render(true); }, "ghost"));
+      const runLabel = isLast ? "Calculate result" : "Continue";
+      actions.append(T.button(runLabel, null, "primary", { type: "submit" }));
       actions.append(T.button("Reset", reset, "ghost"));
-      return el("section", { class: "tp-panel calc-step" },
-        el("h2", { class: "calc-step-title", text: `${index + 1}. ${step.title || "Values"}` }),
+      const form = el("form", { class: "tp-panel calc-step task-calculation-input", novalidate: true },
+        el("h2", { class: "calc-step-title", tabindex: -1, text: step.title || "Values" }),
         step.description ? el("p", { class: "calc-step-desc", text: step.description }) : null,
-        grid,
-        actions);
+        grid, problem, actions);
+      form.addEventListener("submit", event => {
+        event.preventDefault();
+        const issue = validate();
+        problem.textContent = issue || "";
+        if (issue) return;
+        if (isLast) calculate();
+        else { index += 1; render(true); }
+      });
+      form.addEventListener("input", () => {
+        problem.textContent = "";
+        if (direct && (resultState || errorState)) {
+          resultState = null;
+          errorState = null;
+          drawOutput();
+        }
+      });
+      return form;
     };
 
-    const render = () => {
-      const shell = el("div", { class: "calc-wizard" });
-      const overview = el("section", { class: "studio-pane studio-source", "aria-label": "Calculation overview" },
-        el("h2", { class: "studio-pane-title", text: "Calculation overview" }),
-        el("p", { class: "tp-hint", text: config.description || "Enter your values to see the result and its calculation." }),
-        progress());
-      let view;
-      if (index < steps.length) view = stepView();
-      else if (errorState) view = errorView();
-      else if (resultState) view = resultView();
-      else { calculate(); return; }
-      view.classList.add("studio-pane", "studio-controls");
-      shell.append(el("div", { class: "studio-split calc-studio" }, overview, view));
+    const drawOutput = () => {
+      const view = errorState ? errorView() : resultState ? resultView() :
+        el("p", { class: "task-empty", text: "Enter the values and select Calculate result." });
+      output.replaceChildren(el("h2", { class: "task-section-title", tabindex: -1, text: "Result" }), view);
+      announcement.textContent = errorState || (resultState ? `${resultState.primary.label}: ${resultState.primary.value}` : "");
+    };
+
+    const render = (focus = false) => {
+      const shell = el("div", { class: "calc-wizard", "data-workflow": direct ? "calculate" : "guided-calculate" });
+      output = null;
+      if (!direct) shell.append(progress());
+      if (direct || index === steps.length) {
+        output = el("div", { class: "task-calculation-output" });
+        drawOutput();
+      }
+      if (direct) shell.append(el("div", { class: "task-calculation" }, stepView(), output));
+      else shell.append(output || stepView());
       const source = sourceView();
       if (source) shell.append(source);
-      root.replaceChildren(shell);
+      root.replaceChildren(shell, announcement);
+      if (focus) (output || shell).querySelector("h2")?.focus();
     };
 
     const hydration = hydrateFromUrl();

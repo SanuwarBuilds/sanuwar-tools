@@ -250,7 +250,7 @@
       output.value = "";
       notice.textContent = "";
     });
-    root.replaceChildren(el("div", { class: "st-ocr" },
+    root.replaceChildren(el("div", { class: "st-ocr", "data-workflow": "extract-text" },
       panel("Image and language", [controls, actions(run), notice], "st-ocr-source"),
       panel("", [field("Recognized text", output),
         actions(T.copyButton(() => output.value, "Copy text"),
@@ -478,7 +478,7 @@
 
     const pageControls = actions(previous, pageLabel, next);
     pageControls.classList.add("fw-redaction-controls");
-    const editor = el("div", { class: "studio-split" },
+    const editor = el("div", { class: "studio-split", "data-workflow": "redact-document" },
       panel("Preview", [pageControls, view], "studio-pane studio-source"),
       panel("Redaction controls", [review,
         el("details", { class: "fw-details" }, el("summary", { text: "Add a box by position" }), boxForm),
