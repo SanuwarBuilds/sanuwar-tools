@@ -502,10 +502,8 @@
       T.button("Download PNG", () => downloadPng(), "ghost"),
       T.button("Copy encoded content", () => payload ? T.copy(payload) : status(root, "Generate a QR code first.", "error"), "ghost"));
     const panel = el("section", { class: "tp-panel st-qr-workspace" },
-      el("div", { class: "st-qr-settings" },
-        el("h2", { class: "tp-panel-title", text: "QR code settings" }),
-        form, actions),
       el("div", { class: "qr-result" },
+        el("h2", { class: "studio-pane-title", text: "Live preview" }),
         preview,
         el("div", { class: "qr-meta" },
           el("span", { class: "qr-meta-label", text: "Encoded content" }),
@@ -513,7 +511,10 @@
           el("p", { class: "tp-hint", text: "The QR code is generated in this browser. Nothing is uploaded." }),
           el("details", { class: "calc-explain qr-explain" },
             el("summary", { text: "Explain this QR code" }),
-            qrExplain))));
+            qrExplain))),
+      el("div", { class: "st-qr-settings studio-pane studio-controls" },
+        el("h2", { class: "studio-pane-title", text: "QR code settings" }),
+        form, actions));
     root.replaceChildren(panel);
 
     let payload = "";

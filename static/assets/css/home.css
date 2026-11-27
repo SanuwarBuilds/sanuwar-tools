@@ -1,145 +1,173 @@
-.file-home {
-  --file-hero-bg: linear-gradient(105deg, #f6f2fc, #e9e2fa 62%, #ded6f5);
-  --file-workspace-bg: linear-gradient(145deg, #eee8ff, #ded8f8);
+/* Homepage search, tool cards and saved shortcuts. The palette lives in workspace.css. */
+body.reference-ui.file-home #main .desk-page {
+  width: min(1200px, calc(100% - clamp(32px, 8vw, 112px)));
+  padding-top: clamp(22px, 4vw, 44px);
 }
 
-html[data-theme="dark"] .file-home {
-  --file-hero-bg: linear-gradient(105deg, #21192f, #34284a);
-  --file-workspace-bg: linear-gradient(145deg, #312641, #2b2342);
+.bento-hero {
+  position: relative;
+  isolation: isolate;
+  padding: clamp(24px, 6vw, 76px) clamp(16px, 5vw, 66px);
+  overflow: hidden;
+  border: 1px solid var(--wb-line);
+  border-radius: clamp(16px, 2vw, 28px);
+  background: radial-gradient(ellipse at 76% 0%, var(--wb-accent-wash), transparent 69%), var(--wb-card);
 }
-
-.file-home .file-hero { background: var(--file-hero-bg); overflow: hidden; }
-.file-hero-inner { position: relative; display: flex; align-items: center; min-height: clamp(194px, 15.2vw, 258px); }
-.file-hero-copy { position: relative; z-index: 1; width: 61%; padding: 30px 0 34px clamp(0px, 1.7vw, 26px); }
-.file-home #main .file-hero h1 {
-  margin: 0 0 9px;
-  color: var(--wb-ink);
-  font: 780 clamp(38px, 4.65vw, 74px)/1.05 Inter, sans-serif;
-  letter-spacing: -.065em;
-}
-.file-home #main .file-hero p {
-  max-width: 58ch;
-  margin: 0;
-  color: var(--wb-muted);
-  font: 440 clamp(15px, 1.55vw, 24px)/1.45 Inter, sans-serif;
-}
-.file-hero-art {
+.bento-hero::before {
+  content: "";
   position: absolute;
-  inset: 0 clamp(-48px, -3.1vw, -16px) 0 auto;
-  width: 50%;
+  inset: 0;
+  z-index: -1;
+  opacity: .7;
+  background-image: linear-gradient(var(--wb-line) 1px, transparent 1px), linear-gradient(90deg, var(--wb-line) 1px, transparent 1px);
+  background-size: 34px 34px;
+  mask-image: radial-gradient(ellipse at 95% 0%, #000 8%, transparent 70%);
+}
+.file-home #main .bento-hero h1 {
+  margin: 0;
+  color: var(--wb-ink);
+  font: 780 clamp(38px, 6.2vw, 86px)/1.01 Inter, sans-serif;
+  letter-spacing: -.075em;
+}
+.bento-hero h1 span { color: var(--wb-accent); }
+.file-home #main .bento-hero p {
+  max-width: 50ch;
+  margin: 16px 0 24px;
+  color: var(--wb-muted);
+  font: 440 clamp(14px, 1.7vw, 18px)/1.55 Inter, sans-serif;
+}
+body.reference-ui.file-home #main .desk-search {
+  max-width: 710px;
+  background: color-mix(in srgb, var(--wb-bg) 77%, transparent);
+  border-color: var(--wb-line-strong);
+  backdrop-filter: blur(16px);
+}
+body.reference-ui.file-home #main .desk-search:focus-within { border-color: var(--wb-accent); }
+body.reference-ui.file-home #main .desk-search > button { min-height: 42px; }
+body.reference-ui.file-home #main .desk-search > button .desk-icon { display: none; }
+body.reference-ui.file-home #main .desk-search > button:hover { filter: brightness(1.1); }
+
+body.reference-ui.file-home #main .bento-tools { background: none; padding: 0; scroll-margin-top: 80px; }
+.bento-filters { display: flex; flex-wrap: wrap; gap: 8px; margin-block: 20px 22px; scroll-margin-top: 80px; }
+.file-home #main .bento-filters a {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  min-height: 42px;
+  padding: 6px 12px;
+  border: 1px solid var(--wb-line);
+  border-radius: 999px;
+  background: var(--wb-card);
+  color: var(--wb-ink-2);
+  font-size: 13px;
+  font-weight: 610;
+  text-decoration: none;
+}
+.file-home #main .bento-filters a:is(:hover, [aria-current="true"]) {
+  border-color: var(--wb-accent);
+  background: var(--wb-accent-wash);
+  color: var(--wb-ink);
+}
+.file-home #main .bento-filters .desk-icon { width: 18px; height: 18px; color: var(--wb-accent); background: transparent; }
+.file-home #main .bento-filters .desk-icon svg { width: 17px; height: 17px; }
+.bento-heading { margin-top: 6px; }
+.bento-grid { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 12px; }
+.bento-card { min-width: 0; }
+.bento-card[hidden], .bento-history[hidden] { display: none; }
+body.reference-ui.file-home #main .bento-card .desk-tool-row {
+  position: relative;
   height: 100%;
-  object-fit: cover;
-  object-position: center;
-  mask-image: linear-gradient(90deg, transparent, #000 19%, #000 92%, transparent);
+  border-radius: 16px;
+  transition: border-color 160ms ease, box-shadow 160ms ease, background-color 160ms ease;
 }
-[data-theme="dark"] .file-hero-art {
-  filter: brightness(.78) saturate(.85);
-  mask-image: radial-gradient(ellipse 53% 63% at 52% 49%, #000 62%, transparent);
+body.reference-ui.file-home #main .bento-card .desk-tool-row:is(:hover, :focus-within) {
+  border-color: var(--wb-accent);
+  box-shadow: 0 0 20px color-mix(in srgb, var(--wb-accent) 12%, transparent);
 }
+body.reference-ui.file-home #main .bento-card .desk-tool-row > a {
+  display: grid;
+  align-content: start;
+  gap: 12px;
+  min-height: 130px;
+  padding: 15px;
+  border-radius: inherit;
+}
+body.reference-ui.file-home #main .bento-card .desk-icon { width: 43px; height: 43px; border-radius: 12px; }
+body.reference-ui.file-home #main .bento-card .desk-row-copy strong { font-size: 16px; }
+body.reference-ui.file-home #main .bento-card .desk-star { position: absolute; inset: 7px 7px auto auto; }
+body.reference-ui.file-home #main .bento-card .desk-star:hover { background: var(--wb-soft); color: var(--wb-accent); }
+body.reference-ui.file-home #main .bento-tools .desk-star[aria-pressed="true"] svg { fill: var(--wb-accent); }
 
-body.reference-ui.file-home #main .desk-page { padding-top: 20px; }
-body.reference-ui.file-home #main .desk-search { border-color: var(--wb-accent); }
-body.reference-ui.file-home #main .desk-search .desk-icon { color: var(--wb-ink); }
-body.reference-ui.file-home #main .desk-search input { font-size: clamp(16px, 1.4vw, 22px); }
-body.reference-ui.file-home #main .desk-search > button {
-  min-height: 40px;
-  padding-inline: clamp(13px, 2.25vw, 34px);
-  color: var(--st-on-action);
-  background: var(--st-action);
+.bento-history {
+  display: grid;
+  gap: 7px;
+  margin-bottom: 20px;
+  padding: 8px 12px;
+  border: 1px solid var(--wb-line);
+  border-radius: 14px;
+  background: var(--wb-card);
 }
-body.reference-ui.file-home #main .desk-search > button:hover { background: var(--st-accent-hover); }
-
-.file-shortcuts { display: flex; align-items: center; padding-block: 8px; }
-.file-home .file-shortcuts a {
+.bento-history > div:not([hidden]) { display: flex; gap: 10px; align-items: center; }
+body.reference-ui.file-home #main .bento-history h3 { margin: 0; width: 44px; flex: none; font-size: 12px; }
+body.reference-ui.file-home #main .bento-history .desk-recent-list {
   display: flex;
-  flex: 1;
-  justify-content: center;
+  min-width: 0;
+  overflow-x: auto;
+}
+body.reference-ui.file-home #main .bento-history .desk-tool-row { flex: none; background: var(--wb-soft); }
+body.reference-ui.file-home #main .bento-history .desk-tool-row > a { min-height: 44px; }
+body.reference-ui.file-home #main .bento-history :is(.desk-icon, .desk-row-copy small) { display: none; }
+body.reference-ui.file-home #main .bento-history .desk-row-copy strong { font-size: 12px; white-space: nowrap; }
+
+.bento-resources {
+  display: grid;
+  grid-auto-columns: minmax(0, 1fr);
+  grid-auto-flow: column;
+  margin-block: 22px;
+  border: 1px solid var(--wb-line);
+  border-radius: 16px;
+  background: var(--wb-card);
+}
+.file-home #main .bento-resources a {
+  display: flex;
   align-items: center;
   gap: 10px;
-  min-height: 44px;
-  padding-inline: 8px;
-  color: var(--wb-accent);
-  font-size: clamp(13px, 1.25vw, 20px);
-  font-weight: 600;
-  line-height: 1.2;
-  text-decoration: none;
-}
-.file-home .file-shortcuts a + a { border-inline-start: 1px solid var(--wb-line-strong); }
-body.reference-ui.file-home #main .file-shortcuts .desk-icon { width: 30px; height: 30px; background: transparent; color: currentColor; }
-body.reference-ui.file-home #main .file-shortcuts .desk-icon svg { width: 28px; height: 28px; }
-.file-home .file-shortcuts a:hover span:not(.desk-icon) { text-decoration: underline; text-underline-offset: 4px; }
-.file-home .file-quick { margin: 2px 0 12px; }
-.file-home .file-resources { margin-block: 4px 12px; }
-.file-home .file-resources a { font-size: clamp(12px, 1.1vw, 17px); }
-
-.file-tool-layout {
-  display: grid;
-  grid-template-columns: minmax(0, 2.1fr) minmax(280px, 1fr);
-  gap: 20px;
-  align-items: start;
-}
-.file-popular { min-width: 0; scroll-margin-top: 84px; }
-body.reference-ui.file-home #main .desk-panel-head { margin-bottom: 11px; }
-body.reference-ui.file-home #main :is(.file-popular, .file-workspace, .file-guides) h2 {
-  color: var(--st-ink);
-  font-size: clamp(23px, 2vw, 30px);
-  line-height: 1.14;
-}
-body.reference-ui.file-home #main .file-popular .desk-tool-grid { gap: 7px 9px; }
-body.reference-ui.file-home #main .file-popular .desk-tool-row > a { min-height: 69px; }
-body.reference-ui.file-home #main .file-popular .desk-tool-row small { white-space: normal; }
-body.reference-ui.file-home #main .file-workspace { padding: 16px 20px 22px; background: var(--file-workspace-bg); }
-body.reference-ui.file-home #main .file-workspace h3 { margin: 0 0 9px; }
-.file-default-tools { display: grid; gap: 7px; }
-body.reference-ui.file-home #main .file-default-tools .desk-tool-row > a { min-height: 44px; }
-.file-default-tools small:empty { display: none; }
-.file-workspace [data-tool-list]:not([hidden]) + [data-tool-list]:not([hidden]),
-.file-workspace [data-workspace-default]:not([hidden]) ~ [data-tool-list]:not([hidden]) { margin-top: 12px; }
-body.reference-ui.file-home #main .file-workspace .desk-recent-list { grid-template-columns: minmax(0, 1fr); max-height: 232px; }
-
-.file-home .file-guides { margin-top: 22px; margin-bottom: 0; }
-.file-guide-grid { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 14px; }
-.file-home .file-guide-card {
-  display: grid;
-  grid-template-columns: minmax(0, .9fr) minmax(0, 1.1fr);
-  align-items: center;
-  gap: 13px;
-  padding: 10px;
-  border: 1px solid var(--wb-line);
-  border-radius: 12px;
-  background: var(--wb-card);
+  min-height: 58px;
+  padding: 8px 14px;
   color: var(--wb-ink);
+  font-size: 14px;
+  font-weight: 600;
   text-decoration: none;
 }
-.file-home .file-guide-card img { display: block; width: 100%; height: auto; border-radius: 8px; }
-.file-home .file-guide-card strong { display: block; font-size: clamp(14px, 1.36vw, 21px); line-height: 1.2; letter-spacing: -.025em; }
-.file-home .file-guide-card small { display: block; margin-top: 7px; color: var(--wb-muted); font-size: 13px; line-height: 1.35; }
-.file-home .file-guide-card:hover { border-color: var(--wb-accent); background: var(--wb-card-2); }
-.file-home #browse-categories { scroll-margin-top: 84px; }
+.file-home #main .bento-resources a:hover { color: var(--wb-accent); }
+.file-home #main .bento-resources a + a { border-inline-start: 1px solid var(--wb-line); }
+.file-home #main .bento-resources .desk-icon { width: 25px; height: 25px; color: var(--wb-accent); background: transparent; }
+.file-home #main .bento-resources .desk-icon svg { width: 22px; height: 22px; }
+.bento-resources .desk-arrow { margin-inline-start: auto; }
+.bento-guides .desk-row-copy small { max-width: 48ch; }
 
-@media (max-width: 980px) {
-  .file-tool-layout { gap: 14px; grid-template-columns: minmax(0, 1fr) minmax(240px, .6fr); }
-  .file-home .file-guide-card { grid-template-columns: 1fr; align-content: start; }
-}
 @media (max-width: 760px) {
-  .file-hero-inner { display: grid; min-height: 0; padding-top: 20px; }
-  .file-hero-copy { width: 100%; padding: 0; }
-  .file-home #main .file-hero p { max-width: 38ch; }
-  .file-hero-art {
-    position: static;
-    justify-self: end;
-    width: min(100%, 420px);
-    height: auto;
-    margin-bottom: -2px;
-    mask-image: radial-gradient(ellipse 54% 68% at 52% 52%, #000 62%, transparent);
+  .bento-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  .bento-filters { margin-block: 15px 18px; }
+  .file-home #main .bento-filters a { min-height: 40px; font-size: 12px; }
+  .bento-resources { grid-auto-flow: row; }
+  .file-home #main .bento-resources a + a { border-inline-start: 0; border-top: 1px solid var(--wb-line); }
+}
+@media (max-width: 460px) {
+  .bento-grid { grid-template-columns: minmax(0, 1fr); gap: 8px; }
+  body.reference-ui.file-home #main .bento-card .desk-tool-row > a {
+    grid-template-columns: auto minmax(0, 1fr);
+    align-items: center;
+    min-height: 74px;
+    padding: 11px 52px 11px 12px;
   }
-  .file-tool-layout { grid-template-columns: minmax(0, 1fr); }
-  .file-shortcuts { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 5px 8px; }
-  .file-home .file-shortcuts a { justify-content: flex-start; padding-inline: 0; }
-  .file-home .file-shortcuts a + a { border: 0; }
-  body.reference-ui.file-home #main .file-shortcuts .desk-icon { width: 26px; height: 26px; }
-  body.reference-ui.file-home #main .file-shortcuts .desk-icon svg { width: 22px; height: 22px; }
-  .file-home #main .file-guides .desk-panel-head { flex-wrap: wrap; gap: 4px 12px; }
-  .file-guide-grid { grid-template-columns: minmax(0, 1fr); gap: 8px; }
-  .file-home .file-guide-card { grid-template-columns: minmax(90px, .65fr) minmax(0, 1.35fr); }
+  body.reference-ui.file-home #main .bento-card .desk-star { inset: 50% 6px auto auto; transform: translateY(-50%); }
+  body.reference-ui.file-home #main .desk-search label .desk-icon,
+  body.reference-ui.file-home #main .desk-search > button > span:not(.desk-icon) { display: none; }
+  body.reference-ui.file-home #main .desk-search > button { padding-inline: 11px; }
+  body.reference-ui.file-home #main .desk-search > button .desk-icon { display: grid; width: 20px; height: 20px; }
+  body.reference-ui.file-home #main .desk-search > button .desk-icon svg { width: 20px; height: 20px; }
+}
+@media (prefers-reduced-motion: reduce) {
+  body.reference-ui.file-home #main .bento-card .desk-tool-row { transition: none; }
 }

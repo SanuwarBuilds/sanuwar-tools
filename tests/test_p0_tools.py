@@ -54,7 +54,7 @@ class P0ToolTests(unittest.TestCase):
         for slug in P0_SLUGS[:-1]:
             html = self.client.get(f"/tools/{slug}").get_data(as_text=True)
             self.assertIn("/assets/js/tools/calc-math.js?v=1", html)
-            self.assertIn("/assets/js/tools/calculators.js?v=4", html)
+            self.assertRegex(html, r"/assets/js/tools/calculators\.js\?v=\d+")
         qr = self.client.get("/tools/qr-code-generator").get_data(as_text=True)
         self.assertNotIn("calc-math.js", qr)
         self.assertIn("/assets/js/tools/misc.js?v=", qr)

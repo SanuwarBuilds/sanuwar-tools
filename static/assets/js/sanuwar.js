@@ -39,14 +39,12 @@
 
   /* Theme button label mirrors the current theme. */
   const toggle = document.getElementById('theme-toggle');
-  const themeColor = document.querySelector('meta[name="theme-color"]');
   const syncThemeLabel = () => {
     if (!toggle) return;
     const dark = root.dataset.theme === 'dark';
     const label = dark ? 'Switch to light theme' : 'Switch to dark theme';
     toggle.setAttribute('aria-label', label);
     toggle.setAttribute('title', label);
-    themeColor?.setAttribute('content', dark ? '#0c0817' : '#fbfaff');
   };
   syncThemeLabel();
   new MutationObserver(syncThemeLabel).observe(root, {

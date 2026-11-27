@@ -2,6 +2,24 @@
 (async () => {
   const { $, el, api, image, external, empty, tabs, open, toast } = ST;
   let tools = [], selected = "All", categoryOrder = [];
+  const filters = [...document.querySelectorAll("[data-bento-filter]")];
+  const cards = [...document.querySelectorAll("[data-bento-group]")];
+  const filterStatus = $("[data-bento-status]");
+  filters.forEach(filter => filter.addEventListener("click", event => {
+    if (event.metaKey || event.ctrlKey || event.shiftKey || event.altKey) return;
+    event.preventDefault();
+    const group = filter.dataset.bentoFilter;
+    filters.forEach(link => {
+      if (link === filter) link.setAttribute("aria-current", "true");
+      else link.removeAttribute("aria-current");
+    });
+    let count = 0;
+    cards.forEach(card => {
+      card.hidden = group !== "all" && card.dataset.bentoGroup !== group;
+      if (!card.hidden) count += 1;
+    });
+    filterStatus.textContent = `${count} ${count === 1 ? "tool" : "tools"} shown.`;
+  }));
   const grid = $("#tools-grid");
   const categorySelect = $("#category-select");
   const ICON_NAMES = new Set(["photo", "passport", "score", "wallet", "tool", "download", "album", "film", "anime", "manga", "sports", "tv", "torrent", "game", "music", "ebook", "comics", "drama", "vpn", "shield", "calculator", "key", "text", "convert", "document", "clock", "heart", "archive"]);

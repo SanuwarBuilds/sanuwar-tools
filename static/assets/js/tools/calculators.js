@@ -371,14 +371,18 @@
     };
 
     const render = () => {
-      const shell = el("div", { class: "calc-wizard" }, progress());
-      if (index >= steps.length) {
-        if (errorState) shell.append(errorView());
-        else if (resultState) shell.append(resultView());
-        else { calculate(); return; }
-      } else {
-        shell.append(stepView());
-      }
+      const shell = el("div", { class: "calc-wizard" });
+      const overview = el("section", { class: "studio-pane studio-source", "aria-label": "Calculation overview" },
+        el("h2", { class: "studio-pane-title", text: "Calculation overview" }),
+        el("p", { class: "tp-hint", text: config.description || "Enter your values to see the result and its calculation." }),
+        progress());
+      let view;
+      if (index < steps.length) view = stepView();
+      else if (errorState) view = errorView();
+      else if (resultState) view = resultView();
+      else { calculate(); return; }
+      view.classList.add("studio-pane", "studio-controls");
+      shell.append(el("div", { class: "studio-split calc-studio" }, overview, view));
       const source = sourceView();
       if (source) shell.append(source);
       root.replaceChildren(shell);

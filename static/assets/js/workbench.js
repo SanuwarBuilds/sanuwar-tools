@@ -5,9 +5,8 @@
   const root = document.documentElement;
 
   const platform = navigator.userAgentData?.platform || navigator.platform || "";
-  const kbdHint = $("[data-wb-kbd]");
   const isMac = /mac|iphone|ipad/i.test(platform);
-  if (kbdHint) kbdHint.textContent = isMac ? "⌘K" : "Ctrl K";
+  $$("[data-wb-kbd]").forEach(hint => { hint.textContent = isMac ? "⌘K" : "Ctrl K"; });
 
   /* ---------- Search palette --------------------------------------------- */
   const palette = $("#wb-palette");
