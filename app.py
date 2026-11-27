@@ -666,7 +666,7 @@ EDUHELP_LABS = {
     'electricity': 'class-10-electricity.html',
     'carbon-compounds': 'carbon-compounds.html',
 }
-TOOL_BUNDLES = {"text", "media", "forms", "network", "misc", "calculators", "dls", "land", "players", "file-workbench", "study-planner", "pdf-editor", "api-studio", "study-utilities"}
+TOOL_BUNDLES = {"text", "media", "forms", "network", "misc", "calculators", "dls", "land", "players", "file-workbench", "study-planner", "pdf-editor", "api-studio", "study-utilities", "scan-workflow"}
 TOOL_VENDORS = {"js-yaml", "marked", "fflate", "pdf-lib", "pdfjs", "jspdf", "bcryptjs", "qrcodegen", "hlsjs", "dashjs", "tesseract"}
 TOOL_CATEGORY_ICONS = {
     'Players': 'film',

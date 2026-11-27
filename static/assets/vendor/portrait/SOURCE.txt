@@ -1,0 +1,3 @@
+MediaPipe Selfie Segmentation, @mediapipe/selfie_segmentation 0.1.1675465747.
+https://www.npmjs.com/package/@mediapipe/selfie_segmentation/v/0.1.1675465747
+https://github.com/google-ai-edge/mediapipe/blob/master/docs/solutions/selfie_segmentation.md

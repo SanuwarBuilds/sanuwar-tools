@@ -80,7 +80,7 @@
     }
   }
 
-  async function recognize(canvas, language, onProgress, withBlocks = false) {
+  async function createOcr(language, onProgress) {
     const base = location.origin + "/assets/vendor/ocr";
     let fail;
     const failure = new Promise((resolve, reject) => { fail = reject; });
@@ -93,7 +93,11 @@
       logger: ({ status, progress }) => onProgress(status === "recognizing text"
         ? "Recognizing text… " + Math.round(progress * 100) + "%" : "Preparing OCR…"),
     });
-    const worker = await Promise.race([loading, failure]);
+    return Promise.race([loading, failure]);
+  }
+
+  async function recognize(canvas, language, onProgress, withBlocks = false) {
+    const worker = await createOcr(language, onProgress);
     try {
       const { data } = await worker.recognize(canvas, {}, { text: true, blocks: withBlocks });
       return data;
@@ -102,5 +106,5 @@
     }
   }
 
-  T.localFiles = { guardFile, canvasFor, releaseCanvas, toBlob, loadImage, openPdf, renderPdfPage, paintMasks, recognize };
+  T.localFiles = { guardFile, canvasFor, releaseCanvas, toBlob, loadImage, openPdf, renderPdfPage, paintMasks, recognize, createOcr };
 })();

@@ -117,6 +117,13 @@
       }
     });
     root.replaceChildren(panel("", [form, results]));
+    const transfer = window.SanuFileTransfer;
+    transfer.receive().then((entry) => {
+      if (!entry || picker.files.length) return;
+      role.value = entry.role || "photo";
+      role.dispatchEvent(new Event("change"));
+      transfer.fill(picker, entry.file);
+    }).catch((error) => { if (!picker.files.length) results.textContent = error.message; });
   });
 
   const canvas = (width = 1, height = 1) => el("canvas", { width, height });

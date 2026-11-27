@@ -539,10 +539,16 @@
     message('Preparing your image on this device…');
     try {
       await new Promise((resolve) => requestAnimationFrame(() => requestAnimationFrame(resolve)));
-      const { v, output, blob } = await exportPhoto(kind === 'photo');
-      if (kind === 'photo') {
+      const { v, output, blob } = await exportPhoto(!['sheet', 'print'].includes(kind));
+      if (!['sheet', 'print'].includes(kind)) {
         const extension = v.format === 'image/png' ? 'png' : 'jpg';
-        download(blob, `${filename}-${v.width}x${v.height}.${extension}`);
+        const name = `${filename}-${v.width}x${v.height}.${extension}`;
+        if (kind === "checker" || kind === "pack") {
+          const route = kind === "checker" ? "/tools/form-file-checker" : "/tools/application-file-pack";
+          await window.SanuFileTransfer.send(route, blob, name, $('application-mode').value);
+          return;
+        }
+        download(blob, name);
         message(`Image ready · ${(blob.size / 1000).toFixed(2)} KB · ${v.dpi} DPI. Download started.`);
       } else {
         const layout = core.sheetLayout(v, $('photo-sheet').value);
@@ -772,6 +778,11 @@
     }
   };
 
+  $('check-export-photo').onclick = () => action('checker');
+  $('pack-export-photo').onclick = () => action('pack');
+  window.SanuFileTransfer.receive().then((entry) => {
+    if (entry && !source && !loadVersion) void load(entry.file);
+  }).catch((error) => { if (!source) message(error.message, true); });
   $('download-photo').onclick = () => action('photo');
   $('download-sheet').onclick = () => action('sheet');
   $('print-sheet').onclick = () => action('print');

@@ -1,0 +1,6 @@
+Browser build of @pdf-lib/fontkit 1.1.1, from the MIT-licensed fontkit project.
+https://www.npmjs.com/package/@pdf-lib/fontkit/v/1.1.1
+https://github.com/foliojs/fontkit
+Noto Sans Devanagari and Bengali from Google Fonts, licensed under OFL 1.1.
+https://github.com/google/fonts/tree/main/ofl/notosansdevanagari
+https://github.com/google/fonts/tree/main/ofl/notosansbengali

@@ -24,8 +24,8 @@
     <button type="button" data-site-search-open aria-haspopup="dialog" aria-controls="wb-palette">Search</button>
   </div>
   {% set quick_actions = [
-    ('pdf-merge', 'Merge PDFs', 'pdf'),
-    ('qr-code-generator', 'Create a QR code', 'qr'),
+    ('scan-to-pdf', 'Scan to PDF', 'pdf'),
+    ('application-file-pack', 'Application Pack', 'folder'),
     ('form-file-checker', 'Check a form file', 'check')
   ] %}
   <nav class="file-shortcuts file-quick" aria-label="Quick actions">
@@ -34,6 +34,8 @@
     {% for slug, label, symbol in quick_actions if slug in tool_slugs %}
     <a href="/tools/{{ slug }}">{{ icon(symbol) }}<span>{{ label }}</span></a>
     {% endfor %}
+    {% if downloads_enabled %}<a href="/downloads">{{ icon('download') }}<span>Downloads</span></a>{% endif %}
+    <a href="/eduhelp">{{ icon('education') }}<span>Eduhelp</span></a>
   </nav>
 
   <div class="file-tool-layout">

@@ -193,7 +193,7 @@ def install(app):
             response.headers['Content-Security-Policy'] = response.headers['Content-Security-Policy'].replace(
                 "connect-src 'self';", f"connect-src 'self' {weather_sources};")
         if (request.path in ('/players', '/tools') or request.path.startswith('/players/') or request.path.startswith('/tools/')) and response.status_code == 200 and response.mimetype == 'text/html':
-            wasm = " 'wasm-unsafe-eval'" if request.path == '/tools/heic-to-jpg' else ''
+            wasm = " 'wasm-unsafe-eval'" if request.path in ('/tools/heic-to-jpg', '/tools/photo-background-remover') else ''
             providers = API_STUDIO_CONNECT.get(request.path, 'https: https://api.frankfurter.app https://api.frankfurter.dev')
             connect = ("'self' " + providers).strip()
             response.headers['Content-Security-Policy'] = (

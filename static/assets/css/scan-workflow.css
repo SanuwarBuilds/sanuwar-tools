@@ -1,0 +1,61 @@
+.sw-layout {
+  display: grid;
+  grid-template-columns: minmax(235px, .82fr) minmax(0, 1.18fr);
+  gap: clamp(14px, 3vw, 32px);
+  align-items: start;
+}
+.sw-controls, .sw-preview { min-width: 0; }
+.sw-controls h2, .sw-preview h2 {
+  font-size: 19px;
+  line-height: 1.3;
+  margin: 0 0 14px;
+  letter-spacing: -.02em;
+}
+.sw-controls > .tp-btn { margin: 8px 0; }
+.sw-stage {
+  min-height: 120px;
+  display: grid;
+  place-items: center;
+  padding: 12px;
+  border: 1px solid var(--st-line, var(--bp-line));
+  border-radius: 12px;
+  background: var(--st-well, var(--bp-panel-2));
+}
+.sw-stage[hidden], .sw-export[hidden], .sw-advanced[hidden], .sw-layout .tp-field[hidden] { display: none !important; }
+.sw-stage canvas { display: block; max-width: 100%; max-height: 470px; object-fit: contain; }
+.sw-transparent {
+  background-color: #fff;
+  background-image: conic-gradient(#e5ece7 25%, #fff 0 50%, #e5ece7 0 75%, #fff 0);
+  background-size: 20px 20px;
+}
+.sw-pages { padding: 0; margin: 12px 0; list-style: none; }
+.sw-pages li {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) repeat(3, auto);
+  gap: 4px;
+  margin: 3px 0;
+}
+.sw-page-name { min-width: 0; overflow-wrap: anywhere; text-align: left; }
+.sw-status { color: var(--st-ink, var(--bp-ink)); overflow-wrap: anywhere; }
+.sw-status:empty { display: none; }
+.sw-fields { display: grid; grid-template-columns: repeat(2,minmax(0,1fr)); gap: 8px; }
+.sw-advanced { margin-top: 12px; }
+.sw-advanced summary { cursor: pointer; font-weight: 650; padding: 10px 0; }
+.sw-ocr-output { max-height: 430px; overflow: auto; overflow-wrap: anywhere; }
+.sw-ocr-output section { padding: 10px 0; border-bottom: 1px solid var(--st-line, var(--bp-line)); }
+.sw-ocr-output h3 { margin: 0; font-size: 14px; }
+.sw-ocr-output p { white-space: pre-wrap; margin: 6px 0 0; }
+.sw-export { padding: 12px 0; background: var(--st-paper, var(--bp-panel)); }
+.sw-continue { display: flex; flex-wrap: wrap; min-width: 0; gap: 7px; }
+@media (max-width: 720px) {
+  .sw-layout { grid-template-columns: minmax(0, 1fr); }
+  .sw-export { position: sticky; bottom: calc(var(--wb-bottom-h, 60px) + env(safe-area-inset-bottom)); z-index: 2; border-top: 1px solid var(--st-line, var(--bp-line)); }
+  .sw-export > .tp-btn-primary { flex-basis: 100%; }
+  .sw-continue {
+    flex-basis: 100%;
+    flex-wrap: nowrap;
+    overflow-x: auto;
+    padding: 3px;
+  }
+  .sw-continue .tp-btn { flex: none; }
+}

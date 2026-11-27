@@ -1541,6 +1541,10 @@
       } finally { busy = false; refresh(false); }
     });
     mobileEditor.addEventListener("change", () => refresh(false));
+    const transfer = window.SanuFileTransfer;
+    transfer.receive().then((entry) => {
+      if (entry && !pdfInput.files.length) transfer.fill(pdfInput, entry.file);
+    }).catch((failure) => { if (!pdfInput.files.length) tell(error(failure)); });
     refresh(false);
   });
 })();

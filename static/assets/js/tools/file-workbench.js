@@ -208,6 +208,14 @@
       hint("Use the limits shown on your form. 1 KB = 1,000 bytes. Images keep their proportions with white padding if needed. With both dimensions blank, images may shrink to fit the size limit."),
       form,
     ]));
+    const transfer = window.SanuFileTransfer;
+    transfer.receive().then((entry) => {
+      if (!entry) return;
+      const row = rows[["photo", "signature", "pdf"].indexOf(entry.role)];
+      if (!row || row.file.files.length) return;
+      transfer.fill(row.file, entry.file);
+      notice.textContent = entry.file.name + " added to the pack.";
+    }).catch((error) => { notice.textContent = error.message; });
   });
 
   T.register("image-to-text", (root) => {
