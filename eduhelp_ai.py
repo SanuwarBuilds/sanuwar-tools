@@ -41,9 +41,9 @@ def generate(prompt, language, grade, mode, topic, history):
         language_instruction += ' Use Assamese script and Assamese vocabulary, including ৰ and ৱ where appropriate.'
     task = (
         'Create revision notes with key concepts, definitions, one worked example when relevant, '
-        'and two short self-check questions.'
+        'and two short self-check questions. Keep the draft around 180 words.'
         if mode == 'notes' else
-        'Answer the latest question. If it is ambiguous, ask a short clarifying question.'
+        'Answer the latest question directly in about 100 words or fewer. If it is ambiguous, ask a short clarifying question.'
     )
     messages = [{'role': 'system', 'content': f'{TUTOR_PROMPT} Audience: {level}. {language_instruction} {task}'}]
     for turn in history:
@@ -58,10 +58,12 @@ def generate(prompt, language, grade, mode, topic, history):
         upstream = requests.post(
             f'https://api.cloudflare.com/client/v4/accounts/{account}/ai/run/{MODEL}',
             headers={'Authorization': f'Bearer {token}'},
-            json={'messages': messages, 'max_completion_tokens': 1250 if mode == 'notes' else 850,
+            json={'messages': messages, 'max_completion_tokens': 1000 if mode == 'notes' else 600,
                   'chat_template_kwargs': {'enable_thinking': False}, 'store': False},
-            timeout=(4, 28), allow_redirects=False,
+            timeout=(4, 50), allow_redirects=False,
         )
+        if upstream.status_code in (408, 504):
+            raise TutorUnavailable(504)
         if upstream.status_code == 429:
             raise TutorUnavailable(429)
         data = upstream.json()

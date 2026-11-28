@@ -551,7 +551,7 @@ def eduhelp_doubt_answer():
     except eduhelp_ai.TutorUnavailable as error:
         messages = {
             429: 'AI is busy or the usage limit was reached. Your notes are still available.',
-            504: 'The AI took too long to answer. Try a shorter question.',
+            504: 'The AI service took too long to respond. Your input is still here. Try again in a moment.',
             502: 'The AI service is temporarily unavailable. Please try again.',
         }
         return jsonify(error=messages[error.status_code]), error.status_code

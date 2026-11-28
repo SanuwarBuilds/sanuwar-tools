@@ -111,6 +111,9 @@
     for (const form of [ask, generate]) form.querySelector("button[type=submit]").disabled = true;
     reset.disabled = true;
     output.textContent = noteMode ? "Writing your study notes…" : "Working on your answer…";
+    const slowResponse = setTimeout(() => {
+      output.textContent = noteMode ? "Still writing your notes…" : "Still working on your answer…";
+    }, 8000);
     try {
       const csrf = document.querySelector('meta[name="csrf-token"]').content;
       const response = await fetch(workspace.dataset.endpoint, {
@@ -141,6 +144,7 @@
     } catch (error) {
       output.textContent = error instanceof SyntaxError ? "The AI is temporarily unavailable." : error.message;
     } finally {
+      clearTimeout(slowResponse);
       pending = false;
       for (const form of [ask, generate]) form.querySelector("button[type=submit]").disabled = false;
       reset.disabled = false;

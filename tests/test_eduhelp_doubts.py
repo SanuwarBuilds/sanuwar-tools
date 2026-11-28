@@ -47,3 +47,14 @@ class EduHelpDoubtTests(unittest.TestCase):
         limit = self.client.post('/api/eduhelp/doubts', json=request, headers=self.headers)
         self.assertEqual(limit.status_code, 429)
         self.assertNotIn('test-server-token', limit.get_data(as_text=True))
+
+    @patch.dict(os.environ, {'CLOUDFLARE_ACCOUNT_ID': '1' * 32, 'CLOUDFLARE_API_TOKEN': 'test-server-token'})
+    @patch('eduhelp_ai.requests.post')
+    def test_provider_timeout_keeps_retry_available(self, upstream):
+        upstream.return_value = Mock(status_code=504, ok=False)
+        res = self.client.post('/api/eduhelp/doubts', headers=self.headers,
+                               json={'prompt': 'Explain Ohm’s law.', 'language': 'en', 'mode': 'ask'})
+        self.assertEqual(res.status_code, 504)
+        self.assertIn('Your input is still here', res.json['error'])
+        self.assertEqual(upstream.call_args.kwargs['timeout'], (4, 50))
+        self.assertEqual(upstream.call_args.kwargs['json']['max_completion_tokens'], 600)
