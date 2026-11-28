@@ -226,7 +226,7 @@ def install(app):
         if request.is_secure:
             response.headers['Strict-Transport-Security'] = 'max-age=31536000'
         cacheable_feed = request.path == '/api/browser-tools.json'
-        if not cacheable_feed and (request.path.startswith(('/admin','/api/','/purchase','/eduhelp/labs/')) or request.path in ('/', '/downloads', '/download.html', '/tools.config.json', '/privacy', '/about', '/contact')):
+        if not cacheable_feed and (request.path.startswith(('/admin','/api/','/purchase','/eduhelp/labs/')) or request.path in ('/', '/downloads', '/download.html', '/tools.config.json', '/privacy', '/about', '/contact', '/eduhelp/doubts')):
             response.headers['Cache-Control'] = 'no-store'
         return response
     @app.errorhandler(HTTPException)

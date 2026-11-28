@@ -45,10 +45,11 @@
   <p>Once a lesson is verified for this chapter, it will appear here.</p>
 </div>
 {% endif %}
-{% if resource_slug or textbook %}
+{% if chapter or resource_slug or textbook %}
 <section class="video-study-links" aria-labelledby="video-study-links-title">
   <h3 id="video-study-links-title">Study resources</h3>
   <div>
+    {% if chapter %}<a class="button button-light" href="{{ url_for('eduhelp_doubts', grade=grade, topic=chapter) }}">Ask a Doubt</a>{% endif %}
     {% if resource_slug %}
     <a class="button button-light" href="{{ url_for('eduhelp_chapter', slug=resource_slug, _anchor='notes') }}">Read notes</a>
     <a class="button button-light" href="{{ url_for('eduhelp_chapter', slug=resource_slug, _anchor='quiz') }}">Practice quiz</a>

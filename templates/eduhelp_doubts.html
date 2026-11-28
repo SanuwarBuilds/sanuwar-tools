@@ -1,0 +1,60 @@
+{% extends 'eduhelp_resource.html' %}
+{% block bodyclass %}eduhelp-page edu-resource-page edu-doubts-page{% endblock %}
+{% block page_styles %}{{ super() }}<link rel="stylesheet" href="/assets/css/eduhelp-doubts.css?v=1">{% endblock %}
+{% block resource_crumb %}<span>Ask a Doubt</span>{% endblock %}
+{% block resource_body %}
+<header class="doubt-hero">
+  <div><h1>Ask a Doubt</h1><p>Explore a question, work through a problem, or turn a topic into study notes.</p></div>
+  <div class="doubt-preferences">
+    <label for="doubt-language">Answer language
+      <select id="doubt-language"><option value="en">English</option><option value="as" lang="as">অসমীয়া</option></select>
+    </label>
+    <label for="doubt-grade">Class
+      <select id="doubt-grade"><option value="">Any class</option>
+        {% for value in grades %}<option value="{{ value }}"{% if value == grade %} selected{% endif %}>Class {{ value }}</option>{% endfor %}
+      </select>
+    </label>
+  </div>
+</header>
+<div class="doubt-app" data-doubt-app data-endpoint="{{ url_for('eduhelp_doubt_answer') }}"
+  data-ai-ready="{{ 'true' if ai_available else 'false' }}" data-topic="{{ topic }}">
+  <div class="doubt-modes" role="group" aria-label="Study activity">
+    <button type="button" aria-pressed="true" aria-controls="doubt-chat" data-doubt-mode="ask">Ask anything</button>
+    <button type="button" aria-pressed="false" aria-controls="doubt-notes" data-doubt-mode="notes">Make notes</button>
+  </div>
+  {% if not ai_available %}<p class="doubt-service">AI is not connected yet. You can write and download notes below.</p>{% endif %}
+  <section id="doubt-chat" class="doubt-panel" aria-labelledby="ask-title">
+    <header class="doubt-panel-head"><h2 id="ask-title">Your question</h2><button class="doubt-link" type="button" data-doubt-reset hidden>New chat</button></header>
+    <div class="doubt-examples" data-doubt-examples>
+      {% if topic %}<button type="button" data-doubt-example data-en="Explain {{ topic }} with a simple example." data-as="{{ topic }} এটা সহজ উদাহৰণেৰে বুজাই দিয়া।">{{ topic }}</button>{% endif %}
+      <button type="button" data-doubt-example data-en="Explain Ohm’s law with a worked example." data-as="ওমৰ সূত্ৰটো এটা উদাহৰণেৰে বুজাই দিয়া।">Explain a concept</button>
+      <button type="button" data-doubt-example data-en="Solve 2x + 3 = 11 step by step." data-as="2x + 3 = 11 ধাপে ধাপে সমাধান কৰা।">Solve step by step</button>
+    </div>
+    <div class="doubt-transcript" role="log" aria-label="Conversation" aria-live="polite" data-doubt-transcript hidden></div>
+    <form class="doubt-form" data-doubt-ask>
+      <label for="doubt-question" class="doubt-sr-only">Question or follow-up</label>
+      <textarea id="doubt-question" rows="3" maxlength="2000" required minlength="2" placeholder="Type a question or a follow-up…"></textarea>
+      <footer><p>AI requests go to Cloudflare. Leave out personal details and double-check answers.</p><button class="button button-dark" type="submit"{% if not ai_available %} disabled{% endif %}>Ask EduHelp</button></footer>
+    </form>
+    <p class="doubt-feedback" role="status" data-doubt-feedback="ask"></p>
+  </section>
+  <section id="doubt-notes" class="doubt-panel" aria-labelledby="notes-title" hidden>
+    <header class="doubt-panel-head"><h2 id="notes-title">Study notes</h2><button type="button" class="button button-dark" data-doubt-pdf>Download PDF</button></header>
+    <form class="doubt-note-form" data-doubt-generate>
+      <label for="doubt-note-title">Title or topic
+        <input id="doubt-note-title" type="text" maxlength="150" value="{{ topic }}" placeholder="e.g. Electricity – Class 10">
+      </label>
+      <button type="submit" class="button button-light"{% if not ai_available %} disabled{% endif %}>Generate AI draft</button>
+    </form>
+    <label class="doubt-editor" for="doubt-note-body">Notes
+      <textarea id="doubt-note-body" rows="13" maxlength="16000" placeholder="Write or paste notes here. You can edit an AI draft before downloading."></textarea>
+    </label>
+    <p class="doubt-feedback" role="status" data-doubt-feedback="notes"></p>
+  </section>
+  <noscript><p>Enable JavaScript to ask questions and download notes.</p></noscript>
+</div>
+{% endblock %}
+{% block scripts %}
+<script nonce="{{ csp_nonce }}" src="/assets/vendor/jspdf.umd.min.js" defer></script>
+<script nonce="{{ csp_nonce }}" src="/assets/js/eduhelp-doubts.js?v=1" defer></script>
+{% endblock %}

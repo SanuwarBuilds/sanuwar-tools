@@ -9,6 +9,7 @@ PAGES = [
     ('Directories', '/directory', 'Movies anime music websites'),
     ('Eduhelp', '/eduhelp', 'Exams results admission notes study'),
     ('Assam Previous-year Papers', '/eduhelp/papers', 'Previous year board question papers PYQ HSLC SEBA class 10 HS Final AHSEC ASSEB class 12 Arts Science Commerce 2015 2026'),
+    ('Ask a Doubt', '/eduhelp/doubts', 'AI tutor study questions Assamese English create notes PDF EduHelp'),
     ('Class 9–12 Video Library', '/eduhelp/videos', 'YouTube lessons Assam ASSEB AHSEC SEBA NCERT CBSE class 9 10 11 12 video chapter lectures'),
     ('Class-wise Study Hub', '/eduhelp/study', 'NCERT class 10 science chapters visual notes revision formulas quizzes flashcards worksheets'),
     ('Electricity Class 10', '/eduhelp/study/electricity', 'Physics Ohm law notes formulas quiz circuits worksheet flashcards guided lab'),

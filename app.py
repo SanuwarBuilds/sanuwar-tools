@@ -16,6 +16,7 @@ from PIL import Image, UnidentifiedImageError
 from werkzeug.security import check_password_hash
 from werkzeug.utils import secure_filename
 import security
+import eduhelp_ai
 from availability import is_public, public_config
 import payments
 import seo
@@ -506,6 +507,55 @@ def eduhelp_videos():
                            selected_lesson=selected_lesson, active_lesson=active_lesson,
                            lesson_count=len(matched), page=page, page_count=page_count, query_params=query_params,
                            lessons=matched if chapter_mode else matched[offset:offset + page_size])
+
+
+@app.get('/eduhelp/doubts')
+def eduhelp_doubts():
+    grade = request.args.get('grade', type=int)
+    topic = request.args.get('topic', '').strip()[:150]
+    return render_template('eduhelp_doubts.html', grades=EDU_VIDEO_GRADES,
+                           grade=grade if grade in EDU_VIDEO_GRADES else None, topic=topic,
+                           ai_available=eduhelp_ai.available())
+
+
+@app.post('/api/eduhelp/doubts')
+def eduhelp_doubt_answer():
+    if not eduhelp_ai.available():
+        return jsonify(error='AI is not connected yet. You can still write notes and download a PDF.'), 503
+
+    payload = request.get_json()
+    prompt = payload.get('prompt')
+    if not isinstance(prompt, str) or not 2 <= len(prompt.strip()) <= 2000:
+        return jsonify(error='Enter a question or topic between 2 and 2,000 characters.'), 400
+    grade = payload.get('grade')
+    language = payload.get('language')
+    mode = payload.get('mode')
+    topic = payload.get('topic', '')
+    if ((grade is not None and (type(grade) is not int or grade not in EDU_VIDEO_GRADES)) or
+            not isinstance(language, str) or language not in eduhelp_ai.LANGUAGES or
+            not isinstance(topic, str) or len(topic) > 150 or mode not in ('ask', 'notes')):
+        return jsonify(error='Choose a valid class, language and activity.'), 400
+
+    history = payload.get('history', [])
+    if not isinstance(history, list) or len(history) > 2 or any(
+            not isinstance(turn, dict) or
+            not isinstance(turn.get('question'), str) or len(turn['question']) > 2000 or
+            not isinstance(turn.get('answer'), str) or len(turn['answer']) > 4500
+            for turn in history):
+        return jsonify(error='The conversation is too long. Start a new question.'), 400
+    if security.limited(('eduhelp-doubt', request.remote_addr), maximum=5, window=60):
+        return jsonify(error='Too many questions at once. Try again in a minute.'), 429
+
+    try:
+        answer = eduhelp_ai.generate(prompt.strip(), language, grade, mode, topic.strip(), history if mode == 'ask' else [])
+    except eduhelp_ai.TutorUnavailable as error:
+        messages = {
+            429: 'AI is busy or the usage limit was reached. Your notes are still available.',
+            504: 'The AI took too long to answer. Try a shorter question.',
+            502: 'The AI service is temporarily unavailable. Please try again.',
+        }
+        return jsonify(error=messages[error.status_code]), error.status_code
+    return jsonify(answer=answer)
 
 
 @app.get('/eduhelp/study')

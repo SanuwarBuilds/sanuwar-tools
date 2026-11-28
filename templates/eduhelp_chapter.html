@@ -5,7 +5,7 @@
   <p>{{ chapter.board }} · {{ chapter.level }} Science · {{ chapter.subject }}</p><h1>{{ chapter.title }}</h1>
   <nav class="edu-links" aria-label="Chapter sections">
     <a href="#notes">Notes &amp; formulas</a><a href="{{ url_for('eduhelp_videos', grade=10, subject='General Science', chapter=chapter.title) }}">Video lessons</a><a href="#experiment">Guided lab</a><a href="#quiz">Quiz &amp; timed practice</a>
-    <a href="#flashcards">Flashcards</a><a href="#worksheet">Worksheet builder</a>
+    <a href="{{ url_for('eduhelp_doubts', grade=10, topic=chapter.title) }}">Ask a Doubt</a><a href="#flashcards">Flashcards</a><a href="#worksheet">Worksheet builder</a>
   </nav>
 </header>
 <section id="notes" class="edu-resource-section edu-no-print">

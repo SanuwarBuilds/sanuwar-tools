@@ -33,6 +33,7 @@
   </header>
 
   <nav class="edu-campus-shortcuts" aria-label="Popular study resources">
+    {{ shortcut('books', 'purple', 'Ask a Doubt', 'Get answers and make PDF notes', url_for('eduhelp_doubts')) }}
     {{ shortcut('video', 'purple', 'Video library', 'Classes 9–12 by subject', '/eduhelp/videos') }}
     {{ shortcut('books', 'purple', 'Class-wise study hub', 'Notes, quizzes & flashcards', '/eduhelp/study') }}
     {{ shortcut('pdf', 'blue', 'Previous-year papers', 'Assam HSLC & HS Final', '/eduhelp/papers') }}

@@ -40,6 +40,7 @@ PAGES = {
                  'Play local videos, HLS and DASH streams, MKV files, MP3 playlists, subtitles and authorized cloud links in your browser. Files stay on your device.'),
 }
 EDUHELP_RESOURCES = {
+    '/eduhelp/doubts': ('Ask a Doubt and Make Notes', 'Ask study questions in English or Assamese and create downloadable PDF notes.'),
     '/eduhelp/videos': ('Class 9–12 Video Library', 'Find Assam Board and NCERT video lessons by class, subject, chapter and language.'),
     '/eduhelp/study': ('Class-wise Study Hub', 'Find NCERT Class 10 chapter notes, quizzes, guided labs and flashcards.'),
     '/eduhelp/study/electricity': ('Electricity Class 10 Notes & Quiz', 'Learn Ohm’s law, resistance and circuits with examples, a guided lab and practice questions.'),
