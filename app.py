@@ -377,6 +377,109 @@ def eduhelp_resource(filename):
         return json.load(resource)
 
 
+EDU_VIDEO_GRADES = (9, 10, 11, 12)
+EDU_VIDEO_BOARDS = {'assam': 'Assam Board', 'ncert': 'NCERT / CBSE'}
+EDU_VIDEO_STREAMS = {
+    'Science': ('Physics', 'Chemistry', 'Biology', 'Mathematics', 'Computer Science', 'Statistics', 'Geography'),
+    'Arts': ('Political Science', 'History', 'Geography', 'Economics', 'Education', 'Logic and Philosophy',
+             'Sociology', 'Anthropology', 'Psychology', 'Swadesh Adhyayan', 'Statistics', 'Mathematics'),
+    'Commerce': ('Accountancy', 'Business Studies', 'Finance', 'Economics', 'Mathematics',
+                 'Computer Science', 'Statistics'),
+    'Languages': ('English', 'Alternative English', 'Assamese', 'Bengali', 'Hindi', 'Bodo',
+                  'Manipuri', 'Nepali', 'Sanskrit', 'Arabic', 'Persian'),
+}
+EDU_VIDEO_SCHOOL_SUBJECTS = (
+    'English', 'Assamese', 'Mathematics', 'General Science', 'Social Science', 'Hindi', 'Bengali', 'Bodo',
+    'Sanskrit', 'Advanced Mathematics', 'Computer Science', 'IT / ITeS', 'Advanced Assamese', 'Advanced Hindi',
+    'English (In Lieu)', 'Geography', 'History', 'Manipuri', 'Nepali', 'Arabic', 'Persian', 'Arabic Literature',
+)
+
+
+def edu_video_stream_subjects(stream):
+    subjects = EDU_VIDEO_STREAMS.get(stream, ())
+    if stream and stream != 'Languages':
+        return (*subjects, *EDU_VIDEO_STREAMS['Languages'])
+    return subjects
+
+
+@app.get('/eduhelp/videos')
+def eduhelp_videos():
+    board = request.args.get('board', 'assam')
+    if board not in EDU_VIDEO_BOARDS:
+        board = 'assam'
+    grade = request.args.get('grade', type=int)
+    if grade not in EDU_VIDEO_GRADES:
+        grade = None
+    streams = EDU_VIDEO_STREAMS if grade and grade >= 11 else {}
+    stream = request.args.get('stream', '')
+    if stream not in streams:
+        stream = ''
+
+    catalog = eduhelp_resource('eduhelp-videos.json')
+    board_records = [row for row in catalog if row['board'] == board]
+    course_counts = {}
+    for course_grade in EDU_VIDEO_GRADES:
+        names = ('Science', 'Commerce', 'Arts') if course_grade >= 11 else ('',)
+        grade_records = [row for row in board_records if row['grade'] == course_grade]
+        for name in names:
+            members = edu_video_stream_subjects(name)
+            course_counts[course_grade, name] = sum(not name or row['subject'] in members for row in grade_records)
+
+    stream_subjects = edu_video_stream_subjects(stream)
+    stream_records = [row for row in board_records
+                      if (grade is None or row['grade'] == grade)
+                      and (not stream or row['subject'] in stream_subjects)]
+    subject_counts = {}
+    for row in stream_records:
+        name = row['subject']
+        subject_counts[name] = subject_counts.get(name, 0) + 1
+    expected = set()
+    if board == 'assam' and grade:
+        if stream:
+            expected.update(stream_subjects)
+        elif streams:
+            expected.update(set().union(*streams.values()))
+        else:
+            expected.update(EDU_VIDEO_SCHOOL_SUBJECTS)
+    subjects = sorted(subject_counts.keys() | expected, key=natural_key)
+    subject = request.args.get('subject', '')
+    if subject not in subjects:
+        subject = ''
+    subject_records = [row for row in stream_records if not subject or row['subject'] == subject]
+    chapters = sorted({row['chapter'] for row in subject_records if row.get('chapter')}, key=natural_key)
+    chapter = request.args.get('chapter', '')
+    if chapter not in chapters:
+        chapter = ''
+    languages = sorted({row['language'] for row in subject_records if row.get('language')})
+    language = request.args.get('language', '')
+    if language not in languages:
+        language = ''
+    query = request.args.get('q', '').strip()[:120]
+    view = 'lessons' if request.args.get('view') == 'lessons' else ''
+    show_lessons = bool(subject or chapter or language or query or view or request.args.get('page'))
+    terms = query.casefold().split()
+    matched = [row for row in subject_records
+               if (not chapter or row.get('chapter') == chapter)
+               and (not language or row.get('language') == language)
+               and all(term in ' '.join((row['title'], row['subject'], row.get('chapter', ''),
+                                         row.get('channel', ''), row.get('language', ''),
+                                         f"Class {row['grade']}")).casefold() for term in terms)]
+    page_size = 18
+    page_count = max(1, (len(matched) + page_size - 1) // page_size)
+    page = max(1, min(request.args.get('page', 1, type=int), page_count))
+    offset = (page - 1) * page_size
+    query_params = {key: val for key, val in dict(grade=grade, board=board, stream=stream, subject=subject,
+                                                 chapter=chapter, language=language, q=query, view=view).items()
+                    if val}
+    return render_template('eduhelp_videos.html', boards=EDU_VIDEO_BOARDS, grades=EDU_VIDEO_GRADES,
+                           course_counts=course_counts, subject_counts=subject_counts, subjects=subjects,
+                           chapters=chapters, languages=languages, streams=streams, grade=grade,
+                           board=board, course_stream=stream, subject=subject, chapter=chapter,
+                           language=language, query=query, view=view, show_lessons=show_lessons,
+                           lesson_count=len(matched), page=page, page_count=page_count, query_params=query_params,
+                           lessons=matched[offset:offset + page_size])
+
+
 @app.get('/eduhelp/study')
 def eduhelp_study():
     chapters = eduhelp_resource('eduhelp-study.json')

@@ -178,6 +178,10 @@ def install(app):
                 "font-src 'self' https:; connect-src 'self' https:; frame-src https:; "
                 "media-src 'self' https:; object-src 'none'; base-uri 'none'; "
                 "frame-ancestors 'none'; form-action 'self'")
+        if request.path == '/eduhelp/videos' and response.status_code == 200 and response.mimetype == 'text/html':
+            policy = response.headers['Content-Security-Policy']
+            if 'frame-src ' not in policy:
+                response.headers['Content-Security-Policy'] = policy + '; frame-src https://www.youtube-nocookie.com'
         if request.path == '/photo-tools' and response.status_code == 200:
             # Local editing and print previews only; no third-party processing.
             response.headers['Content-Security-Policy'] = (

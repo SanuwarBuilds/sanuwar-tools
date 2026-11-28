@@ -40,6 +40,7 @@ PAGES = {
                  'Play local videos, HLS and DASH streams, MKV files, MP3 playlists, subtitles and authorized cloud links in your browser. Files stay on your device.'),
 }
 EDUHELP_RESOURCES = {
+    '/eduhelp/videos': ('Class 9–12 Video Library', 'Find Assam Board and NCERT video lessons by class, subject, chapter and language.'),
     '/eduhelp/study': ('Class-wise Study Hub', 'Find NCERT Class 10 chapter notes, quizzes, guided labs and flashcards.'),
     '/eduhelp/study/electricity': ('Electricity Class 10 Notes & Quiz', 'Learn Ohm’s law, resistance and circuits with examples, a guided lab and practice questions.'),
     '/eduhelp/study/carbon-compounds': ('Carbon and its Compounds Class 10 Notes & Quiz', 'Review carbon bonding, hydrocarbons and reactions with a guided lab, quiz and worksheets.'),
@@ -60,6 +61,7 @@ PAGE_TYPES = {
     '/eduhelp/labs': 'CollectionPage',
     '/eduhelp/papers': 'CollectionPage',
     '/eduhelp/study': 'CollectionPage',
+    '/eduhelp/videos': 'CollectionPage',
     '/eduhelp/calendar': 'CollectionPage',
     '/eduhelp/scholarships': 'CollectionPage',
     '/players': 'CollectionPage',

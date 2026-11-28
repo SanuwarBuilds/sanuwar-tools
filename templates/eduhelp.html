@@ -24,7 +24,7 @@
       <p>Learn Class 10 science with notes and interactive labs. Prepare for Assam HSLC and HS Final with past papers, timed practice and a revision plan.</p>
       <div class="edu-campus-hero-actions">
         <a class="edu-campus-primary" href="#classroom">Explore by class {{ icon('arrow') }}</a>
-        <a class="edu-campus-secondary" href="/eduhelp/papers">Find exam papers</a>
+        <a class="edu-campus-secondary" href="/eduhelp/videos">Watch video lessons</a>
       </div>
     </div>
     <div class="edu-campus-visual">
@@ -33,6 +33,7 @@
   </header>
 
   <nav class="edu-campus-shortcuts" aria-label="Popular study resources">
+    {{ shortcut('video', 'purple', 'Video library', 'Classes 9–12 by subject', '/eduhelp/videos') }}
     {{ shortcut('books', 'purple', 'Class-wise study hub', 'Notes, quizzes & flashcards', '/eduhelp/study') }}
     {{ shortcut('pdf', 'blue', 'Previous-year papers', 'Assam HSLC & HS Final', '/eduhelp/papers') }}
     {% if 'Lab' in categories %}{{ shortcut('lab', 'green', 'Interactive science labs', 'Explore and run experiments', '/eduhelp/labs') }}{% endif %}

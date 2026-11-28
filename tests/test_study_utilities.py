@@ -66,6 +66,29 @@ class StudyUtilitiesTests(unittest.TestCase):
         self.assertIn(b'/tools/url-shortener', self.client.get('/tools/qr-code-generator').data)
         self.assertIn(b'/tools/live-forex-crypto-converter', self.client.get('/tools/currency-converter').data)
 
+    def test_video_library_browses_classes_before_lessons_and_searches_across_grades(self):
+        catalog = self.client.get('/eduhelp/videos')
+        self.assertEqual(catalog.status_code, 200)
+        self.assertIn('Class 12 · Commerce'.encode(), catalog.data)
+        self.assertNotIn(b'https://i.ytimg.com/vi/', catalog.data)
+        subjects = self.client.get('/eduhelp/videos?grade=12&stream=Commerce')
+        self.assertIn(b'subject=Accountancy', subjects.data)
+        self.assertNotIn(b'https://i.ytimg.com/vi/', subjects.data)
+        results = self.client.get('/eduhelp/videos?board=ncert&q=class+12+physics')
+        self.assertIn(b'Search results</h2>', results.data)
+        self.assertIn('Class 12 · Physics'.encode(), results.data)
+        self.assertNotIn('Class 11 · Physics'.encode(), results.data)
+
+    def test_video_library_filters_by_grade_subject_and_provider(self):
+        page = self.client.get('/eduhelp/videos?grade=12&stream=Commerce&subject=Accountancy')
+        self.assertEqual(page.status_code, 200)
+        self.assertIn(b'Accountancy</h2>', page.data)
+        self.assertIn(b'https://i.ytimg.com/vi/', page.data)
+        self.assertIn(b'https://www.youtube.com/watch?v=', page.data)
+        self.assertIn('frame-src https://www.youtube-nocookie.com', page.headers['Content-Security-Policy'])
+        self.assertNotIn('youtube-nocookie.com', self.client.get('/eduhelp/study').headers['Content-Security-Policy'])
+        self.assertNotIn(b'<iframe', page.data)
+
     def test_calendar_export_uses_exclusive_end_and_rejects_unknown_events(self):
         response = self.client.get('/eduhelp/calendar/hslc-2027-theory.ics')
         self.assertEqual(response.status_code, 200)
