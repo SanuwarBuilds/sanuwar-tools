@@ -364,9 +364,12 @@ def eduhelp():
     categories = [name for name in EDUHELP_CATEGORIES
                   if any(item.get('category') == name for item in updates)]
     tools = [tool for tool in load_tool_catalog()['tools'] if tool['category'] == 'Education']
+    level = 'hs' if request.args.get('level') == 'hs' else 'hslc'
+    chapters = {slug: chapter for slug, chapter in eduhelp_resource('eduhelp-study.json').items()
+                if chapter['level'] == 'Class 10'} if level == 'hslc' else {}
     return render_template('eduhelp.html', updates=updates, categories=categories, study_tools=tools,
-                           weather_mode=weather_provider(),
-                           notice=data.get('notice', ''), updated=data.get('updated', ''))
+                           weather_mode=weather_provider(), chapters=chapters, level=level,
+                           notice=data.get('notice', ''))
 
 
 def eduhelp_resource(filename):

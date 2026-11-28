@@ -1,80 +1,123 @@
 {% extends 'base.html' %}
-{% block bodyclass %}eduhelp-page{% endblock %}
-{% block page_styles %}<link rel="stylesheet" href="/assets/css/eduhelp-study.css?v=1"><link rel="stylesheet" href="/assets/css/tools.css?v=7"><link rel="stylesheet" href="/assets/css/api-studio.css?v=2">{% endblock %}
+{% block bodyclass %}eduhelp-page edu-campus-page{% endblock %}
+{% block page_styles %}
+<link rel="stylesheet" href="/assets/css/tools.css?v=7">
+<link rel="stylesheet" href="/assets/css/api-studio.css?v=2">
+<link rel="stylesheet" href="/assets/css/eduhelp-campus.css?v=1">
+{% endblock %}
+{% macro icon(name) -%}
+<svg aria-hidden="true" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><use href="/assets/icons/workspace.svg#{{ name }}"></use></svg>
+{%- endmacro %}
+{% macro shortcut(icon_name, tone, title, detail, href) -%}
+<a class="edu-campus-shortcut" href="{{ href }}">
+  <span class="edu-campus-symbol {{ tone }}">{{ icon(icon_name) }}</span>
+  <span><strong>{{ title }}</strong><small>{{ detail }}</small></span>
+  {{ icon('arrow') }}
+</a>
+{%- endmacro %}
 {% block content %}
-<section class="wb-page wrap wb-eduhelp">
+<section class="wb-page wrap wb-eduhelp edu-campus" aria-labelledby="eduhelp-title">
   <nav class="tp-crumb" aria-label="Breadcrumb"><a href="/">Home</a><span aria-hidden="true">/</span><span>Eduhelp</span></nav>
-
-  <header class="wb-page-head">
-    <div class="wb-page-head-copy">
-      <span class="wb-eyebrow">Eduhelp · exam, result &amp; admission updates</span>
-      <h1 id="eduhelp-title">Eduhelp</h1>
-      <p class="wb-page-lede">Exam notices, results, admission dates, scholarships and career alerts — collected in one calm board. Every update links to the official source, so always verify the final details there.</p>
-      <div class="wb-page-actions">
-        <a class="button button-dark" href="/eduhelp/study">Browse study chapters</a>
-        <a class="button button-light" href="#updates">Browse {{ updates | length }} updates</a>
-        <a class="button button-light" href="/eduhelp/papers">Previous-year papers <span aria-hidden="true">→</span></a>
-        {% if 'Lab' in categories %}<a class="button button-light" href="/eduhelp/labs">Lab library <span aria-hidden="true">→</span></a>{% endif %}
-        <a class="button button-light" href="#eduhelp-notice">Read the notice <span aria-hidden="true">→</span></a>
+  <header class="edu-campus-hero">
+    <div class="edu-campus-intro">
+      <h1 id="eduhelp-title">Study and practise<br class="edu-campus-break"> with <em>EduHelp</em></h1>
+      <p>Learn Class 10 science with notes and interactive labs. Prepare for Assam HSLC and HS Final with past papers, timed practice and a revision plan.</p>
+      <div class="edu-campus-hero-actions">
+        <a class="edu-campus-primary" href="#classroom">Explore by class {{ icon('arrow') }}</a>
+        <a class="edu-campus-secondary" href="/eduhelp/papers">Find exam papers</a>
       </div>
     </div>
-    <aside class="wb-page-aside" aria-label="Eduhelp summary">
-      <div class="wb-stat"><strong>{{ updates | length }}</strong><span>updates</span></div>
-      {% if updated %}<div class="wb-stat"><strong>{{ updated }}</strong><span>last updated</span></div>{% endif %}
-    </aside>
+    <div class="edu-campus-visual">
+      <img src="/assets/eduhelp/student-study.webp" alt="" width="1024" height="683" fetchpriority="high">
+    </div>
   </header>
 
-  <section class="wb-section edu-resource-shelf" aria-labelledby="edu-resources-title">
-    <div class="wb-section-head"><h2 id="edu-resources-title">Study and exam resources</h2></div>
-    <ul>
-      <li><a href="/eduhelp/study">Class-wise study hub</a></li>
-      <li><a href="/eduhelp/papers">Papers &amp; timed practice</a></li>
-      <li><a href="/tools/study-timer-revision-planner">Daily revision planner</a></li>
-      <li><a href="/eduhelp/calendar">Exam &amp; admission calendar</a></li>
-      <li><a href="/eduhelp/scholarships">Scholarship finder</a></li>
-    </ul>
+  <nav class="edu-campus-shortcuts" aria-label="Popular study resources">
+    {{ shortcut('books', 'purple', 'Class-wise study hub', 'Notes, quizzes & flashcards', '/eduhelp/study') }}
+    {{ shortcut('pdf', 'blue', 'Previous-year papers', 'Assam HSLC & HS Final', '/eduhelp/papers') }}
+    {% if 'Lab' in categories %}{{ shortcut('lab', 'green', 'Interactive science labs', 'Explore and run experiments', '/eduhelp/labs') }}{% endif %}
+    {{ shortcut('check', 'orange', 'Revision planner', 'Set daily chapter targets', '/tools/study-timer-revision-planner') }}
+  </nav>
+
+  <section class="edu-campus-section" id="classroom" aria-labelledby="classroom-title">
+    <div class="edu-campus-section-head"><h2 id="classroom-title">Explore by class</h2><a href="/eduhelp/study">Open Study Hub {{ icon('arrow') }}</a></div>
+    <div class="edu-campus-classroom">
+      <nav class="edu-campus-classes" aria-label="Choose a class">
+        <a href="{{ url_for('eduhelp', level='hslc', _anchor='classroom') }}"{% if level == 'hslc' %} aria-current="true"{% endif %}>
+          <span>Class 10</span><small>HSLC &amp; NCERT Science</small>
+        </a>
+        <a href="{{ url_for('eduhelp', level='hs', _anchor='classroom') }}"{% if level == 'hs' %} aria-current="true"{% endif %}>
+          <span>Class 12</span><small>Assam HS Final</small>
+        </a>
+      </nav>
+      <div class="edu-campus-class-content">
+        {% if level == 'hslc' %}
+        <h3>Class 10 resources</h3>
+        <div class="edu-campus-class-grid">
+          {% for slug, chapter in chapters.items() %}
+          <article class="edu-campus-chapter">
+            <span class="edu-campus-subject {{ 'purple' if chapter.subject == 'Physics' else 'green' }}">{{ chapter.subject }}</span>
+            <h4><a href="{{ url_for('eduhelp_chapter', slug=slug) }}">{{ chapter.title }}</a></h4>
+            <div class="edu-campus-chapter-links">
+              <a href="{{ url_for('eduhelp_chapter', slug=slug, _anchor='notes') }}">Notes</a>
+              <a href="{{ url_for('eduhelp_chapter', slug=slug, _anchor='quiz') }}">Quiz</a>
+              {% if 'Lab' in categories %}<a href="{{ url_for('eduhelp_chapter', slug=slug, _anchor='experiment') }}">Guided lab</a>{% endif %}
+            </div>
+          </article>
+          {% endfor %}
+          <article class="edu-campus-chapter">
+            <span class="edu-campus-subject blue">Assam board</span>
+            <h4><a href="/eduhelp/papers?exam=hslc">HSLC question papers</a></h4>
+            <div class="edu-campus-chapter-links"><a href="/eduhelp/papers?exam=hslc">Browse 2015–2026</a></div>
+          </article>
+        </div>
+        {% else %}
+        <h3>HS Final papers by stream</h3>
+        <div class="edu-campus-class-grid">
+          {% for stream, tone in [('Arts', 'purple'), ('Science', 'green'), ('Commerce', 'blue')] %}
+          <article class="edu-campus-chapter">
+            <span class="edu-campus-subject {{ tone }}">Assam board</span>
+            <h4><a href="{{ url_for('eduhelp_papers', exam='hs', stream=stream) }}">{{ stream }}</a></h4>
+            <div class="edu-campus-chapter-links"><a href="{{ url_for('eduhelp_papers', exam='hs', stream=stream) }}">Browse 2015–2026</a></div>
+          </article>
+          {% endfor %}
+        </div>
+        {% endif %}
+      </div>
+    </div>
   </section>
 
-  {% if study_tools %}
-  <section class="wb-section" aria-labelledby="study-tools-title">
-    <div class="wb-section-head"><h2 id="study-tools-title">Study and reference tools</h2></div>
-    <div class="wb-edu-grid">
-      {% for tool in study_tools %}
-      <article class="edu-card">
-        <h3><a href="/tools/{{ tool.slug }}">{{ tool.name }}</a></h3>
-        <p>{{ tool.description }}</p>
-        {% if tool.slug == 'weather-air-quality' %}
-        <div class="study-weather-widget" data-study-weather-widget data-weather-mode="{{ weather_mode }}" aria-label="Weather and air quality lookup"><noscript><p>Enable JavaScript to check current weather.</p></noscript></div>
-        {% endif %}
-      </article>
+  <section class="edu-campus-section" aria-labelledby="exam-desk-title">
+    <div class="edu-campus-section-head"><h2 id="exam-desk-title">Exams and admissions</h2></div>
+    <div class="edu-campus-exam-desk">
+      {{ shortcut('check', 'blue', 'Exam & admission calendar', 'Official dates and calendar downloads', '/eduhelp/calendar') }}
+      {{ shortcut('education', 'green', 'Scholarship finder', 'Find schemes by class and state', '/eduhelp/scholarships') }}
+      {{ shortcut('folder', 'purple', 'Latest education updates', 'Notices, results and official links', '#updates') }}
+    </div>
+  </section>
+
+  <section class="edu-campus-section" id="updates" aria-labelledby="updates-title">
+    <div class="edu-campus-section-head">
+      <h2 id="updates-title">Latest education updates</h2>
+      <p class="wb-count"><b id="eduhelp-visible">{{ updates | length }}</b> of {{ updates | length }} updates</p>
+      {% if 'Lab' in categories %}<a href="/eduhelp/labs">Lab library</a>{% endif %}
+    </div>
+    <div class="wb-toolbar">
+      <label class="wb-search-field" for="eduhelp-search">
+        <svg aria-hidden="true" viewBox="0 0 24 24"><circle cx="10.5" cy="10.5" r="6.5"/><path d="m16 16 4.5 4.5"/></svg>
+        <input type="search" id="eduhelp-search" placeholder="Search Eduhelp updates…" aria-label="Search Eduhelp updates">
+      </label>
+    </div>
+
+    {% if categories | length > 1 %}
+    <div class="filter-tabs" id="eduhelp-filters" role="group" aria-label="Filter updates by category">
+      <button type="button" class="filter-tab active" data-category="all" aria-pressed="true">All <span>{{ updates | length }}</span></button>
+      {% for category in categories %}
+      <button type="button" class="filter-tab" data-category="{{ category }}" aria-pressed="false">{{ category }} <span>{{ updates | selectattr('category', 'equalto', category) | list | length }}</span></button>
       {% endfor %}
     </div>
-  </section>
-  {% endif %}
+    {% endif %}
 
-  <div class="wb-toolbar">
-    <label class="wb-search-field" for="eduhelp-search">
-      <svg aria-hidden="true" viewBox="0 0 24 24"><circle cx="10.5" cy="10.5" r="6.5"/><path d="m16 16 4.5 4.5"/></svg>
-      <input type="search" id="eduhelp-search" placeholder="Search Eduhelp updates…" aria-label="Search Eduhelp updates">
-      <kbd>/</kbd>
-    </label>
-    <span class="wb-toolbar-count"><b id="eduhelp-total">{{ updates | length }}</b> updates tracked</span>
-  </div>
-
-  {% if categories | length > 1 %}
-  <div class="filter-tabs" id="eduhelp-filters" role="group" aria-label="Filter updates by category">
-    <button type="button" class="filter-tab active" data-category="all" aria-pressed="true">All <span>{{ updates | length }}</span></button>
-    {% for category in categories %}
-    <button type="button" class="filter-tab" data-category="{{ category }}" aria-pressed="false">{{ category }} <span>{{ updates | selectattr('category', 'equalto', category) | list | length }}</span></button>
-    {% endfor %}
-  </div>
-  {% endif %}
-
-  <section class="wb-section" id="updates" aria-labelledby="updates-title">
-    <div class="wb-section-head">
-      <div><span class="wb-eyebrow">01 / Updates</span><h2 id="updates-title">Latest education updates</h2></div>
-      <p class="wb-count"><b id="eduhelp-visible">{{ updates | length }}</b> of {{ updates | length }}</p>
-    </div>
     {% if updates %}
     <div class="wb-edu-grid" id="eduhelp-grid" aria-live="polite">
       {% for update in updates %}
@@ -122,15 +165,31 @@
   <aside class="wb-note" id="eduhelp-notice" aria-labelledby="eduhelp-notice-title">
     <span class="wb-note-mark" aria-hidden="true">!</span>
     <div>
-      <span class="wb-eyebrow">Please read</span>
       <h2 id="eduhelp-notice-title">Before you act on an update</h2>
       <p>{{ notice or 'Eduhelp shares education updates for quick reference only. Always confirm exam dates, results, admission and scholarship details on the official board, university or government website before you act.' }}</p>
     </div>
   </aside>
+  {% if study_tools %}
+  <section class="edu-campus-section" aria-labelledby="study-tools-title">
+    <div class="edu-campus-section-head"><h2 id="study-tools-title">Study and reference tools</h2></div>
+    <div class="wb-edu-grid">
+      {% for tool in study_tools %}
+      <article class="edu-card">
+        <h3><a href="/tools/{{ tool.slug }}">{{ tool.name }}</a></h3>
+        <p>{{ tool.description }}</p>
+        {% if tool.slug == 'weather-air-quality' %}
+        <div class="study-weather-widget" data-study-weather-widget data-weather-mode="{{ weather_mode }}" aria-label="Weather and air quality lookup"><noscript><p>Enable JavaScript to check current weather.</p></noscript></div>
+        {% endif %}
+      </article>
+      {% endfor %}
+    </div>
+  </section>
+  {% endif %}
+
 </section>
 {% endblock %}
 {% block scripts %}
-<script nonce="{{ csp_nonce }}" src="/assets/js/eduhelp.js?v=2" defer></script>
+<script nonce="{{ csp_nonce }}" src="/assets/js/eduhelp.js?v=3" defer></script>
 {% if study_tools | selectattr('slug', 'equalto', 'weather-air-quality') | list %}
 <script nonce="{{ csp_nonce }}" src="/assets/js/tools/core.js?v=3" defer></script>
 <script nonce="{{ csp_nonce }}" src="/assets/js/tools/study-utilities.js?v=2" defer></script>

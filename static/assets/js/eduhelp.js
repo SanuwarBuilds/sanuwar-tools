@@ -3,7 +3,7 @@
   const input = document.querySelector("#eduhelp-search");
   if (!input) return;
 
-  const cards = [...document.querySelectorAll(".edu-card")];
+  const cards = [...document.querySelectorAll("#eduhelp-grid .edu-card")];
   const visible = document.querySelector("#eduhelp-visible");
   const empty = document.querySelector("#eduhelp-empty");
   const tabs = [...document.querySelectorAll("#eduhelp-filters [data-category]")];
