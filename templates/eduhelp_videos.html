@@ -1,6 +1,6 @@
 {% extends 'eduhelp_resource.html' %}
 {% block bodyclass %}eduhelp-page edu-resource-page edu-videos-page{% endblock %}
-{% block page_styles %}{{ super() }}<link rel="stylesheet" href="/assets/css/eduhelp-videos.css?v=2">{% endblock %}
+{% block page_styles %}{{ super() }}<link rel="stylesheet" href="/assets/css/eduhelp-videos.css?v=3">{% endblock %}
 {% block resource_crumb %}<span>Video library</span>{% endblock %}
 {% macro icon(name) %}
 <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="1.7" aria-hidden="true"><use href="/assets/icons/workspace.svg#{{ name }}"/></svg>
@@ -27,13 +27,18 @@
     {% if grade %}<input type="hidden" name="grade" value="{{ grade }}">{% endif %}
     {% if course_stream %}<input type="hidden" name="stream" value="{{ course_stream }}">{% endif %}
     {% if subject %}<input type="hidden" name="subject" value="{{ subject }}">{% endif %}
-    <label class="video-sr-only" for="video-query">Search {{ subject or ('Class ' ~ grade if grade else boards[board]) }} lessons</label>
-    <div class="video-search-field">{{ icon('search') }}<input type="search" id="video-query" name="q" value="{{ query }}" maxlength="120" placeholder="Search {{ subject or ('Class ' ~ grade if grade else 'lessons') }}"></div>
+    {% if chapter %}<input type="hidden" name="chapter" value="{{ chapter }}">{% endif %}
+    <label class="video-sr-only" for="video-query">Search {{ chapter or subject or ('Class ' ~ grade if grade else boards[board]) }} lessons</label>
+    <div class="video-search-field">{{ icon('search') }}<input type="search" id="video-query" name="q" value="{{ query }}" maxlength="120" placeholder="Search {{ chapter or subject or ('Class ' ~ grade if grade else 'lessons') }}"></div>
     <button type="submit" class="button button-dark">Search</button>
   </form>
 </header>
 
 <div class="video-library" id="video-library">
+  <section class="video-resume" data-video-resume hidden aria-labelledby="video-resume-title">
+    <div><h2 id="video-resume-title">Continue studying</h2><p data-video-resume-label></p></div>
+    <a class="button button-light" data-video-resume-link>Continue lesson</a>
+  </section>
   <aside class="video-catalog-nav">
     <nav aria-label="Curriculum">
       <h2>Curriculum</h2>
@@ -59,31 +64,52 @@
     {% if grade or show_lessons %}
     <nav class="video-breadcrumb" aria-label="Video catalogue">
       <a href="{{ url_for('eduhelp_videos', board=board, _anchor='video-results') }}">All classes</a>
-      {% if grade and show_lessons %}
+      {% if grade and subject %}
       <span aria-hidden="true">/</span><a href="{{ url_for('eduhelp_videos', grade=grade, board=board, stream=course_stream or none, _anchor='video-results') }}">Class {{ grade }}{% if course_stream %} · {{ course_stream }}{% endif %} subjects</a>
+      {% endif %}
+      {% if chapter_mode %}
+      <span aria-hidden="true">/</span><a href="{{ url_for('eduhelp_videos', board=board, grade=grade, stream=course_stream or none, subject=subject, _anchor='video-results') }}">{{ subject }} chapters</a>
       {% endif %}
     </nav>
     {% endif %}
     <div class="video-results-head">
       <div>
-        <h2 id="video-results-title">{% if subject %}{% if grade %}Class {{ grade }} · {% endif %}{{ subject }}{% elif query %}Search results{% elif grade %}Class {{ grade }}{% if course_stream %} · {{ course_stream }}{% endif %}{% elif show_lessons %}All lessons{% else %}Explore video lessons{% endif %}</h2>
-        <p>{{ boards[board] }}{% if show_lessons %} · {{ lesson_count }} {{ 'lesson' if lesson_count == 1 else 'lessons' }}{% if query %} for “{{ query }}”{% endif %}{% endif %}</p>
+        <h2 id="video-results-title">{% if chapter_mode and chapter %}{{ chapter }}{% elif subject %}{% if grade %}Class {{ grade }} · {% endif %}{{ subject }}{% elif query %}Search results{% elif grade %}Class {{ grade }}{% if course_stream %} · {{ course_stream }}{% endif %}{% elif show_lessons %}All lessons{% else %}Explore video lessons{% endif %}</h2>
+        <p>{{ boards[board] }}{% if chapter_mode and chapter %} · Class {{ grade }} · {{ subject }}{% endif %}{% if show_lessons %} · {{ lesson_count }} {{ 'lesson' if lesson_count == 1 else 'lessons' }}{% if query %} for “{{ query }}”{% endif %}{% endif %}</p>
       </div>
       {% if grade and not show_lessons %}
-      <a class="video-all" href="{{ url_for('eduhelp_videos', grade=grade, board=board, stream=course_stream or none, view='lessons', _anchor='video-results') }}">All videos {{ icon('arrow') }}</a>
+      <a class="video-all" href="{{ url_for('eduhelp_videos', grade=grade, board=board, stream=course_stream or none, subject=subject or none, view='lessons', _anchor='video-results') }}">All videos {{ icon('arrow') }}</a>
       {% endif %}
     </div>
 
     {% if not show_lessons and not grade %}
-    <ul class="video-course-grid">
-      {% for (value, name), count in course_counts.items() %}
-      <li><a class="video-course" href="{{ url_for('eduhelp_videos', grade=value, board=board, stream=name or none, _anchor='video-results') }}">
-        <span class="video-course-icon" aria-hidden="true">{{ value }}</span>
-        <span><strong>Class {{ value }}{% if name %} · {{ name }}{% endif %}</strong><small>{{ count }} {{ 'lesson' if count == 1 else 'lessons' }}</small></span>
+    <div class="video-course-groups">
+      {% for group, title in [('school', 'Classes 9 and 10'), (11, 'Class 11'), (12, 'Class 12')] %}
+      <section class="video-course-group{% if group != 'school' %} video-course-group--streams{% endif %}">
+        <h3>{{ title }}</h3>
+        <ul class="video-course-grid">
+          {% for (value, name), count in course_counts.items() if (group == 'school' and value < 11) or group == value %}
+          <li><a class="video-course" href="{{ url_for('eduhelp_videos', grade=value, board=board, stream=name or none, _anchor='video-results') }}"{% if name %} aria-label="Class {{ value }} · {{ name }} · {{ count }} lessons"{% endif %}>
+            <span class="video-course-icon" aria-hidden="true">{% if name %}{{ icon('books') }}{% else %}{{ value }}{% endif %}</span>
+            <span><strong>{{ name or ('Class ' ~ value) }}</strong><small>{{ count }} {{ 'lesson' if count == 1 else 'lessons' }}</small></span>
+            {{ icon('arrow') }}
+          </a></li>
+          {% endfor %}
+        </ul>
+      </section>
+      {% endfor %}
+    </div>
+    {% elif show_chapters %}
+    <ol class="video-chapter-index" aria-label="Chapters">
+      {% for name in chapters %}
+      {% set count = chapter_counts.get(name, 0) %}
+      <li><a href="{{ url_for('eduhelp_videos', board=board, grade=grade, stream=course_stream or none, subject=subject, chapter=name, _anchor='video-results') }}">
+        {{ icon('books') }}<strong>{{ name }}</strong>
+        <small>{{ (count ~ (' lesson' if count == 1 else ' lessons')) if count else 'Videos pending' }}</small>
         {{ icon('arrow') }}
       </a></li>
       {% endfor %}
-    </ul>
+    </ol>
     {% elif not show_lessons %}
     {% if streams %}
     <nav class="video-streams" aria-label="Stream">
@@ -103,18 +129,21 @@
       {% endfor %}
     </ul>
     {% else %}
-    {% if (subject and chapters) or chapter or languages|length > 1 or language or query %}
+    {% if not chapter_mode and ((subject and chapters) or chapter or languages|length > 1 or language or query) %}
     <div class="video-result-controls">
       {% if (subject and chapters) or chapter %}{{ filter_menu('chapter', 'All chapters', chapters, chapter) }}{% endif %}
       {% if languages|length > 1 or language %}{{ filter_menu('language', 'All languages', languages, language) }}{% endif %}
       {% if query %}<a class="video-all" href="{{ url_for('eduhelp_videos', board=board, grade=grade, stream=course_stream or none, subject=subject or none, _anchor='video-results') }}">Clear search</a>{% endif %}
     </div>
     {% endif %}
-    {% if lessons %}
+    {% if chapter_mode %}
+    {% include 'eduhelp_video_chapter.html' %}
+    {% elif lessons %}
     <ul class="video-grid">
       {% for lesson in lessons %}
       <li>
-        <article class="video-card">
+        {% set resume_url = url_for('eduhelp_videos', board=lesson.board, grade=lesson.grade, subject=lesson.subject, chapter=lesson.chapter, lesson=lesson.id, _anchor='video-results') %}
+        <article class="video-card" data-study-title="{{ lesson.title }}" data-study-url="{{ resume_url }}" data-study-id="{{ lesson.id }}">
           <a class="video-thumb" href="https://www.youtube.com/watch?v={{ lesson.id }}" target="_blank" rel="noopener noreferrer"
             {% if not lesson.external_only %}data-video-id="{{ lesson.id }}" data-video-title="{{ lesson.title }}"{% endif %} aria-label="{{ 'Watch on YouTube:' if lesson.external_only else 'Play' }} {{ lesson.title }}">
             <img src="https://i.ytimg.com/vi/{{ lesson.id }}/hqdefault.jpg" alt="" width="480" height="360" loading="lazy" decoding="async">
@@ -124,7 +153,10 @@
             <p class="video-topic">{% if not grade %}Class {{ lesson.grade }} · {% endif %}{{ lesson.subject }}{% if lesson.chapter %} · {{ lesson.chapter }}{% endif %}</p>
             <h3><a href="https://www.youtube.com/watch?v={{ lesson.id }}" target="_blank" rel="noopener noreferrer"
               {% if not lesson.external_only %}data-video-id="{{ lesson.id }}" data-video-title="{{ lesson.title }}"{% endif %}>{{ lesson.title }}</a></h3>
-            <p class="video-byline">{{ lesson.channel }} · {{ lesson.language or 'Language not listed' }}</p>
+            <div class="video-meta">
+              <span class="video-language">{{ lesson.language or 'Language unlisted' }}</span>
+              {% if lesson.channel %}<span class="video-byline">{{ lesson.channel }}</span>{% endif %}
+            </div>
             {% if lesson.external_only %}<span class="video-playlist">Plays on YouTube</span>{% endif %}
             {% if lesson.playlist %}<a class="video-playlist" href="https://www.youtube.com/playlist?list={{ lesson.playlist }}" target="_blank" rel="noopener noreferrer">View playlist on YouTube</a>{% endif %}
           </div>
@@ -153,6 +185,7 @@
     {% endif %}
     <details class="video-coverage">
       <summary>Sources and coverage</summary>
+      {% if textbook %}<p><a href="{{ textbook }}" target="_blank" rel="noopener noreferrer">Official Assam Board textbook</a></p>{% endif %}
       <p>Assam Board and NCERT resources are listed separately. Older videos may follow an earlier textbook edition. Use the chapter title and compare it with your current syllabus.</p>
       {% if board == 'assam' %}
       {% set missing = subjects | reject('in', subject_counts) | list %}
@@ -171,4 +204,4 @@
   <p>Playback unavailable here? <a class="video-watch" target="_blank" rel="noopener noreferrer">Watch on YouTube</a></p>
 </dialog>
 {% endblock %}
-{% block scripts %}<script nonce="{{ csp_nonce }}" src="/assets/js/eduhelp-videos.js?v=2" defer></script>{% endblock %}
+{% block scripts %}<script nonce="{{ csp_nonce }}" src="/assets/js/eduhelp-videos.js?v=3" defer></script>{% endblock %}

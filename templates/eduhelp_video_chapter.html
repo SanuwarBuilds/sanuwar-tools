@@ -1,0 +1,60 @@
+{% if active_lesson %}
+<div class="chapter-studio" data-chapter-studio{% if selected_lesson %} data-explicit-lesson{% endif %}>
+  <div class="chapter-watch" data-chapter-watch>
+    <div class="chapter-player" data-chapter-frame>
+      <a class="video-thumb chapter-poster" data-chapter-play href="https://www.youtube.com/watch?v={{ active_lesson.id }}" target="_blank" rel="noopener noreferrer" aria-label="Play {{ active_lesson.title }}">
+        <img src="https://i.ytimg.com/vi/{{ active_lesson.id }}/hqdefault.jpg" width="480" height="360" alt="" decoding="async">
+        <span class="video-play" aria-hidden="true"><svg viewBox="0 0 24 24" width="20" height="20" fill="currentColor"><path d="M8 5v14l11-7z"/></svg></span>
+      </a>
+    </div>
+    <div class="chapter-active">
+      <h3 data-chapter-title tabindex="-1">{{ active_lesson.title }}</h3>
+      <div class="video-meta"><span class="video-language" data-chapter-language>{{ active_lesson.language or 'Language unlisted' }}</span><span class="video-byline" data-chapter-channel>{{ active_lesson.channel or '' }}</span></div>
+      <div class="chapter-actions">
+        <a class="video-all" data-chapter-youtube href="https://www.youtube.com/watch?v={{ active_lesson.id }}" target="_blank" rel="noopener noreferrer">Watch on YouTube {{ icon('arrow') }}</a>
+        <button type="button" class="button button-light" data-video-complete hidden aria-pressed="false">Mark complete</button>
+      </div>
+    </div>
+  </div>
+  <section class="chapter-queue" aria-labelledby="chapter-lessons-title">
+    <header>
+      <div><h3 id="chapter-lessons-title">Lessons</h3><p data-chapter-progress aria-live="polite">{{ lessons|length }} available</p></div>
+      {% if language %}<a class="video-all" href="{{ url_for('eduhelp_videos', board=board, grade=grade, stream=course_stream or none, subject=subject, chapter=chapter, _anchor='video-results') }}">All languages</a>{% endif %}
+      <label data-language-setting hidden>Preferred language
+        <select data-video-language><option value="">Any language</option>
+          {% for name in preference_languages %}<option value="{{ name }}">{{ name }}</option>{% endfor %}
+        </select>
+      </label>
+    </header>
+    <ol class="chapter-lesson-list">
+      {% for lesson in lessons %}
+      {% set link = url_for('eduhelp_videos', board=board, grade=grade, stream=course_stream or none, subject=subject, chapter=chapter or none, language=language or none, lesson=lesson.id, _anchor='video-results') %}
+      <li>
+        <a href="{{ link }}" data-chapter-lesson="{{ lesson.id }}" data-title="{{ lesson.title }}" data-language="{{ lesson.language or '' }}" data-channel="{{ lesson.channel or '' }}"{% if lesson.external_only %} data-external-only{% endif %}{% if active_lesson.id == lesson.id %} aria-current="true"{% endif %}>
+          <img src="https://i.ytimg.com/vi/{{ lesson.id }}/hqdefault.jpg" width="96" height="54" alt="" loading="lazy" decoding="async">
+          <span><strong>{{ lesson.title }}</strong><small>{{ lesson.language or 'Language unlisted' }}{% if lesson.format %} · {{ lesson.format }}{% endif %}{% if lesson.channel %} · {{ lesson.channel }}{% endif %}</small><small data-lesson-completed hidden>Completed</small></span>
+        </a>
+      </li>
+      {% endfor %}
+    </ol>
+  </section>
+</div>
+{% else %}
+<div class="edu-resource-card video-empty">
+  <h3>Videos pending</h3>
+  <p>Once a lesson is verified for this chapter, it will appear here.</p>
+</div>
+{% endif %}
+{% if resource_slug or textbook %}
+<section class="video-study-links" aria-labelledby="video-study-links-title">
+  <h3 id="video-study-links-title">Study resources</h3>
+  <div>
+    {% if resource_slug %}
+    <a class="button button-light" href="{{ url_for('eduhelp_chapter', slug=resource_slug, _anchor='notes') }}">Read notes</a>
+    <a class="button button-light" href="{{ url_for('eduhelp_chapter', slug=resource_slug, _anchor='quiz') }}">Practice quiz</a>
+    <a class="button button-light" href="{{ url_for('eduhelp_chapter', slug=resource_slug, _anchor='worksheet') }}">Build worksheet</a>
+    {% endif %}
+    {% if textbook %}<a class="button button-light" href="{{ textbook }}" target="_blank" rel="noopener noreferrer">Open official textbook</a>{% endif %}
+  </div>
+</section>
+{% endif %}

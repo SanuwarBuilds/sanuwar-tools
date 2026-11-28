@@ -1,0 +1,27 @@
+{
+  "assam": {
+    "10": {
+      "General Science": {
+        "textbook": "https://site.sebaonline.org/textbooks/class-10/General%20Science_Eng_Class%20X.pdf",
+        "chapters": [
+          "Chemical Reactions and Equations",
+          "Acids, Bases and Salts",
+          "Metals and Non-metals",
+          "Carbon and its Compounds",
+          "Periodic Classification of Elements",
+          "Life Processes",
+          "Control and Coordination",
+          "How do Organisms Reproduce?",
+          "Heredity and Evolution",
+          "Light – Reflection and Refraction",
+          "Human Eye and Colourful World",
+          "Electricity",
+          "Magnetic Effects of Electric Current",
+          "Sources of Energy",
+          "Our Environment",
+          "Management of Natural Resources"
+        ]
+      }
+    }
+  }
+}

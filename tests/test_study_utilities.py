@@ -80,7 +80,7 @@ class StudyUtilitiesTests(unittest.TestCase):
         self.assertNotIn('Class 11 · Physics'.encode(), results.data)
 
     def test_video_library_filters_by_grade_subject_and_provider(self):
-        page = self.client.get('/eduhelp/videos?grade=12&stream=Commerce&subject=Accountancy')
+        page = self.client.get('/eduhelp/videos?grade=12&stream=Commerce&subject=Accountancy&view=lessons')
         self.assertEqual(page.status_code, 200)
         self.assertIn(b'Accountancy</h2>', page.data)
         self.assertIn(b'https://i.ytimg.com/vi/', page.data)
@@ -88,6 +88,24 @@ class StudyUtilitiesTests(unittest.TestCase):
         self.assertIn('frame-src https://www.youtube-nocookie.com', page.headers['Content-Security-Policy'])
         self.assertNotIn('youtube-nocookie.com', self.client.get('/eduhelp/study').headers['Content-Security-Policy'])
         self.assertNotIn(b'<iframe', page.data)
+
+    def test_video_chapter_uses_textbook_order_and_links_lessons_to_practice(self):
+        subject = '/eduhelp/videos?grade=10&subject=General+Science'
+        catalogue = self.client.get(subject)
+        self.assertEqual(catalogue.status_code, 200)
+        self.assertIn(b'aria-label="Chapters"', catalogue.data)
+        self.assertLess(catalogue.data.index(b'chapter=Carbon+and+its+Compounds'),
+                        catalogue.data.index(b'chapter=Electricity'))
+        chapter = self.client.get(subject + '&chapter=Electricity&lesson=kyBnzI5hNZc')
+        self.assertEqual(chapter.status_code, 200)
+        self.assertIn(b'Electricity</h2>', chapter.data)
+        self.assertIn(b'Electricity Part-I</h3>', chapter.data)
+        self.assertIn(b'/eduhelp/study/electricity#notes', chapter.data)
+        self.assertIn(b'/eduhelp/study/electricity#quiz', chapter.data)
+        self.assertIn(b'data-video-language', chapter.data)
+        self.assertNotIn(b'<iframe', chapter.data)
+        old_url = self.client.get(subject + '&chapter=Chapter+4')
+        self.assertIn(b'Carbon and its Compounds</h2>', old_url.data)
 
     def test_calendar_export_uses_exclusive_end_and_rejects_unknown_events(self):
         response = self.client.get('/eduhelp/calendar/hslc-2027-theory.ics')

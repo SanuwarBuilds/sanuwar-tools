@@ -446,24 +446,48 @@ def eduhelp_videos():
     if subject not in subjects:
         subject = ''
     subject_records = [row for row in stream_records if not subject or row['subject'] == subject]
-    chapters = sorted({row['chapter'] for row in subject_records if row.get('chapter')}, key=natural_key)
+    curriculum = eduhelp_resource('eduhelp-video-curriculum.json')
+    syllabus = curriculum.get(board, {}).get(str(grade), {}).get(subject, {})
+    textbook_chapters = syllabus.get('chapters', ())
+    chapter_counts = {}
+    for row in subject_records:
+        if name := row.get('chapter'):
+            chapter_counts[name] = chapter_counts.get(name, 0) + 1
+    extra_chapters = sorted(chapter_counts.keys() - set(textbook_chapters),
+                            key=lambda name: natural_key(name.replace('Lesson ', 'Chapter ', 1)
+                                                         if name.startswith('Lesson ') else name))
+    chapters = [*textbook_chapters, *extra_chapters]
     chapter = request.args.get('chapter', '')
+    numbered = re.fullmatch(r'(?:Chapter|Lesson) (\d{1,2})', chapter)
+    if numbered and 1 <= int(numbered[1]) <= len(textbook_chapters):
+        chapter = textbook_chapters[int(numbered[1]) - 1]
     if chapter not in chapters:
         chapter = ''
-    languages = sorted({row['language'] for row in subject_records if row.get('language')})
+    chapter_records = [row for row in subject_records if not chapter or row.get('chapter') == chapter]
+    languages = sorted({row['language'] for row in chapter_records if row.get('language')})
+    preference_languages = sorted({row['language'] for row in catalog if row.get('language')})
     language = request.args.get('language', '')
     if language not in languages:
         language = ''
     query = request.args.get('q', '').strip()[:120]
     view = 'lessons' if request.args.get('view') == 'lessons' else ''
-    show_lessons = bool(subject or chapter or language or query or view or request.args.get('page'))
+    selected_lesson = request.args.get('lesson', '')
+    standalone = not chapter and any(row['id'] == selected_lesson for row in chapter_records)
+    show_chapters = bool(grade and subject and chapters and not (
+        chapter or language or query or view or standalone or request.args.get('page')))
+    chapter_mode = bool(grade and subject and not query and (chapter or standalone))
+    show_lessons = not show_chapters and bool(subject or chapter or language or query or view or request.args.get('page'))
+    resource_slug = None
+    if grade == 10 and subject == 'General Science':
+        resource_slug = {'Electricity': 'electricity', 'Carbon and its Compounds': 'carbon-compounds'}.get(chapter)
     terms = query.casefold().split()
-    matched = [row for row in subject_records
-               if (not chapter or row.get('chapter') == chapter)
+    matched = [row for row in chapter_records
+               if (not standalone or row['id'] == selected_lesson)
                and (not language or row.get('language') == language)
                and all(term in ' '.join((row['title'], row['subject'], row.get('chapter', ''),
                                          row.get('channel', ''), row.get('language', ''),
                                          f"Class {row['grade']}")).casefold() for term in terms)]
+    active_lesson = next((row for row in matched if row['id'] == selected_lesson), matched[0] if matched else None)
     page_size = 18
     page_count = max(1, (len(matched) + page_size - 1) // page_size)
     page = max(1, min(request.args.get('page', 1, type=int), page_count))
@@ -473,11 +497,15 @@ def eduhelp_videos():
                     if val}
     return render_template('eduhelp_videos.html', boards=EDU_VIDEO_BOARDS, grades=EDU_VIDEO_GRADES,
                            course_counts=course_counts, subject_counts=subject_counts, subjects=subjects,
-                           chapters=chapters, languages=languages, streams=streams, grade=grade,
+                           chapters=chapters, chapter_counts=chapter_counts, textbook=syllabus.get('textbook'),
+                           languages=languages, preference_languages=preference_languages,
+                           streams=streams, grade=grade,
                            board=board, course_stream=stream, subject=subject, chapter=chapter,
                            language=language, query=query, view=view, show_lessons=show_lessons,
+                           show_chapters=show_chapters, chapter_mode=chapter_mode, resource_slug=resource_slug,
+                           selected_lesson=selected_lesson, active_lesson=active_lesson,
                            lesson_count=len(matched), page=page, page_count=page_count, query_params=query_params,
-                           lessons=matched[offset:offset + page_size])
+                           lessons=matched if chapter_mode else matched[offset:offset + page_size])
 
 
 @app.get('/eduhelp/study')
